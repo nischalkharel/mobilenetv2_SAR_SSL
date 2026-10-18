@@ -1,0 +1,49 @@
+--- dino-main/main_dino.py (lines 214-251)
++++ mobileNetv2_DINO/train_ssl.py (lines 152-190)
+@@ -220,32 +158,33 @@
+     args.warmup_teacher_temp_epochs,
+     args.epochs,
+-).cuda()
++    student_temp=args.student_temp,
++    center_momentum=args.center_momentum,
++).to(device)
+ 
+ # ============ preparing optimizer ... ============
+-params_groups = utils.get_params_groups(student)
++params_groups = get_params_groups(student)
+ if args.optimizer == "adamw":
+     optimizer = torch.optim.AdamW(params_groups)  # to use with ViTs
+ elif args.optimizer == "sgd":
+     optimizer = torch.optim.SGD(params_groups, lr=0, momentum=0.9)  # lr is set by scheduler
+-elif args.optimizer == "lars":
+-    optimizer = utils.LARS(params_groups)  # to use with convnet and large batches
+ # for mixed precision training
+ fp16_scaler = None
+-if args.use_fp16:
+-    fp16_scaler = torch.cuda.amp.GradScaler()
++if args.use_fp16 and device.type == "cuda":
++    fp16_scaler = torch.amp.GradScaler("cuda")
+ 
+ # ============ init schedulers ... ============
+-lr_schedule = utils.cosine_scheduler(
+-    args.lr * (args.batch_size_per_gpu * utils.get_world_size()) / 256.,  # linear scaling rule
++lr_schedule = cosine_scheduler(
++    args.lr * args.batch_size_per_gpu / 256.,  # linear scaling rule
+     args.min_lr,
+-    args.epochs, len(data_loader),
++    args.epochs, niter_per_ep,
+     warmup_epochs=args.warmup_epochs,
+ )
+-wd_schedule = utils.cosine_scheduler(
++wd_schedule = cosine_scheduler(
+     args.weight_decay,
+     args.weight_decay_end,
+-    args.epochs, len(data_loader),
++    args.epochs, niter_per_ep,
+ )
+ # momentum parameter is increased to 1. during training with a cosine schedule
+-momentum_schedule = utils.cosine_scheduler(args.momentum_teacher, 1,
+-                                           args.epochs, len(data_loader))
++momentum_schedule = cosine_scheduler(args.momentum_teacher, 1,
++                                     args.epochs, niter_per_ep)
++print(f"Loss, optimizer and schedulers ready.")

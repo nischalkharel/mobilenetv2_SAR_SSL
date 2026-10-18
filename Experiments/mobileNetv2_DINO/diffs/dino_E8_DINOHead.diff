@@ -1,0 +1,19 @@
+--- dino-main/vision_transformer.py (lines 257-291)
++++ mobileNetv2_DINO/dino.py (lines 204-238)
+@@ -274,12 +221,12 @@
+             self.mlp = nn.Sequential(*layers)
+         self.apply(self._init_weights)
+-        self.last_layer = nn.utils.weight_norm(nn.Linear(bottleneck_dim, out_dim, bias=False))
+-        self.last_layer.weight_g.data.fill_(1)
++        self.last_layer = nn.utils.parametrizations.weight_norm(nn.Linear(bottleneck_dim, out_dim, bias=False))
++        self.last_layer.parametrizations.weight.original0.data.fill_(1)
+         if norm_last_layer:
+-            self.last_layer.weight_g.requires_grad = False
++            self.last_layer.parametrizations.weight.original0.requires_grad = False
+ 
+     def _init_weights(self, m):
+         if isinstance(m, nn.Linear):
+-            trunc_normal_(m.weight, std=.02)
++            nn.init.trunc_normal_(m.weight, std=.02)
+             if isinstance(m, nn.Linear) and m.bias is not None:
+                 nn.init.constant_(m.bias, 0)

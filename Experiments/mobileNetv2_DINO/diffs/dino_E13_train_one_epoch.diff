@@ -1,0 +1,86 @@
+--- dino-main/main_dino.py (lines 301-360)
++++ mobileNetv2_DINO/train_ssl.py (lines 203-267)
+@@ -301,8 +203,8 @@
+-def train_one_epoch(student, teacher, teacher_without_ddp, dino_loss, data_loader,
++def train_one_epoch(student, teacher, dino_loss, data_loader,
+                     optimizer, lr_schedule, wd_schedule, momentum_schedule,epoch,
+-                    fp16_scaler, args):
+-    metric_logger = utils.MetricLogger(delimiter="  ")
+-    header = 'Epoch: [{}/{}]'.format(epoch, args.epochs)
+-    for it, (images, _) in enumerate(metric_logger.log_every(data_loader, 10, header)):
++                    fp16_scaler, args, device, timing=None):
++    sums, t0 = {}, time.time()
++    for it, images in enumerate(data_loader):
++        step = it + 1
+         # update weight decay and learning rate according to their schedule
+         it = len(data_loader) * epoch + it  # global training iteration
+@@ -313,7 +215,8 @@
+ 
+         # move images to gpu
+-        images = [im.cuda(non_blocking=True) for im in images]
++        images = [im.to(device, non_blocking=True) for im in images]
++        center = dino_loss.center.clone()  # the center this step uses, for the diagnostics
+         # teacher and student forward passes + compute dino loss
+-        with torch.cuda.amp.autocast(fp16_scaler is not None):
++        with torch.autocast(device.type, dtype=torch.float16, enabled=fp16_scaler is not None):
+             teacher_output = teacher(images[:2])  # only the 2 global views pass through the teacher
+             student_output = student(images)
+@@ -321,6 +224,5 @@
+ 
+         if not math.isfinite(loss.item()):
+-            print("Loss is {}, stopping training".format(loss.item()), force=True)
+-            sys.exit(1)
++            raise RuntimeError("Loss is {}, stopping training".format(loss.item()))
+ 
+         # student update
+@@ -330,7 +232,7 @@
+             loss.backward()
+             if args.clip_grad:
+-                param_norms = utils.clip_gradients(student, args.clip_grad)
+-            utils.cancel_gradients_last_layer(epoch, student,
+-                                              args.freeze_last_layer)
++                param_norms = clip_gradients(student, args.clip_grad)
++            cancel_gradients_last_layer(epoch, student,
++                                        args.freeze_last_layer)
+             optimizer.step()
+         else:
+@@ -338,7 +240,7 @@
+             if args.clip_grad:
+                 fp16_scaler.unscale_(optimizer)  # unscale the gradients of optimizer's assigned params in-place
+-                param_norms = utils.clip_gradients(student, args.clip_grad)
+-            utils.cancel_gradients_last_layer(epoch, student,
+-                                              args.freeze_last_layer)
++                param_norms = clip_gradients(student, args.clip_grad)
++            cancel_gradients_last_layer(epoch, student,
++                                        args.freeze_last_layer)
+             fp16_scaler.step(optimizer)
+             fp16_scaler.update()
+@@ -347,14 +249,19 @@
+         with torch.no_grad():
+             m = momentum_schedule[it]  # momentum parameter
+-            for param_q, param_k in zip(student.module.parameters(), teacher_without_ddp.parameters()):
++            for param_q, param_k in zip(student.parameters(), teacher.parameters()):
+                 param_k.data.mul_(m).add_((1 - m) * param_q.detach().data)
+ 
+         # logging
+-        torch.cuda.synchronize()
+-        metric_logger.update(loss=loss.item())
+-        metric_logger.update(lr=optimizer.param_groups[0]["lr"])
+-        metric_logger.update(wd=optimizer.param_groups[0]["weight_decay"])
+-    # gather the stats from all processes
+-    metric_logger.synchronize_between_processes()
+-    print("Averaged stats:", metric_logger)
+-    return {k: meter.global_avg for k, meter in metric_logger.meters.items()}
++        diag = collapse_diagnostics(teacher_output, center, dino_loss.teacher_temp_schedule[epoch],
++                                    teacher.last_features, len(images[0]))
++        for k, v in {"loss": loss.item(), **diag}.items():
++            sums[k] = sums.get(k, 0.0) + v
++        if timing is not None:
++            timing(step, len(data_loader))
++        if args.log_every_steps and (step % args.log_every_steps == 0 or step == len(data_loader)):
++            print(f"    step {step:5d}/{len(data_loader)}  loss {sums['loss'] / step:.4f}  "
++                  f"lr {optimizer.param_groups[0]['lr']:.2e}  teacher entropy {sums['teacher_entropy'] / step:.3f}  "
++                  f"{time.time() - t0:.0f}s", flush=True)
++    return {k: v / len(data_loader) for k, v in sums.items()} | {
++        "lr": optimizer.param_groups[0]["lr"], "wd": optimizer.param_groups[0]["weight_decay"],
++        "momentum": m, "teacher_temp": float(dino_loss.teacher_temp_schedule[epoch])}

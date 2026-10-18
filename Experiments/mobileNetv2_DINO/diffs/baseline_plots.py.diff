@@ -1,0 +1,74 @@
+--- Baseline/plots.py
++++ mobileNetv2_DINO/plots.py
+@@ -8,6 +8,10 @@
+                       confidence.pdf, calibration.pdf
+ 
++    train_ssl.py -> <SSL run folder>/charts/            (redrawn after every SSL epoch)
++                      ssl_loss.pdf, ssl_teacher_entropy.pdf, ssl_feature_similarity.pdf, ssl_schedules.pdf
++
+ Redraw for an existing run (for example one trained before this file existed):
+-    python Experiments/Baseline/plots.py --run Experiments/Baseline/Baseline_Output/<run folder>
++    python Experiments/mobileNetv2_DINO/plots.py --run Experiments/mobileNetv2_DINO/outputs/finetune/<run folder>
++    python Experiments/mobileNetv2_DINO/plots.py --run Experiments/mobileNetv2_DINO/outputs/ssl/<run folder>
+ """
+ import argparse
+@@ -80,4 +84,51 @@
+     a.plot(epoch, col("lr"), "o-", ms=3, color="tab:green")
+     save(fig, out / "learning_rate.pdf", header)
++    return out
++
++
++# ---- DINO SSL curves (new in this experiment; not in the baseline) ---------------------------------
++
++def plot_ssl_history(run_dir: Path) -> Path:
++    """<SSL run>/charts/: DINO loss, teacher entropies, feature similarity, schedules per epoch."""
++    run_dir = Path(run_dir)
++    out = run_dir / "charts"
++    out.mkdir(exist_ok=True)
++    rows = read_csv(run_dir / "history.csv")
++    col = lambda k: np.array([float(r[k]) for r in rows])  # noqa: E731
++    epoch = col("epoch").astype(int)
++    cfg = json.loads((run_dir / "config.json").read_text(encoding="utf-8"))
++    out_dim = cfg["dino"]["out_dim"]
++    header = (f"{run_dir.name}\nDINO SSL, {cfg['optim']['epochs']} epochs planned, out_dim {out_dim}. "
++              f"A falling loss alone does not show useful features; check the diagnostics and fine-tuning.")
++
++    def new_axes(title, ylabel):
++        fig, a = plt.subplots(figsize=(8, 5))
++        a.set(title=title, xlabel="epoch", ylabel=ylabel)
++        a.grid(alpha=0.3)
++        return fig, a
++
++    fig, a = new_axes("DINO loss (cross-entropy between teacher and student views)", "loss")
++    a.plot(epoch, col("loss"), "o-", ms=3)
++    save(fig, out / "ssl_loss.pdf", header)
++
++    fig, a = new_axes("Teacher output entropy (collapse check)", "entropy (nats)")
++    a.plot(epoch, col("teacher_entropy"), "o-", ms=3, label="per image (low = sharp)")
++    a.plot(epoch, col("teacher_marginal_entropy"), "o-", ms=3, label="of the batch average (near 0 = one-hot collapse)")
++    a.axhline(np.log(out_dim), color="k", ls="--", lw=1, label=f"ln(out_dim) = {np.log(out_dim):.2f} (uniform collapse)")
++    a.legend()
++    save(fig, out / "ssl_teacher_entropy.pdf", header)
++
++    fig, a = new_axes("Teacher backbone features across different images (collapse check)", "value")
++    a.plot(epoch, col("feature_cosine"), "o-", ms=3, label="mean cosine similarity between images (1 = all identical)")
++    a.plot(epoch, col("feature_std"), "o-", ms=3, label="std across images of normalized features (0 = collapse)")
++    a.legend()
++    save(fig, out / "ssl_feature_similarity.pdf", header)
++
++    fig, a = new_axes("Schedules (value at the end of each epoch)", "value")
++    a.plot(epoch, col("lr") / col("lr").max(), "o-", ms=3, label=f"learning rate / {col('lr').max():.3g}")
++    a.plot(epoch, col("momentum"), "o-", ms=3, label="teacher EMA momentum")
++    a.plot(epoch, col("wd") / max(col("wd").max(), 1e-12), "o-", ms=3, label=f"weight decay / {col('wd').max():.3g}")
++    a.legend()
++    save(fig, out / "ssl_schedules.pdf", header)
+     return out
+ 
+@@ -175,4 +226,7 @@
+     parser.add_argument("--run", type=Path, required=True)
+     args = parser.parse_args()
++    if (args.run / "checkpoint.pth").exists():  # an SSL run folder
++        print(f"Wrote charts to {plot_ssl_history(args.run)}")
++        return
+     print(f"Wrote charts to {plot_history(args.run)}")
+     for eval_dir in sorted(args.run.glob("eval_*")):

@@ -1,0 +1,11 @@
+--- dino-main/main_dino.py (lines 363-416)
++++ mobileNetv2_DINO/dino.py (lines 244-297)
+@@ -410,6 +291,6 @@
+         """
+         batch_center = torch.sum(teacher_output, dim=0, keepdim=True)
+-        dist.all_reduce(batch_center)
+-        batch_center = batch_center / (len(teacher_output) * dist.get_world_size())
++        # single process: the whole batch is on this GPU, so no all_reduce and world size 1
++        batch_center = batch_center / len(teacher_output)
+ 
+         # ema update

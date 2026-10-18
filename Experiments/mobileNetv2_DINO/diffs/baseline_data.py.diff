@@ -1,0 +1,24 @@
+--- Baseline/data.py
++++ mobileNetv2_DINO/data.py
+@@ -26,7 +26,7 @@
+ 
+ # ---- Manifests -----------------------------------------------------------------
+-def load_class_names() -> list[str]:
+-    """Class names indexed by label, from the saved class_mapping.csv."""
+-    with open(paths.SPLITS_DIR / "class_mapping.csv", encoding="utf-8") as f:
++def load_class_names(folder: Path = paths.SPLITS_DIR) -> list[str]:
++    """Class names indexed by label, from the saved class_mapping.csv (or a run folder's copy)."""
++    with open(Path(folder) / "class_mapping.csv", encoding="utf-8") as f:
+         rows = list(csv.DictReader(f))
+     names = [r["class_name"] for r in sorted(rows, key=lambda r: int(r["label"]))]
+@@ -36,7 +36,7 @@
+ 
+ 
+-def read_manifest(csv_name: str, class_names: list[str]) -> list[tuple[str, int]]:
+-    """(relative_path, label) pairs from one of the saved subset CSVs, with consistency checks."""
+-    with open(paths.SPLITS_DIR / csv_name, encoding="utf-8") as f:
++def read_manifest(csv_name: str, class_names: list[str], folder: Path = paths.SPLITS_DIR) -> list[tuple[str, int]]:
++    """(relative_path, label) pairs from one of the saved subset CSVs (or a run folder's copy), with consistency checks."""
++    with open(Path(folder) / csv_name, encoding="utf-8") as f:
+         rows = list(csv.DictReader(f))
+     records = []

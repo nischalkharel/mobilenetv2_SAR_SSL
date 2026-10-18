@@ -1,0 +1,22 @@
+--- Baseline/config.json
++++ mobileNetv2_DINO/config_finetune.json
+@@ -1,8 +1,9 @@
+ {
+-  "run_name": "A0_imagenet_mobilenetv2",
++  "run_name": "A1_dino_mobilenetv2",
+ 
+   "init": {
+-    "type": "imagenet",
+-    "backbone_checkpoint": null
++    "type": "backbone_checkpoint",
++    "backbone_checkpoint": null,
++    "_note": "set on the command line: --backbone <file exported by train_ssl.py> (A1), or --init imagenet (A0 parity check)"
+   },
+ 
+@@ -29,5 +30,5 @@
+     "device": "cuda",
+     "log_every_batches": 25,
+-    "_device_note": "GPU (RTX 4070 SUPER) for now. For the CPU timing runs later, set device to \"cpu\" (or run train.py --device cpu); \"auto\" picks the GPU when available. The device used is recorded in run_info.json."
++    "_note": "Same values as Experiments/Baseline/config.json (A0), so only the backbone initialization differs. This seed is the downstream seed; the SSL seed is separate (config_ssl.json)."
+   }
+ }

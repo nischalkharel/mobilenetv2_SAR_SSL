@@ -1,0 +1,136 @@
+--- Baseline/train.py
++++ mobileNetv2_DINO/train_supervised.py
+@@ -1,8 +1,11 @@
+-"""Supervised fine-tuning of MobileNetV2 on a labeled SOC-40 subset.
++"""Supervised fine-tuning of MobileNetV2 on a labeled SOC-40 subset (stage 2 of route A1).
++
++Copied from Experiments/Baseline/train.py; the training itself is unchanged. Differences are listed
++in DINO_CHANGES.md (section "Downstream code versus the baseline").
+ 
+ Run from the repository root:
+-    python Experiments/Baseline/train.py                                 # uses Experiments/Baseline/config.json
+-    python Experiments/Baseline/train.py --config path/to/other.json     # e.g. a DINO-initialized backbone
+-    python Experiments/Baseline/train.py --device cpu                    # override config train.device (CPU timing runs)
++    python Experiments/mobileNetv2_DINO/train_supervised.py --backbone <SSL run>/backbone_teacher_epoch100.pth   # A1
++    python Experiments/mobileNetv2_DINO/train_supervised.py --init imagenet     # parity check: same as A0
++    python Experiments/mobileNetv2_DINO/train_supervised.py --device cpu ...    # override config train.device
+ 
+ The whole model (backbone + new 40-class head) is trained on data.train_csv. After every
+@@ -14,5 +17,4 @@
+ import json
+ import shutil
+-import sys
+ import time
+ import traceback
+@@ -23,13 +25,13 @@
+ from torch.utils.data import DataLoader
+ 
+-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # repository root, for "import paths"
+-import paths  # noqa: E402
+-from data import SARDataset, build_transform, load_class_names, manifest_hash, read_manifest  # noqa: E402
+-from engine import predict, train_one_epoch  # noqa: E402
+-from model import build_model  # noqa: E402
+-from plots import plot_history  # noqa: E402
+-from utils import environment_info, git_info, resolve_device, save_json, set_seed, sha256_file  # noqa: E402
+-
+-DEFAULT_CONFIG = Path(__file__).resolve().parent / "config.json"
++import paths  # this experiment's own paths.py (next to this file)
++from data import SARDataset, build_transform, load_class_names, manifest_hash, read_manifest
++from engine import predict, train_one_epoch
++from model import build_model
++from plots import plot_history
++from ssl_data import audit_splits
++from utils import environment_info, git_info, resolve_device, save_json, set_seed, sha256_file
++
++DEFAULT_CONFIG = Path(__file__).resolve().parent / "config_finetune.json"
+ SMOKE_PER_CLASS = 8  # images per class in train and validation for a smoke run
+ SMOKE_EPOCHS = 2
+@@ -54,5 +56,16 @@
+ 
+ 
+-def run(cfg: dict, smoke: bool = False, output_root: Path = paths.BASELINE_OUTPUT_DIR) -> Path:
++def init_provenance(init_cfg: dict) -> dict:
++    """Where the backbone starts, with file hashes, and for an SSL backbone its full SSL record."""
++    if init_cfg["type"] == "imagenet":
++        return {"type": "imagenet", "file": paths.MOBILENETV2_IMAGENET_WEIGHTS.name,
++                "sha256": sha256_file(paths.MOBILENETV2_IMAGENET_WEIGHTS)}
++    file = Path(init_cfg["backbone_checkpoint"])
++    meta = torch.load(file, map_location="cpu", weights_only=True)
++    meta.pop("backbone_state_dict")
++    return {"type": "backbone_checkpoint", "file": str(file), "sha256": sha256_file(file), "ssl_record": meta}
++
++
++def run(cfg: dict, smoke: bool = False, output_root: Path = paths.FINETUNE_OUTPUT_DIR) -> Path:
+     """Train one model and return its run folder."""
+     data_cfg, train_cfg = cfg["data"], cfg["train"]
+@@ -64,4 +77,5 @@
+ 
+     # ---- Data and leakage guards -------------------------------------------------
++    split_audit = audit_splits(paths.SPLITS_DIR)  # raises on any leak or inconsistency in the saved CSVs
+     class_names = load_class_names()
+     train_records = read_manifest(data_cfg["train_csv"], class_names)
+@@ -82,4 +96,7 @@
+     save_json({**cfg, "smoke": smoke}, run_dir / "config.json")
+     shutil.copy(paths.SPLITS_DIR / "class_mapping.csv", run_dir / "class_mapping.csv")
++    (run_dir / "manifests").mkdir()  # exact membership used; evaluate.py reads these copies
++    for f in [data_cfg["train_csv"], data_cfg["val_csv"], "class_mapping.csv"]:
++        shutil.copy(paths.SPLITS_DIR / f, run_dir / "manifests" / f)
+     save_json({
+         "class_mapping.csv": {"sha256": sha256_file(paths.SPLITS_DIR / "class_mapping.csv")},
+@@ -89,8 +106,10 @@
+                 "used_content_hash": manifest_hash(val_records), "num_images": len(val_records)},
+         "note": "used_content_hash covers the images actually used (a smoke run uses a subset)",
++        "split_audit": split_audit,
+     }, run_dir / "manifests.json")
+     run_info = {"status": "running", "started": datetime.now().isoformat(timespec="seconds"),
+                 "environment": environment_info(device), "git": git_info(paths.REPO_ROOT),
+-                "model_selection": "epoch with highest validation accuracy (earliest on ties)"}
++                "model_selection": "epoch with highest validation accuracy (earliest on ties)",
++                "initialization": init_provenance(cfg["init"])}
+     save_json(run_info, run_dir / "run_info.json")
+     gpu = f" ({run_info['environment']['gpu']})" if device.type == "cuda" else ""
+@@ -120,4 +139,7 @@
+         val_loader = DataLoader(val_ds, shuffle=False, **loader_args)
+ 
++        # Reset the downstream seed right before the model and training parts are built, so nothing that
++        # ran before (in this process) can change the head initialization, data order or augmentation.
++        set_seed(train_cfg["seed"])
+         model = build_model(cfg["init"], num_classes=len(class_names)).to(device)
+         optimizer = make_optimizer(model, train_cfg)
+@@ -171,10 +193,13 @@
+               f"  config.json        settings used\n"
+               f"  class_mapping.csv  label number -> class name\n"
+-              f"  manifests.json     hashes of the train/val image lists used\n"
++              f"  manifests.json     hashes of the train/val image lists used, plus the split audit\n"
++              f"  manifests/         copies of the labeled, validation and class-mapping CSVs used\n"
+               f"  run_info.json      status, device, versions, timing, best epoch\n"
+               f"  history.csv        per-epoch loss and accuracy (train and val)\n"
+               f"  best.pt            model weights from the best validation epoch\n"
+               f"  charts/            loss.pdf, accuracy.pdf, overfitting_gap.pdf, learning_rate.pdf (one chart per file)\n"
+-              f"Next: python Experiments/Baseline/evaluate.py --run \"{run_dir}\"", flush=True)
++              f"Next: python Experiments/mobileNetv2_DINO/evaluate.py --run \"{run_dir}\" --split validation\n"
++              f"Final test (once, when everything is fixed): "
++              f"python Experiments/mobileNetv2_DINO/evaluate.py --run \"{run_dir}\"", flush=True)
+         return run_dir
+     except BaseException:
+@@ -187,4 +212,6 @@
+     parser = argparse.ArgumentParser(description="Supervised fine-tuning on SOC-40")
+     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
++    parser.add_argument("--backbone", type=Path, help="backbone file exported by a DINO run (route A1)")
++    parser.add_argument("--init", choices=["imagenet"], help="start from the ImageNet weights instead (A0 parity check)")
+     parser.add_argument("--smoke", action="store_true",
+                         help=f"{SMOKE_PER_CLASS} images per class, {SMOKE_EPOCHS} epochs; pipeline check only")
+@@ -194,5 +221,12 @@
+     if args.device:
+         cfg["train"]["device"] = args.device  # saved into the run's config.json, so the run records it
+-    run(cfg, smoke=args.smoke)
++    if bool(args.backbone) == bool(args.init):
++        raise SystemExit("give exactly one of --backbone <file> or --init imagenet")
++    if args.backbone:
++        cfg["init"] = {"type": "backbone_checkpoint", "backbone_checkpoint": str(args.backbone.resolve())}
++    else:
++        cfg["init"] = {"type": "imagenet", "backbone_checkpoint": None}
++        cfg["run_name"] = "A0parity_imagenet_mobilenetv2"
++    run(cfg, smoke=args.smoke, output_root=paths.SMOKE_OUTPUT_DIR if args.smoke else paths.FINETUNE_OUTPUT_DIR)
+ 
+ 

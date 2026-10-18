@@ -1,0 +1,21 @@
+--- dino-main/main_dino.py (lines 278-290)
++++ mobileNetv2_DINO/train_ssl.py (lines 464-478)
+@@ -281,10 +467,12 @@
+     'optimizer': optimizer.state_dict(),
+     'epoch': epoch + 1,
+-    'args': args,
++    'args': vars(args),
+     'dino_loss': dino_loss.state_dict(),
++    'fp16_scaler': fp16_scaler.state_dict() if fp16_scaler is not None else None,
++    'global_step': (epoch + 1) * niter_per_ep,
++    'schedule_info': schedule_info,
++    'rng_state': rng_state(),
+ }
+-if fp16_scaler is not None:
+-    save_dict['fp16_scaler'] = fp16_scaler.state_dict()
+-utils.save_on_master(save_dict, os.path.join(args.output_dir, 'checkpoint.pth'))
+-if args.saveckp_freq and epoch % args.saveckp_freq == 0:
+-    utils.save_on_master(save_dict, os.path.join(args.output_dir, f'checkpoint{epoch:04}.pth'))
++tmp = run_dir / "checkpoint.pth.tmp"
++torch.save(save_dict, tmp)
++os.replace(tmp, run_dir / "checkpoint.pth")  # only replaced once the new file is complete

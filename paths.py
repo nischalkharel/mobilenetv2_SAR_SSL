@@ -3,11 +3,15 @@
 Paths inside the repository are found relative to this file, so
 they work on any machine without editing.
 """
+import os
 from pathlib import Path
 
 # ---- Edit these per PC ----------------------------------------------------
 # Folder that contains Amplitude_8bit/ and annotation_coco/ from the Hugging Face download.
-ATRNET_GROUND_RANGE = Path(r"C:\Users\nisch\Documents\SHREC\2026_2027\ATRNet-STAR\Ground_Range")
+# On another machine (e.g. Pitt CRC) set the environment variable ATRNET_GROUND_RANGE instead of
+# editing this line; the job scripts in crc/ do that.
+ATRNET_GROUND_RANGE = Path(os.environ.get("ATRNET_GROUND_RANGE",
+                                          r"C:\Users\nisch\Documents\SHREC\2026_2027\ATRNet-STAR\Ground_Range"))
 
 # ---- Derived dataset paths (normally no need to edit) ----------------------
 # The extracted folder name is literally URL-encoded on disk; keep it exactly as is.
@@ -23,6 +27,7 @@ SOC40_TEST_DIR = SOC40_DIR / "test"
 # ---- Paths inside the repository ------------------------------------------
 REPO_ROOT = Path(__file__).resolve().parent
 SPLITS_DIR = REPO_ROOT / "preprocessing_dataset"  # validation.csv, ssl_training_data.csv, labeled_set.csv
+BASELINE_OUTPUT_DIR = REPO_ROOT / "Experiments" / "Baseline" / "Baseline_Output"  # one subfolder per run
 MOBILENETV2_IMAGENET_WEIGHTS = (
     REPO_ROOT / "MobileNetV2" / "checkpoints" / "pretrained" / "mobilenet_v2_imagenet1k_v2.pth"
 )

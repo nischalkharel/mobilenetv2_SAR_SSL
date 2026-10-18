@@ -1,0 +1,70 @@
+{
+  "run_name": "A2_lejepa_ssl_mobilenetv2",
+  "_note": "LeJEPA SSL stage only. All sections are merged into one flat settings object. Origin of every value: README.md, section 'SSL recipe'.",
+  "setup": {
+    "seed": 0,
+    "init": "imagenet",
+    "ssl_csv": "ssl_training_data.csv",
+    "cache_pixels": true,
+    "num_workers": 2,
+    "device": "cuda",
+    "log_every_steps": 200,
+    "export_every": 5,
+    "_export_note": "also export the backbone every 5 epochs, for the accuracy-versus-epoch analysis only; the backbone used for A2 is the final epoch, fixed in advance"
+  },
+  "views": {
+    "n_global_views": 8,
+    "global_crop_size": 224,
+    "global_crops_scale": [
+      0.3,
+      1.0
+    ],
+    "n_local_views": 0,
+    "local_crop_size": 96,
+    "local_crops_scale": [
+      0.05,
+      0.3
+    ],
+    "hflip_p": 0.5,
+    "color_jitter_p": 0.8,
+    "brightness": 0.4,
+    "contrast": 0.4,
+    "blur_p": 0.5,
+    "blur_sigma": [
+      0.1,
+      2.0
+    ],
+    "solarization_p": 0.0,
+    "normalize_mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "normalize_std": [
+      0.229,
+      0.224,
+      0.225
+    ]
+  },
+  "lejepa": {
+    "proj_hidden_dim": 2048,
+    "proj_dim": 512,
+    "lamb": 0.05,
+    "num_slices": 1024,
+    "t_max": 3.0,
+    "n_points": 17
+  },
+  "optim": {
+    "optimizer": "adamw",
+    "lr": 0.0005,
+    "weight_decay": 0.0005,
+    "warmup_epochs": 1,
+    "warmup_start_factor": 0.01,
+    "final_lr_ratio": 0.001,
+    "batch_size": 32,
+    "epochs": 55,
+    "_epochs_note": "set so the planned SSL time is about A1's 458 minutes on this PC (compute-matched by wall-clock); confirm with the 1-epoch pilot before the full run",
+    "precision": "bf16"
+  },
+  "smoke": false
+}

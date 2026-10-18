@@ -1,0 +1,40 @@
+--- dino-main/main_dino.py (lines 182-212)
++++ mobileNetv2_DINO/train_ssl.py (lines 126-145)
+@@ -182,4 +126,4 @@
+ # multi-crop wrapper handles forward with inputs of different resolutions
+-student = utils.MultiCropWrapper(student, DINOHead(
++student = MultiCropWrapper(student, DINOHead(
+     embed_dim,
+     args.out_dim,
+@@ -187,26 +131,15 @@
+     norm_last_layer=args.norm_last_layer,
+ ))
+-teacher = utils.MultiCropWrapper(
++teacher = MultiCropWrapper(
+     teacher,
+     DINOHead(embed_dim, args.out_dim, args.use_bn_in_head),
+ )
+ # move networks to gpu
+-student, teacher = student.cuda(), teacher.cuda()
+-# synchronize batch norms (if any)
+-if utils.has_batchnorms(student):
+-    student = nn.SyncBatchNorm.convert_sync_batchnorm(student)
+-    teacher = nn.SyncBatchNorm.convert_sync_batchnorm(teacher)
+-
+-    # we need DDP wrapper to have synchro batch norms working...
+-    teacher = nn.parallel.DistributedDataParallel(teacher, device_ids=[args.gpu])
+-    teacher_without_ddp = teacher.module
+-else:
+-    # teacher_without_ddp and teacher are the same thing
+-    teacher_without_ddp = teacher
+-student = nn.parallel.DistributedDataParallel(student, device_ids=[args.gpu])
++student, teacher = student.to(device), teacher.to(device)
++# one process, one GPU: ordinary BatchNorm, no SyncBatchNorm and no DistributedDataParallel
+ # teacher and student start with the same weights
+-teacher_without_ddp.load_state_dict(student.module.state_dict())
++teacher.load_state_dict(student.state_dict())
+ # there is no backpropagation through the teacher, so no need for gradients
+ for p in teacher.parameters():
+     p.requires_grad = False
+-print(f"Student and Teacher are built: they are both {args.arch} network.")
++print(f"Student and Teacher are built: they are both MobileNetV2 networks.")

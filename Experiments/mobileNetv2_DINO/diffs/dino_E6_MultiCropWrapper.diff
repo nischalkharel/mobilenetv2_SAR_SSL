@@ -1,0 +1,20 @@
+--- dino-main/utils.py (lines 594-629)
++++ mobileNetv2_DINO/dino.py (lines 145-182)
+@@ -603,8 +154,8 @@
+     def __init__(self, backbone, head):
+         super(MultiCropWrapper, self).__init__()
+-        # disable layers dedicated to ImageNet labels classification
+-        backbone.fc, backbone.head = nn.Identity(), nn.Identity()
++        # the backbone (MobileNetV2Backbone) already has no ImageNet classifier
+         self.backbone = backbone
+         self.head = head
++        self.last_features = None
+ 
+     def forward(self, x):
+@@ -626,4 +177,6 @@
+             output = torch.cat((output, _out))
+             start_idx = end_idx
++        # keep the pooled backbone features (no gradient) for the collapse diagnostics
++        self.last_features = output.detach()
+         # Run the head forward on the concatenated features.
+         return self.head(output)
