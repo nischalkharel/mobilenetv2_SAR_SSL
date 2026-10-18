@@ -6,10 +6,10 @@ Layout on CRC (set up and verified 2026-10-18):
 |---|---|
 | Code (this repository) | `/ihome/ageorge/nik96/mobilenetv2_SAR_SSL` |
 | Dataset (SOC_40classes, 194,750 files) | `/ix/ageorge/nik96/data/ATRNet-STAR/Ground_Range/Amplitude_8bit/<encoded name>/SOC_40classes` |
-| ImageNet weights (sha256 `1f19491f...`) | `/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth`, copied into `MobileNetV2/checkpoints/pretrained/` of the clone |
+| ImageNet weights (sha256 `1f19491f...`) | `/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth` (read directly via `MOBILENETV2_IMAGENET_WEIGHTS` in `env.sh`; no copy) |
 | Python environment (Python 3.13.16, torch 2.10.0+cu128) | `/ix/ageorge/nik96/envs/sarssl` (conda-forge Python; packages by pip) |
 
-`env.sh` holds everything CRC-specific (modules, environment, `ATRNET_GROUND_RANGE`); the job scripts source it.
+`env.sh` holds everything CRC-specific (modules, environment, `ATRNET_GROUND_RANGE`, `MOBILENETV2_IMAGENET_WEIGHTS`); the job scripts source it.
 
 ## Workflow
 

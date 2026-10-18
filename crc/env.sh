@@ -8,6 +8,8 @@ source activate /ix/ageorge/nik96/envs/sarssl     # CRC manual: "source activate
 
 # Dataset on CRC (read by every paths.py); contains Amplitude_8bit/<encoded name>/SOC_40classes
 export ATRNET_GROUND_RANGE=/ix/ageorge/nik96/data/ATRNet-STAR/Ground_Range
+# ImageNet MobileNetV2 start weights on CRC (sha256 1f19491f...; same file as on the PC)
+export MOBILENETV2_IMAGENET_WEIGHTS=/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth
 
 # Record where and with what the job runs (top of the job's log file)
 echo "host $(hostname)  job ${SLURM_JOB_ID:-none}  start $(date)"

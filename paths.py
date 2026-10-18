@@ -28,6 +28,7 @@ SOC40_TEST_DIR = SOC40_DIR / "test"
 REPO_ROOT = Path(__file__).resolve().parent
 SPLITS_DIR = REPO_ROOT / "preprocessing_dataset"  # validation.csv, ssl_training_data.csv, labeled_set.csv
 BASELINE_OUTPUT_DIR = REPO_ROOT / "Experiments" / "Baseline" / "Baseline_Output"  # one subfolder per run
-MOBILENETV2_IMAGENET_WEIGHTS = (
-    REPO_ROOT / "MobileNetV2" / "checkpoints" / "pretrained" / "mobilenet_v2_imagenet1k_v2.pth"
-)
+# Override with the environment variable MOBILENETV2_IMAGENET_WEIGHTS on another machine (crc/env.sh does).
+MOBILENETV2_IMAGENET_WEIGHTS = Path(os.environ.get(
+    "MOBILENETV2_IMAGENET_WEIGHTS",
+    REPO_ROOT / "MobileNetV2" / "checkpoints" / "pretrained" / "mobilenet_v2_imagenet1k_v2.pth"))
