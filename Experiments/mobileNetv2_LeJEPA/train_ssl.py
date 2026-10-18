@@ -226,10 +226,13 @@ def run(cfg: dict | None, smoke: bool = False, output_root: Path | None = None,
             # Windows can silently move GPU memory into system RAM when the card is full, which made a test
             # run about 100 times slower instead of failing. A cap on PyTorch's allocator turns that into a
             # clear "out of memory" error. It does not stop Windows from spilling when OTHER programs also hold GPU
-            # memory; that is why the batch is 28, not 32 (README.md, "Time and memory").
-            gpu_index = device.index if device.index is not None else torch.cuda.current_device()
-            torch.cuda.set_per_process_memory_fraction(
-                min(1.0, GPU_MEMORY_CAP_GB * 2**30 / torch.cuda.get_device_properties(gpu_index).total_memory), gpu_index)
+            # memory (README.md, "Time and memory"). Windows only: Linux (e.g. Pitt CRC) does not spill, and an
+            # 11 GB cap would block the batch-64 runs on 40 GB cards.
+            if os.name == "nt":
+                gpu_index = device.index if device.index is not None else torch.cuda.current_device()
+                torch.cuda.set_per_process_memory_fraction(
+                    min(1.0, GPU_MEMORY_CAP_GB * 2**30 / torch.cuda.get_device_properties(gpu_index).total_memory),
+                    gpu_index)
 
         # ---- Data loading ----------------------------------------------------------------------
         cache_file = None

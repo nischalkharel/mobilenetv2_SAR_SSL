@@ -26,5 +26,6 @@ Layout on CRC (set up and verified 2026-10-18):
 |---|---|---|
 | `baseline.sbatch` | A0: fine-tune ImageNet MobileNetV2, validation evaluation | 2 h |
 | `dino.sbatch` | A1: smoke test, DINO SSL 100 epochs, fine-tune, validation evaluation | 1 day |
+| `lejepa.sbatch` | A2: smoke test, LeJEPA SSL 100 epochs (batch 64), fine-tune, validation evaluation | 36 h (QoS normal) |
 
 Cancel a job: `scancel -M gpu <job id>`. Test evaluation is not in the scripts on purpose: run it once, by hand, when settings are final.

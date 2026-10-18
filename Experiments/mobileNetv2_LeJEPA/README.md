@@ -97,7 +97,7 @@ python Experiments/mobileNetv2_LeJEPA/evaluate.py --run "Experiments/mobileNetv2
 | Optimizer | AdamW, lr 5e-4, weight decay 5e-4 on all parameters, no gradient clipping | README: lr 5e-4 "good starting point", weight decay 5e-4 "for ResNets" | Authors' CNN values |
 | Schedule | linear warm-up for 1 epoch from 0.01 x lr, then cosine to lr / 1000 | README: warm-up + cosine to lr/1000; MINIMAL: 1-epoch warm-up from 0.01 x lr | Authors |
 | Precision | bf16 autocast for the network; loss in float32 | bf16 everywhere | bf16 as the authors; the loss is computed in float32 (cheap, avoids precision loss in SIGReg's averages) |
-| **Batch** | **28 images (224 views per step)** | 256 to 512 (paper: competitive from 128; SIGReg's bias "not a concern even for minibatches as small as 16") | **Forced by the GPU.** See "Time and memory": at 32 the process plus other programs exceed the card's 12 GB and Windows slows everything down |
+| **Batch** | **64 images (512 views per step)** | 256 to 512 (paper: competitive from 128; SIGReg's bias "not a concern even for minibatches as small as 16") | **Same as A1 DINO** (Nischal, 2026-10-18), so epochs, images per step and optimizer steps all match A1. Runs on a 40 GB GPU (Pitt CRC). The PC pilot used 28, the most that fit its 12 GB card (see "Time and memory") |
 | **Epochs** | **100** | 100 to 800 depending on the experiment | **Same number of epochs as A1** (Nischal's decision). This is not equal compute: about 14 h here against A1's 7.6 h. A time-matched run (55 epochs) is a later, separate experiment |
 | Seed | 0 | 0 | SSL seed, separate from the fine-tuning seed |
 | Checkpoint used downstream | final epoch | n/a | Fixed in advance. Backbones are also exported every 5 epochs for the accuracy-versus-epoch analysis only |
@@ -111,10 +111,10 @@ python Experiments/mobileNetv2_LeJEPA/evaluate.py --run "Experiments/mobileNetv2
 | Collapse prevention | teacher centering + sharpening, EMA, stop-gradient | SIGReg term |
 | Head | 3-layer MLP -> 256 -> normalized 4,096-way layer | 3-layer MLP -> 512 |
 | Views per image | 2 x 224 (scale 0.4-1) + 8 x 96 (0.15-0.4) | 8 x 224 (0.3-1) |
-| Batch | 64 images | 28 images |
+| Batch | 64 images | 64 images |
 | Optimizer | AdamW, peak lr 1.25e-4 (scaled), wd 0.04, 10-epoch warm-up, gradient clip 3 | AdamW, peak lr 5e-4, wd 5e-4, 1-epoch warm-up, no clipping |
 | Precision | fp16 + loss scaling | bf16 |
-| Epochs, steps | 100 epochs, 102,100 steps | 100 epochs, 233,500 steps |
+| Epochs, steps | 100 epochs, 102,100 steps | 100 epochs, 102,100 steps |
 | Images seen | 6.53 M | 6.54 M |
 | 224-px views through the network | 13.1 M (student) + 13.1 M (teacher, no backward) + 52.3 M at 96 px | 52.3 M, all with backward |
 | SSL time on this PC | 458 min | about 860 min (estimated from the pilot) |
