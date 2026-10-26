@@ -34,3 +34,43 @@ Decide before running (research decisions for Nischal):
 
 - [ ] Local crop scale ablation: 0.05 (original DINO) against our 0.15, chosen on validation, if compute allows.
 - [ ] Repeat seeds for A0 and A1 once the protocol is fixed.
+
+## 5. From the NG meeting (2026-10-19; Joey, Brittany, Abby; joint with Dikchhya)
+
+Asked of Nischal:
+- [ ] Results as a side-by-side **bar chart** (A0/A1/A2, later A3), not only a table; add test accuracy once settings are frozen.
+- [ ] Implement **SparK (A3)** and run it on CRC.
+- [ ] **Seeds re-draw the data split** (labeled set + SSL pool), not only the training seed (Joey). Re-apply the leakage control for each new split.
+- [ ] **Label budgets spread wide**: e.g. 1%, 3%, 10%.
+- [ ] **Cost of the gain**: SSL training time / GPU-hours / peak memory per method (have: DINO 469.6 min 9.19 GB, LeJEPA 633.7 min 19.8 GB on A100); inference cost is the same backbone for all. Propose the cost metrics on a slide next meeting and ask for feedback.
+- [ ] **Second architecture**: collect SHREC lab backbone studies (Pitt and other SHREC sites); candidates EfficientNet (NG has good SAR results with it), MobileNetV3, ResNet. Short list for next meeting.
+- [ ] CPU latency: low priority (same MobileNetV2 for every method). If done: Intel server-grade CPUs, roughly 24-50+ cores, inference only.
+- [ ] Look at **SARDet-100K** (Brittany, in chat): COCO-style superset of SAR sets (ships, aircraft, ground, MSTAR), larger scenes; possible bigger/more varied SSL pool.
+- [ ] Check SOC-40 vs MSTAR target overlap (said "I can do that cross-check"); SOC-50 = SOC-40 + MSTAR (different sensors) not used.
+- [ ] Brittany's ATR interests (raised in Dikchhya's slot, apply here too): generalization across depression/aspect angle, band (X vs Ku) and polarization, and background/scene. ATRNet-STAR has EOC splits for these; currently all bands and 4 polarizations are mixed together.
+- [ ] Brittany's concern: 128 px chips upscaled to 224 and cropped (little scene context). Explain upscaling loses no information, crops do drop context; keep in mind when choosing the dataset.
+- [ ] **Main goal (not later):** novelty for the conference paper, e.g. a method combining ideas from DINO / LeJEPA / SparK. See section 6.
+
+Follow-up email with the slides: confirm DINO's final network is the teacher (EMA of students), and that the student sees all 10 crops (2 global + 8 local) while the teacher sees only the 2 global ones.
+
+Logistics: biweekly on Fridays, joint with Dikchhya, 1-hour series; SHREC conference January 2027, Albuquerque.
+
+## 6. Novelty candidates (keep updating; check literature before claiming)
+
+Joey asked whether adapting SSL to MobileNetV2 is novel: done before, but not in a controlled way. That alone is weak; we need something new.
+
+- [ ] **Physical views as positive pairs:** ATRNet-STAR has the same vehicle, angle and scene in 4 polarizations, 2 bands and repeat passes. Use these as SSL "views" instead of (or with) random crops. We currently remove them only near validation images (leakage control); inside the SSL pool they are free, label-free positives.
+- [ ] **Neighbouring aspect angles as positives** (same target, small rotation in azimuth): teaches the angle robustness Brittany cares about.
+- [ ] **DINO + SIGReg:** add LeJEPA's SIGReg to DINO (or replace centering/sharpening).
+- [ ] **LeJEPA with DINO's multi-crop** (already in section 3): DINO was better and cheaper here; is that because of the small crops?
+- [ ] **Masked + embedding:** SparK-style masking as one of the views in DINO/LeJEPA.
+- [ ] **SAR-specific augmentations** (speckle-aware noise, dB/contrast changes) instead of the photo ones (solarization is already off for SAR reasons).
+
+## 7. EOC (operating-condition shift) study, from the 2026-10-20 overlap check
+
+Check script: scratchpad `eoc_check.py` (sha256 of every .tif). Findings:
+- Every EOC image is an SOC-40 image (0 new images); for each experiment, EOC train + EOC test = all 97,375 SOC-40 images, re-sorted by condition.
+- Train condition per experiment: depression 15 deg (test 30/45/60); polarization HH (test HV/VH/VV); band X (test KU, folder `test`); azimuth mostly 0-59 deg (test in 60-deg sectors); scene sandstone + bare soil (test factory, urban (X band only), woodland (11 classes only)). All 40 classes otherwise.
+- About 2/3 of every EOC test set is in our current SSL pool, about 30% is SOC-40 test. So the current A1/A2 backbones have seen (unlabeled) most EOC test images: do not use them for EOC claims.
+- [ ] Design (proposed): per EOC experiment, split each test condition by acquisition group into a half that may go into the SSL pool (unlabeled) and a half kept only for evaluation; labels = small budget (1/3/10%) from EOC train only. Strict ablation: SSL on EOC train only (about 20-28k images).
+- [ ] Priority: depression and polarization (Brittany), then scene; band and azimuth later.

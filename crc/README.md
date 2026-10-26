@@ -27,5 +27,6 @@ Layout on CRC (set up and verified 2026-10-18):
 | `baseline.sbatch` | A0: fine-tune ImageNet MobileNetV2, validation evaluation | 2 h |
 | `dino.sbatch` | A1: smoke test, DINO SSL 100 epochs, fine-tune, validation evaluation | 1 day |
 | `lejepa.sbatch` | A2: smoke test, LeJEPA SSL 100 epochs (batch 64), fine-tune, validation evaluation | 36 h (QoS normal) |
+| `label_budgets.sbatch` | A0/A1/A2 fine-tunes on the 1% and 10% labeled sets from the existing SSL backbones (hash-checked); validation + test for each; test for the existing 3% runs | 6 h |
 
-Cancel a job: `scancel -M gpu <job id>`. Test evaluation is not in the scripts on purpose: run it once, by hand, when settings are final.
+Cancel a job: `scancel -M gpu <job id>`. Test-set rule (Nischal, 2026-10-26): test scores are recorded for finished runs, but every decision (best epoch, settings, ablations) is made on validation only. A setting changed after seeing a test score must be reported as such.

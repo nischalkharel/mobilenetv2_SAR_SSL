@@ -101,6 +101,18 @@ def audit_splits(splits_dir: Path = paths.SPLITS_DIR, check_test_folder: bool = 
         if shared:
             problems.append(f"validation and {k} share {len(shared)} acquisition groups")
 
+    # Label-budget sets (preprocessing_dataset/make_label_budgets.py): same rules as labeled_set.csv.
+    budget_files = sorted(p.name for p in splits_dir.glob("labeled_set_*.csv"))
+    for f in budget_files:
+        rs = read_rows(splits_dir / f)
+        p = {r["relative_path"] for r in rs}
+        if len(p) != len(rs) or not p <= sets["ssl"]:
+            problems.append(f"{f}: duplicate paths or images outside the SSL pool")
+        if any(name_of.get(int(r["label"])) != r["class_name"] for r in rs):
+            problems.append(f"{f}: label/class mismatch")
+        if val_groups & {r["acquisition_group"] for r in rs}:
+            problems.append(f"validation and {f} share acquisition groups")
+
     n_test = None
     if check_test_folder:
         test_ids = {p.stem for p in paths.SOC40_TEST_DIR.glob("*/*.tif")}
@@ -113,9 +125,9 @@ def audit_splits(splits_dir: Path = paths.SPLITS_DIR, check_test_folder: bool = 
         raise ValueError("split audit failed:\n  " + "\n  ".join(problems))
     return {
         "counts": {k: len(v) for k, v in sets.items()} | {"official_test": n_test, "classes": len(name_of)},
-        "csv_sha256": {f: sha256_file(splits_dir / f) for f in [*SPLIT_FILES.values(), "class_mapping.csv"]},
+        "csv_sha256": {f: sha256_file(splits_dir / f) for f in [*SPLIT_FILES.values(), *budget_files, "class_mapping.csv"]},
         "checks": ["unique paths in every CSV", "labels agree with class_mapping.csv and class folders",
-                   "labeled inside SSL pool", "validation/excluded disjoint from SSL and labeled",
+                   "labeled (and every labeled_set_*.csv) inside SSL pool", "validation/excluded disjoint from SSL and labeled",
                    "no shared acquisition group between validation and SSL/labeled",
                    "only official train/ images", "no official test image ID in any CSV"],
     }

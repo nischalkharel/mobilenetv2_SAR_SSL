@@ -189,10 +189,15 @@ def main():
     parser.add_argument("--smoke", action="store_true",
                         help=f"{SMOKE_PER_CLASS} images per class, {SMOKE_EPOCHS} epochs; pipeline check only")
     parser.add_argument("--device", help='override train.device in the config: "cuda", "cpu" or "auto"')
+    parser.add_argument("--train-csv", help="labeled CSV in preprocessing_dataset/ to train on instead of "
+                        "data.train_csv, e.g. labeled_set_1pct.csv (label-budget runs; added to the run name)")
     args = parser.parse_args()
     cfg = json.loads(args.config.read_text(encoding="utf-8"))
     if args.device:
         cfg["train"]["device"] = args.device  # saved into the run's config.json, so the run records it
+    if args.train_csv:
+        cfg["data"]["train_csv"] = args.train_csv  # saved into the run's config.json and manifests
+        cfg["run_name"] += "_" + Path(args.train_csv).stem
     run(cfg, smoke=args.smoke)
 
 
