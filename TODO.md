@@ -74,3 +74,11 @@ Check script: scratchpad `eoc_check.py` (sha256 of every .tif). Findings:
 - About 2/3 of every EOC test set is in our current SSL pool, about 30% is SOC-40 test. So the current A1/A2 backbones have seen (unlabeled) most EOC test images: do not use them for EOC claims.
 - [ ] Design (proposed): per EOC experiment, split each test condition by acquisition group into a half that may go into the SSL pool (unlabeled) and a half kept only for evaluation; labels = small budget (1/3/10%) from EOC train only. Strict ablation: SSL on EOC train only (about 20-28k images).
 - [ ] Priority: depression and polarization (Brittany), then scene; band and azimuth later.
+
+## 8. A3 SparK (implemented 2026-10-27) and a precision finding
+
+- [x] SparK for MobileNetV2 in `Experiments/mobileNetv2_SparK` (authors' code vendored, import lines only changed; smoke test 66 checks pass on the PC GPU). See its README and SPARK_CHANGES.md.
+- [ ] Full run on CRC: `sbatch crc/spark.sbatch` (SSL 100 epochs, then 3% / 1% / 10% fine-tunes with validation + test). A100 time not measured yet (expected roughly 12-17 h in float32).
+- [ ] **Precision pitfall (possible paper finding; check before claiming):** at SparK's start, the gradient vs a float64 reference has about 100% error with TF32 (PyTorch's default on A100/RTX 30/40), 129% with bf16, 11% in true float32 on the GPU, 3% on the CPU. Likely cause: ImageNet normalization maps the dark SAR background to about -2.1 and BatchNorm follows every conv, so gradients are small remainders of large cancelling sums. A3 runs in true float32 for this reason.
+  - [ ] Measure the same for A1 (DINO, fp16 autocast) and A2 (LeJEPA, bf16) at initialization and later in training. If large there too, their results were trained with mostly-noise encoder gradients; rerun in float32 and compare.
+  - [ ] Possible fix to test: normalize SAR inputs with the SAR pool's own mean/std instead of ImageNet's (removes the large constant offset); keep everything else equal.
