@@ -23,7 +23,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # so "import paths" works
 import paths  # noqa: E402
 
-SEED = 1  # separate from the split's SEED 0, so the extra draws do not repeat its random sequence
+SEED = paths.SPLIT  # one above the split's own seed (SPLIT - 1), so the extra draws do not repeat its random sequence
 BUDGETS = {"labeled_set_1pct.csv": 0.01, "labeled_set_10pct.csv": 0.10}
 BASE_FRACTION = 0.03  # the fraction labeled_set.csv was made with (preprocessing_dataset.py)
 

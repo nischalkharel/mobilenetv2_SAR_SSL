@@ -78,7 +78,17 @@ Check script: scratchpad `eoc_check.py` (sha256 of every .tif). Findings:
 ## 8. A3 SparK (implemented 2026-10-27) and a precision finding
 
 - [x] SparK for MobileNetV2 in `Experiments/mobileNetv2_SparK` (authors' code vendored, import lines only changed; smoke test 66 checks pass on the PC GPU). See its README and SPARK_CHANGES.md.
-- [ ] Full run on CRC: `sbatch crc/spark.sbatch` (SSL 100 epochs, then 3% / 1% / 10% fine-tunes with validation + test). A100 time not measured yet (expected roughly 12-17 h in float32).
+- [x] Full run on CRC (done 2026-10-28, jobs 4568708): `sbatch crc/spark.sbatch` (SSL 100 epochs, then 3% / 1% / 10% fine-tunes with validation + test). A100 time not measured yet (expected roughly 12-17 h in float32).
 - [ ] **Precision pitfall (possible paper finding; check before claiming):** at SparK's start, the gradient vs a float64 reference has about 100% error with TF32 (PyTorch's default on A100/RTX 30/40), 129% with bf16, 11% in true float32 on the GPU, 3% on the CPU. Likely cause: ImageNet normalization maps the dark SAR background to about -2.1 and BatchNorm follows every conv, so gradients are small remainders of large cancelling sums. A3 runs in true float32 for this reason.
   - [ ] Measure the same for A1 (DINO, fp16 autocast) and A2 (LeJEPA, bf16) at initialization and later in training. If large there too, their results were trained with mostly-noise encoder gradients; rerun in float32 and compare.
   - [ ] Possible fix to test: normalize SAR inputs with the SAR pool's own mean/std instead of ImageNet's (removes the large constant offset); keep everything else equal.
+
+## 9. Paper direction: teaching small models with few labels (2026-10-28)
+
+Goal: a method that makes advanced SSL work better for small edge models (SAR is the test domain, not the topic).
+Literature so far: SSLight (ICLR 2023, crops for small nets incl. MobileNetV2 + DINO), Shi et al. (AAAI 2022, over-clustering), SEED / DisCo / BINGO (distill from big teacher), TinySSL (2026 preprint, head bigger than model). Our DINO head is ~8.4M params vs 2.2M MobileNetV2.
+- [ ] Walk through DINO / LeJEPA code and math with Nischal; mark where small CNNs differ from ViTs.
+- [ ] Choose the base method to improve (see 2026-10-28 discussion).
+- [ ] SSL on a bigger model (ViT-S and/or ResNet-50) on the same data: show big models gain more than small ones (the gap our method should close).
+- [ ] SSL on unlabeled data NOT matching the labeled set (other SAR datasets/sensors/targets, e.g. SARDet-100K, OpenSARShip, Sentinel-1 chips), then fine-tune on the same few ATRNet-STAR labels: does SSL learn general image understanding, or only help when unlabeled = labeled domain? Check overlap with ATRNet-STAR first.
+- [ ] **Splits 2 and 3 (made 2026-10-28)**: `preprocessing_dataset/split2/`, `split3/` (seeds 1, 2; new validation, SSL pool, 1/3/10% labeled sets; same test folder and recipes; training seed 0). Switch: env `SAR_SPLIT`; run folders tagged `_split2/_split3`. Jobs: `sbatch crc/split_run.sbatch <baseline|dino|lejepa|spark> <2|3>`. Then mean +- spread over splits 1-3 per route and budget.

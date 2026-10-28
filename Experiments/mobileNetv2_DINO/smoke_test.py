@@ -122,6 +122,8 @@ def part_ssl(cli):
     check("split audit (leakage and consistency checks)", True, f"({len(audit['checks'])} checks, counts {audit['counts']})")
     count_key = {"labeled_set.csv": "labeled", "validation.csv": "validation", "class_mapping.csv": "classes"}
     for f, (sha, n) in A0_RECORD.items():
+        if paths.SPLIT != 1 and f != "class_mapping.csv":  # the hashes are split 1's files
+            continue
         same = audit["csv_sha256"][f] == sha
         count = audit["counts"][count_key[f]]
         check(f"{f} identical to the A0 run's file", same and count == n, f"({count} rows/classes, sha256 {'matches' if same else 'DIFFERS'})")

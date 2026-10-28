@@ -33,7 +33,15 @@ SOC40_TEST_DIR = SOC40_DIR / "test"
 # ---- Paths found relative to this file ---------------------------------------------
 EXPERIMENT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = EXPERIMENT_DIR.parents[1]
+# Which data split to use. Set the environment variable SAR_SPLIT per job (crc/split_run.sbatch does);
+# nothing to edit here. Split 1 is the original subsets in preprocessing_dataset/ (seed 0); splits 2 and 3
+# are re-drawn with seeds 1 and 2 into preprocessing_dataset/split2/ and split3/ (new validation, SSL pool
+# and labeled sets; same test folder). RUN_TAG goes into run folder names so runs of different splits never mix.
+SPLIT = int(os.environ.get("SAR_SPLIT", "1"))
 SPLITS_DIR = REPO_ROOT / "preprocessing_dataset"  # validation.csv, ssl_training_data.csv, labeled_set.csv, ...
+if SPLIT != 1:
+    SPLITS_DIR = SPLITS_DIR / f"split{SPLIT}"
+RUN_TAG = "" if SPLIT == 1 else f"_split{SPLIT}"
 # Override with the environment variable MOBILENETV2_IMAGENET_WEIGHTS on another machine (crc/env.sh does).
 MOBILENETV2_IMAGENET_WEIGHTS = Path(os.environ.get(
     "MOBILENETV2_IMAGENET_WEIGHTS",

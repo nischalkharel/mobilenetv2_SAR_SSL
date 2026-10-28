@@ -2,6 +2,8 @@
 
 Run from the repository root:
     python preprocessing_dataset/preprocessing_dataset.py
+For a re-drawn split (written to preprocessing_dataset/split<N>/, seed N-1):
+    SAR_SPLIT=2 python preprocessing_dataset/preprocessing_dataset.py
 
 What it does
 1. Lists every image in SOC-40 train/ and test/, checks that each .tif has its .xml,
@@ -51,7 +53,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # so "import paths
 import paths  # noqa: E402
 from subset_report import make_report  # noqa: E402
 
-SEED = 0
+SEED = paths.SPLIT - 1  # split 1 = seed 0 (the original subsets); set SAR_SPLIT=2 or 3 for the re-drawn splits
 VAL_PER_CLASS = 20       # validation images per class, each from a different pose (40 classes -> 800)
 LABELED_FRACTION = 0.03  # fraction of the SSL pool, per class (about 30 to 60 images per class)
 

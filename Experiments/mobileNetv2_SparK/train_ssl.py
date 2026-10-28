@@ -265,7 +265,7 @@ def run(cfg: dict | None, smoke: bool = False, output_root: Path | None = None,
     if resume_dir is None:
         stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         root = Path(output_root) if output_root else (paths.SMOKE_OUTPUT_DIR if smoke else paths.SSL_OUTPUT_DIR)
-        run_dir = root / f"{stamp}_{cfg['run_name']}_seed{args.seed}{'_SMOKE' if smoke else ''}"
+        run_dir = root / f"{stamp}_{cfg['run_name']}{paths.RUN_TAG}_seed{args.seed}{'_SMOKE' if smoke else ''}"
         run_dir.mkdir(parents=True, exist_ok=False)  # never overwrite an earlier run
         write_json(cfg, run_dir / "config.json")
         (run_dir / "manifests").mkdir()

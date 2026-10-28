@@ -43,6 +43,10 @@ def evaluate(run_dir: Path, split: str = "test", device_name: str = "auto") -> d
     model.to(device)
 
     records = test_manifest(class_names) if split == "test" else read_manifest(cfg["data"]["val_csv"], class_names)
+    if split == "validation":  # must be the run's own split (set SAR_SPLIT as in training)
+        rec = json.loads((run_dir / "manifests.json").read_text(encoding="utf-8"))["val"]
+        if manifest_hash(records) != rec["used_content_hash"] and not cfg.get("smoke"):
+            raise ValueError("validation images differ from those used during training (wrong SAR_SPLIT?)")
     gpu = f" ({torch.cuda.get_device_name(device)})" if device.type == "cuda" else ""
     print(f"Evaluating {run_dir / 'best.pt'}\n"
           f"  checkpoint : epoch {ckpt['epoch']}, val acc at training {ckpt['val_acc']:.4f}\n"

@@ -77,7 +77,7 @@ def run(cfg: dict, smoke: bool = False, output_root: Path = paths.BASELINE_OUTPU
 
     # ---- Run folder and records --------------------------------------------------
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    run_dir = Path(output_root) / f"{stamp}_{cfg['run_name']}_seed{train_cfg['seed']}{'_SMOKE' if smoke else ''}"
+    run_dir = Path(output_root) / f"{stamp}_{cfg['run_name']}{paths.RUN_TAG}_seed{train_cfg['seed']}{'_SMOKE' if smoke else ''}"
     run_dir.mkdir(parents=True, exist_ok=False)  # never overwrite an earlier run
     save_json({**cfg, "smoke": smoke}, run_dir / "config.json")
     shutil.copy(paths.SPLITS_DIR / "class_mapping.csv", run_dir / "class_mapping.csv")
