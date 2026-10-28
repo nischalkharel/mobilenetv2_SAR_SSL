@@ -1,0 +1,155 @@
+{
+  "status": "completed",
+  "started": "2026-10-27T15:51:46",
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.10.0+cu128",
+    "torchvision": "0.25.0+cu128",
+    "platform": "Linux-5.14.0-503.22.1.el9_5.x86_64-x86_64-with-glibc2.34",
+    "device": "cuda",
+    "cpu_threads": 8,
+    "gpu": "NVIDIA A100-PCIE-40GB"
+  },
+  "git": {
+    "commit": "4672ccaa81bbf638f5cfc0a41dcbf47b3fa0ac99",
+    "uncommitted_changes": true
+  },
+  "model_selection": "epoch with highest validation accuracy (earliest on ties)",
+  "initialization": {
+    "type": "backbone_checkpoint",
+    "file": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/ssl/20261018-192425_A1_dino_ssl_mobilenetv2_seed0/backbone_teacher_epoch100.pth",
+    "sha256": "50214da5d552186e090ed7c485ef28c863aedd1976f2838c31568c3a84c55c2c",
+    "ssl_record": {
+      "source": "teacher",
+      "ssl_method": "DINO (adapted to MobileNetV2, single GPU; see DINO_CHANGES.md)",
+      "ssl_run_dir": "20261018-192425_A1_dino_ssl_mobilenetv2_seed0",
+      "ssl_checkpoint_sha256": "98bbe564e3860d13a20261208a8ee883b88029accefddeec1cd7c21957940792",
+      "ssl_epoch": 100,
+      "ssl_epochs_planned": 100,
+      "ssl_seed": 0,
+      "ssl_config": {
+        "run_name": "A1_dino_ssl_mobilenetv2",
+        "seed": 0,
+        "init": "imagenet",
+        "ssl_csv": "ssl_training_data.csv",
+        "cache_pixels": true,
+        "num_workers": 2,
+        "device": "cuda",
+        "log_every_steps": 100,
+        "global_crop_size": 224,
+        "global_crops_scale": [
+          0.4,
+          1.0
+        ],
+        "local_crops_number": 8,
+        "local_crop_size": 96,
+        "local_crops_scale": [
+          0.15,
+          0.4
+        ],
+        "hflip_p": 0.5,
+        "color_jitter_p": 0.8,
+        "brightness": 0.4,
+        "contrast": 0.4,
+        "blur_p": [
+          1.0,
+          0.1,
+          0.5
+        ],
+        "solarization_p": 0.0,
+        "normalize_mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "normalize_std": [
+          0.229,
+          0.224,
+          0.225
+        ],
+        "out_dim": 4096,
+        "use_bn_in_head": false,
+        "norm_last_layer": true,
+        "momentum_teacher": 0.9995,
+        "warmup_teacher_temp": 0.04,
+        "teacher_temp": 0.04,
+        "warmup_teacher_temp_epochs": 0,
+        "student_temp": 0.1,
+        "center_momentum": 0.9,
+        "optimizer": "adamw",
+        "lr": 0.0005,
+        "min_lr": 1e-06,
+        "warmup_epochs": 10,
+        "weight_decay": 0.04,
+        "weight_decay_end": 0.04,
+        "clip_grad": 3.0,
+        "batch_size_per_gpu": 64,
+        "epochs": 100,
+        "freeze_last_layer": 1,
+        "use_fp16": true
+      },
+      "ssl_manifest": {
+        "ssl_csv": "ssl_training_data.csv",
+        "csv_sha256": "67add7e44a7fc142a9c12aa324fff2f1ec0c7b049c27e9bd613703b3096ddbac",
+        "class_mapping_sha256": "5768e0346b908a22e11e25f34fbdfbc167783c9ccb33f434353a10c268a4427d",
+        "used_paths_hash": "6b62bf38b9f2d8a4bd702db1a3e976fe4d3e64f0b91ceaf5213345963594b7f1",
+        "num_images": 65387,
+        "split_audit": {
+          "counts": {
+            "ssl": 65387,
+            "labeled": 1961,
+            "validation": 800,
+            "excluded": 1904,
+            "official_test": 29284,
+            "classes": 40
+          },
+          "csv_sha256": {
+            "ssl_training_data.csv": "67add7e44a7fc142a9c12aa324fff2f1ec0c7b049c27e9bd613703b3096ddbac",
+            "labeled_set.csv": "3eefc78f9eb254d3e86d355c72e22c60097869ad032734b1b38194cc51c8c767",
+            "validation.csv": "c752adadce615c11ffaefb0f187f144042d83cb070d9c9c34775ab8b989a9980",
+            "excluded_near_duplicates.csv": "ad465e33307bb7e85b4abad38a8f6da7a51a3ac71acc1592ce2e73b878250fd0",
+            "class_mapping.csv": "5768e0346b908a22e11e25f34fbdfbc167783c9ccb33f434353a10c268a4427d"
+          },
+          "checks": [
+            "unique paths in every CSV",
+            "labels agree with class_mapping.csv and class folders",
+            "labeled inside SSL pool",
+            "validation/excluded disjoint from SSL and labeled",
+            "no shared acquisition group between validation and SSL/labeled",
+            "only official train/ images",
+            "no official test image ID in any CSV"
+          ]
+        },
+        "note": "used_paths_hash identifies the image list actually used (a manifest hash of sorted paths; not a hash of image contents). A smoke run uses a subset."
+      },
+      "ssl_cost": {
+        "epochs_done": 100,
+        "optimizer_steps": 102100,
+        "images_seen": 6534400,
+        "views_seen_student": 65344000,
+        "views_seen_teacher": 13068800,
+        "train_minutes": 469.64,
+        "device": "cuda (NVIDIA A100-PCIE-40GB)",
+        "peak_gpu_memory_gb": 9.19
+      },
+      "initialization_before_ssl": {
+        "type": "imagenet",
+        "file": "mobilenet_v2_imagenet1k_v2.pth",
+        "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35",
+        "weights": "torchvision MobileNet_V2_Weights.IMAGENET1K_V2 (same file as A0)"
+      },
+      "num_parameter_tensors": 156,
+      "num_buffer_tensors": 156,
+      "excluded_from_export": [
+        "head.last_layer",
+        "head.mlp"
+      ],
+      "exported": "2026-10-19T03:27:58"
+    }
+  },
+  "num_parameters": 2275112,
+  "finished": "2026-10-27T15:53:27",
+  "train_minutes": 1.35,
+  "best_epoch": 28,
+  "best_val_acc": 0.3462499976158142
+}

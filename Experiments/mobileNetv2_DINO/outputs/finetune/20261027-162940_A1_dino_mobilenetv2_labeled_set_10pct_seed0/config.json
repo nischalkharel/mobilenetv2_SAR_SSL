@@ -1,0 +1,39 @@
+{
+  "run_name": "A1_dino_mobilenetv2_labeled_set_10pct",
+  "init": {
+    "type": "backbone_checkpoint",
+    "backbone_checkpoint": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/ssl/20261018-192425_A1_dino_ssl_mobilenetv2_seed0/backbone_teacher_epoch100.pth"
+  },
+  "data": {
+    "train_csv": "labeled_set_10pct.csv",
+    "val_csv": "validation.csv",
+    "input_size": 224,
+    "normalize_mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "normalize_std": [
+      0.229,
+      0.224,
+      0.225
+    ],
+    "augment_hflip_p": 0.5,
+    "augment_translate_pad": 8,
+    "cache_in_memory": true,
+    "num_workers": 0
+  },
+  "train": {
+    "seed": 0,
+    "epochs": 30,
+    "batch_size": 64,
+    "optimizer": "adamw",
+    "lr": 0.0005,
+    "weight_decay": 0.01,
+    "scheduler": "cosine",
+    "device": "cuda",
+    "log_every_batches": 25,
+    "_note": "Same values as Experiments/Baseline/config.json (A0), so only the backbone initialization differs. This seed is the downstream seed; the SSL seed is separate (config_ssl.json)."
+  },
+  "smoke": false
+}
