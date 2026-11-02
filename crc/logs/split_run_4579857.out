@@ -1,0 +1,2088 @@
+host gpu-n52.crc.pitt.edu  job 4579857  start Wed Oct 28 04:51:27 PM EDT 2026
+repo /ihome/ageorge/nik96/mobilenetv2_SAR_SSL  commit af308fa  branch SmokeTest_Mobilenet_with_DINO
+NVIDIA A100-PCIE-40GB, 40960 MiB, 595.91.07
+python /ix/ageorge/nik96/envs/sarssl/bin/python 3.13.16 | torch 2.10.0+cu128 | torchvision 0.25.0+cu128 | cuda available True
+route lejepa  split 2
+Smoke test on cuda. Outputs go to /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke
+
+1. Data
+  [PASS] split audit (leakage and consistency checks) (7 checks, counts {'ssl': 65427, 'labeled': 1962, 'validation': 800, 'excluded': 1864, 'official_test': 29284, 'classes': 40})
+  [PASS] class_mapping.csv identical to the A0 run's file (40 rows/classes, sha256 matches)
+  [PASS] SSL item is a list of views only (no label) 
+  [PASS] views leave the data loader as uint8 gray images (8 x (1, 224, 224))
+  [PASS] GPU-side input equals the A0/A1 pipeline (Grayscale(3) -> ToTensor -> Normalize) on the same views (max difference 7.2e-07)
+  [PASS] 3 channels are copies of one SAR channel after de-normalizing 
+2. Sources
+  [PASS] lejepa_lib/univariate/base.py byte-identical to the authors' lejepa/univariate/base.py (sha256 08d4f1159906...)
+  [PASS] lejepa_lib/univariate/epps_pulley.py byte-identical to the authors' lejepa/univariate/epps_pulley.py (sha256 e6554ee42de2...)
+  [PASS] lejepa_lib/multivariate/slicing.py byte-identical to the authors' lejepa/multivariate/slicing.py (sha256 86c0fe3a714d...)
+3. Initialization
+  ImageNet weights sha256 1f19491f7357621f...
+  [PASS] backbone equals the ImageNet IMAGENET1K_V2 weights (parameters and BatchNorm buffers) 
+  [PASS] no ImageNet classifier in the SSL network 
+  [PASS] one network: only backbone and projector, every parameter trainable 
+  [PASS] projector 1280 -> 2048 -> 2048 -> proj_dim with BatchNorm after the hidden layers (1280 -> 2048 -> 2048 -> 512)
+4. Loss against the authors' code
+  [PASS] agreement equals MINIMAL.md inv_loss = (proj.mean(0) - proj).square().mean() 
+  [PASS] SIGReg (authors' library) equals MINIMAL.md's SIGReg formula on the same directions (3.157266 vs 3.157266)
+  [PASS] total = (1 - lamb) * agreement + lamb * SIGReg 
+  [PASS] SIGReg advanced its seed (new random directions next step) 
+  [PASS] with local views: agreement equals the paper's listing (centers = mean of global views) 
+  [PASS] SIGReg is about 1 for Gaussian projections and large for collapsed ones (Gaussian 1.06, collapsed 12.86)
+5. Shapes and mixed resolutions
+  [PASS] features (V, N, 1280) and projections (V, N, proj_dim) 
+  [PASS] mixed 224/96 views give the same features as one view at a time (view-major order kept) 
+6. One real training step (8 SSL images, the configured views)
+  [PASS] loss, agreement and SIGReg finite (loss 0.2231, agreement 0.0971, SIGReg 2.618)
+  [PASS] all gradients finite 
+  [PASS] every backbone parameter updated (156 tensors)
+  [PASS] every projector parameter updated 
+  [PASS] BatchNorm statistics updated once (one resolution group) 
+  [PASS] SIGReg random directions advanced once 
+7. Save and resume (smoke runs, 48 images, 2 epochs)
+Preparing the pixel cache for 48 SSL images (slow only the first time)...
+  pixels_2558900dddbca85f_48.npy ready in 3s
+
+SMOKE RUN (pipeline check only): A2_lejepa_ssl_mobilenetv2
+  output folder      : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke/20261028-165759_A2_lejepa_ssl_mobilenetv2_split2_seed0_SMOKE
+  device             : cuda (NVIDIA A100-PCIE-40GB), precision bf16 autocast
+  init               : ImageNet IMAGENET1K_V2 (one network; no teacher)
+  SSL images         : 48 from ssl_training_data.csv (no labels used)
+  batch              : 8 images x 8 views = 8 x 224px (all global)
+  dimensions         : MobileNetV2 feature 1280 (checked: {224: (2, 1280)}) -> projector 2048-2048-512
+  loss               : (1 - 0.05) x agreement + 0.05 x SIGReg (1024 directions, Epps-Pulley 17 points on [0, 3.0])
+  trainable params   : 10,100,992 (backbone + projector)
+  steps              : 6 per epoch, 2 epochs, 12 total
+  learning rate      : AdamW peak 0.0005 after 1 warm-up epoch(s) from 0.01 x lr, cosine to 3.40e-05; weight decay 0.0005; seed 0
+
+SSL epoch 1/2
+    step     1/6  loss 0.2212  agreement 0.0948  sigreg 2.623  proj std 0.326  lr 5.00e-06  1s
+    step     2/6  loss 0.2217  agreement 0.0950  sigreg 2.629  proj std 0.325  lr 8.75e-05  1s
+    step     3/6  loss 0.2200  agreement 0.0945  sigreg 2.604  proj std 0.324  lr 1.70e-04  1s
+    step     4/6  loss 0.2171  agreement 0.0936  sigreg 2.564  proj std 0.323  lr 2.52e-04  1s
+    step     5/6  loss 0.2146  agreement 0.0924  sigreg 2.536  proj std 0.321  lr 3.35e-04  1s
+    step     6/6  loss 0.2132  agreement 0.0910  sigreg 2.536  proj std 0.319  lr 4.18e-04  1s
+  epoch   1/2 summary  loss 0.2132  agreement 0.0910  sigreg 2.536  proj std 0.319  feature cosine 0.319  0.0 min, checkpoint saved
+  exported backbone (epoch 1): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch001.pth
+
+SSL epoch 2/2
+    step     1/6  loss 0.2122  agreement 0.0824  sigreg 2.679  proj std 0.310  lr 5.00e-04  0s
+    step     2/6  loss 0.2130  agreement 0.0806  sigreg 2.727  proj std 0.307  lr 4.67e-04  0s
+    step     3/6  loss 0.2113  agreement 0.0788  sigreg 2.729  proj std 0.308  lr 3.75e-04  0s
+    step     4/6  loss 0.2092  agreement 0.0779  sigreg 2.704  proj std 0.308  lr 2.50e-04  0s
+    step     5/6  loss 0.2062  agreement 0.0764  sigreg 2.671  proj std 0.310  lr 1.25e-04  1s
+    step     6/6  loss 0.2036  agreement 0.0752  sigreg 2.642  proj std 0.311  lr 3.40e-05  1s
+  epoch   2/2 summary  loss 0.2036  agreement 0.0752  sigreg 2.642  proj std 0.311  feature cosine 0.317  0.0 min, checkpoint saved
+  exported backbone (epoch 2): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch002.pth
+
+Done. SSL cost: 0.03 min, 96 images seen, 12 steps.
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke/20261028-165759_A2_lejepa_ssl_mobilenetv2_split2_seed0_SMOKE:
+  config.json, manifests.json, manifests/   settings and the image list used (with hashes)
+  run_info.json        status, environment, cost (time, images, steps, GPU memory)
+  history.csv, charts/ per-epoch loss terms and collapse diagnostics
+  view_preview.png     original chips beside the views used in training
+  checkpoint.pth       full training state (network, optimizer, SIGReg step, RNG)
+  backbone_epoch002.pth FINAL backbone for fine-tuning (route A2)
+Next: python Experiments/mobileNetv2_LeJEPA/train_supervised.py --backbone "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke/20261028-165759_A2_lejepa_ssl_mobilenetv2_split2_seed0_SMOKE/backbone_epoch002.pth"
+Preparing the pixel cache for 48 SSL images (slow only the first time)...
+  pixels_2558900dddbca85f_48.npy ready in 14s
+
+SMOKE RUN (pipeline check only): A2_lejepa_ssl_mobilenetv2
+  output folder      : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke/20261028-165820_A2_lejepa_ssl_mobilenetv2_split2_seed0_SMOKE
+  device             : cuda (NVIDIA A100-PCIE-40GB), precision bf16 autocast
+  init               : ImageNet IMAGENET1K_V2 (one network; no teacher)
+  SSL images         : 48 from ssl_training_data.csv (no labels used)
+  batch              : 8 images x 8 views = 8 x 224px (all global)
+  dimensions         : MobileNetV2 feature 1280 (checked: {224: (2, 1280)}) -> projector 2048-2048-512
+  loss               : (1 - 0.05) x agreement + 0.05 x SIGReg (1024 directions, Epps-Pulley 17 points on [0, 3.0])
+  trainable params   : 10,100,992 (backbone + projector)
+  steps              : 6 per epoch, 2 epochs, 12 total
+  learning rate      : AdamW peak 0.0005 after 1 warm-up epoch(s) from 0.01 x lr, cosine to 3.40e-05; weight decay 0.0005; seed 0
+
+SSL epoch 1/2
+    step     1/6  loss 0.2212  agreement 0.0948  sigreg 2.623  proj std 0.326  lr 5.00e-06  0s
+    step     2/6  loss 0.2217  agreement 0.0950  sigreg 2.629  proj std 0.325  lr 8.75e-05  0s
+    step     3/6  loss 0.2200  agreement 0.0945  sigreg 2.604  proj std 0.324  lr 1.70e-04  0s
+    step     4/6  loss 0.2171  agreement 0.0936  sigreg 2.564  proj std 0.323  lr 2.52e-04  0s
+    step     5/6  loss 0.2146  agreement 0.0924  sigreg 2.536  proj std 0.321  lr 3.35e-04  1s
+    step     6/6  loss 0.2132  agreement 0.0910  sigreg 2.536  proj std 0.319  lr 4.18e-04  1s
+  epoch   1/2 summary  loss 0.2132  agreement 0.0910  sigreg 2.536  proj std 0.319  feature cosine 0.319  0.0 min, checkpoint saved
+  exported backbone (epoch 1): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch001.pth
+
+Stopped after epoch 1 of 2. Continue with:
+  python Experiments/mobileNetv2_LeJEPA/train_ssl.py --resume "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke/20261028-165820_A2_lejepa_ssl_mobilenetv2_split2_seed0_SMOKE"
+  [PASS] stopped run is marked resumable after epoch 1 
+  [PASS] resume with a changed config (lamb) is rejected 
+Preparing the pixel cache for 48 SSL images (slow only the first time)...
+  pixels_2558900dddbca85f_48.npy ready in 1s
+
+SMOKE RUN (pipeline check only): A2_lejepa_ssl_mobilenetv2  (RESUMED at epoch 2)
+  output folder      : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke/20261028-165820_A2_lejepa_ssl_mobilenetv2_split2_seed0_SMOKE
+  device             : cuda (NVIDIA A100-PCIE-40GB), precision bf16 autocast
+  init               : ImageNet IMAGENET1K_V2 (one network; no teacher)
+  SSL images         : 48 from ssl_training_data.csv (no labels used)
+  batch              : 8 images x 8 views = 8 x 224px (all global)
+  dimensions         : MobileNetV2 feature 1280 (checked: {224: (2, 1280)}) -> projector 2048-2048-512
+  loss               : (1 - 0.05) x agreement + 0.05 x SIGReg (1024 directions, Epps-Pulley 17 points on [0, 3.0])
+  trainable params   : 10,100,992 (backbone + projector)
+  steps              : 6 per epoch, 2 epochs, 12 total
+  learning rate      : AdamW peak 0.0005 after 1 warm-up epoch(s) from 0.01 x lr, cosine to 3.40e-05; weight decay 0.0005; seed 0
+
+SSL epoch 2/2
+    step     1/6  loss 0.2122  agreement 0.0824  sigreg 2.679  proj std 0.310  lr 5.00e-04  0s
+    step     2/6  loss 0.2130  agreement 0.0806  sigreg 2.727  proj std 0.307  lr 4.67e-04  0s
+    step     3/6  loss 0.2113  agreement 0.0788  sigreg 2.729  proj std 0.308  lr 3.75e-04  0s
+    step     4/6  loss 0.2092  agreement 0.0779  sigreg 2.704  proj std 0.308  lr 2.50e-04  1s
+    step     5/6  loss 0.2062  agreement 0.0764  sigreg 2.671  proj std 0.310  lr 1.25e-04  1s
+    step     6/6  loss 0.2036  agreement 0.0752  sigreg 2.642  proj std 0.311  lr 3.40e-05  1s
+  epoch   2/2 summary  loss 0.2036  agreement 0.0752  sigreg 2.642  proj std 0.311  feature cosine 0.317  0.0 min, checkpoint saved
+  exported backbone (epoch 2): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch002.pth
+
+Done. SSL cost: 0.02 min, 96 images seen, 12 steps.
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke/20261028-165820_A2_lejepa_ssl_mobilenetv2_split2_seed0_SMOKE:
+  config.json, manifests.json, manifests/   settings and the image list used (with hashes)
+  run_info.json        status, environment, cost (time, images, steps, GPU memory)
+  history.csv, charts/ per-epoch loss terms and collapse diagnostics
+  view_preview.png     original chips beside the views used in training
+  checkpoint.pth       full training state (network, optimizer, SIGReg step, RNG)
+  backbone_epoch002.pth FINAL backbone for fine-tuning (route A2)
+Next: python Experiments/mobileNetv2_LeJEPA/train_supervised.py --backbone "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke/20261028-165820_A2_lejepa_ssl_mobilenetv2_split2_seed0_SMOKE/backbone_epoch002.pth"
+  [PASS] same epoch, global step, schedule and SIGReg step after resume 
+  [PASS] resumed run matches the uninterrupted run (max difference 0.0e+00; tolerance 0.02 on cuda: cuDNN picks non-deterministic kernels on the GPU, and bf16 rounding makes those differences larger than in fp32)
+  [PASS] learning rate per epoch identical after resume 
+8. Export
+  [PASS] a backbone file after every epoch in the smoke run (export_every = 1) 
+  [PASS] exported backbone loads strictly into a fresh MobileNetV2 (156 parameters + 156 buffers)
+  [PASS] export contains no projector or classifier 
+  [PASS] export equals the backbone of the final checkpoint and is marked final 
+Imports
+  [PASS] every project module in use was loaded from this folder (data, engine, evaluate, export_backbone, lejepa_model, model, paths, plots, preview_views, ssl_data, train_ssl, train_supervised, utils)
+  [PASS] SIGReg code loaded from this folder's lejepa_lib/ 
+  [PASS] no module from Baseline, the DINO experiment or lejepa-main 
+
+PASSED (SSL part)
+Smoke folders (not results): 20261028-165759_A2_lejepa_ssl_mobilenetv2_split2_seed0_SMOKE, 20261028-165820_A2_lejepa_ssl_mobilenetv2_split2_seed0_SMOKE in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke
+9. Downstream fine-tuning from the exported backbone
+  [PASS] fine-tuning model starts from the exported backbone 
+  [PASS] new head: 40 outputs, dropout 0.2 kept 
+  [PASS] one step updates backbone and new classifier (158/158 tensors)
+SMOKE RUN (pipeline check only): A2_lejepa_mobilenetv2
+  output folder : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke/20261028-170001_A2_lejepa_mobilenetv2_split2_seed0_SMOKE
+  device        : cuda (NVIDIA A100-PCIE-40GB)
+  init          : backbone_checkpoint  /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke/20261028-165759_A2_lejepa_ssl_mobilenetv2_split2_seed0_SMOKE/backbone_epoch002.pth
+  train images  : 320 from labeled_set.csv
+  val images    : 320 from validation.csv (picks best.pt)
+  settings      : 2 epochs, batch 64, adamw lr 0.0005, cosine schedule, seed 0
+Reading all train and val images into memory (once per run)...
+  done in 53s
+
+Epoch 1/2  (lr 5.00e-04)
+    train batch    5/5  running loss 3.7097  running acc 0.0187  3s
+    val   batch    5/5  0s
+  epoch   1/2 summary  train loss 3.7097 acc 0.0187  val loss 3.6910 acc 0.0156  4s  *new best, saved best.pt
+  best so far: val acc 0.0156 (epoch 1)  elapsed 0.1 min, about 0.1 min left
+
+Epoch 2/2  (lr 2.50e-04)
+    train batch    5/5  running loss 3.6060  running acc 0.0813  1s
+    val   batch    5/5  0s
+  epoch   2/2 summary  train loss 3.6060 acc 0.0813  val loss 3.6823 acc 0.0250  1s  *new best, saved best.pt
+  best so far: val acc 0.0250 (epoch 2)  elapsed 0.2 min, about 0.0 min left
+
+Done in 0.18 min. Best validation accuracy 0.0250 at epoch 2.
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke/20261028-170001_A2_lejepa_mobilenetv2_split2_seed0_SMOKE:
+  config.json        settings used
+  class_mapping.csv  label number -> class name
+  manifests.json     hashes of the train/val image lists used, plus the split audit
+  manifests/         copies of the labeled, validation and class-mapping CSVs used
+  run_info.json      status, device, versions, timing, best epoch
+  history.csv        per-epoch loss and accuracy (train and val)
+  best.pt            model weights from the best validation epoch
+  charts/            loss.pdf, accuracy.pdf, overfitting_gap.pdf, learning_rate.pdf (one chart per file)
+Next: python Experiments/mobileNetv2_LeJEPA/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke/20261028-170001_A2_lejepa_mobilenetv2_split2_seed0_SMOKE" --split validation
+Final test (once, when everything is fixed): python Experiments/mobileNetv2_LeJEPA/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke/20261028-170001_A2_lejepa_mobilenetv2_split2_seed0_SMOKE"
+  [PASS] fine-tuning run completed and records the SSL provenance 
+  [PASS] reloaded best.pt reproduces the recorded validation accuracy (0.0250 vs 0.0250 recorded; tolerance one image of 320)
+Evaluating /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke/20261028-170001_A2_lejepa_mobilenetv2_split2_seed0_SMOKE/best.pt
+  checkpoint : epoch 2, val acc at training 0.0250
+  split      : validation, 320 images (read from disk)
+  device     : cuda (NVIDIA A100-PCIE-40GB)
+    validation batch    5/5  10s
+validation: 320 images  overall accuracy 0.0250  mean per-class accuracy 0.0250  (checkpoint epoch 2)
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke/20261028-170001_A2_lejepa_mobilenetv2_split2_seed0_SMOKE/eval_validation:
+  metrics.json            overall and mean per-class accuracy, loss, checkpoint info
+  per_class_accuracy.csv  accuracy for each of the 40 classes
+  confusion_matrix.csv    rows = true class, columns = predicted class
+  predictions.csv         one row per image: true, predicted, confidence
+  charts/                 per_class_accuracy.pdf, confusion_matrix.pdf, top_mistakes.pdf,
+                          confidence.pdf, calibration.pdf (one chart per file)
+  [PASS] evaluate.py --split validation uses the run's manifest copies and reproduces the record (0.0250)
+Imports
+  [PASS] every project module in use was loaded from this folder (data, engine, evaluate, export_backbone, lejepa_model, model, paths, plots, preview_views, ssl_data, train_ssl, train_supervised, utils)
+  [PASS] SIGReg code loaded from this folder's lejepa_lib/ 
+  [PASS] no module from Baseline, the DINO experiment or lejepa-main 
+
+PASSED (downstream part)
+Smoke folders (not results): 20261028-170001_A2_lejepa_mobilenetv2_split2_seed0_SMOKE in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/smoke
+
+SMOKE TEST PASSED (both parts)
+Preparing the pixel cache for 65427 SSL images (slow only the first time)...
+    decoded 10000/65427 images into the cache, 870s
+    decoded 20000/65427 images into the cache, 1876s
+    decoded 30000/65427 images into the cache, 2722s
+    decoded 40000/65427 images into the cache, 3595s
+    decoded 50000/65427 images into the cache, 4361s
+    decoded 60000/65427 images into the cache, 5153s
+  pixels_7588844f9a1e3f89_65427.npy ready in 7397s
+
+LeJEPA SSL run: A2_lejepa_ssl_mobilenetv2
+  output folder      : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/ssl/20261028-170313_A2_lejepa_ssl_mobilenetv2_split2_seed0
+  device             : cuda (NVIDIA A100-PCIE-40GB), precision bf16 autocast
+  init               : ImageNet IMAGENET1K_V2 (one network; no teacher)
+  SSL images         : 65427 from ssl_training_data.csv (no labels used)
+  batch              : 64 images x 8 views = 8 x 224px (all global)
+  dimensions         : MobileNetV2 feature 1280 (checked: {224: (2, 1280)}) -> projector 2048-2048-512
+  loss               : (1 - 0.05) x agreement + 0.05 x SIGReg (1024 directions, Epps-Pulley 17 points on [0, 3.0])
+  trainable params   : 10,100,992 (backbone + projector)
+  steps              : 1022 per epoch, 100 epochs, 102200 total
+  learning rate      : AdamW peak 0.0005 after 1 warm-up epoch(s) from 0.01 x lr, cosine to 5.00e-07; weight decay 0.0005; seed 0
+
+SSL epoch 1/100
+  measured speed: 0.365 s/step -> about 6.2 min per epoch, about 10.36 h until epoch 100, peak GPU memory 19.80 GB
+    step   200/1022  loss 0.5559  agreement 0.1791  sigreg 7.715  proj std 0.672  lr 1.01e-04  117s
+    step   400/1022  loss 0.3899  agreement 0.1392  sigreg 5.153  proj std 0.789  lr 1.98e-04  190s
+    step   600/1022  loss 0.3170  agreement 0.1178  sigreg 4.103  proj std 0.838  lr 2.95e-04  264s
+    step   800/1022  loss 0.2759  agreement 0.1041  sigreg 3.539  proj std 0.867  lr 3.92e-04  338s
+    step  1000/1022  loss 0.2499  agreement 0.0949  sigreg 3.195  proj std 0.887  lr 4.89e-04  412s
+    step  1022/1022  loss 0.2477  agreement 0.0941  sigreg 3.166  proj std 0.889  lr 5.00e-04  420s
+  epoch   1/100 summary  loss 0.2477  agreement 0.0941  sigreg 3.166  proj std 0.889  feature cosine 0.280  7.0 min, checkpoint saved
+
+SSL epoch 2/100
+    step   200/1022  loss 0.1362  agreement 0.0532  sigreg 1.714  proj std 0.971  lr 5.00e-04  74s
+    step   400/1022  loss 0.1321  agreement 0.0514  sigreg 1.665  proj std 0.972  lr 5.00e-04  148s
+    step   600/1022  loss 0.1284  agreement 0.0497  sigreg 1.622  proj std 0.973  lr 5.00e-04  222s
+    step   800/1022  loss 0.1258  agreement 0.0487  sigreg 1.590  proj std 0.973  lr 5.00e-04  296s
+    step  1000/1022  loss 0.1235  agreement 0.0480  sigreg 1.558  proj std 0.973  lr 5.00e-04  370s
+    step  1022/1022  loss 0.1232  agreement 0.0479  sigreg 1.555  proj std 0.973  lr 5.00e-04  378s
+  epoch   2/100 summary  loss 0.1232  agreement 0.0479  sigreg 1.555  proj std 0.973  feature cosine 0.231  6.3 min, checkpoint saved
+
+SSL epoch 3/100
+    step   200/1022  loss 0.1104  agreement 0.0426  sigreg 1.399  proj std 0.976  lr 5.00e-04  77s
+    step   400/1022  loss 0.1090  agreement 0.0420  sigreg 1.382  proj std 0.977  lr 5.00e-04  152s
+    step   600/1022  loss 0.1081  agreement 0.0418  sigreg 1.368  proj std 0.977  lr 5.00e-04  226s
+    step   800/1022  loss 0.1070  agreement 0.0414  sigreg 1.353  proj std 0.977  lr 5.00e-04  300s
+    step  1000/1022  loss 0.1059  agreement 0.0409  sigreg 1.341  proj std 0.977  lr 5.00e-04  374s
+    step  1022/1022  loss 0.1057  agreement 0.0408  sigreg 1.339  proj std 0.977  lr 4.99e-04  382s
+  epoch   3/100 summary  loss 0.1057  agreement 0.0408  sigreg 1.339  proj std 0.977  feature cosine 0.205  6.4 min, checkpoint saved
+
+SSL epoch 4/100
+    step   200/1022  loss 0.0988  agreement 0.0374  sigreg 1.266  proj std 0.978  lr 4.99e-04  75s
+    step   400/1022  loss 0.0985  agreement 0.0374  sigreg 1.260  proj std 0.978  lr 4.99e-04  149s
+    step   600/1022  loss 0.0981  agreement 0.0373  sigreg 1.252  proj std 0.978  lr 4.99e-04  223s
+    step   800/1022  loss 0.0975  agreement 0.0371  sigreg 1.245  proj std 0.978  lr 4.99e-04  297s
+    step  1000/1022  loss 0.0970  agreement 0.0370  sigreg 1.238  proj std 0.979  lr 4.99e-04  371s
+    step  1022/1022  loss 0.0969  agreement 0.0369  sigreg 1.237  proj std 0.979  lr 4.99e-04  380s
+  epoch   4/100 summary  loss 0.0969  agreement 0.0369  sigreg 1.237  proj std 0.979  feature cosine 0.189  6.3 min, checkpoint saved
+
+SSL epoch 5/100
+    step   200/1022  loss 0.0934  agreement 0.0350  sigreg 1.204  proj std 0.980  lr 4.99e-04  76s
+    step   400/1022  loss 0.0930  agreement 0.0347  sigreg 1.201  proj std 0.980  lr 4.99e-04  150s
+    step   600/1022  loss 0.0929  agreement 0.0348  sigreg 1.198  proj std 0.979  lr 4.98e-04  224s
+    step   800/1022  loss 0.0925  agreement 0.0345  sigreg 1.193  proj std 0.980  lr 4.98e-04  298s
+    step  1000/1022  loss 0.0920  agreement 0.0343  sigreg 1.189  proj std 0.980  lr 4.98e-04  372s
+    step  1022/1022  loss 0.0919  agreement 0.0343  sigreg 1.188  proj std 0.980  lr 4.98e-04  380s
+  epoch   5/100 summary  loss 0.0919  agreement 0.0343  sigreg 1.188  proj std 0.980  feature cosine 0.180  6.3 min, checkpoint saved
+  exported backbone (epoch 5): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch005.pth
+
+SSL epoch 6/100
+    step   200/1022  loss 0.0888  agreement 0.0323  sigreg 1.162  proj std 0.979  lr 4.98e-04  76s
+    step   400/1022  loss 0.0885  agreement 0.0323  sigreg 1.156  proj std 0.980  lr 4.98e-04  150s
+    step   600/1022  loss 0.0886  agreement 0.0324  sigreg 1.156  proj std 0.980  lr 4.97e-04  224s
+    step   800/1022  loss 0.0882  agreement 0.0323  sigreg 1.150  proj std 0.980  lr 4.97e-04  299s
+    step  1000/1022  loss 0.0882  agreement 0.0324  sigreg 1.148  proj std 0.980  lr 4.97e-04  373s
+    step  1022/1022  loss 0.0881  agreement 0.0323  sigreg 1.148  proj std 0.980  lr 4.97e-04  381s
+  epoch   6/100 summary  loss 0.0881  agreement 0.0323  sigreg 1.148  proj std 0.980  feature cosine 0.174  6.3 min, checkpoint saved
+
+SSL epoch 7/100
+    step   200/1022  loss 0.0855  agreement 0.0310  sigreg 1.122  proj std 0.980  lr 4.97e-04  75s
+    step   400/1022  loss 0.0853  agreement 0.0310  sigreg 1.117  proj std 0.980  lr 4.96e-04  149s
+    step   600/1022  loss 0.0850  agreement 0.0309  sigreg 1.114  proj std 0.981  lr 4.96e-04  223s
+    step   800/1022  loss 0.0848  agreement 0.0308  sigreg 1.111  proj std 0.980  lr 4.96e-04  297s
+    step  1000/1022  loss 0.0846  agreement 0.0308  sigreg 1.108  proj std 0.980  lr 4.96e-04  371s
+    step  1022/1022  loss 0.0846  agreement 0.0308  sigreg 1.108  proj std 0.980  lr 4.95e-04  379s
+  epoch   7/100 summary  loss 0.0846  agreement 0.0308  sigreg 1.108  proj std 0.980  feature cosine 0.169  6.3 min, checkpoint saved
+
+SSL epoch 8/100
+    step   200/1022  loss 0.0830  agreement 0.0301  sigreg 1.090  proj std 0.981  lr 4.95e-04  75s
+    step   400/1022  loss 0.0823  agreement 0.0297  sigreg 1.083  proj std 0.981  lr 4.95e-04  149s
+    step   600/1022  loss 0.0825  agreement 0.0299  sigreg 1.083  proj std 0.981  lr 4.95e-04  223s
+    step   800/1022  loss 0.0824  agreement 0.0298  sigreg 1.082  proj std 0.981  lr 4.94e-04  297s
+    step  1000/1022  loss 0.0823  agreement 0.0297  sigreg 1.080  proj std 0.981  lr 4.94e-04  371s
+    step  1022/1022  loss 0.0823  agreement 0.0298  sigreg 1.080  proj std 0.981  lr 4.94e-04  379s
+  epoch   8/100 summary  loss 0.0823  agreement 0.0298  sigreg 1.080  proj std 0.981  feature cosine 0.166  6.3 min, checkpoint saved
+
+SSL epoch 9/100
+    step   200/1022  loss 0.0804  agreement 0.0286  sigreg 1.064  proj std 0.981  lr 4.94e-04  75s
+    step   400/1022  loss 0.0802  agreement 0.0287  sigreg 1.057  proj std 0.982  lr 4.93e-04  149s
+    step   600/1022  loss 0.0800  agreement 0.0287  sigreg 1.055  proj std 0.982  lr 4.93e-04  223s
+    step   800/1022  loss 0.0798  agreement 0.0286  sigreg 1.052  proj std 0.982  lr 4.92e-04  297s
+    step  1000/1022  loss 0.0797  agreement 0.0286  sigreg 1.050  proj std 0.982  lr 4.92e-04  371s
+    step  1022/1022  loss 0.0797  agreement 0.0286  sigreg 1.050  proj std 0.982  lr 4.92e-04  379s
+  epoch   9/100 summary  loss 0.0797  agreement 0.0286  sigreg 1.050  proj std 0.982  feature cosine 0.164  6.3 min, checkpoint saved
+
+SSL epoch 10/100
+    step   200/1022  loss 0.0784  agreement 0.0277  sigreg 1.041  proj std 0.983  lr 4.92e-04  75s
+    step   400/1022  loss 0.0783  agreement 0.0278  sigreg 1.039  proj std 0.983  lr 4.91e-04  149s
+    step   600/1022  loss 0.0781  agreement 0.0277  sigreg 1.036  proj std 0.983  lr 4.91e-04  223s
+    step   800/1022  loss 0.0780  agreement 0.0277  sigreg 1.034  proj std 0.983  lr 4.90e-04  297s
+    step  1000/1022  loss 0.0778  agreement 0.0276  sigreg 1.031  proj std 0.983  lr 4.90e-04  371s
+    step  1022/1022  loss 0.0778  agreement 0.0276  sigreg 1.031  proj std 0.983  lr 4.90e-04  379s
+  epoch  10/100 summary  loss 0.0778  agreement 0.0276  sigreg 1.031  proj std 0.983  feature cosine 0.161  6.3 min, checkpoint saved
+  exported backbone (epoch 10): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch010.pth
+
+SSL epoch 11/100
+    step   200/1022  loss 0.0771  agreement 0.0273  sigreg 1.025  proj std 0.982  lr 4.89e-04  75s
+    step   400/1022  loss 0.0769  agreement 0.0271  sigreg 1.022  proj std 0.983  lr 4.89e-04  149s
+    step   600/1022  loss 0.0768  agreement 0.0272  sigreg 1.020  proj std 0.983  lr 4.89e-04  223s
+    step   800/1022  loss 0.0766  agreement 0.0271  sigreg 1.018  proj std 0.983  lr 4.88e-04  297s
+    step  1000/1022  loss 0.0764  agreement 0.0269  sigreg 1.016  proj std 0.983  lr 4.88e-04  371s
+    step  1022/1022  loss 0.0764  agreement 0.0269  sigreg 1.016  proj std 0.983  lr 4.88e-04  379s
+  epoch  11/100 summary  loss 0.0764  agreement 0.0269  sigreg 1.016  proj std 0.983  feature cosine 0.159  6.3 min, checkpoint saved
+
+SSL epoch 12/100
+    step   200/1022  loss 0.0744  agreement 0.0256  sigreg 1.002  proj std 0.983  lr 4.87e-04  75s
+    step   400/1022  loss 0.0748  agreement 0.0259  sigreg 1.003  proj std 0.983  lr 4.87e-04  149s
+    step   600/1022  loss 0.0749  agreement 0.0261  sigreg 1.002  proj std 0.983  lr 4.86e-04  223s
+    step   800/1022  loss 0.0748  agreement 0.0260  sigreg 1.001  proj std 0.983  lr 4.86e-04  297s
+    step  1000/1022  loss 0.0748  agreement 0.0262  sigreg 0.999  proj std 0.983  lr 4.85e-04  370s
+    step  1022/1022  loss 0.0748  agreement 0.0261  sigreg 0.999  proj std 0.983  lr 4.85e-04  379s
+  epoch  12/100 summary  loss 0.0748  agreement 0.0261  sigreg 0.999  proj std 0.983  feature cosine 0.158  6.3 min, checkpoint saved
+
+SSL epoch 13/100
+    step   200/1022  loss 0.0740  agreement 0.0257  sigreg 0.990  proj std 0.984  lr 4.84e-04  75s
+    step   400/1022  loss 0.0736  agreement 0.0257  sigreg 0.985  proj std 0.984  lr 4.84e-04  148s
+    step   600/1022  loss 0.0734  agreement 0.0255  sigreg 0.983  proj std 0.984  lr 4.83e-04  222s
+    step   800/1022  loss 0.0733  agreement 0.0255  sigreg 0.982  proj std 0.984  lr 4.83e-04  296s
+    step  1000/1022  loss 0.0735  agreement 0.0256  sigreg 0.983  proj std 0.984  lr 4.82e-04  370s
+    step  1022/1022  loss 0.0735  agreement 0.0256  sigreg 0.983  proj std 0.984  lr 4.82e-04  379s
+  epoch  13/100 summary  loss 0.0735  agreement 0.0256  sigreg 0.983  proj std 0.984  feature cosine 0.156  6.3 min, checkpoint saved
+
+SSL epoch 14/100
+    step   200/1022  loss 0.0723  agreement 0.0248  sigreg 0.974  proj std 0.985  lr 4.82e-04  75s
+    step   400/1022  loss 0.0724  agreement 0.0248  sigreg 0.977  proj std 0.985  lr 4.81e-04  149s
+    step   600/1022  loss 0.0723  agreement 0.0247  sigreg 0.977  proj std 0.985  lr 4.80e-04  223s
+    step   800/1022  loss 0.0722  agreement 0.0247  sigreg 0.975  proj std 0.985  lr 4.80e-04  297s
+    step  1000/1022  loss 0.0722  agreement 0.0248  sigreg 0.974  proj std 0.985  lr 4.79e-04  372s
+    step  1022/1022  loss 0.0722  agreement 0.0248  sigreg 0.973  proj std 0.985  lr 4.79e-04  380s
+  epoch  14/100 summary  loss 0.0722  agreement 0.0248  sigreg 0.973  proj std 0.985  feature cosine 0.155  6.3 min, checkpoint saved
+
+SSL epoch 15/100
+    step   200/1022  loss 0.0713  agreement 0.0243  sigreg 0.965  proj std 0.985  lr 4.78e-04  75s
+    step   400/1022  loss 0.0713  agreement 0.0242  sigreg 0.966  proj std 0.985  lr 4.78e-04  149s
+    step   600/1022  loss 0.0713  agreement 0.0243  sigreg 0.966  proj std 0.985  lr 4.77e-04  223s
+    step   800/1022  loss 0.0714  agreement 0.0243  sigreg 0.966  proj std 0.985  lr 4.76e-04  297s
+    step  1000/1022  loss 0.0713  agreement 0.0243  sigreg 0.965  proj std 0.985  lr 4.76e-04  371s
+    step  1022/1022  loss 0.0713  agreement 0.0243  sigreg 0.965  proj std 0.985  lr 4.76e-04  380s
+  epoch  15/100 summary  loss 0.0713  agreement 0.0243  sigreg 0.965  proj std 0.985  feature cosine 0.153  6.3 min, checkpoint saved
+  exported backbone (epoch 15): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch015.pth
+
+SSL epoch 16/100
+    step   200/1022  loss 0.0704  agreement 0.0237  sigreg 0.957  proj std 0.985  lr 4.75e-04  75s
+    step   400/1022  loss 0.0707  agreement 0.0240  sigreg 0.958  proj std 0.985  lr 4.74e-04  149s
+    step   600/1022  loss 0.0707  agreement 0.0240  sigreg 0.957  proj std 0.985  lr 4.74e-04  223s
+    step   800/1022  loss 0.0707  agreement 0.0241  sigreg 0.956  proj std 0.985  lr 4.73e-04  297s
+    step  1000/1022  loss 0.0706  agreement 0.0240  sigreg 0.956  proj std 0.985  lr 4.72e-04  371s
+    step  1022/1022  loss 0.0706  agreement 0.0240  sigreg 0.955  proj std 0.985  lr 4.72e-04  379s
+  epoch  16/100 summary  loss 0.0706  agreement 0.0240  sigreg 0.955  proj std 0.985  feature cosine 0.151  6.3 min, checkpoint saved
+
+SSL epoch 17/100
+    step   200/1022  loss 0.0692  agreement 0.0229  sigreg 0.948  proj std 0.986  lr 4.72e-04  75s
+    step   400/1022  loss 0.0693  agreement 0.0231  sigreg 0.947  proj std 0.985  lr 4.71e-04  149s
+    step   600/1022  loss 0.0693  agreement 0.0232  sigreg 0.946  proj std 0.985  lr 4.70e-04  223s
+    step   800/1022  loss 0.0694  agreement 0.0232  sigreg 0.947  proj std 0.985  lr 4.69e-04  298s
+    step  1000/1022  loss 0.0694  agreement 0.0233  sigreg 0.947  proj std 0.985  lr 4.69e-04  372s
+    step  1022/1022  loss 0.0694  agreement 0.0233  sigreg 0.947  proj std 0.985  lr 4.68e-04  380s
+  epoch  17/100 summary  loss 0.0694  agreement 0.0233  sigreg 0.947  proj std 0.985  feature cosine 0.149  6.3 min, checkpoint saved
+
+SSL epoch 18/100
+    step   200/1022  loss 0.0690  agreement 0.0229  sigreg 0.944  proj std 0.985  lr 4.68e-04  74s
+    step   400/1022  loss 0.0687  agreement 0.0228  sigreg 0.942  proj std 0.986  lr 4.67e-04  148s
+    step   600/1022  loss 0.0688  agreement 0.0229  sigreg 0.942  proj std 0.985  lr 4.66e-04  222s
+    step   800/1022  loss 0.0689  agreement 0.0230  sigreg 0.941  proj std 0.985  lr 4.65e-04  296s
+    step  1000/1022  loss 0.0689  agreement 0.0230  sigreg 0.941  proj std 0.985  lr 4.65e-04  371s
+    step  1022/1022  loss 0.0689  agreement 0.0230  sigreg 0.941  proj std 0.985  lr 4.65e-04  379s
+  epoch  18/100 summary  loss 0.0689  agreement 0.0230  sigreg 0.941  proj std 0.985  feature cosine 0.148  6.3 min, checkpoint saved
+
+SSL epoch 19/100
+    step   200/1022  loss 0.0674  agreement 0.0221  sigreg 0.929  proj std 0.987  lr 4.64e-04  75s
+    step   400/1022  loss 0.0677  agreement 0.0223  sigreg 0.931  proj std 0.987  lr 4.63e-04  149s
+    step   600/1022  loss 0.0679  agreement 0.0224  sigreg 0.931  proj std 0.987  lr 4.62e-04  223s
+    step   800/1022  loss 0.0679  agreement 0.0225  sigreg 0.931  proj std 0.987  lr 4.61e-04  297s
+    step  1000/1022  loss 0.0679  agreement 0.0225  sigreg 0.930  proj std 0.987  lr 4.60e-04  371s
+    step  1022/1022  loss 0.0679  agreement 0.0225  sigreg 0.930  proj std 0.986  lr 4.60e-04  379s
+  epoch  19/100 summary  loss 0.0679  agreement 0.0225  sigreg 0.930  proj std 0.986  feature cosine 0.148  6.3 min, checkpoint saved
+
+SSL epoch 20/100
+    step   200/1022  loss 0.0675  agreement 0.0222  sigreg 0.927  proj std 0.986  lr 4.60e-04  75s
+    step   400/1022  loss 0.0673  agreement 0.0222  sigreg 0.925  proj std 0.987  lr 4.59e-04  149s
+    step   600/1022  loss 0.0672  agreement 0.0222  sigreg 0.923  proj std 0.987  lr 4.58e-04  223s
+    step   800/1022  loss 0.0672  agreement 0.0221  sigreg 0.922  proj std 0.987  lr 4.57e-04  297s
+    step  1000/1022  loss 0.0671  agreement 0.0221  sigreg 0.923  proj std 0.987  lr 4.56e-04  371s
+    step  1022/1022  loss 0.0671  agreement 0.0221  sigreg 0.923  proj std 0.987  lr 4.56e-04  380s
+  epoch  20/100 summary  loss 0.0671  agreement 0.0221  sigreg 0.923  proj std 0.987  feature cosine 0.145  6.3 min, checkpoint saved
+  exported backbone (epoch 20): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch020.pth
+
+SSL epoch 21/100
+    step   200/1022  loss 0.0661  agreement 0.0211  sigreg 0.920  proj std 0.987  lr 4.55e-04  75s
+    step   400/1022  loss 0.0659  agreement 0.0212  sigreg 0.916  proj std 0.987  lr 4.54e-04  149s
+    step   600/1022  loss 0.0661  agreement 0.0213  sigreg 0.917  proj std 0.987  lr 4.53e-04  223s
+    step   800/1022  loss 0.0663  agreement 0.0215  sigreg 0.917  proj std 0.987  lr 4.52e-04  298s
+    step  1000/1022  loss 0.0664  agreement 0.0217  sigreg 0.916  proj std 0.987  lr 4.51e-04  372s
+    step  1022/1022  loss 0.0664  agreement 0.0217  sigreg 0.916  proj std 0.987  lr 4.51e-04  380s
+  epoch  21/100 summary  loss 0.0664  agreement 0.0217  sigreg 0.916  proj std 0.987  feature cosine 0.143  6.3 min, checkpoint saved
+
+SSL epoch 22/100
+    step   200/1022  loss 0.0659  agreement 0.0213  sigreg 0.914  proj std 0.987  lr 4.50e-04  75s
+    step   400/1022  loss 0.0659  agreement 0.0213  sigreg 0.912  proj std 0.987  lr 4.50e-04  149s
+    step   600/1022  loss 0.0658  agreement 0.0213  sigreg 0.911  proj std 0.988  lr 4.49e-04  223s
+    step   800/1022  loss 0.0658  agreement 0.0214  sigreg 0.910  proj std 0.987  lr 4.48e-04  297s
+    step  1000/1022  loss 0.0660  agreement 0.0215  sigreg 0.910  proj std 0.987  lr 4.47e-04  371s
+    step  1022/1022  loss 0.0659  agreement 0.0215  sigreg 0.910  proj std 0.987  lr 4.47e-04  380s
+  epoch  22/100 summary  loss 0.0659  agreement 0.0215  sigreg 0.910  proj std 0.987  feature cosine 0.143  6.3 min, checkpoint saved
+
+SSL epoch 23/100
+    step   200/1022  loss 0.0653  agreement 0.0211  sigreg 0.906  proj std 0.987  lr 4.46e-04  75s
+    step   400/1022  loss 0.0652  agreement 0.0210  sigreg 0.905  proj std 0.987  lr 4.45e-04  149s
+    step   600/1022  loss 0.0653  agreement 0.0210  sigreg 0.906  proj std 0.987  lr 4.44e-04  223s
+    step   800/1022  loss 0.0653  agreement 0.0211  sigreg 0.905  proj std 0.987  lr 4.43e-04  297s
+    step  1000/1022  loss 0.0653  agreement 0.0211  sigreg 0.906  proj std 0.987  lr 4.42e-04  372s
+    step  1022/1022  loss 0.0653  agreement 0.0210  sigreg 0.906  proj std 0.987  lr 4.42e-04  380s
+  epoch  23/100 summary  loss 0.0653  agreement 0.0210  sigreg 0.906  proj std 0.987  feature cosine 0.142  6.3 min, checkpoint saved
+
+SSL epoch 24/100
+    step   200/1022  loss 0.0650  agreement 0.0211  sigreg 0.900  proj std 0.988  lr 4.41e-04  75s
+    step   400/1022  loss 0.0650  agreement 0.0211  sigreg 0.900  proj std 0.988  lr 4.40e-04  149s
+    step   600/1022  loss 0.0649  agreement 0.0210  sigreg 0.899  proj std 0.988  lr 4.39e-04  223s
+    step   800/1022  loss 0.0647  agreement 0.0209  sigreg 0.898  proj std 0.988  lr 4.38e-04  297s
+    step  1000/1022  loss 0.0647  agreement 0.0209  sigreg 0.896  proj std 0.988  lr 4.36e-04  372s
+    step  1022/1022  loss 0.0647  agreement 0.0209  sigreg 0.896  proj std 0.988  lr 4.36e-04  380s
+  epoch  24/100 summary  loss 0.0647  agreement 0.0209  sigreg 0.896  proj std 0.988  feature cosine 0.141  6.3 min, checkpoint saved
+
+SSL epoch 25/100
+    step   200/1022  loss 0.0641  agreement 0.0205  sigreg 0.891  proj std 0.989  lr 4.35e-04  74s
+    step   400/1022  loss 0.0639  agreement 0.0204  sigreg 0.891  proj std 0.989  lr 4.34e-04  148s
+    step   600/1022  loss 0.0640  agreement 0.0205  sigreg 0.890  proj std 0.988  lr 4.33e-04  222s
+    step   800/1022  loss 0.0640  agreement 0.0205  sigreg 0.890  proj std 0.988  lr 4.32e-04  297s
+    step  1000/1022  loss 0.0641  agreement 0.0206  sigreg 0.891  proj std 0.988  lr 4.31e-04  371s
+    step  1022/1022  loss 0.0641  agreement 0.0206  sigreg 0.890  proj std 0.988  lr 4.31e-04  379s
+  epoch  25/100 summary  loss 0.0641  agreement 0.0206  sigreg 0.890  proj std 0.988  feature cosine 0.139  6.3 min, checkpoint saved
+  exported backbone (epoch 25): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch025.pth
+
+SSL epoch 26/100
+    step   200/1022  loss 0.0635  agreement 0.0200  sigreg 0.890  proj std 0.988  lr 4.30e-04  75s
+    step   400/1022  loss 0.0637  agreement 0.0202  sigreg 0.890  proj std 0.988  lr 4.29e-04  149s
+    step   600/1022  loss 0.0637  agreement 0.0202  sigreg 0.890  proj std 0.988  lr 4.28e-04  223s
+    step   800/1022  loss 0.0637  agreement 0.0203  sigreg 0.889  proj std 0.988  lr 4.27e-04  297s
+    step  1000/1022  loss 0.0636  agreement 0.0203  sigreg 0.888  proj std 0.988  lr 4.26e-04  371s
+    step  1022/1022  loss 0.0637  agreement 0.0203  sigreg 0.888  proj std 0.988  lr 4.25e-04  379s
+  epoch  26/100 summary  loss 0.0637  agreement 0.0203  sigreg 0.888  proj std 0.988  feature cosine 0.137  6.3 min, checkpoint saved
+
+SSL epoch 27/100
+    step   200/1022  loss 0.0631  agreement 0.0198  sigreg 0.885  proj std 0.989  lr 4.24e-04  75s
+    step   400/1022  loss 0.0631  agreement 0.0198  sigreg 0.886  proj std 0.989  lr 4.23e-04  149s
+    step   600/1022  loss 0.0632  agreement 0.0199  sigreg 0.886  proj std 0.989  lr 4.22e-04  223s
+    step   800/1022  loss 0.0632  agreement 0.0199  sigreg 0.886  proj std 0.989  lr 4.21e-04  297s
+    step  1000/1022  loss 0.0632  agreement 0.0200  sigreg 0.886  proj std 0.989  lr 4.20e-04  371s
+    step  1022/1022  loss 0.0632  agreement 0.0200  sigreg 0.886  proj std 0.989  lr 4.20e-04  380s
+  epoch  27/100 summary  loss 0.0632  agreement 0.0200  sigreg 0.886  proj std 0.989  feature cosine 0.136  6.3 min, checkpoint saved
+
+SSL epoch 28/100
+    step   200/1022  loss 0.0624  agreement 0.0194  sigreg 0.879  proj std 0.989  lr 4.19e-04  75s
+    step   400/1022  loss 0.0627  agreement 0.0196  sigreg 0.881  proj std 0.989  lr 4.17e-04  149s
+    step   600/1022  loss 0.0627  agreement 0.0196  sigreg 0.881  proj std 0.989  lr 4.16e-04  223s
+    step   800/1022  loss 0.0627  agreement 0.0196  sigreg 0.882  proj std 0.989  lr 4.15e-04  297s
+    step  1000/1022  loss 0.0627  agreement 0.0196  sigreg 0.881  proj std 0.989  lr 4.14e-04  371s
+    step  1022/1022  loss 0.0627  agreement 0.0196  sigreg 0.881  proj std 0.989  lr 4.14e-04  379s
+  epoch  28/100 summary  loss 0.0627  agreement 0.0196  sigreg 0.881  proj std 0.989  feature cosine 0.134  6.3 min, checkpoint saved
+
+SSL epoch 29/100
+    step   200/1022  loss 0.0620  agreement 0.0190  sigreg 0.879  proj std 0.988  lr 4.13e-04  75s
+    step   400/1022  loss 0.0621  agreement 0.0192  sigreg 0.877  proj std 0.989  lr 4.11e-04  148s
+    step   600/1022  loss 0.0621  agreement 0.0192  sigreg 0.876  proj std 0.989  lr 4.10e-04  223s
+    step   800/1022  loss 0.0621  agreement 0.0193  sigreg 0.875  proj std 0.989  lr 4.09e-04  297s
+    step  1000/1022  loss 0.0620  agreement 0.0193  sigreg 0.874  proj std 0.989  lr 4.08e-04  371s
+    step  1022/1022  loss 0.0621  agreement 0.0193  sigreg 0.875  proj std 0.989  lr 4.08e-04  379s
+  epoch  29/100 summary  loss 0.0621  agreement 0.0193  sigreg 0.875  proj std 0.989  feature cosine 0.132  6.3 min, checkpoint saved
+
+SSL epoch 30/100
+    step   200/1022  loss 0.0614  agreement 0.0187  sigreg 0.872  proj std 0.989  lr 4.07e-04  75s
+    step   400/1022  loss 0.0617  agreement 0.0189  sigreg 0.875  proj std 0.989  lr 4.05e-04  149s
+    step   600/1022  loss 0.0616  agreement 0.0190  sigreg 0.872  proj std 0.989  lr 4.04e-04  223s
+    step   800/1022  loss 0.0617  agreement 0.0191  sigreg 0.872  proj std 0.989  lr 4.03e-04  297s
+    step  1000/1022  loss 0.0617  agreement 0.0191  sigreg 0.871  proj std 0.989  lr 4.02e-04  371s
+    step  1022/1022  loss 0.0617  agreement 0.0191  sigreg 0.871  proj std 0.989  lr 4.02e-04  380s
+  epoch  30/100 summary  loss 0.0617  agreement 0.0191  sigreg 0.871  proj std 0.989  feature cosine 0.131  6.3 min, checkpoint saved
+  exported backbone (epoch 30): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch030.pth
+
+SSL epoch 31/100
+    step   200/1022  loss 0.0613  agreement 0.0189  sigreg 0.867  proj std 0.989  lr 4.00e-04  75s
+    step   400/1022  loss 0.0613  agreement 0.0189  sigreg 0.867  proj std 0.990  lr 3.99e-04  149s
+    step   600/1022  loss 0.0613  agreement 0.0189  sigreg 0.867  proj std 0.990  lr 3.98e-04  223s
+    step   800/1022  loss 0.0614  agreement 0.0189  sigreg 0.867  proj std 0.990  lr 3.97e-04  297s
+    step  1000/1022  loss 0.0613  agreement 0.0189  sigreg 0.867  proj std 0.990  lr 3.95e-04  371s
+    step  1022/1022  loss 0.0613  agreement 0.0189  sigreg 0.867  proj std 0.990  lr 3.95e-04  379s
+  epoch  31/100 summary  loss 0.0613  agreement 0.0189  sigreg 0.867  proj std 0.990  feature cosine 0.130  6.3 min, checkpoint saved
+
+SSL epoch 32/100
+    step   200/1022  loss 0.0608  agreement 0.0184  sigreg 0.867  proj std 0.990  lr 3.94e-04  75s
+    step   400/1022  loss 0.0612  agreement 0.0188  sigreg 0.867  proj std 0.990  lr 3.93e-04  149s
+    step   600/1022  loss 0.0612  agreement 0.0188  sigreg 0.866  proj std 0.990  lr 3.91e-04  223s
+    step   800/1022  loss 0.0611  agreement 0.0188  sigreg 0.866  proj std 0.990  lr 3.90e-04  297s
+    step  1000/1022  loss 0.0612  agreement 0.0188  sigreg 0.866  proj std 0.990  lr 3.89e-04  371s
+    step  1022/1022  loss 0.0612  agreement 0.0188  sigreg 0.866  proj std 0.990  lr 3.89e-04  379s
+  epoch  32/100 summary  loss 0.0612  agreement 0.0188  sigreg 0.866  proj std 0.990  feature cosine 0.128  6.3 min, checkpoint saved
+
+SSL epoch 33/100
+    step   200/1022  loss 0.0604  agreement 0.0181  sigreg 0.865  proj std 0.989  lr 3.87e-04  75s
+    step   400/1022  loss 0.0604  agreement 0.0181  sigreg 0.864  proj std 0.989  lr 3.86e-04  149s
+    step   600/1022  loss 0.0605  agreement 0.0183  sigreg 0.864  proj std 0.989  lr 3.85e-04  223s
+    step   800/1022  loss 0.0606  agreement 0.0184  sigreg 0.863  proj std 0.990  lr 3.83e-04  298s
+    step  1000/1022  loss 0.0605  agreement 0.0183  sigreg 0.862  proj std 0.990  lr 3.82e-04  372s
+    step  1022/1022  loss 0.0605  agreement 0.0183  sigreg 0.862  proj std 0.990  lr 3.82e-04  380s
+  epoch  33/100 summary  loss 0.0605  agreement 0.0183  sigreg 0.862  proj std 0.990  feature cosine 0.128  6.3 min, checkpoint saved
+
+SSL epoch 34/100
+    step   200/1022  loss 0.0597  agreement 0.0178  sigreg 0.857  proj std 0.990  lr 3.81e-04  75s
+    step   400/1022  loss 0.0598  agreement 0.0178  sigreg 0.857  proj std 0.990  lr 3.79e-04  149s
+    step   600/1022  loss 0.0600  agreement 0.0180  sigreg 0.859  proj std 0.990  lr 3.78e-04  223s
+    step   800/1022  loss 0.0601  agreement 0.0180  sigreg 0.859  proj std 0.990  lr 3.77e-04  298s
+    step  1000/1022  loss 0.0601  agreement 0.0180  sigreg 0.859  proj std 0.990  lr 3.75e-04  372s
+    step  1022/1022  loss 0.0601  agreement 0.0180  sigreg 0.859  proj std 0.990  lr 3.75e-04  380s
+  epoch  34/100 summary  loss 0.0601  agreement 0.0180  sigreg 0.859  proj std 0.990  feature cosine 0.126  6.3 min, checkpoint saved
+
+SSL epoch 35/100
+    step   200/1022  loss 0.0595  agreement 0.0178  sigreg 0.852  proj std 0.991  lr 3.74e-04  75s
+    step   400/1022  loss 0.0596  agreement 0.0178  sigreg 0.854  proj std 0.991  lr 3.72e-04  149s
+    step   600/1022  loss 0.0595  agreement 0.0177  sigreg 0.853  proj std 0.990  lr 3.71e-04  223s
+    step   800/1022  loss 0.0595  agreement 0.0178  sigreg 0.853  proj std 0.990  lr 3.70e-04  298s
+    step  1000/1022  loss 0.0595  agreement 0.0178  sigreg 0.853  proj std 0.990  lr 3.68e-04  372s
+    step  1022/1022  loss 0.0595  agreement 0.0178  sigreg 0.853  proj std 0.990  lr 3.68e-04  380s
+  epoch  35/100 summary  loss 0.0595  agreement 0.0178  sigreg 0.853  proj std 0.990  feature cosine 0.125  6.3 min, checkpoint saved
+  exported backbone (epoch 35): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch035.pth
+
+SSL epoch 36/100
+    step   200/1022  loss 0.0593  agreement 0.0175  sigreg 0.854  proj std 0.990  lr 3.67e-04  75s
+    step   400/1022  loss 0.0596  agreement 0.0177  sigreg 0.855  proj std 0.990  lr 3.65e-04  149s
+    step   600/1022  loss 0.0596  agreement 0.0178  sigreg 0.855  proj std 0.990  lr 3.64e-04  223s
+    step   800/1022  loss 0.0596  agreement 0.0177  sigreg 0.855  proj std 0.990  lr 3.63e-04  297s
+    step  1000/1022  loss 0.0595  agreement 0.0177  sigreg 0.853  proj std 0.990  lr 3.61e-04  372s
+    step  1022/1022  loss 0.0595  agreement 0.0177  sigreg 0.853  proj std 0.990  lr 3.61e-04  380s
+  epoch  36/100 summary  loss 0.0595  agreement 0.0177  sigreg 0.853  proj std 0.990  feature cosine 0.123  6.3 min, checkpoint saved
+
+SSL epoch 37/100
+    step   200/1022  loss 0.0586  agreement 0.0171  sigreg 0.847  proj std 0.991  lr 3.60e-04  75s
+    step   400/1022  loss 0.0590  agreement 0.0174  sigreg 0.848  proj std 0.990  lr 3.58e-04  149s
+    step   600/1022  loss 0.0592  agreement 0.0175  sigreg 0.850  proj std 0.990  lr 3.57e-04  223s
+    step   800/1022  loss 0.0592  agreement 0.0176  sigreg 0.850  proj std 0.990  lr 3.56e-04  296s
+    step  1000/1022  loss 0.0592  agreement 0.0176  sigreg 0.850  proj std 0.990  lr 3.54e-04  370s
+    step  1022/1022  loss 0.0592  agreement 0.0176  sigreg 0.850  proj std 0.990  lr 3.54e-04  378s
+  epoch  37/100 summary  loss 0.0592  agreement 0.0176  sigreg 0.850  proj std 0.990  feature cosine 0.122  6.3 min, checkpoint saved
+
+SSL epoch 38/100
+    step   200/1022  loss 0.0589  agreement 0.0174  sigreg 0.847  proj std 0.990  lr 3.53e-04  75s
+    step   400/1022  loss 0.0588  agreement 0.0173  sigreg 0.848  proj std 0.990  lr 3.51e-04  149s
+    step   600/1022  loss 0.0589  agreement 0.0173  sigreg 0.848  proj std 0.991  lr 3.50e-04  223s
+    step   800/1022  loss 0.0588  agreement 0.0174  sigreg 0.847  proj std 0.991  lr 3.48e-04  297s
+    step  1000/1022  loss 0.0588  agreement 0.0174  sigreg 0.846  proj std 0.991  lr 3.47e-04  371s
+    step  1022/1022  loss 0.0588  agreement 0.0174  sigreg 0.847  proj std 0.991  lr 3.47e-04  379s
+  epoch  38/100 summary  loss 0.0588  agreement 0.0174  sigreg 0.847  proj std 0.991  feature cosine 0.121  6.3 min, checkpoint saved
+
+SSL epoch 39/100
+    step   200/1022  loss 0.0581  agreement 0.0167  sigreg 0.844  proj std 0.991  lr 3.45e-04  75s
+    step   400/1022  loss 0.0582  agreement 0.0169  sigreg 0.843  proj std 0.991  lr 3.44e-04  149s
+    step   600/1022  loss 0.0583  agreement 0.0170  sigreg 0.843  proj std 0.991  lr 3.42e-04  223s
+    step   800/1022  loss 0.0583  agreement 0.0170  sigreg 0.843  proj std 0.991  lr 3.41e-04  298s
+    step  1000/1022  loss 0.0584  agreement 0.0171  sigreg 0.843  proj std 0.991  lr 3.40e-04  372s
+    step  1022/1022  loss 0.0584  agreement 0.0171  sigreg 0.844  proj std 0.991  lr 3.39e-04  380s
+  epoch  39/100 summary  loss 0.0584  agreement 0.0171  sigreg 0.844  proj std 0.991  feature cosine 0.119  6.3 min, checkpoint saved
+
+SSL epoch 40/100
+    step   200/1022  loss 0.0580  agreement 0.0169  sigreg 0.839  proj std 0.991  lr 3.38e-04  75s
+    step   400/1022  loss 0.0579  agreement 0.0168  sigreg 0.840  proj std 0.991  lr 3.36e-04  149s
+    step   600/1022  loss 0.0579  agreement 0.0168  sigreg 0.840  proj std 0.991  lr 3.35e-04  223s
+    step   800/1022  loss 0.0579  agreement 0.0168  sigreg 0.839  proj std 0.991  lr 3.34e-04  297s
+    step  1000/1022  loss 0.0580  agreement 0.0169  sigreg 0.840  proj std 0.991  lr 3.32e-04  371s
+    step  1022/1022  loss 0.0580  agreement 0.0169  sigreg 0.840  proj std 0.991  lr 3.32e-04  380s
+  epoch  40/100 summary  loss 0.0580  agreement 0.0169  sigreg 0.840  proj std 0.991  feature cosine 0.119  6.3 min, checkpoint saved
+  exported backbone (epoch 40): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch040.pth
+
+SSL epoch 41/100
+    step   200/1022  loss 0.0578  agreement 0.0166  sigreg 0.840  proj std 0.992  lr 3.30e-04  75s
+    step   400/1022  loss 0.0575  agreement 0.0164  sigreg 0.838  proj std 0.991  lr 3.29e-04  149s
+    step   600/1022  loss 0.0575  agreement 0.0165  sigreg 0.836  proj std 0.991  lr 3.28e-04  223s
+    step   800/1022  loss 0.0576  agreement 0.0166  sigreg 0.835  proj std 0.991  lr 3.26e-04  297s
+    step  1000/1022  loss 0.0576  agreement 0.0167  sigreg 0.836  proj std 0.991  lr 3.25e-04  372s
+    step  1022/1022  loss 0.0577  agreement 0.0167  sigreg 0.836  proj std 0.991  lr 3.24e-04  380s
+  epoch  41/100 summary  loss 0.0577  agreement 0.0167  sigreg 0.836  proj std 0.991  feature cosine 0.119  6.3 min, checkpoint saved
+
+SSL epoch 42/100
+    step   200/1022  loss 0.0574  agreement 0.0165  sigreg 0.835  proj std 0.991  lr 3.23e-04  75s
+    step   400/1022  loss 0.0576  agreement 0.0165  sigreg 0.838  proj std 0.991  lr 3.21e-04  149s
+    step   600/1022  loss 0.0574  agreement 0.0164  sigreg 0.836  proj std 0.991  lr 3.20e-04  223s
+    step   800/1022  loss 0.0574  agreement 0.0165  sigreg 0.836  proj std 0.991  lr 3.18e-04  297s
+    step  1000/1022  loss 0.0574  agreement 0.0164  sigreg 0.836  proj std 0.991  lr 3.17e-04  371s
+    step  1022/1022  loss 0.0574  agreement 0.0164  sigreg 0.836  proj std 0.991  lr 3.17e-04  380s
+  epoch  42/100 summary  loss 0.0574  agreement 0.0164  sigreg 0.836  proj std 0.991  feature cosine 0.117  6.3 min, checkpoint saved
+
+SSL epoch 43/100
+    step   200/1022  loss 0.0571  agreement 0.0161  sigreg 0.835  proj std 0.991  lr 3.15e-04  75s
+    step   400/1022  loss 0.0569  agreement 0.0160  sigreg 0.834  proj std 0.991  lr 3.14e-04  148s
+    step   600/1022  loss 0.0571  agreement 0.0161  sigreg 0.835  proj std 0.991  lr 3.12e-04  222s
+    step   800/1022  loss 0.0570  agreement 0.0161  sigreg 0.834  proj std 0.991  lr 3.11e-04  296s
+    step  1000/1022  loss 0.0570  agreement 0.0161  sigreg 0.833  proj std 0.991  lr 3.09e-04  370s
+    step  1022/1022  loss 0.0570  agreement 0.0161  sigreg 0.833  proj std 0.991  lr 3.09e-04  378s
+  epoch  43/100 summary  loss 0.0570  agreement 0.0161  sigreg 0.833  proj std 0.991  feature cosine 0.116  6.3 min, checkpoint saved
+
+SSL epoch 44/100
+    step   200/1022  loss 0.0566  agreement 0.0160  sigreg 0.828  proj std 0.992  lr 3.08e-04  75s
+    step   400/1022  loss 0.0567  agreement 0.0160  sigreg 0.831  proj std 0.992  lr 3.06e-04  149s
+    step   600/1022  loss 0.0568  agreement 0.0161  sigreg 0.830  proj std 0.991  lr 3.05e-04  223s
+    step   800/1022  loss 0.0567  agreement 0.0160  sigreg 0.830  proj std 0.991  lr 3.03e-04  297s
+    step  1000/1022  loss 0.0567  agreement 0.0160  sigreg 0.830  proj std 0.992  lr 3.02e-04  371s
+    step  1022/1022  loss 0.0568  agreement 0.0160  sigreg 0.830  proj std 0.992  lr 3.01e-04  379s
+  epoch  44/100 summary  loss 0.0568  agreement 0.0160  sigreg 0.830  proj std 0.992  feature cosine 0.115  6.3 min, checkpoint saved
+
+SSL epoch 45/100
+    step   200/1022  loss 0.0562  agreement 0.0156  sigreg 0.828  proj std 0.991  lr 3.00e-04  75s
+    step   400/1022  loss 0.0563  agreement 0.0157  sigreg 0.829  proj std 0.991  lr 2.98e-04  149s
+    step   600/1022  loss 0.0566  agreement 0.0159  sigreg 0.831  proj std 0.991  lr 2.97e-04  223s
+    step   800/1022  loss 0.0565  agreement 0.0159  sigreg 0.829  proj std 0.991  lr 2.95e-04  297s
+    step  1000/1022  loss 0.0566  agreement 0.0159  sigreg 0.829  proj std 0.991  lr 2.94e-04  371s
+    step  1022/1022  loss 0.0566  agreement 0.0159  sigreg 0.830  proj std 0.991  lr 2.94e-04  379s
+  epoch  45/100 summary  loss 0.0566  agreement 0.0159  sigreg 0.830  proj std 0.991  feature cosine 0.113  6.3 min, checkpoint saved
+  exported backbone (epoch 45): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch045.pth
+
+SSL epoch 46/100
+    step   200/1022  loss 0.0562  agreement 0.0157  sigreg 0.825  proj std 0.991  lr 2.92e-04  74s
+    step   400/1022  loss 0.0560  agreement 0.0156  sigreg 0.824  proj std 0.992  lr 2.91e-04  148s
+    step   600/1022  loss 0.0560  agreement 0.0155  sigreg 0.826  proj std 0.991  lr 2.89e-04  222s
+    step   800/1022  loss 0.0560  agreement 0.0155  sigreg 0.825  proj std 0.991  lr 2.88e-04  296s
+    step  1000/1022  loss 0.0560  agreement 0.0155  sigreg 0.824  proj std 0.991  lr 2.86e-04  370s
+    step  1022/1022  loss 0.0560  agreement 0.0156  sigreg 0.824  proj std 0.991  lr 2.86e-04  378s
+  epoch  46/100 summary  loss 0.0560  agreement 0.0156  sigreg 0.824  proj std 0.991  feature cosine 0.113  6.3 min, checkpoint saved
+
+SSL epoch 47/100
+    step   200/1022  loss 0.0558  agreement 0.0153  sigreg 0.824  proj std 0.991  lr 2.84e-04  75s
+    step   400/1022  loss 0.0557  agreement 0.0153  sigreg 0.823  proj std 0.991  lr 2.83e-04  149s
+    step   600/1022  loss 0.0557  agreement 0.0153  sigreg 0.823  proj std 0.991  lr 2.81e-04  223s
+    step   800/1022  loss 0.0559  agreement 0.0155  sigreg 0.823  proj std 0.991  lr 2.80e-04  297s
+    step  1000/1022  loss 0.0559  agreement 0.0155  sigreg 0.824  proj std 0.991  lr 2.78e-04  371s
+    step  1022/1022  loss 0.0559  agreement 0.0155  sigreg 0.824  proj std 0.991  lr 2.78e-04  380s
+  epoch  47/100 summary  loss 0.0559  agreement 0.0155  sigreg 0.824  proj std 0.991  feature cosine 0.112  6.3 min, checkpoint saved
+
+SSL epoch 48/100
+    step   200/1022  loss 0.0549  agreement 0.0148  sigreg 0.816  proj std 0.991  lr 2.76e-04  75s
+    step   400/1022  loss 0.0553  agreement 0.0150  sigreg 0.821  proj std 0.991  lr 2.75e-04  149s
+    step   600/1022  loss 0.0554  agreement 0.0151  sigreg 0.821  proj std 0.991  lr 2.73e-04  223s
+    step   800/1022  loss 0.0555  agreement 0.0152  sigreg 0.821  proj std 0.991  lr 2.72e-04  297s
+    step  1000/1022  loss 0.0555  agreement 0.0153  sigreg 0.821  proj std 0.991  lr 2.70e-04  371s
+    step  1022/1022  loss 0.0556  agreement 0.0153  sigreg 0.821  proj std 0.991  lr 2.70e-04  379s
+  epoch  48/100 summary  loss 0.0556  agreement 0.0153  sigreg 0.821  proj std 0.991  feature cosine 0.111  6.3 min, checkpoint saved
+
+SSL epoch 49/100
+    step   200/1022  loss 0.0553  agreement 0.0151  sigreg 0.820  proj std 0.992  lr 2.69e-04  75s
+    step   400/1022  loss 0.0554  agreement 0.0152  sigreg 0.819  proj std 0.992  lr 2.67e-04  149s
+    step   600/1022  loss 0.0553  agreement 0.0151  sigreg 0.819  proj std 0.992  lr 2.65e-04  223s
+    step   800/1022  loss 0.0553  agreement 0.0151  sigreg 0.818  proj std 0.992  lr 2.64e-04  297s
+    step  1000/1022  loss 0.0553  agreement 0.0151  sigreg 0.819  proj std 0.992  lr 2.62e-04  371s
+    step  1022/1022  loss 0.0553  agreement 0.0152  sigreg 0.819  proj std 0.992  lr 2.62e-04  379s
+  epoch  49/100 summary  loss 0.0553  agreement 0.0152  sigreg 0.819  proj std 0.992  feature cosine 0.111  6.3 min, checkpoint saved
+
+SSL epoch 50/100
+    step   200/1022  loss 0.0548  agreement 0.0148  sigreg 0.814  proj std 0.992  lr 2.61e-04  75s
+    step   400/1022  loss 0.0549  agreement 0.0148  sigreg 0.815  proj std 0.992  lr 2.59e-04  149s
+    step   600/1022  loss 0.0550  agreement 0.0149  sigreg 0.818  proj std 0.991  lr 2.57e-04  223s
+    step   800/1022  loss 0.0551  agreement 0.0149  sigreg 0.818  proj std 0.991  lr 2.56e-04  297s
+    step  1000/1022  loss 0.0550  agreement 0.0149  sigreg 0.817  proj std 0.991  lr 2.54e-04  371s
+    step  1022/1022  loss 0.0550  agreement 0.0149  sigreg 0.817  proj std 0.991  lr 2.54e-04  379s
+  epoch  50/100 summary  loss 0.0550  agreement 0.0149  sigreg 0.817  proj std 0.991  feature cosine 0.109  6.3 min, checkpoint saved
+  exported backbone (epoch 50): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch050.pth
+
+SSL epoch 51/100
+    step   200/1022  loss 0.0548  agreement 0.0148  sigreg 0.815  proj std 0.992  lr 2.53e-04  74s
+    step   400/1022  loss 0.0546  agreement 0.0146  sigreg 0.815  proj std 0.992  lr 2.51e-04  148s
+    step   600/1022  loss 0.0546  agreement 0.0147  sigreg 0.814  proj std 0.992  lr 2.50e-04  222s
+    step   800/1022  loss 0.0547  agreement 0.0147  sigreg 0.814  proj std 0.992  lr 2.48e-04  296s
+    step  1000/1022  loss 0.0548  agreement 0.0148  sigreg 0.815  proj std 0.992  lr 2.46e-04  370s
+    step  1022/1022  loss 0.0548  agreement 0.0148  sigreg 0.815  proj std 0.992  lr 2.46e-04  378s
+  epoch  51/100 summary  loss 0.0548  agreement 0.0148  sigreg 0.815  proj std 0.992  feature cosine 0.108  6.3 min, checkpoint saved
+
+SSL epoch 52/100
+    step   200/1022  loss 0.0541  agreement 0.0142  sigreg 0.812  proj std 0.992  lr 2.45e-04  75s
+    step   400/1022  loss 0.0542  agreement 0.0144  sigreg 0.811  proj std 0.991  lr 2.43e-04  149s
+    step   600/1022  loss 0.0543  agreement 0.0144  sigreg 0.812  proj std 0.991  lr 2.42e-04  223s
+    step   800/1022  loss 0.0544  agreement 0.0145  sigreg 0.813  proj std 0.992  lr 2.40e-04  297s
+    step  1000/1022  loss 0.0544  agreement 0.0146  sigreg 0.812  proj std 0.992  lr 2.39e-04  371s
+    step  1022/1022  loss 0.0544  agreement 0.0146  sigreg 0.812  proj std 0.992  lr 2.38e-04  379s
+  epoch  52/100 summary  loss 0.0544  agreement 0.0146  sigreg 0.812  proj std 0.992  feature cosine 0.108  6.3 min, checkpoint saved
+
+SSL epoch 53/100
+    step   200/1022  loss 0.0542  agreement 0.0144  sigreg 0.811  proj std 0.991  lr 2.37e-04  74s
+    step   400/1022  loss 0.0545  agreement 0.0145  sigreg 0.814  proj std 0.991  lr 2.35e-04  148s
+    step   600/1022  loss 0.0544  agreement 0.0145  sigreg 0.813  proj std 0.991  lr 2.34e-04  222s
+    step   800/1022  loss 0.0544  agreement 0.0145  sigreg 0.812  proj std 0.991  lr 2.32e-04  296s
+    step  1000/1022  loss 0.0543  agreement 0.0145  sigreg 0.812  proj std 0.991  lr 2.31e-04  370s
+    step  1022/1022  loss 0.0543  agreement 0.0145  sigreg 0.812  proj std 0.991  lr 2.30e-04  378s
+  epoch  53/100 summary  loss 0.0543  agreement 0.0145  sigreg 0.812  proj std 0.991  feature cosine 0.107  6.3 min, checkpoint saved
+
+SSL epoch 54/100
+    step   200/1022  loss 0.0539  agreement 0.0142  sigreg 0.808  proj std 0.991  lr 2.29e-04  75s
+    step   400/1022  loss 0.0541  agreement 0.0143  sigreg 0.810  proj std 0.991  lr 2.27e-04  149s
+    step   600/1022  loss 0.0540  agreement 0.0142  sigreg 0.810  proj std 0.992  lr 2.26e-04  222s
+    step   800/1022  loss 0.0540  agreement 0.0143  sigreg 0.809  proj std 0.992  lr 2.24e-04  296s
+    step  1000/1022  loss 0.0541  agreement 0.0143  sigreg 0.809  proj std 0.992  lr 2.23e-04  370s
+    step  1022/1022  loss 0.0541  agreement 0.0143  sigreg 0.809  proj std 0.992  lr 2.23e-04  378s
+  epoch  54/100 summary  loss 0.0541  agreement 0.0143  sigreg 0.809  proj std 0.992  feature cosine 0.106  6.3 min, checkpoint saved
+
+SSL epoch 55/100
+    step   200/1022  loss 0.0534  agreement 0.0139  sigreg 0.804  proj std 0.992  lr 2.21e-04  75s
+    step   400/1022  loss 0.0536  agreement 0.0140  sigreg 0.806  proj std 0.992  lr 2.19e-04  149s
+    step   600/1022  loss 0.0536  agreement 0.0140  sigreg 0.807  proj std 0.992  lr 2.18e-04  223s
+    step   800/1022  loss 0.0536  agreement 0.0140  sigreg 0.806  proj std 0.992  lr 2.16e-04  297s
+    step  1000/1022  loss 0.0538  agreement 0.0141  sigreg 0.807  proj std 0.992  lr 2.15e-04  371s
+    step  1022/1022  loss 0.0538  agreement 0.0141  sigreg 0.808  proj std 0.992  lr 2.15e-04  379s
+  epoch  55/100 summary  loss 0.0538  agreement 0.0141  sigreg 0.808  proj std 0.992  feature cosine 0.105  6.3 min, checkpoint saved
+  exported backbone (epoch 55): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch055.pth
+
+SSL epoch 56/100
+    step   200/1022  loss 0.0535  agreement 0.0139  sigreg 0.806  proj std 0.992  lr 2.13e-04  75s
+    step   400/1022  loss 0.0535  agreement 0.0138  sigreg 0.806  proj std 0.992  lr 2.12e-04  148s
+    step   600/1022  loss 0.0536  agreement 0.0140  sigreg 0.807  proj std 0.992  lr 2.10e-04  222s
+    step   800/1022  loss 0.0536  agreement 0.0140  sigreg 0.807  proj std 0.992  lr 2.09e-04  296s
+    step  1000/1022  loss 0.0536  agreement 0.0139  sigreg 0.807  proj std 0.992  lr 2.07e-04  369s
+    step  1022/1022  loss 0.0536  agreement 0.0139  sigreg 0.806  proj std 0.992  lr 2.07e-04  378s
+  epoch  56/100 summary  loss 0.0536  agreement 0.0139  sigreg 0.806  proj std 0.992  feature cosine 0.104  6.3 min, checkpoint saved
+
+SSL epoch 57/100
+    step   200/1022  loss 0.0528  agreement 0.0137  sigreg 0.796  proj std 0.991  lr 2.05e-04  75s
+    step   400/1022  loss 0.0529  agreement 0.0135  sigreg 0.801  proj std 0.991  lr 2.04e-04  148s
+    step   600/1022  loss 0.0532  agreement 0.0137  sigreg 0.803  proj std 0.992  lr 2.02e-04  222s
+    step   800/1022  loss 0.0532  agreement 0.0137  sigreg 0.803  proj std 0.992  lr 2.01e-04  295s
+    step  1000/1022  loss 0.0532  agreement 0.0138  sigreg 0.803  proj std 0.992  lr 1.99e-04  369s
+    step  1022/1022  loss 0.0533  agreement 0.0138  sigreg 0.803  proj std 0.992  lr 1.99e-04  377s
+  epoch  57/100 summary  loss 0.0533  agreement 0.0138  sigreg 0.803  proj std 0.992  feature cosine 0.103  6.3 min, checkpoint saved
+
+SSL epoch 58/100
+    step   200/1022  loss 0.0530  agreement 0.0139  sigreg 0.797  proj std 0.992  lr 1.98e-04  82s
+    step   400/1022  loss 0.0532  agreement 0.0139  sigreg 0.799  proj std 0.992  lr 1.96e-04  155s
+    step   600/1022  loss 0.0531  agreement 0.0138  sigreg 0.800  proj std 0.992  lr 1.95e-04  229s
+    step   800/1022  loss 0.0530  agreement 0.0137  sigreg 0.800  proj std 0.992  lr 1.93e-04  303s
+    step  1000/1022  loss 0.0530  agreement 0.0137  sigreg 0.800  proj std 0.992  lr 1.92e-04  377s
+    step  1022/1022  loss 0.0530  agreement 0.0137  sigreg 0.800  proj std 0.992  lr 1.91e-04  385s
+  epoch  58/100 summary  loss 0.0530  agreement 0.0137  sigreg 0.800  proj std 0.992  feature cosine 0.103  6.4 min, checkpoint saved
+
+SSL epoch 59/100
+    step   200/1022  loss 0.0529  agreement 0.0135  sigreg 0.803  proj std 0.993  lr 1.90e-04  75s
+    step   400/1022  loss 0.0527  agreement 0.0133  sigreg 0.800  proj std 0.993  lr 1.88e-04  149s
+    step   600/1022  loss 0.0528  agreement 0.0134  sigreg 0.800  proj std 0.992  lr 1.87e-04  223s
+    step   800/1022  loss 0.0528  agreement 0.0134  sigreg 0.801  proj std 0.992  lr 1.85e-04  297s
+    step  1000/1022  loss 0.0529  agreement 0.0135  sigreg 0.802  proj std 0.992  lr 1.84e-04  371s
+    step  1022/1022  loss 0.0529  agreement 0.0135  sigreg 0.801  proj std 0.992  lr 1.84e-04  379s
+  epoch  59/100 summary  loss 0.0529  agreement 0.0135  sigreg 0.801  proj std 0.992  feature cosine 0.102  6.3 min, checkpoint saved
+
+SSL epoch 60/100
+    step   200/1022  loss 0.0519  agreement 0.0129  sigreg 0.793  proj std 0.992  lr 1.82e-04  75s
+    step   400/1022  loss 0.0524  agreement 0.0131  sigreg 0.799  proj std 0.992  lr 1.81e-04  149s
+    step   600/1022  loss 0.0524  agreement 0.0132  sigreg 0.798  proj std 0.992  lr 1.79e-04  222s
+    step   800/1022  loss 0.0525  agreement 0.0133  sigreg 0.798  proj std 0.992  lr 1.78e-04  296s
+    step  1000/1022  loss 0.0525  agreement 0.0133  sigreg 0.798  proj std 0.992  lr 1.76e-04  370s
+    step  1022/1022  loss 0.0525  agreement 0.0133  sigreg 0.798  proj std 0.992  lr 1.76e-04  378s
+  epoch  60/100 summary  loss 0.0525  agreement 0.0133  sigreg 0.798  proj std 0.992  feature cosine 0.102  6.3 min, checkpoint saved
+  exported backbone (epoch 60): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch060.pth
+
+SSL epoch 61/100
+    step   200/1022  loss 0.0527  agreement 0.0132  sigreg 0.802  proj std 0.991  lr 1.75e-04  75s
+    step   400/1022  loss 0.0528  agreement 0.0133  sigreg 0.803  proj std 0.992  lr 1.73e-04  149s
+    step   600/1022  loss 0.0527  agreement 0.0132  sigreg 0.802  proj std 0.992  lr 1.72e-04  222s
+    step   800/1022  loss 0.0527  agreement 0.0133  sigreg 0.801  proj std 0.992  lr 1.70e-04  296s
+    step  1000/1022  loss 0.0527  agreement 0.0133  sigreg 0.800  proj std 0.992  lr 1.69e-04  370s
+    step  1022/1022  loss 0.0527  agreement 0.0133  sigreg 0.800  proj std 0.992  lr 1.69e-04  378s
+  epoch  61/100 summary  loss 0.0527  agreement 0.0133  sigreg 0.800  proj std 0.992  feature cosine 0.101  6.3 min, checkpoint saved
+
+SSL epoch 62/100
+    step   200/1022  loss 0.0519  agreement 0.0127  sigreg 0.796  proj std 0.991  lr 1.67e-04  75s
+    step   400/1022  loss 0.0518  agreement 0.0128  sigreg 0.793  proj std 0.992  lr 1.66e-04  149s
+    step   600/1022  loss 0.0520  agreement 0.0130  sigreg 0.794  proj std 0.992  lr 1.64e-04  223s
+    step   800/1022  loss 0.0520  agreement 0.0129  sigreg 0.794  proj std 0.992  lr 1.63e-04  297s
+    step  1000/1022  loss 0.0520  agreement 0.0129  sigreg 0.794  proj std 0.992  lr 1.61e-04  371s
+    step  1022/1022  loss 0.0520  agreement 0.0129  sigreg 0.794  proj std 0.992  lr 1.61e-04  379s
+  epoch  62/100 summary  loss 0.0520  agreement 0.0129  sigreg 0.794  proj std 0.992  feature cosine 0.100  6.3 min, checkpoint saved
+
+SSL epoch 63/100
+    step   200/1022  loss 0.0522  agreement 0.0130  sigreg 0.796  proj std 0.992  lr 1.60e-04  75s
+    step   400/1022  loss 0.0519  agreement 0.0129  sigreg 0.794  proj std 0.991  lr 1.58e-04  148s
+    step   600/1022  loss 0.0519  agreement 0.0128  sigreg 0.794  proj std 0.991  lr 1.57e-04  222s
+    step   800/1022  loss 0.0519  agreement 0.0129  sigreg 0.794  proj std 0.991  lr 1.55e-04  296s
+    step  1000/1022  loss 0.0519  agreement 0.0129  sigreg 0.793  proj std 0.991  lr 1.54e-04  370s
+    step  1022/1022  loss 0.0519  agreement 0.0129  sigreg 0.793  proj std 0.991  lr 1.54e-04  379s
+  epoch  63/100 summary  loss 0.0519  agreement 0.0129  sigreg 0.793  proj std 0.991  feature cosine 0.099  6.3 min, checkpoint saved
+
+SSL epoch 64/100
+    step   200/1022  loss 0.0520  agreement 0.0129  sigreg 0.795  proj std 0.992  lr 1.52e-04  74s
+    step   400/1022  loss 0.0521  agreement 0.0129  sigreg 0.796  proj std 0.992  lr 1.51e-04  148s
+    step   600/1022  loss 0.0521  agreement 0.0130  sigreg 0.796  proj std 0.992  lr 1.49e-04  222s
+    step   800/1022  loss 0.0519  agreement 0.0129  sigreg 0.793  proj std 0.992  lr 1.48e-04  296s
+    step  1000/1022  loss 0.0519  agreement 0.0129  sigreg 0.793  proj std 0.992  lr 1.47e-04  370s
+    step  1022/1022  loss 0.0519  agreement 0.0129  sigreg 0.793  proj std 0.992  lr 1.47e-04  378s
+  epoch  64/100 summary  loss 0.0519  agreement 0.0129  sigreg 0.793  proj std 0.992  feature cosine 0.099  6.3 min, checkpoint saved
+
+SSL epoch 65/100
+    step   200/1022  loss 0.0516  agreement 0.0126  sigreg 0.792  proj std 0.992  lr 1.45e-04  75s
+    step   400/1022  loss 0.0515  agreement 0.0125  sigreg 0.792  proj std 0.991  lr 1.44e-04  149s
+    step   600/1022  loss 0.0516  agreement 0.0126  sigreg 0.792  proj std 0.991  lr 1.42e-04  223s
+    step   800/1022  loss 0.0516  agreement 0.0126  sigreg 0.792  proj std 0.991  lr 1.41e-04  297s
+    step  1000/1022  loss 0.0517  agreement 0.0127  sigreg 0.792  proj std 0.992  lr 1.40e-04  371s
+    step  1022/1022  loss 0.0516  agreement 0.0127  sigreg 0.792  proj std 0.992  lr 1.39e-04  379s
+  epoch  65/100 summary  loss 0.0516  agreement 0.0127  sigreg 0.792  proj std 0.992  feature cosine 0.098  6.3 min, checkpoint saved
+  exported backbone (epoch 65): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch065.pth
+
+SSL epoch 66/100
+    step   200/1022  loss 0.0511  agreement 0.0125  sigreg 0.785  proj std 0.993  lr 1.38e-04  75s
+    step   400/1022  loss 0.0514  agreement 0.0126  sigreg 0.789  proj std 0.992  lr 1.37e-04  149s
+    step   600/1022  loss 0.0515  agreement 0.0126  sigreg 0.790  proj std 0.992  lr 1.35e-04  223s
+    step   800/1022  loss 0.0514  agreement 0.0125  sigreg 0.790  proj std 0.992  lr 1.34e-04  297s
+    step  1000/1022  loss 0.0515  agreement 0.0126  sigreg 0.791  proj std 0.992  lr 1.32e-04  371s
+    step  1022/1022  loss 0.0515  agreement 0.0126  sigreg 0.791  proj std 0.992  lr 1.32e-04  380s
+  epoch  66/100 summary  loss 0.0515  agreement 0.0126  sigreg 0.791  proj std 0.992  feature cosine 0.098  6.3 min, checkpoint saved
+
+SSL epoch 67/100
+    step   200/1022  loss 0.0511  agreement 0.0124  sigreg 0.787  proj std 0.991  lr 1.31e-04  75s
+    step   400/1022  loss 0.0511  agreement 0.0123  sigreg 0.787  proj std 0.992  lr 1.30e-04  149s
+    step   600/1022  loss 0.0511  agreement 0.0123  sigreg 0.788  proj std 0.992  lr 1.28e-04  223s
+    step   800/1022  loss 0.0511  agreement 0.0123  sigreg 0.787  proj std 0.992  lr 1.27e-04  297s
+    step  1000/1022  loss 0.0511  agreement 0.0123  sigreg 0.788  proj std 0.992  lr 1.26e-04  371s
+    step  1022/1022  loss 0.0511  agreement 0.0123  sigreg 0.788  proj std 0.992  lr 1.25e-04  379s
+  epoch  67/100 summary  loss 0.0511  agreement 0.0123  sigreg 0.788  proj std 0.992  feature cosine 0.098  6.3 min, checkpoint saved
+
+SSL epoch 68/100
+    step   200/1022  loss 0.0508  agreement 0.0120  sigreg 0.788  proj std 0.993  lr 1.24e-04  75s
+    step   400/1022  loss 0.0510  agreement 0.0122  sigreg 0.788  proj std 0.992  lr 1.23e-04  149s
+    step   600/1022  loss 0.0510  agreement 0.0122  sigreg 0.788  proj std 0.992  lr 1.21e-04  223s
+    step   800/1022  loss 0.0511  agreement 0.0123  sigreg 0.788  proj std 0.992  lr 1.20e-04  298s
+    step  1000/1022  loss 0.0512  agreement 0.0124  sigreg 0.788  proj std 0.992  lr 1.19e-04  372s
+    step  1022/1022  loss 0.0511  agreement 0.0123  sigreg 0.788  proj std 0.992  lr 1.19e-04  380s
+  epoch  68/100 summary  loss 0.0511  agreement 0.0123  sigreg 0.788  proj std 0.992  feature cosine 0.097  6.3 min, checkpoint saved
+
+SSL epoch 69/100
+    step   200/1022  loss 0.0507  agreement 0.0120  sigreg 0.787  proj std 0.992  lr 1.17e-04  75s
+    step   400/1022  loss 0.0508  agreement 0.0120  sigreg 0.787  proj std 0.992  lr 1.16e-04  149s
+    step   600/1022  loss 0.0507  agreement 0.0121  sigreg 0.785  proj std 0.992  lr 1.15e-04  223s
+    step   800/1022  loss 0.0507  agreement 0.0120  sigreg 0.785  proj std 0.992  lr 1.13e-04  297s
+    step  1000/1022  loss 0.0508  agreement 0.0121  sigreg 0.787  proj std 0.992  lr 1.12e-04  371s
+    step  1022/1022  loss 0.0508  agreement 0.0121  sigreg 0.787  proj std 0.992  lr 1.12e-04  379s
+  epoch  69/100 summary  loss 0.0508  agreement 0.0121  sigreg 0.787  proj std 0.992  feature cosine 0.096  6.3 min, checkpoint saved
+
+SSL epoch 70/100
+    step   200/1022  loss 0.0508  agreement 0.0121  sigreg 0.787  proj std 0.992  lr 1.11e-04  75s
+    step   400/1022  loss 0.0509  agreement 0.0121  sigreg 0.788  proj std 0.992  lr 1.09e-04  149s
+    step   600/1022  loss 0.0508  agreement 0.0120  sigreg 0.787  proj std 0.992  lr 1.08e-04  223s
+    step   800/1022  loss 0.0507  agreement 0.0120  sigreg 0.787  proj std 0.992  lr 1.07e-04  297s
+    step  1000/1022  loss 0.0508  agreement 0.0120  sigreg 0.787  proj std 0.992  lr 1.06e-04  370s
+    step  1022/1022  loss 0.0508  agreement 0.0120  sigreg 0.787  proj std 0.992  lr 1.05e-04  379s
+  epoch  70/100 summary  loss 0.0508  agreement 0.0120  sigreg 0.787  proj std 0.992  feature cosine 0.096  6.3 min, checkpoint saved
+  exported backbone (epoch 70): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch070.pth
+
+SSL epoch 71/100
+    step   200/1022  loss 0.0505  agreement 0.0116  sigreg 0.788  proj std 0.992  lr 1.04e-04  74s
+    step   400/1022  loss 0.0504  agreement 0.0117  sigreg 0.785  proj std 0.992  lr 1.03e-04  148s
+    step   600/1022  loss 0.0504  agreement 0.0117  sigreg 0.785  proj std 0.992  lr 1.02e-04  222s
+    step   800/1022  loss 0.0504  agreement 0.0118  sigreg 0.784  proj std 0.992  lr 1.00e-04  296s
+    step  1000/1022  loss 0.0504  agreement 0.0118  sigreg 0.784  proj std 0.992  lr 9.91e-05  370s
+    step  1022/1022  loss 0.0504  agreement 0.0118  sigreg 0.784  proj std 0.992  lr 9.90e-05  379s
+  epoch  71/100 summary  loss 0.0504  agreement 0.0118  sigreg 0.784  proj std 0.992  feature cosine 0.096  6.3 min, checkpoint saved
+
+SSL epoch 72/100
+    step   200/1022  loss 0.0505  agreement 0.0118  sigreg 0.784  proj std 0.992  lr 9.78e-05  75s
+    step   400/1022  loss 0.0507  agreement 0.0119  sigreg 0.786  proj std 0.993  lr 9.65e-05  148s
+    step   600/1022  loss 0.0506  agreement 0.0119  sigreg 0.785  proj std 0.993  lr 9.53e-05  222s
+    step   800/1022  loss 0.0505  agreement 0.0118  sigreg 0.784  proj std 0.993  lr 9.41e-05  297s
+    step  1000/1022  loss 0.0504  agreement 0.0118  sigreg 0.784  proj std 0.992  lr 9.29e-05  371s
+    step  1022/1022  loss 0.0504  agreement 0.0118  sigreg 0.784  proj std 0.993  lr 9.28e-05  379s
+  epoch  72/100 summary  loss 0.0504  agreement 0.0118  sigreg 0.784  proj std 0.993  feature cosine 0.095  6.3 min, checkpoint saved
+
+SSL epoch 73/100
+    step   200/1022  loss 0.0502  agreement 0.0117  sigreg 0.783  proj std 0.992  lr 9.16e-05  75s
+    step   400/1022  loss 0.0503  agreement 0.0117  sigreg 0.783  proj std 0.992  lr 9.04e-05  148s
+    step   600/1022  loss 0.0504  agreement 0.0118  sigreg 0.783  proj std 0.992  lr 8.92e-05  222s
+    step   800/1022  loss 0.0503  agreement 0.0117  sigreg 0.783  proj std 0.992  lr 8.80e-05  296s
+    step  1000/1022  loss 0.0502  agreement 0.0117  sigreg 0.782  proj std 0.992  lr 8.68e-05  370s
+    step  1022/1022  loss 0.0502  agreement 0.0117  sigreg 0.782  proj std 0.992  lr 8.67e-05  378s
+  epoch  73/100 summary  loss 0.0502  agreement 0.0117  sigreg 0.782  proj std 0.992  feature cosine 0.095  6.3 min, checkpoint saved
+
+SSL epoch 74/100
+    step   200/1022  loss 0.0502  agreement 0.0115  sigreg 0.786  proj std 0.992  lr 8.55e-05  74s
+    step   400/1022  loss 0.0502  agreement 0.0116  sigreg 0.784  proj std 0.992  lr 8.44e-05  148s
+    step   600/1022  loss 0.0501  agreement 0.0115  sigreg 0.783  proj std 0.992  lr 8.32e-05  222s
+    step   800/1022  loss 0.0502  agreement 0.0116  sigreg 0.783  proj std 0.992  lr 8.21e-05  296s
+    step  1000/1022  loss 0.0502  agreement 0.0116  sigreg 0.783  proj std 0.992  lr 8.09e-05  370s
+    step  1022/1022  loss 0.0502  agreement 0.0116  sigreg 0.783  proj std 0.992  lr 8.08e-05  378s
+  epoch  74/100 summary  loss 0.0502  agreement 0.0116  sigreg 0.783  proj std 0.992  feature cosine 0.095  6.3 min, checkpoint saved
+
+SSL epoch 75/100
+    step   200/1022  loss 0.0508  agreement 0.0121  sigreg 0.786  proj std 0.993  lr 7.97e-05  75s
+    step   400/1022  loss 0.0503  agreement 0.0118  sigreg 0.782  proj std 0.992  lr 7.85e-05  149s
+    step   600/1022  loss 0.0501  agreement 0.0116  sigreg 0.781  proj std 0.992  lr 7.74e-05  223s
+    step   800/1022  loss 0.0501  agreement 0.0116  sigreg 0.781  proj std 0.992  lr 7.63e-05  297s
+    step  1000/1022  loss 0.0501  agreement 0.0116  sigreg 0.781  proj std 0.992  lr 7.52e-05  371s
+    step  1022/1022  loss 0.0501  agreement 0.0116  sigreg 0.781  proj std 0.992  lr 7.51e-05  379s
+  epoch  75/100 summary  loss 0.0501  agreement 0.0116  sigreg 0.781  proj std 0.992  feature cosine 0.095  6.3 min, checkpoint saved
+  exported backbone (epoch 75): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch075.pth
+
+SSL epoch 76/100
+    step   200/1022  loss 0.0496  agreement 0.0113  sigreg 0.778  proj std 0.992  lr 7.40e-05  74s
+    step   400/1022  loss 0.0499  agreement 0.0115  sigreg 0.779  proj std 0.992  lr 7.29e-05  148s
+    step   600/1022  loss 0.0498  agreement 0.0115  sigreg 0.778  proj std 0.992  lr 7.18e-05  222s
+    step   800/1022  loss 0.0498  agreement 0.0115  sigreg 0.778  proj std 0.992  lr 7.07e-05  296s
+    step  1000/1022  loss 0.0498  agreement 0.0115  sigreg 0.778  proj std 0.992  lr 6.96e-05  370s
+    step  1022/1022  loss 0.0498  agreement 0.0115  sigreg 0.778  proj std 0.992  lr 6.95e-05  378s
+  epoch  76/100 summary  loss 0.0498  agreement 0.0115  sigreg 0.778  proj std 0.992  feature cosine 0.094  6.3 min, checkpoint saved
+
+SSL epoch 77/100
+    step   200/1022  loss 0.0498  agreement 0.0113  sigreg 0.780  proj std 0.992  lr 6.84e-05  75s
+    step   400/1022  loss 0.0500  agreement 0.0114  sigreg 0.782  proj std 0.992  lr 6.74e-05  149s
+    step   600/1022  loss 0.0499  agreement 0.0114  sigreg 0.782  proj std 0.992  lr 6.63e-05  223s
+    step   800/1022  loss 0.0500  agreement 0.0115  sigreg 0.781  proj std 0.992  lr 6.53e-05  297s
+    step  1000/1022  loss 0.0499  agreement 0.0114  sigreg 0.781  proj std 0.992  lr 6.42e-05  371s
+    step  1022/1022  loss 0.0499  agreement 0.0114  sigreg 0.781  proj std 0.992  lr 6.41e-05  379s
+  epoch  77/100 summary  loss 0.0499  agreement 0.0114  sigreg 0.781  proj std 0.992  feature cosine 0.094  6.3 min, checkpoint saved
+
+SSL epoch 78/100
+    step   200/1022  loss 0.0496  agreement 0.0111  sigreg 0.781  proj std 0.993  lr 6.31e-05  75s
+    step   400/1022  loss 0.0497  agreement 0.0113  sigreg 0.780  proj std 0.992  lr 6.21e-05  149s
+    step   600/1022  loss 0.0497  agreement 0.0112  sigreg 0.779  proj std 0.992  lr 6.11e-05  223s
+    step   800/1022  loss 0.0496  agreement 0.0113  sigreg 0.779  proj std 0.992  lr 6.00e-05  297s
+    step  1000/1022  loss 0.0497  agreement 0.0113  sigreg 0.779  proj std 0.992  lr 5.90e-05  370s
+    step  1022/1022  loss 0.0497  agreement 0.0113  sigreg 0.779  proj std 0.992  lr 5.89e-05  378s
+  epoch  78/100 summary  loss 0.0497  agreement 0.0113  sigreg 0.779  proj std 0.992  feature cosine 0.094  6.3 min, checkpoint saved
+
+SSL epoch 79/100
+    step   200/1022  loss 0.0498  agreement 0.0114  sigreg 0.779  proj std 0.993  lr 5.79e-05  75s
+    step   400/1022  loss 0.0495  agreement 0.0112  sigreg 0.778  proj std 0.992  lr 5.70e-05  149s
+    step   600/1022  loss 0.0495  agreement 0.0112  sigreg 0.778  proj std 0.992  lr 5.60e-05  223s
+    step   800/1022  loss 0.0496  agreement 0.0112  sigreg 0.778  proj std 0.992  lr 5.50e-05  297s
+    step  1000/1022  loss 0.0495  agreement 0.0112  sigreg 0.776  proj std 0.992  lr 5.40e-05  371s
+    step  1022/1022  loss 0.0495  agreement 0.0112  sigreg 0.777  proj std 0.992  lr 5.39e-05  379s
+  epoch  79/100 summary  loss 0.0495  agreement 0.0112  sigreg 0.777  proj std 0.992  feature cosine 0.093  6.3 min, checkpoint saved
+
+SSL epoch 80/100
+    step   200/1022  loss 0.0489  agreement 0.0108  sigreg 0.773  proj std 0.992  lr 5.30e-05  75s
+    step   400/1022  loss 0.0491  agreement 0.0110  sigreg 0.774  proj std 0.992  lr 5.20e-05  148s
+    step   600/1022  loss 0.0491  agreement 0.0110  sigreg 0.774  proj std 0.992  lr 5.11e-05  222s
+    step   800/1022  loss 0.0492  agreement 0.0110  sigreg 0.775  proj std 0.992  lr 5.02e-05  296s
+    step  1000/1022  loss 0.0493  agreement 0.0111  sigreg 0.776  proj std 0.992  lr 4.92e-05  370s
+    step  1022/1022  loss 0.0494  agreement 0.0111  sigreg 0.776  proj std 0.992  lr 4.91e-05  378s
+  epoch  80/100 summary  loss 0.0494  agreement 0.0111  sigreg 0.776  proj std 0.992  feature cosine 0.093  6.3 min, checkpoint saved
+  exported backbone (epoch 80): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch080.pth
+
+SSL epoch 81/100
+    step   200/1022  loss 0.0497  agreement 0.0111  sigreg 0.784  proj std 0.992  lr 4.82e-05  75s
+    step   400/1022  loss 0.0494  agreement 0.0111  sigreg 0.778  proj std 0.992  lr 4.73e-05  149s
+    step   600/1022  loss 0.0494  agreement 0.0110  sigreg 0.778  proj std 0.992  lr 4.64e-05  222s
+    step   800/1022  loss 0.0493  agreement 0.0110  sigreg 0.777  proj std 0.992  lr 4.55e-05  296s
+    step  1000/1022  loss 0.0494  agreement 0.0111  sigreg 0.777  proj std 0.992  lr 4.46e-05  370s
+    step  1022/1022  loss 0.0493  agreement 0.0110  sigreg 0.777  proj std 0.992  lr 4.45e-05  378s
+  epoch  81/100 summary  loss 0.0493  agreement 0.0110  sigreg 0.777  proj std 0.992  feature cosine 0.093  6.3 min, checkpoint saved
+
+SSL epoch 82/100
+    step   200/1022  loss 0.0495  agreement 0.0111  sigreg 0.778  proj std 0.992  lr 4.37e-05  75s
+    step   400/1022  loss 0.0495  agreement 0.0111  sigreg 0.778  proj std 0.992  lr 4.28e-05  149s
+    step   600/1022  loss 0.0495  agreement 0.0111  sigreg 0.779  proj std 0.992  lr 4.19e-05  223s
+    step   800/1022  loss 0.0494  agreement 0.0111  sigreg 0.778  proj std 0.992  lr 4.11e-05  296s
+    step  1000/1022  loss 0.0493  agreement 0.0110  sigreg 0.777  proj std 0.992  lr 4.02e-05  370s
+    step  1022/1022  loss 0.0493  agreement 0.0110  sigreg 0.777  proj std 0.992  lr 4.02e-05  379s
+  epoch  82/100 summary  loss 0.0493  agreement 0.0110  sigreg 0.777  proj std 0.992  feature cosine 0.092  6.3 min, checkpoint saved
+
+SSL epoch 83/100
+    step   200/1022  loss 0.0489  agreement 0.0108  sigreg 0.772  proj std 0.992  lr 3.93e-05  75s
+    step   400/1022  loss 0.0490  agreement 0.0109  sigreg 0.774  proj std 0.992  lr 3.85e-05  149s
+    step   600/1022  loss 0.0490  agreement 0.0109  sigreg 0.773  proj std 0.992  lr 3.77e-05  223s
+    step   800/1022  loss 0.0490  agreement 0.0109  sigreg 0.774  proj std 0.992  lr 3.69e-05  297s
+    step  1000/1022  loss 0.0491  agreement 0.0109  sigreg 0.774  proj std 0.992  lr 3.61e-05  371s
+    step  1022/1022  loss 0.0490  agreement 0.0109  sigreg 0.774  proj std 0.992  lr 3.60e-05  379s
+  epoch  83/100 summary  loss 0.0490  agreement 0.0109  sigreg 0.774  proj std 0.992  feature cosine 0.092  6.3 min, checkpoint saved
+
+SSL epoch 84/100
+    step   200/1022  loss 0.0488  agreement 0.0107  sigreg 0.773  proj std 0.992  lr 3.52e-05  75s
+    step   400/1022  loss 0.0490  agreement 0.0108  sigreg 0.773  proj std 0.992  lr 3.44e-05  149s
+    step   600/1022  loss 0.0491  agreement 0.0109  sigreg 0.775  proj std 0.992  lr 3.36e-05  223s
+    step   800/1022  loss 0.0491  agreement 0.0109  sigreg 0.775  proj std 0.992  lr 3.29e-05  297s
+    step  1000/1022  loss 0.0491  agreement 0.0109  sigreg 0.775  proj std 0.992  lr 3.21e-05  371s
+    step  1022/1022  loss 0.0491  agreement 0.0109  sigreg 0.775  proj std 0.992  lr 3.20e-05  379s
+  epoch  84/100 summary  loss 0.0491  agreement 0.0109  sigreg 0.775  proj std 0.992  feature cosine 0.092  6.3 min, checkpoint saved
+
+SSL epoch 85/100
+    step   200/1022  loss 0.0491  agreement 0.0110  sigreg 0.774  proj std 0.993  lr 3.13e-05  74s
+    step   400/1022  loss 0.0489  agreement 0.0108  sigreg 0.773  proj std 0.993  lr 3.05e-05  148s
+    step   600/1022  loss 0.0488  agreement 0.0107  sigreg 0.772  proj std 0.993  lr 2.98e-05  222s
+    step   800/1022  loss 0.0488  agreement 0.0107  sigreg 0.772  proj std 0.992  lr 2.91e-05  296s
+    step  1000/1022  loss 0.0489  agreement 0.0108  sigreg 0.772  proj std 0.992  lr 2.83e-05  370s
+    step  1022/1022  loss 0.0488  agreement 0.0108  sigreg 0.772  proj std 0.992  lr 2.83e-05  378s
+  epoch  85/100 summary  loss 0.0488  agreement 0.0108  sigreg 0.772  proj std 0.992  feature cosine 0.092  6.3 min, checkpoint saved
+  exported backbone (epoch 85): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch085.pth
+
+SSL epoch 86/100
+    step   200/1022  loss 0.0491  agreement 0.0108  sigreg 0.777  proj std 0.991  lr 2.76e-05  74s
+    step   400/1022  loss 0.0492  agreement 0.0108  sigreg 0.777  proj std 0.992  lr 2.69e-05  148s
+    step   600/1022  loss 0.0491  agreement 0.0107  sigreg 0.778  proj std 0.991  lr 2.62e-05  222s
+    step   800/1022  loss 0.0490  agreement 0.0108  sigreg 0.776  proj std 0.992  lr 2.55e-05  296s
+    step  1000/1022  loss 0.0489  agreement 0.0107  sigreg 0.775  proj std 0.992  lr 2.48e-05  370s
+    step  1022/1022  loss 0.0489  agreement 0.0107  sigreg 0.775  proj std 0.992  lr 2.47e-05  378s
+  epoch  86/100 summary  loss 0.0489  agreement 0.0107  sigreg 0.775  proj std 0.992  feature cosine 0.092  6.3 min, checkpoint saved
+
+SSL epoch 87/100
+    step   200/1022  loss 0.0490  agreement 0.0107  sigreg 0.776  proj std 0.992  lr 2.41e-05  75s
+    step   400/1022  loss 0.0490  agreement 0.0107  sigreg 0.776  proj std 0.992  lr 2.34e-05  149s
+    step   600/1022  loss 0.0489  agreement 0.0107  sigreg 0.776  proj std 0.992  lr 2.28e-05  223s
+    step   800/1022  loss 0.0489  agreement 0.0107  sigreg 0.774  proj std 0.992  lr 2.22e-05  297s
+    step  1000/1022  loss 0.0488  agreement 0.0107  sigreg 0.773  proj std 0.992  lr 2.15e-05  371s
+    step  1022/1022  loss 0.0489  agreement 0.0107  sigreg 0.773  proj std 0.992  lr 2.15e-05  380s
+  epoch  87/100 summary  loss 0.0489  agreement 0.0107  sigreg 0.773  proj std 0.992  feature cosine 0.092  6.3 min, checkpoint saved
+
+SSL epoch 88/100
+    step   200/1022  loss 0.0490  agreement 0.0108  sigreg 0.775  proj std 0.992  lr 2.08e-05  75s
+    step   400/1022  loss 0.0488  agreement 0.0107  sigreg 0.773  proj std 0.992  lr 2.02e-05  149s
+    step   600/1022  loss 0.0488  agreement 0.0107  sigreg 0.774  proj std 0.992  lr 1.96e-05  223s
+    step   800/1022  loss 0.0487  agreement 0.0106  sigreg 0.772  proj std 0.992  lr 1.90e-05  297s
+    step  1000/1022  loss 0.0487  agreement 0.0106  sigreg 0.772  proj std 0.992  lr 1.85e-05  371s
+    step  1022/1022  loss 0.0487  agreement 0.0106  sigreg 0.772  proj std 0.992  lr 1.84e-05  379s
+  epoch  88/100 summary  loss 0.0487  agreement 0.0106  sigreg 0.772  proj std 0.992  feature cosine 0.091  6.3 min, checkpoint saved
+
+SSL epoch 89/100
+    step   200/1022  loss 0.0485  agreement 0.0107  sigreg 0.769  proj std 0.992  lr 1.78e-05  75s
+    step   400/1022  loss 0.0485  agreement 0.0105  sigreg 0.770  proj std 0.993  lr 1.73e-05  149s
+    step   600/1022  loss 0.0485  agreement 0.0105  sigreg 0.770  proj std 0.992  lr 1.67e-05  223s
+    step   800/1022  loss 0.0486  agreement 0.0106  sigreg 0.770  proj std 0.992  lr 1.62e-05  297s
+    step  1000/1022  loss 0.0486  agreement 0.0106  sigreg 0.770  proj std 0.992  lr 1.56e-05  371s
+    step  1022/1022  loss 0.0486  agreement 0.0106  sigreg 0.771  proj std 0.992  lr 1.56e-05  379s
+  epoch  89/100 summary  loss 0.0486  agreement 0.0106  sigreg 0.771  proj std 0.992  feature cosine 0.091  6.3 min, checkpoint saved
+
+SSL epoch 90/100
+    step   200/1022  loss 0.0487  agreement 0.0106  sigreg 0.772  proj std 0.992  lr 1.50e-05  74s
+    step   400/1022  loss 0.0485  agreement 0.0106  sigreg 0.770  proj std 0.993  lr 1.45e-05  148s
+    step   600/1022  loss 0.0486  agreement 0.0106  sigreg 0.771  proj std 0.992  lr 1.40e-05  223s
+    step   800/1022  loss 0.0487  agreement 0.0106  sigreg 0.771  proj std 0.992  lr 1.35e-05  297s
+    step  1000/1022  loss 0.0487  agreement 0.0106  sigreg 0.771  proj std 0.992  lr 1.30e-05  371s
+    step  1022/1022  loss 0.0486  agreement 0.0106  sigreg 0.771  proj std 0.992  lr 1.30e-05  379s
+  epoch  90/100 summary  loss 0.0486  agreement 0.0106  sigreg 0.771  proj std 0.992  feature cosine 0.091  6.3 min, checkpoint saved
+  exported backbone (epoch 90): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch090.pth
+
+SSL epoch 91/100
+    step   200/1022  loss 0.0489  agreement 0.0107  sigreg 0.776  proj std 0.992  lr 1.25e-05  75s
+    step   400/1022  loss 0.0488  agreement 0.0107  sigreg 0.772  proj std 0.992  lr 1.20e-05  149s
+    step   600/1022  loss 0.0487  agreement 0.0106  sigreg 0.771  proj std 0.992  lr 1.16e-05  223s
+    step   800/1022  loss 0.0486  agreement 0.0106  sigreg 0.771  proj std 0.992  lr 1.11e-05  297s
+    step  1000/1022  loss 0.0486  agreement 0.0106  sigreg 0.772  proj std 0.992  lr 1.07e-05  371s
+    step  1022/1022  loss 0.0487  agreement 0.0106  sigreg 0.772  proj std 0.992  lr 1.06e-05  379s
+  epoch  91/100 summary  loss 0.0487  agreement 0.0106  sigreg 0.772  proj std 0.992  feature cosine 0.091  6.3 min, checkpoint saved
+
+SSL epoch 92/100
+    step   200/1022  loss 0.0482  agreement 0.0104  sigreg 0.767  proj std 0.993  lr 1.02e-05  75s
+    step   400/1022  loss 0.0485  agreement 0.0105  sigreg 0.770  proj std 0.993  lr 9.76e-06  149s
+    step   600/1022  loss 0.0485  agreement 0.0105  sigreg 0.772  proj std 0.992  lr 9.35e-06  223s
+    step   800/1022  loss 0.0486  agreement 0.0105  sigreg 0.772  proj std 0.993  lr 8.94e-06  298s
+    step  1000/1022  loss 0.0485  agreement 0.0105  sigreg 0.771  proj std 0.993  lr 8.55e-06  372s
+    step  1022/1022  loss 0.0485  agreement 0.0105  sigreg 0.771  proj std 0.993  lr 8.51e-06  380s
+  epoch  92/100 summary  loss 0.0485  agreement 0.0105  sigreg 0.771  proj std 0.993  feature cosine 0.091  6.3 min, checkpoint saved
+
+SSL epoch 93/100
+    step   200/1022  loss 0.0486  agreement 0.0106  sigreg 0.770  proj std 0.992  lr 8.12e-06  74s
+    step   400/1022  loss 0.0486  agreement 0.0106  sigreg 0.771  proj std 0.993  lr 7.75e-06  148s
+    step   600/1022  loss 0.0486  agreement 0.0106  sigreg 0.771  proj std 0.992  lr 7.38e-06  222s
+    step   800/1022  loss 0.0486  agreement 0.0105  sigreg 0.771  proj std 0.993  lr 7.02e-06  296s
+    step  1000/1022  loss 0.0486  agreement 0.0105  sigreg 0.772  proj std 0.992  lr 6.68e-06  370s
+    step  1022/1022  loss 0.0486  agreement 0.0105  sigreg 0.772  proj std 0.992  lr 6.64e-06  378s
+  epoch  93/100 summary  loss 0.0486  agreement 0.0105  sigreg 0.772  proj std 0.992  feature cosine 0.091  6.3 min, checkpoint saved
+
+SSL epoch 94/100
+    step   200/1022  loss 0.0484  agreement 0.0104  sigreg 0.769  proj std 0.992  lr 6.30e-06  74s
+    step   400/1022  loss 0.0486  agreement 0.0105  sigreg 0.773  proj std 0.992  lr 5.97e-06  148s
+    step   600/1022  loss 0.0486  agreement 0.0105  sigreg 0.773  proj std 0.992  lr 5.66e-06  222s
+    step   800/1022  loss 0.0486  agreement 0.0105  sigreg 0.772  proj std 0.992  lr 5.35e-06  296s
+    step  1000/1022  loss 0.0485  agreement 0.0105  sigreg 0.771  proj std 0.992  lr 5.05e-06  370s
+    step  1022/1022  loss 0.0485  agreement 0.0105  sigreg 0.771  proj std 0.992  lr 5.01e-06  378s
+  epoch  94/100 summary  loss 0.0485  agreement 0.0105  sigreg 0.771  proj std 0.992  feature cosine 0.091  6.3 min, checkpoint saved
+
+SSL epoch 95/100
+    step   200/1022  loss 0.0485  agreement 0.0104  sigreg 0.772  proj std 0.992  lr 4.73e-06  75s
+    step   400/1022  loss 0.0485  agreement 0.0104  sigreg 0.771  proj std 0.992  lr 4.45e-06  149s
+    step   600/1022  loss 0.0485  agreement 0.0104  sigreg 0.772  proj std 0.992  lr 4.18e-06  223s
+    step   800/1022  loss 0.0485  agreement 0.0105  sigreg 0.772  proj std 0.992  lr 3.92e-06  297s
+    step  1000/1022  loss 0.0485  agreement 0.0104  sigreg 0.771  proj std 0.992  lr 3.67e-06  372s
+    step  1022/1022  loss 0.0485  agreement 0.0104  sigreg 0.771  proj std 0.992  lr 3.64e-06  380s
+  epoch  95/100 summary  loss 0.0485  agreement 0.0104  sigreg 0.771  proj std 0.992  feature cosine 0.091  6.3 min, checkpoint saved
+  exported backbone (epoch 95): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch095.pth
+
+SSL epoch 96/100
+    step   200/1022  loss 0.0485  agreement 0.0104  sigreg 0.774  proj std 0.992  lr 3.40e-06  75s
+    step   400/1022  loss 0.0485  agreement 0.0104  sigreg 0.772  proj std 0.993  lr 3.17e-06  149s
+    step   600/1022  loss 0.0485  agreement 0.0104  sigreg 0.772  proj std 0.993  lr 2.95e-06  223s
+    step   800/1022  loss 0.0485  agreement 0.0105  sigreg 0.771  proj std 0.993  lr 2.73e-06  297s
+    step  1000/1022  loss 0.0485  agreement 0.0105  sigreg 0.772  proj std 0.992  lr 2.53e-06  371s
+    step  1022/1022  loss 0.0485  agreement 0.0105  sigreg 0.771  proj std 0.992  lr 2.51e-06  379s
+  epoch  96/100 summary  loss 0.0485  agreement 0.0105  sigreg 0.771  proj std 0.992  feature cosine 0.091  6.3 min, checkpoint saved
+
+SSL epoch 97/100
+    step   200/1022  loss 0.0488  agreement 0.0108  sigreg 0.771  proj std 0.991  lr 2.32e-06  75s
+    step   400/1022  loss 0.0486  agreement 0.0107  sigreg 0.769  proj std 0.992  lr 2.14e-06  148s
+    step   600/1022  loss 0.0485  agreement 0.0106  sigreg 0.770  proj std 0.992  lr 1.96e-06  223s
+    step   800/1022  loss 0.0484  agreement 0.0105  sigreg 0.769  proj std 0.992  lr 1.80e-06  297s
+    step  1000/1022  loss 0.0485  agreement 0.0105  sigreg 0.770  proj std 0.992  lr 1.65e-06  371s
+    step  1022/1022  loss 0.0485  agreement 0.0105  sigreg 0.770  proj std 0.992  lr 1.63e-06  379s
+  epoch  97/100 summary  loss 0.0485  agreement 0.0105  sigreg 0.770  proj std 0.992  feature cosine 0.091  6.3 min, checkpoint saved
+
+SSL epoch 98/100
+    step   200/1022  loss 0.0483  agreement 0.0103  sigreg 0.771  proj std 0.993  lr 1.49e-06  75s
+    step   400/1022  loss 0.0485  agreement 0.0104  sigreg 0.771  proj std 0.993  lr 1.36e-06  149s
+    step   600/1022  loss 0.0485  agreement 0.0104  sigreg 0.773  proj std 0.992  lr 1.23e-06  223s
+    step   800/1022  loss 0.0485  agreement 0.0104  sigreg 0.773  proj std 0.992  lr 1.12e-06  297s
+    step  1000/1022  loss 0.0485  agreement 0.0104  sigreg 0.772  proj std 0.992  lr 1.01e-06  371s
+    step  1022/1022  loss 0.0485  agreement 0.0104  sigreg 0.772  proj std 0.992  lr 1.00e-06  379s
+  epoch  98/100 summary  loss 0.0485  agreement 0.0104  sigreg 0.772  proj std 0.992  feature cosine 0.091  6.3 min, checkpoint saved
+
+SSL epoch 99/100
+    step   200/1022  loss 0.0486  agreement 0.0106  sigreg 0.771  proj std 0.992  lr 9.10e-07  75s
+    step   400/1022  loss 0.0484  agreement 0.0105  sigreg 0.770  proj std 0.992  lr 8.26e-07  149s
+    step   600/1022  loss 0.0484  agreement 0.0104  sigreg 0.769  proj std 0.992  lr 7.51e-07  223s
+    step   800/1022  loss 0.0484  agreement 0.0105  sigreg 0.770  proj std 0.992  lr 6.87e-07  297s
+    step  1000/1022  loss 0.0483  agreement 0.0104  sigreg 0.769  proj std 0.993  lr 6.31e-07  371s
+    step  1022/1022  loss 0.0483  agreement 0.0104  sigreg 0.769  proj std 0.993  lr 6.26e-07  379s
+  epoch  99/100 summary  loss 0.0483  agreement 0.0104  sigreg 0.769  proj std 0.993  feature cosine 0.091  6.3 min, checkpoint saved
+
+SSL epoch 100/100
+    step   200/1022  loss 0.0486  agreement 0.0104  sigreg 0.774  proj std 0.992  lr 5.82e-07  75s
+    step   400/1022  loss 0.0485  agreement 0.0105  sigreg 0.772  proj std 0.992  lr 5.47e-07  149s
+    step   600/1022  loss 0.0485  agreement 0.0105  sigreg 0.771  proj std 0.992  lr 5.22e-07  223s
+    step   800/1022  loss 0.0485  agreement 0.0105  sigreg 0.771  proj std 0.992  lr 5.06e-07  297s
+    step  1000/1022  loss 0.0485  agreement 0.0104  sigreg 0.771  proj std 0.992  lr 5.00e-07  371s
+    step  1022/1022  loss 0.0485  agreement 0.0104  sigreg 0.771  proj std 0.992  lr 5.00e-07  379s
+  epoch 100/100 summary  loss 0.0485  agreement 0.0104  sigreg 0.771  proj std 0.992  feature cosine 0.091  6.3 min, checkpoint saved
+  exported backbone (epoch 100): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2; excluded: proj -> backbone_epoch100.pth
+
+Done. SSL cost: 632.66 min, 6,540,800 images seen, 102,200 steps.
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/ssl/20261028-170313_A2_lejepa_ssl_mobilenetv2_split2_seed0:
+  config.json, manifests.json, manifests/   settings and the image list used (with hashes)
+  run_info.json        status, environment, cost (time, images, steps, GPU memory)
+  history.csv, charts/ per-epoch loss terms and collapse diagnostics
+  view_preview.png     original chips beside the views used in training
+  checkpoint.pth       full training state (network, optimizer, SIGReg step, RNG)
+  backbone_epoch100.pth FINAL backbone for fine-tuning (route A2)
+Next: python Experiments/mobileNetv2_LeJEPA/train_supervised.py --backbone "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/ssl/20261028-170313_A2_lejepa_ssl_mobilenetv2_split2_seed0/backbone_epoch100.pth"
+SSL run folder: Experiments/mobileNetv2_LeJEPA/outputs/ssl/20261028-170313_A2_lejepa_ssl_mobilenetv2_split2_seed0
+Training run: A2_lejepa_mobilenetv2_labeled_set_1pct
+  output folder : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-054314_A2_lejepa_mobilenetv2_labeled_set_1pct_split2_seed0
+  device        : cuda (NVIDIA A100-PCIE-40GB)
+  init          : backbone_checkpoint  /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/ssl/20261028-170313_A2_lejepa_ssl_mobilenetv2_split2_seed0/backbone_epoch100.pth
+  train images  : 653 from labeled_set_1pct.csv
+  val images    : 800 from validation.csv (picks best.pt)
+  settings      : 30 epochs, batch 64, adamw lr 0.0005, cosine schedule, seed 0
+Reading all train and val images into memory (once per run)...
+  done in 12s
+
+Epoch 1/30  (lr 5.00e-04)
+    train batch   11/11  running loss 3.6742  running acc 0.0704  2s
+    val   batch   13/13  1s
+  epoch   1/30 summary  train loss 3.6742 acc 0.0704  val loss 3.6487 acc 0.1238  3s  *new best, saved best.pt
+  best so far: val acc 0.1238 (epoch 1)  elapsed 0.0 min, about 1.4 min left
+
+Epoch 2/30  (lr 4.99e-04)
+    train batch   11/11  running loss 3.4540  running acc 0.2986  1s
+    val   batch   13/13  1s
+  epoch   2/30 summary  train loss 3.4540 acc 0.2986  val loss 3.4742 acc 0.1562  2s  *new best, saved best.pt
+  best so far: val acc 0.1562 (epoch 2)  elapsed 0.1 min, about 1.4 min left
+
+Epoch 3/30  (lr 4.95e-04)
+    train batch   11/11  running loss 2.9395  running acc 0.3292  1s
+    val   batch   13/13  1s
+  epoch   3/30 summary  train loss 2.9395 acc 0.3292  val loss 3.1575 acc 0.1825  2s  *new best, saved best.pt
+  best so far: val acc 0.1825 (epoch 3)  elapsed 0.1 min, about 1.3 min left
+
+Epoch 4/30  (lr 4.88e-04)
+    train batch   11/11  running loss 2.4475  running acc 0.4104  1s
+    val   batch   13/13  1s
+  epoch   4/30 summary  train loss 2.4475 acc 0.4104  val loss 2.9313 acc 0.2163  2s  *new best, saved best.pt
+  best so far: val acc 0.2163 (epoch 4)  elapsed 0.2 min, about 1.2 min left
+
+Epoch 5/30  (lr 4.78e-04)
+    train batch   11/11  running loss 2.0521  running acc 0.5191  1s
+    val   batch   13/13  1s
+  epoch   5/30 summary  train loss 2.0521 acc 0.5191  val loss 2.7942 acc 0.2275  2s  *new best, saved best.pt
+  best so far: val acc 0.2275 (epoch 5)  elapsed 0.2 min, about 1.2 min left
+
+Epoch 6/30  (lr 4.67e-04)
+    train batch   11/11  running loss 1.7549  running acc 0.5727  1s
+    val   batch   13/13  1s
+  epoch   6/30 summary  train loss 1.7549 acc 0.5727  val loss 2.6895 acc 0.2587  2s  *new best, saved best.pt
+  best so far: val acc 0.2587 (epoch 6)  elapsed 0.3 min, about 1.1 min left
+
+Epoch 7/30  (lr 4.52e-04)
+    train batch   11/11  running loss 1.4730  running acc 0.6830  1s
+    val   batch   13/13  1s
+  epoch   7/30 summary  train loss 1.4730 acc 0.6830  val loss 2.6455 acc 0.2600  2s  *new best, saved best.pt
+  best so far: val acc 0.2600 (epoch 7)  elapsed 0.3 min, about 1.1 min left
+
+Epoch 8/30  (lr 4.36e-04)
+    train batch   11/11  running loss 1.2533  running acc 0.7274  1s
+    val   batch   13/13  1s
+  epoch   8/30 summary  train loss 1.2533 acc 0.7274  val loss 2.5660 acc 0.2850  2s  *new best, saved best.pt
+  best so far: val acc 0.2850 (epoch 8)  elapsed 0.4 min, about 1.0 min left
+
+Epoch 9/30  (lr 4.17e-04)
+    train batch   11/11  running loss 1.0762  running acc 0.7902  1s
+    val   batch   13/13  1s
+  epoch   9/30 summary  train loss 1.0762 acc 0.7902  val loss 2.5373 acc 0.2837  2s
+  best so far: val acc 0.2850 (epoch 8)  elapsed 0.4 min, about 1.0 min left
+
+Epoch 10/30  (lr 3.97e-04)
+    train batch   11/11  running loss 0.8854  running acc 0.8484  1s
+    val   batch   13/13  1s
+  epoch  10/30 summary  train loss 0.8854 acc 0.8484  val loss 2.5165 acc 0.2912  2s  *new best, saved best.pt
+  best so far: val acc 0.2912 (epoch 10)  elapsed 0.5 min, about 0.9 min left
+
+Epoch 11/30  (lr 3.75e-04)
+    train batch   11/11  running loss 0.7601  running acc 0.8836  1s
+    val   batch   13/13  1s
+  epoch  11/30 summary  train loss 0.7601 acc 0.8836  val loss 2.5139 acc 0.3187  2s  *new best, saved best.pt
+  best so far: val acc 0.3187 (epoch 11)  elapsed 0.5 min, about 0.9 min left
+
+Epoch 12/30  (lr 3.52e-04)
+    train batch   11/11  running loss 0.6347  running acc 0.9188  1s
+    val   batch   13/13  1s
+  epoch  12/30 summary  train loss 0.6347 acc 0.9188  val loss 2.4801 acc 0.3288  2s  *new best, saved best.pt
+  best so far: val acc 0.3288 (epoch 12)  elapsed 0.5 min, about 0.8 min left
+
+Epoch 13/30  (lr 3.27e-04)
+    train batch   11/11  running loss 0.5337  running acc 0.9387  1s
+    val   batch   13/13  1s
+  epoch  13/30 summary  train loss 0.5337 acc 0.9387  val loss 2.4627 acc 0.3325  2s  *new best, saved best.pt
+  best so far: val acc 0.3325 (epoch 13)  elapsed 0.6 min, about 0.8 min left
+
+Epoch 14/30  (lr 3.02e-04)
+    train batch   11/11  running loss 0.4399  running acc 0.9602  1s
+    val   batch   13/13  1s
+  epoch  14/30 summary  train loss 0.4399 acc 0.9602  val loss 2.4902 acc 0.3375  2s  *new best, saved best.pt
+  best so far: val acc 0.3375 (epoch 14)  elapsed 0.6 min, about 0.7 min left
+
+Epoch 15/30  (lr 2.76e-04)
+    train batch   11/11  running loss 0.3927  running acc 0.9755  1s
+    val   batch   13/13  1s
+  epoch  15/30 summary  train loss 0.3927 acc 0.9755  val loss 2.4894 acc 0.3350  2s
+  best so far: val acc 0.3375 (epoch 14)  elapsed 0.7 min, about 0.7 min left
+
+Epoch 16/30  (lr 2.50e-04)
+    train batch   11/11  running loss 0.3337  running acc 0.9832  1s
+    val   batch   13/13  1s
+  epoch  16/30 summary  train loss 0.3337 acc 0.9832  val loss 2.4723 acc 0.3400  2s  *new best, saved best.pt
+  best so far: val acc 0.3400 (epoch 16)  elapsed 0.7 min, about 0.6 min left
+
+Epoch 17/30  (lr 2.24e-04)
+    train batch   11/11  running loss 0.2985  running acc 0.9877  1s
+    val   batch   13/13  1s
+  epoch  17/30 summary  train loss 0.2985 acc 0.9877  val loss 2.4806 acc 0.3375  2s
+  best so far: val acc 0.3400 (epoch 16)  elapsed 0.8 min, about 0.6 min left
+
+Epoch 18/30  (lr 1.98e-04)
+    train batch   11/11  running loss 0.2505  running acc 0.9939  1s
+    val   batch   13/13  1s
+  epoch  18/30 summary  train loss 0.2505 acc 0.9939  val loss 2.4832 acc 0.3438  2s  *new best, saved best.pt
+  best so far: val acc 0.3438 (epoch 18)  elapsed 0.8 min, about 0.5 min left
+
+Epoch 19/30  (lr 1.73e-04)
+    train batch   11/11  running loss 0.2274  running acc 0.9969  1s
+    val   batch   13/13  1s
+  epoch  19/30 summary  train loss 0.2274 acc 0.9969  val loss 2.4612 acc 0.3487  2s  *new best, saved best.pt
+  best so far: val acc 0.3487 (epoch 19)  elapsed 0.9 min, about 0.5 min left
+
+Epoch 20/30  (lr 1.48e-04)
+    train batch   11/11  running loss 0.2103  running acc 0.9939  1s
+    val   batch   13/13  1s
+  epoch  20/30 summary  train loss 0.2103 acc 0.9939  val loss 2.4844 acc 0.3487  2s
+  best so far: val acc 0.3487 (epoch 19)  elapsed 0.9 min, about 0.5 min left
+
+Epoch 21/30  (lr 1.25e-04)
+    train batch   11/11  running loss 0.1898  running acc 0.9923  1s
+    val   batch   13/13  1s
+  epoch  21/30 summary  train loss 0.1898 acc 0.9923  val loss 2.4998 acc 0.3425  2s
+  best so far: val acc 0.3487 (epoch 19)  elapsed 1.0 min, about 0.4 min left
+
+Epoch 22/30  (lr 1.03e-04)
+    train batch   11/11  running loss 0.1785  running acc 0.9969  1s
+    val   batch   13/13  1s
+  epoch  22/30 summary  train loss 0.1785 acc 0.9969  val loss 2.5004 acc 0.3475  2s
+  best so far: val acc 0.3487 (epoch 19)  elapsed 1.0 min, about 0.4 min left
+
+Epoch 23/30  (lr 8.27e-05)
+    train batch   11/11  running loss 0.1753  running acc 0.9969  1s
+    val   batch   13/13  1s
+  epoch  23/30 summary  train loss 0.1753 acc 0.9969  val loss 2.4989 acc 0.3525  2s  *new best, saved best.pt
+  best so far: val acc 0.3525 (epoch 23)  elapsed 1.0 min, about 0.3 min left
+
+Epoch 24/30  (lr 6.42e-05)
+    train batch   11/11  running loss 0.1590  running acc 0.9969  1s
+    val   batch   13/13  1s
+  epoch  24/30 summary  train loss 0.1590 acc 0.9969  val loss 2.5061 acc 0.3525  2s
+  best so far: val acc 0.3525 (epoch 23)  elapsed 1.1 min, about 0.3 min left
+
+Epoch 25/30  (lr 4.77e-05)
+    train batch   11/11  running loss 0.1531  running acc 0.9985  1s
+    val   batch   13/13  1s
+  epoch  25/30 summary  train loss 0.1531 acc 0.9985  val loss 2.5068 acc 0.3537  2s  *new best, saved best.pt
+  best so far: val acc 0.3537 (epoch 25)  elapsed 1.1 min, about 0.2 min left
+
+Epoch 26/30  (lr 3.35e-05)
+    train batch   11/11  running loss 0.1590  running acc 0.9954  1s
+    val   batch   13/13  1s
+  epoch  26/30 summary  train loss 0.1590 acc 0.9954  val loss 2.5039 acc 0.3475  2s
+  best so far: val acc 0.3537 (epoch 25)  elapsed 1.2 min, about 0.2 min left
+
+Epoch 27/30  (lr 2.16e-05)
+    train batch   11/11  running loss 0.1502  running acc 0.9985  1s
+    val   batch   13/13  1s
+  epoch  27/30 summary  train loss 0.1502 acc 0.9985  val loss 2.5005 acc 0.3462  2s
+  best so far: val acc 0.3537 (epoch 25)  elapsed 1.2 min, about 0.1 min left
+
+Epoch 28/30  (lr 1.22e-05)
+    train batch   11/11  running loss 0.1435  running acc 0.9985  1s
+    val   batch   13/13  1s
+  epoch  28/30 summary  train loss 0.1435 acc 0.9985  val loss 2.5026 acc 0.3550  2s  *new best, saved best.pt
+  best so far: val acc 0.3550 (epoch 28)  elapsed 1.3 min, about 0.1 min left
+
+Epoch 29/30  (lr 5.46e-06)
+    train batch   11/11  running loss 0.1554  running acc 0.9985  1s
+    val   batch   13/13  1s
+  epoch  29/30 summary  train loss 0.1554 acc 0.9985  val loss 2.4964 acc 0.3512  2s
+  best so far: val acc 0.3550 (epoch 28)  elapsed 1.3 min, about 0.0 min left
+
+Epoch 30/30  (lr 1.37e-06)
+    train batch   11/11  running loss 0.1477  running acc 0.9985  1s
+    val   batch   13/13  1s
+  epoch  30/30 summary  train loss 0.1477 acc 0.9985  val loss 2.5044 acc 0.3512  2s
+  best so far: val acc 0.3550 (epoch 28)  elapsed 1.4 min, about 0.0 min left
+
+Done in 1.37 min. Best validation accuracy 0.3550 at epoch 28.
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-054314_A2_lejepa_mobilenetv2_labeled_set_1pct_split2_seed0:
+  config.json        settings used
+  class_mapping.csv  label number -> class name
+  manifests.json     hashes of the train/val image lists used, plus the split audit
+  manifests/         copies of the labeled, validation and class-mapping CSVs used
+  run_info.json      status, device, versions, timing, best epoch
+  history.csv        per-epoch loss and accuracy (train and val)
+  best.pt            model weights from the best validation epoch
+  charts/            loss.pdf, accuracy.pdf, overfitting_gap.pdf, learning_rate.pdf (one chart per file)
+Next: python Experiments/mobileNetv2_LeJEPA/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-054314_A2_lejepa_mobilenetv2_labeled_set_1pct_split2_seed0" --split validation
+Final test (once, when everything is fixed): python Experiments/mobileNetv2_LeJEPA/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-054314_A2_lejepa_mobilenetv2_labeled_set_1pct_split2_seed0"
+Evaluating Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-054314_A2_lejepa_mobilenetv2_labeled_set_1pct_split2_seed0/best.pt
+  checkpoint : epoch 28, val acc at training 0.3550
+  split      : validation, 800 images (read from disk)
+  device     : cuda (NVIDIA A100-PCIE-40GB)
+    validation batch   13/13  4s
+validation: 800 images  overall accuracy 0.3550  mean per-class accuracy 0.3550  (checkpoint epoch 28)
+Outputs in Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-054314_A2_lejepa_mobilenetv2_labeled_set_1pct_split2_seed0/eval_validation:
+  metrics.json            overall and mean per-class accuracy, loss, checkpoint info
+  per_class_accuracy.csv  accuracy for each of the 40 classes
+  confusion_matrix.csv    rows = true class, columns = predicted class
+  predictions.csv         one row per image: true, predicted, confidence
+  charts/                 per_class_accuracy.pdf, confusion_matrix.pdf, top_mistakes.pdf,
+                          confidence.pdf, calibration.pdf (one chart per file)
+Evaluating Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-054314_A2_lejepa_mobilenetv2_labeled_set_1pct_split2_seed0/best.pt
+  checkpoint : epoch 28, val acc at training 0.3550
+  split      : test, 29284 images (read from disk)
+  device     : cuda (NVIDIA A100-PCIE-40GB)
+    test batch   25/458  22s
+    test batch   50/458  48s
+    test batch   75/458  74s
+    test batch  100/458  100s
+    test batch  125/458  133s
+    test batch  150/458  161s
+    test batch  175/458  186s
+    test batch  200/458  208s
+    test batch  225/458  234s
+    test batch  250/458  264s
+    test batch  275/458  290s
+    test batch  300/458  321s
+    test batch  325/458  346s
+    test batch  350/458  362s
+    test batch  375/458  383s
+    test batch  400/458  405s
+    test batch  425/458  425s
+    test batch  450/458  443s
+    test batch  458/458  449s
+test: 29284 images  overall accuracy 0.3600  mean per-class accuracy 0.3590  (checkpoint epoch 28)
+Outputs in Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-054314_A2_lejepa_mobilenetv2_labeled_set_1pct_split2_seed0/eval_test:
+  metrics.json            overall and mean per-class accuracy, loss, checkpoint info
+  per_class_accuracy.csv  accuracy for each of the 40 classes
+  confusion_matrix.csv    rows = true class, columns = predicted class
+  predictions.csv         one row per image: true, predicted, confidence
+  charts/                 per_class_accuracy.pdf, confusion_matrix.pdf, top_mistakes.pdf,
+                          confidence.pdf, calibration.pdf (one chart per file)
+Training run: A2_lejepa_mobilenetv2
+  output folder : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055254_A2_lejepa_mobilenetv2_split2_seed0
+  device        : cuda (NVIDIA A100-PCIE-40GB)
+  init          : backbone_checkpoint  /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/ssl/20261028-170313_A2_lejepa_ssl_mobilenetv2_split2_seed0/backbone_epoch100.pth
+  train images  : 1962 from labeled_set.csv
+  val images    : 800 from validation.csv (picks best.pt)
+  settings      : 30 epochs, batch 64, adamw lr 0.0005, cosine schedule, seed 0
+Reading all train and val images into memory (once per run)...
+  done in 6s
+
+Epoch 1/30  (lr 5.00e-04)
+    train batch   25/31  running loss 3.5618  running acc 0.1187  3s
+    train batch   31/31  running loss 3.5015  running acc 0.1259  4s
+    val   batch   13/13  1s
+  epoch   1/30 summary  train loss 3.5015 acc 0.1259  val loss 3.0909 acc 0.1813  5s  *new best, saved best.pt
+  best so far: val acc 0.1813 (epoch 1)  elapsed 0.1 min, about 2.4 min left
+
+Epoch 2/30  (lr 4.99e-04)
+    train batch   25/31  running loss 2.6434  running acc 0.3106  3s
+    train batch   31/31  running loss 2.5855  running acc 0.3191  4s
+    val   batch   13/13  1s
+  epoch   2/30 summary  train loss 2.5855 acc 0.3191  val loss 2.4775 acc 0.2887  4s  *new best, saved best.pt
+  best so far: val acc 0.2887 (epoch 2)  elapsed 0.2 min, about 2.4 min left
+
+Epoch 3/30  (lr 4.95e-04)
+    train batch   25/31  running loss 1.9909  running acc 0.4694  3s
+    train batch   31/31  running loss 1.9615  running acc 0.4750  3s
+    val   batch   13/13  1s
+  epoch   3/30 summary  train loss 1.9615 acc 0.4750  val loss 2.1335 acc 0.3837  4s  *new best, saved best.pt
+  best so far: val acc 0.3837 (epoch 3)  elapsed 0.3 min, about 2.3 min left
+
+Epoch 4/30  (lr 4.88e-04)
+    train batch   25/31  running loss 1.5495  running acc 0.5800  3s
+    train batch   31/31  running loss 1.5348  running acc 0.5851  4s
+    val   batch   13/13  1s
+  epoch   4/30 summary  train loss 1.5348 acc 0.5851  val loss 1.9180 acc 0.4387  4s  *new best, saved best.pt
+  best so far: val acc 0.4387 (epoch 4)  elapsed 0.3 min, about 2.2 min left
+
+Epoch 5/30  (lr 4.78e-04)
+    train batch   25/31  running loss 1.1958  running acc 0.6975  3s
+    train batch   31/31  running loss 1.1953  running acc 0.6916  3s
+    val   batch   13/13  1s
+  epoch   5/30 summary  train loss 1.1953 acc 0.6916  val loss 1.7677 acc 0.4663  4s  *new best, saved best.pt
+  best so far: val acc 0.4663 (epoch 5)  elapsed 0.4 min, about 2.1 min left
+
+Epoch 6/30  (lr 4.67e-04)
+    train batch   25/31  running loss 0.9065  running acc 0.7856  3s
+    train batch   31/31  running loss 0.9096  running acc 0.7778  4s
+    val   batch   13/13  1s
+  epoch   6/30 summary  train loss 0.9096 acc 0.7778  val loss 1.6780 acc 0.4925  4s  *new best, saved best.pt
+  best so far: val acc 0.4925 (epoch 6)  elapsed 0.5 min, about 2.0 min left
+
+Epoch 7/30  (lr 4.52e-04)
+    train batch   25/31  running loss 0.6648  running acc 0.8575  3s
+    train batch   31/31  running loss 0.6731  running acc 0.8527  3s
+    val   batch   13/13  1s
+  epoch   7/30 summary  train loss 0.6731 acc 0.8527  val loss 1.6450 acc 0.5113  4s  *new best, saved best.pt
+  best so far: val acc 0.5113 (epoch 7)  elapsed 0.6 min, about 1.9 min left
+
+Epoch 8/30  (lr 4.36e-04)
+    train batch   25/31  running loss 0.5015  running acc 0.9062  3s
+    train batch   31/31  running loss 0.5061  running acc 0.9032  4s
+    val   batch   13/13  1s
+  epoch   8/30 summary  train loss 0.5061 acc 0.9032  val loss 1.6056 acc 0.5288  4s  *new best, saved best.pt
+  best so far: val acc 0.5288 (epoch 8)  elapsed 0.7 min, about 1.8 min left
+
+Epoch 9/30  (lr 4.17e-04)
+    train batch   25/31  running loss 0.3624  running acc 0.9425  3s
+    train batch   31/31  running loss 0.3631  running acc 0.9439  4s
+    val   batch   13/13  1s
+  epoch   9/30 summary  train loss 0.3631 acc 0.9439  val loss 1.6085 acc 0.5312  4s  *new best, saved best.pt
+  best so far: val acc 0.5312 (epoch 9)  elapsed 0.7 min, about 1.7 min left
+
+Epoch 10/30  (lr 3.97e-04)
+    train batch   25/31  running loss 0.2586  running acc 0.9681  3s
+    train batch   31/31  running loss 0.2532  running acc 0.9699  4s
+    val   batch   13/13  1s
+  epoch  10/30 summary  train loss 0.2532 acc 0.9699  val loss 1.6510 acc 0.5225  4s
+  best so far: val acc 0.5312 (epoch 9)  elapsed 0.8 min, about 1.6 min left
+
+Epoch 11/30  (lr 3.75e-04)
+    train batch   25/31  running loss 0.1775  running acc 0.9844  3s
+    train batch   31/31  running loss 0.1782  running acc 0.9827  4s
+    val   batch   13/13  1s
+  epoch  11/30 summary  train loss 0.1782 acc 0.9827  val loss 1.6760 acc 0.5387  4s  *new best, saved best.pt
+  best so far: val acc 0.5387 (epoch 11)  elapsed 0.9 min, about 1.6 min left
+
+Epoch 12/30  (lr 3.52e-04)
+    train batch   25/31  running loss 0.1298  running acc 0.9894  3s
+    train batch   31/31  running loss 0.1297  running acc 0.9888  3s
+    val   batch   13/13  1s
+  epoch  12/30 summary  train loss 0.1297 acc 0.9888  val loss 1.6672 acc 0.5300  4s
+  best so far: val acc 0.5387 (epoch 11)  elapsed 1.0 min, about 1.5 min left
+
+Epoch 13/30  (lr 3.27e-04)
+    train batch   25/31  running loss 0.0992  running acc 0.9956  3s
+    train batch   31/31  running loss 0.0980  running acc 0.9959  3s
+    val   batch   13/13  1s
+  epoch  13/30 summary  train loss 0.0980 acc 0.9959  val loss 1.6630 acc 0.5462  4s  *new best, saved best.pt
+  best so far: val acc 0.5462 (epoch 13)  elapsed 1.1 min, about 1.4 min left
+
+Epoch 14/30  (lr 3.02e-04)
+    train batch   25/31  running loss 0.0709  running acc 0.9981  3s
+    train batch   31/31  running loss 0.0730  running acc 0.9975  4s
+    val   batch   13/13  1s
+  epoch  14/30 summary  train loss 0.0730 acc 0.9975  val loss 1.6922 acc 0.5500  4s  *new best, saved best.pt
+  best so far: val acc 0.5500 (epoch 14)  elapsed 1.2 min, about 1.3 min left
+
+Epoch 15/30  (lr 2.76e-04)
+    train batch   25/31  running loss 0.0594  running acc 0.9988  3s
+    train batch   31/31  running loss 0.0590  running acc 0.9990  4s
+    val   batch   13/13  1s
+  epoch  15/30 summary  train loss 0.0590 acc 0.9990  val loss 1.6776 acc 0.5575  4s  *new best, saved best.pt
+  best so far: val acc 0.5575 (epoch 15)  elapsed 1.2 min, about 1.2 min left
+
+Epoch 16/30  (lr 2.50e-04)
+    train batch   25/31  running loss 0.0499  running acc 0.9981  3s
+    train batch   31/31  running loss 0.0500  running acc 0.9985  3s
+    val   batch   13/13  1s
+  epoch  16/30 summary  train loss 0.0500 acc 0.9985  val loss 1.6910 acc 0.5550  4s
+  best so far: val acc 0.5575 (epoch 15)  elapsed 1.3 min, about 1.1 min left
+
+Epoch 17/30  (lr 2.24e-04)
+    train batch   25/31  running loss 0.0426  running acc 0.9994  3s
+    train batch   31/31  running loss 0.0412  running acc 0.9995  4s
+    val   batch   13/13  1s
+  epoch  17/30 summary  train loss 0.0412 acc 0.9995  val loss 1.7018 acc 0.5587  4s  *new best, saved best.pt
+  best so far: val acc 0.5587 (epoch 17)  elapsed 1.4 min, about 1.1 min left
+
+Epoch 18/30  (lr 1.98e-04)
+    train batch   25/31  running loss 0.0359  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0367  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  18/30 summary  train loss 0.0367 acc 1.0000  val loss 1.7014 acc 0.5625  4s  *new best, saved best.pt
+  best so far: val acc 0.5625 (epoch 18)  elapsed 1.5 min, about 1.0 min left
+
+Epoch 19/30  (lr 1.73e-04)
+    train batch   25/31  running loss 0.0333  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0331  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  19/30 summary  train loss 0.0331 acc 1.0000  val loss 1.6974 acc 0.5550  4s
+  best so far: val acc 0.5625 (epoch 18)  elapsed 1.6 min, about 0.9 min left
+
+Epoch 20/30  (lr 1.48e-04)
+    train batch   25/31  running loss 0.0295  running acc 0.9994  3s
+    train batch   31/31  running loss 0.0307  running acc 0.9995  4s
+    val   batch   13/13  1s
+  epoch  20/30 summary  train loss 0.0307 acc 0.9995  val loss 1.7091 acc 0.5600  4s
+  best so far: val acc 0.5625 (epoch 18)  elapsed 1.6 min, about 0.8 min left
+
+Epoch 21/30  (lr 1.25e-04)
+    train batch   25/31  running loss 0.0271  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0286  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  21/30 summary  train loss 0.0286 acc 1.0000  val loss 1.7140 acc 0.5587  4s
+  best so far: val acc 0.5625 (epoch 18)  elapsed 1.7 min, about 0.7 min left
+
+Epoch 22/30  (lr 1.03e-04)
+    train batch   25/31  running loss 0.0241  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0248  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  22/30 summary  train loss 0.0248 acc 1.0000  val loss 1.7245 acc 0.5638  4s  *new best, saved best.pt
+  best so far: val acc 0.5638 (epoch 22)  elapsed 1.8 min, about 0.7 min left
+
+Epoch 23/30  (lr 8.27e-05)
+    train batch   25/31  running loss 0.0240  running acc 0.9994  3s
+    train batch   31/31  running loss 0.0240  running acc 0.9995  4s
+    val   batch   13/13  1s
+  epoch  23/30 summary  train loss 0.0240 acc 0.9995  val loss 1.7301 acc 0.5587  4s
+  best so far: val acc 0.5638 (epoch 22)  elapsed 1.9 min, about 0.6 min left
+
+Epoch 24/30  (lr 6.42e-05)
+    train batch   25/31  running loss 0.0233  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0243  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  24/30 summary  train loss 0.0243 acc 1.0000  val loss 1.7391 acc 0.5587  4s
+  best so far: val acc 0.5638 (epoch 22)  elapsed 2.0 min, about 0.5 min left
+
+Epoch 25/30  (lr 4.77e-05)
+    train batch   25/31  running loss 0.0212  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0216  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  25/30 summary  train loss 0.0216 acc 1.0000  val loss 1.7348 acc 0.5575  4s
+  best so far: val acc 0.5638 (epoch 22)  elapsed 2.1 min, about 0.4 min left
+
+Epoch 26/30  (lr 3.35e-05)
+    train batch   25/31  running loss 0.0236  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0237  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  26/30 summary  train loss 0.0237 acc 1.0000  val loss 1.7303 acc 0.5650  4s  *new best, saved best.pt
+  best so far: val acc 0.5650 (epoch 26)  elapsed 2.1 min, about 0.3 min left
+
+Epoch 27/30  (lr 2.16e-05)
+    train batch   25/31  running loss 0.0225  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0230  running acc 1.0000  3s
+    val   batch   13/13  1s
+  epoch  27/30 summary  train loss 0.0230 acc 1.0000  val loss 1.7430 acc 0.5600  4s
+  best so far: val acc 0.5650 (epoch 26)  elapsed 2.2 min, about 0.2 min left
+
+Epoch 28/30  (lr 1.22e-05)
+    train batch   25/31  running loss 0.0221  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0225  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  28/30 summary  train loss 0.0225 acc 1.0000  val loss 1.7204 acc 0.5700  4s  *new best, saved best.pt
+  best so far: val acc 0.5700 (epoch 28)  elapsed 2.3 min, about 0.2 min left
+
+Epoch 29/30  (lr 5.46e-06)
+    train batch   25/31  running loss 0.0204  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0208  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  29/30 summary  train loss 0.0208 acc 1.0000  val loss 1.7445 acc 0.5587  4s
+  best so far: val acc 0.5700 (epoch 28)  elapsed 2.4 min, about 0.1 min left
+
+Epoch 30/30  (lr 1.37e-06)
+    train batch   25/31  running loss 0.0216  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0212  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  30/30 summary  train loss 0.0212 acc 1.0000  val loss 1.7418 acc 0.5650  4s
+  best so far: val acc 0.5700 (epoch 28)  elapsed 2.5 min, about 0.0 min left
+
+Done in 2.49 min. Best validation accuracy 0.5700 at epoch 28.
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055254_A2_lejepa_mobilenetv2_split2_seed0:
+  config.json        settings used
+  class_mapping.csv  label number -> class name
+  manifests.json     hashes of the train/val image lists used, plus the split audit
+  manifests/         copies of the labeled, validation and class-mapping CSVs used
+  run_info.json      status, device, versions, timing, best epoch
+  history.csv        per-epoch loss and accuracy (train and val)
+  best.pt            model weights from the best validation epoch
+  charts/            loss.pdf, accuracy.pdf, overfitting_gap.pdf, learning_rate.pdf (one chart per file)
+Next: python Experiments/mobileNetv2_LeJEPA/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055254_A2_lejepa_mobilenetv2_split2_seed0" --split validation
+Final test (once, when everything is fixed): python Experiments/mobileNetv2_LeJEPA/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055254_A2_lejepa_mobilenetv2_split2_seed0"
+Evaluating Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055254_A2_lejepa_mobilenetv2_split2_seed0/best.pt
+  checkpoint : epoch 28, val acc at training 0.5700
+  split      : validation, 800 images (read from disk)
+  device     : cuda (NVIDIA A100-PCIE-40GB)
+    validation batch   13/13  3s
+validation: 800 images  overall accuracy 0.5700  mean per-class accuracy 0.5700  (checkpoint epoch 28)
+Outputs in Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055254_A2_lejepa_mobilenetv2_split2_seed0/eval_validation:
+  metrics.json            overall and mean per-class accuracy, loss, checkpoint info
+  per_class_accuracy.csv  accuracy for each of the 40 classes
+  confusion_matrix.csv    rows = true class, columns = predicted class
+  predictions.csv         one row per image: true, predicted, confidence
+  charts/                 per_class_accuracy.pdf, confusion_matrix.pdf, top_mistakes.pdf,
+                          confidence.pdf, calibration.pdf (one chart per file)
+Evaluating Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055254_A2_lejepa_mobilenetv2_split2_seed0/best.pt
+  checkpoint : epoch 28, val acc at training 0.5700
+  split      : test, 29284 images (read from disk)
+  device     : cuda (NVIDIA A100-PCIE-40GB)
+    test batch   25/458  6s
+    test batch   50/458  12s
+    test batch   75/458  18s
+    test batch  100/458  23s
+    test batch  125/458  28s
+    test batch  150/458  33s
+    test batch  175/458  41s
+    test batch  200/458  47s
+    test batch  225/458  55s
+    test batch  250/458  61s
+    test batch  275/458  67s
+    test batch  300/458  73s
+    test batch  325/458  80s
+    test batch  350/458  87s
+    test batch  375/458  93s
+    test batch  400/458  98s
+    test batch  425/458  105s
+    test batch  450/458  111s
+    test batch  458/458  113s
+test: 29284 images  overall accuracy 0.5671  mean per-class accuracy 0.5659  (checkpoint epoch 28)
+Outputs in Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055254_A2_lejepa_mobilenetv2_split2_seed0/eval_test:
+  metrics.json            overall and mean per-class accuracy, loss, checkpoint info
+  per_class_accuracy.csv  accuracy for each of the 40 classes
+  confusion_matrix.csv    rows = true class, columns = predicted class
+  predictions.csv         one row per image: true, predicted, confidence
+  charts/                 per_class_accuracy.pdf, confusion_matrix.pdf, top_mistakes.pdf,
+                          confidence.pdf, calibration.pdf (one chart per file)
+Training run: A2_lejepa_mobilenetv2_labeled_set_10pct
+  output folder : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055758_A2_lejepa_mobilenetv2_labeled_set_10pct_split2_seed0
+  device        : cuda (NVIDIA A100-PCIE-40GB)
+  init          : backbone_checkpoint  /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/ssl/20261028-170313_A2_lejepa_ssl_mobilenetv2_split2_seed0/backbone_epoch100.pth
+  train images  : 6543 from labeled_set_10pct.csv
+  val images    : 800 from validation.csv (picks best.pt)
+  settings      : 30 epochs, batch 64, adamw lr 0.0005, cosine schedule, seed 0
+Reading all train and val images into memory (once per run)...
+  done in 19s
+
+Epoch 1/30  (lr 5.00e-04)
+    train batch   25/103  running loss 3.5460  running acc 0.1156  3s
+    train batch   50/103  running loss 3.2384  running acc 0.1700  6s
+    train batch   75/103  running loss 2.9743  running acc 0.2154  9s
+    train batch  100/103  running loss 2.7714  running acc 0.2539  12s
+    train batch  103/103  running loss 2.7549  running acc 0.2574  13s
+    val   batch   13/13  1s
+  epoch   1/30 summary  train loss 2.7549 acc 0.2574  val loss 2.0638 acc 0.3988  14s  *new best, saved best.pt
+  best so far: val acc 0.3988 (epoch 1)  elapsed 0.2 min, about 6.6 min left
+
+Epoch 2/30  (lr 4.99e-04)
+    train batch   25/103  running loss 1.7986  running acc 0.4919  3s
+    train batch   50/103  running loss 1.7102  running acc 0.5125  6s
+    train batch   75/103  running loss 1.6648  running acc 0.5244  9s
+    train batch  100/103  running loss 1.6083  running acc 0.5372  12s
+    train batch  103/103  running loss 1.6045  running acc 0.5380  12s
+    val   batch   13/13  1s
+  epoch   2/30 summary  train loss 1.6045 acc 0.5380  val loss 1.4985 acc 0.5462  13s  *new best, saved best.pt
+  best so far: val acc 0.5462 (epoch 2)  elapsed 0.5 min, about 6.3 min left
+
+Epoch 3/30  (lr 4.95e-04)
+    train batch   25/103  running loss 1.1699  running acc 0.6562  3s
+    train batch   50/103  running loss 1.1400  running acc 0.6666  6s
+    train batch   75/103  running loss 1.1277  running acc 0.6671  9s
+    train batch  100/103  running loss 1.1147  running acc 0.6683  12s
+    train batch  103/103  running loss 1.1142  running acc 0.6690  12s
+    val   batch   13/13  1s
+  epoch   3/30 summary  train loss 1.1142 acc 0.6690  val loss 1.2370 acc 0.6137  13s  *new best, saved best.pt
+  best so far: val acc 0.6137 (epoch 3)  elapsed 0.7 min, about 6.0 min left
+
+Epoch 4/30  (lr 4.88e-04)
+    train batch   25/103  running loss 0.8537  running acc 0.7444  3s
+    train batch   50/103  running loss 0.8411  running acc 0.7556  6s
+    train batch   75/103  running loss 0.8191  running acc 0.7625  9s
+    train batch  100/103  running loss 0.8101  running acc 0.7631  11s
+    train batch  103/103  running loss 0.8084  running acc 0.7631  12s
+    val   batch   13/13  1s
+  epoch   4/30 summary  train loss 0.8084 acc 0.7631  val loss 1.1046 acc 0.6625  13s  *new best, saved best.pt
+  best so far: val acc 0.6625 (epoch 4)  elapsed 0.9 min, about 5.8 min left
+
+Epoch 5/30  (lr 4.78e-04)
+    train batch   25/103  running loss 0.6250  running acc 0.8269  3s
+    train batch   50/103  running loss 0.6052  running acc 0.8297  6s
+    train batch   75/103  running loss 0.5972  running acc 0.8290  9s
+    train batch  100/103  running loss 0.5988  running acc 0.8272  11s
+    train batch  103/103  running loss 0.5973  running acc 0.8278  12s
+    val   batch   13/13  1s
+  epoch   5/30 summary  train loss 0.5973 acc 0.8278  val loss 1.0499 acc 0.6913  13s  *new best, saved best.pt
+  best so far: val acc 0.6913 (epoch 5)  elapsed 1.1 min, about 5.6 min left
+
+Epoch 6/30  (lr 4.67e-04)
+    train batch   25/103  running loss 0.4227  running acc 0.8938  3s
+    train batch   50/103  running loss 0.4357  running acc 0.8847  6s
+    train batch   75/103  running loss 0.4325  running acc 0.8806  9s
+    train batch  100/103  running loss 0.4351  running acc 0.8792  11s
+    train batch  103/103  running loss 0.4363  running acc 0.8791  12s
+    val   batch   13/13  1s
+  epoch   6/30 summary  train loss 0.4363 acc 0.8791  val loss 1.0594 acc 0.6737  12s
+  best so far: val acc 0.6913 (epoch 5)  elapsed 1.3 min, about 5.3 min left
+
+Epoch 7/30  (lr 4.52e-04)
+    train batch   25/103  running loss 0.3357  running acc 0.9131  3s
+    train batch   50/103  running loss 0.3219  running acc 0.9181  6s
+    train batch   75/103  running loss 0.3178  running acc 0.9175  9s
+    train batch  100/103  running loss 0.3175  running acc 0.9173  11s
+    train batch  103/103  running loss 0.3207  running acc 0.9164  12s
+    val   batch   13/13  1s
+  epoch   7/30 summary  train loss 0.3207 acc 0.9164  val loss 1.0502 acc 0.6963  12s  *new best, saved best.pt
+  best so far: val acc 0.6963 (epoch 7)  elapsed 1.5 min, about 5.1 min left
+
+Epoch 8/30  (lr 4.36e-04)
+    train batch   25/103  running loss 0.2305  running acc 0.9444  3s
+    train batch   50/103  running loss 0.2414  running acc 0.9413  6s
+    train batch   75/103  running loss 0.2389  running acc 0.9400  8s
+    train batch  100/103  running loss 0.2362  running acc 0.9413  11s
+    train batch  103/103  running loss 0.2354  running acc 0.9413  12s
+    val   batch   13/13  1s
+  epoch   8/30 summary  train loss 0.2354 acc 0.9413  val loss 1.0398 acc 0.7175  12s  *new best, saved best.pt
+  best so far: val acc 0.7175 (epoch 8)  elapsed 1.8 min, about 4.8 min left
+
+Epoch 9/30  (lr 4.17e-04)
+    train batch   25/103  running loss 0.1557  running acc 0.9700  3s
+    train batch   50/103  running loss 0.1609  running acc 0.9663  6s
+    train batch   75/103  running loss 0.1600  running acc 0.9648  9s
+    train batch  100/103  running loss 0.1620  running acc 0.9637  11s
+    train batch  103/103  running loss 0.1627  running acc 0.9638  12s
+    val   batch   13/13  1s
+  epoch   9/30 summary  train loss 0.1627 acc 0.9638  val loss 0.9878 acc 0.7300  12s  *new best, saved best.pt
+  best so far: val acc 0.7300 (epoch 9)  elapsed 2.0 min, about 4.6 min left
+
+Epoch 10/30  (lr 3.97e-04)
+    train batch   25/103  running loss 0.1282  running acc 0.9706  3s
+    train batch   50/103  running loss 0.1280  running acc 0.9712  6s
+    train batch   75/103  running loss 0.1240  running acc 0.9733  8s
+    train batch  100/103  running loss 0.1248  running acc 0.9730  11s
+    train batch  103/103  running loss 0.1244  running acc 0.9731  11s
+    val   batch   13/13  1s
+  epoch  10/30 summary  train loss 0.1244 acc 0.9731  val loss 1.0376 acc 0.7287  12s
+  best so far: val acc 0.7300 (epoch 9)  elapsed 2.2 min, about 4.4 min left
+
+Epoch 11/30  (lr 3.75e-04)
+    train batch   25/103  running loss 0.0907  running acc 0.9825  3s
+    train batch   50/103  running loss 0.0874  running acc 0.9828  6s
+    train batch   75/103  running loss 0.0878  running acc 0.9827  9s
+    train batch  100/103  running loss 0.0860  running acc 0.9833  12s
+    train batch  103/103  running loss 0.0863  running acc 0.9832  12s
+    val   batch   13/13  1s
+  epoch  11/30 summary  train loss 0.0863 acc 0.9832  val loss 0.9981 acc 0.7337  13s  *new best, saved best.pt
+  best so far: val acc 0.7337 (epoch 11)  elapsed 2.4 min, about 4.2 min left
+
+Epoch 12/30  (lr 3.52e-04)
+    train batch   25/103  running loss 0.0693  running acc 0.9856  3s
+    train batch   50/103  running loss 0.0657  running acc 0.9884  6s
+    train batch   75/103  running loss 0.0639  running acc 0.9898  8s
+    train batch  100/103  running loss 0.0652  running acc 0.9900  11s
+    train batch  103/103  running loss 0.0667  running acc 0.9899  12s
+    val   batch   13/13  1s
+  epoch  12/30 summary  train loss 0.0667 acc 0.9899  val loss 1.0589 acc 0.7387  12s  *new best, saved best.pt
+  best so far: val acc 0.7387 (epoch 12)  elapsed 2.6 min, about 3.9 min left
+
+Epoch 13/30  (lr 3.27e-04)
+    train batch   25/103  running loss 0.0980  running acc 0.9825  3s
+    train batch   50/103  running loss 0.0817  running acc 0.9862  6s
+    train batch   75/103  running loss 0.0763  running acc 0.9860  9s
+    train batch  100/103  running loss 0.0719  running acc 0.9870  11s
+    train batch  103/103  running loss 0.0718  running acc 0.9870  12s
+    val   batch   13/13  1s
+  epoch  13/30 summary  train loss 0.0718 acc 0.9870  val loss 1.0368 acc 0.7412  12s  *new best, saved best.pt
+  best so far: val acc 0.7412 (epoch 13)  elapsed 2.8 min, about 3.7 min left
+
+Epoch 14/30  (lr 3.02e-04)
+    train batch   25/103  running loss 0.0469  running acc 0.9925  3s
+    train batch   50/103  running loss 0.0440  running acc 0.9934  6s
+    train batch   75/103  running loss 0.0420  running acc 0.9946  9s
+    train batch  100/103  running loss 0.0430  running acc 0.9947  11s
+    train batch  103/103  running loss 0.0429  running acc 0.9948  12s
+    val   batch   13/13  1s
+  epoch  14/30 summary  train loss 0.0429 acc 0.9948  val loss 1.0316 acc 0.7325  12s
+  best so far: val acc 0.7412 (epoch 13)  elapsed 3.1 min, about 3.5 min left
+
+Epoch 15/30  (lr 2.76e-04)
+    train batch   25/103  running loss 0.0274  running acc 0.9988  3s
+    train batch   50/103  running loss 0.0295  running acc 0.9975  6s
+    train batch   75/103  running loss 0.0308  running acc 0.9967  9s
+    train batch  100/103  running loss 0.0315  running acc 0.9969  12s
+    train batch  103/103  running loss 0.0320  running acc 0.9966  12s
+    val   batch   13/13  1s
+  epoch  15/30 summary  train loss 0.0320 acc 0.9966  val loss 1.0342 acc 0.7525  13s  *new best, saved best.pt
+  best so far: val acc 0.7525 (epoch 15)  elapsed 3.3 min, about 3.3 min left
+
+Epoch 16/30  (lr 2.50e-04)
+    train batch   25/103  running loss 0.0260  running acc 0.9969  3s
+    train batch   50/103  running loss 0.0242  running acc 0.9981  6s
+    train batch   75/103  running loss 0.0238  running acc 0.9983  9s
+    train batch  100/103  running loss 0.0240  running acc 0.9984  12s
+    train batch  103/103  running loss 0.0241  running acc 0.9985  12s
+    val   batch   13/13  1s
+  epoch  16/30 summary  train loss 0.0241 acc 0.9985  val loss 1.0372 acc 0.7375  13s
+  best so far: val acc 0.7525 (epoch 15)  elapsed 3.5 min, about 3.1 min left
+
+Epoch 17/30  (lr 2.24e-04)
+    train batch   25/103  running loss 0.0232  running acc 0.9975  3s
+    train batch   50/103  running loss 0.0244  running acc 0.9975  6s
+    train batch   75/103  running loss 0.0240  running acc 0.9971  9s
+    train batch  100/103  running loss 0.0236  running acc 0.9975  12s
+    train batch  103/103  running loss 0.0236  running acc 0.9974  12s
+    val   batch   13/13  1s
+  epoch  17/30 summary  train loss 0.0236 acc 0.9974  val loss 1.0148 acc 0.7450  13s
+  best so far: val acc 0.7525 (epoch 15)  elapsed 3.7 min, about 2.8 min left
+
+Epoch 18/30  (lr 1.98e-04)
+    train batch   25/103  running loss 0.0190  running acc 0.9988  3s
+    train batch   50/103  running loss 0.0198  running acc 0.9984  6s
+    train batch   75/103  running loss 0.0199  running acc 0.9981  9s
+    train batch  100/103  running loss 0.0195  running acc 0.9983  12s
+    train batch  103/103  running loss 0.0197  running acc 0.9983  12s
+    val   batch   13/13  1s
+  epoch  18/30 summary  train loss 0.0197 acc 0.9983  val loss 1.0304 acc 0.7500  13s
+  best so far: val acc 0.7525 (epoch 15)  elapsed 3.9 min, about 2.6 min left
+
+Epoch 19/30  (lr 1.73e-04)
+    train batch   25/103  running loss 0.0153  running acc 0.9994  3s
+    train batch   50/103  running loss 0.0164  running acc 0.9991  6s
+    train batch   75/103  running loss 0.0154  running acc 0.9994  9s
+    train batch  100/103  running loss 0.0162  running acc 0.9992  12s
+    train batch  103/103  running loss 0.0166  running acc 0.9991  12s
+    val   batch   13/13  1s
+  epoch  19/30 summary  train loss 0.0166 acc 0.9991  val loss 1.0271 acc 0.7513  13s
+  best so far: val acc 0.7525 (epoch 15)  elapsed 4.2 min, about 2.4 min left
+
+Epoch 20/30  (lr 1.48e-04)
+    train batch   25/103  running loss 0.0147  running acc 0.9988  3s
+    train batch   50/103  running loss 0.0155  running acc 0.9988  6s
+    train batch   75/103  running loss 0.0160  running acc 0.9988  9s
+    train batch  100/103  running loss 0.0152  running acc 0.9991  12s
+    train batch  103/103  running loss 0.0155  running acc 0.9989  12s
+    val   batch   13/13  1s
+  epoch  20/30 summary  train loss 0.0155 acc 0.9989  val loss 1.0649 acc 0.7525  13s
+  best so far: val acc 0.7525 (epoch 15)  elapsed 4.4 min, about 2.2 min left
+
+Epoch 21/30  (lr 1.25e-04)
+    train batch   25/103  running loss 0.0121  running acc 0.9994  3s
+    train batch   50/103  running loss 0.0139  running acc 0.9991  6s
+    train batch   75/103  running loss 0.0137  running acc 0.9994  9s
+    train batch  100/103  running loss 0.0130  running acc 0.9995  12s
+    train batch  103/103  running loss 0.0132  running acc 0.9994  12s
+    val   batch   13/13  1s
+  epoch  21/30 summary  train loss 0.0132 acc 0.9994  val loss 1.0484 acc 0.7538  13s  *new best, saved best.pt
+  best so far: val acc 0.7538 (epoch 21)  elapsed 4.6 min, about 2.0 min left
+
+Epoch 22/30  (lr 1.03e-04)
+    train batch   25/103  running loss 0.0120  running acc 0.9994  3s
+    train batch   50/103  running loss 0.0114  running acc 0.9997  6s
+    train batch   75/103  running loss 0.0127  running acc 0.9988  9s
+    train batch  100/103  running loss 0.0130  running acc 0.9989  12s
+    train batch  103/103  running loss 0.0129  running acc 0.9989  12s
+    val   batch   13/13  1s
+  epoch  22/30 summary  train loss 0.0129 acc 0.9989  val loss 1.0374 acc 0.7525  13s
+  best so far: val acc 0.7538 (epoch 21)  elapsed 4.8 min, about 1.8 min left
+
+Epoch 23/30  (lr 8.27e-05)
+    train batch   25/103  running loss 0.0111  running acc 0.9994  3s
+    train batch   50/103  running loss 0.0114  running acc 0.9994  6s
+    train batch   75/103  running loss 0.0110  running acc 0.9996  9s
+    train batch  100/103  running loss 0.0106  running acc 0.9997  12s
+    train batch  103/103  running loss 0.0107  running acc 0.9995  12s
+    val   batch   13/13  1s
+  epoch  23/30 summary  train loss 0.0107 acc 0.9995  val loss 1.0249 acc 0.7588  13s  *new best, saved best.pt
+  best so far: val acc 0.7588 (epoch 23)  elapsed 5.1 min, about 1.5 min left
+
+Epoch 24/30  (lr 6.42e-05)
+    train batch   25/103  running loss 0.0088  running acc 1.0000  3s
+    train batch   50/103  running loss 0.0101  running acc 0.9997  6s
+    train batch   75/103  running loss 0.0099  running acc 0.9996  8s
+    train batch  100/103  running loss 0.0099  running acc 0.9995  11s
+    train batch  103/103  running loss 0.0100  running acc 0.9995  11s
+    val   batch   13/13  1s
+  epoch  24/30 summary  train loss 0.0100 acc 0.9995  val loss 1.0395 acc 0.7613  12s  *new best, saved best.pt
+  best so far: val acc 0.7613 (epoch 24)  elapsed 5.3 min, about 1.3 min left
+
+Epoch 25/30  (lr 4.77e-05)
+    train batch   25/103  running loss 0.0092  running acc 0.9994  3s
+    train batch   50/103  running loss 0.0089  running acc 0.9997  6s
+    train batch   75/103  running loss 0.0088  running acc 0.9998  9s
+    train batch  100/103  running loss 0.0090  running acc 0.9997  12s
+    train batch  103/103  running loss 0.0093  running acc 0.9995  12s
+    val   batch   13/13  1s
+  epoch  25/30 summary  train loss 0.0093 acc 0.9995  val loss 1.0202 acc 0.7625  13s  *new best, saved best.pt
+  best so far: val acc 0.7625 (epoch 25)  elapsed 5.5 min, about 1.1 min left
+
+Epoch 26/30  (lr 3.35e-05)
+    train batch   25/103  running loss 0.0087  running acc 1.0000  3s
+    train batch   50/103  running loss 0.0090  running acc 0.9997  6s
+    train batch   75/103  running loss 0.0093  running acc 0.9996  9s
+    train batch  100/103  running loss 0.0095  running acc 0.9997  12s
+    train batch  103/103  running loss 0.0096  running acc 0.9997  12s
+    val   batch   13/13  1s
+  epoch  26/30 summary  train loss 0.0096 acc 0.9997  val loss 1.0154 acc 0.7563  13s
+  best so far: val acc 0.7625 (epoch 25)  elapsed 5.7 min, about 0.9 min left
+
+Epoch 27/30  (lr 2.16e-05)
+    train batch   25/103  running loss 0.0092  running acc 0.9994  3s
+    train batch   50/103  running loss 0.0089  running acc 0.9994  6s
+    train batch   75/103  running loss 0.0086  running acc 0.9996  9s
+    train batch  100/103  running loss 0.0087  running acc 0.9997  11s
+    train batch  103/103  running loss 0.0090  running acc 0.9997  12s
+    val   batch   13/13  1s
+  epoch  27/30 summary  train loss 0.0090 acc 0.9997  val loss 1.0335 acc 0.7575  13s
+  best so far: val acc 0.7625 (epoch 25)  elapsed 5.9 min, about 0.7 min left
+
+Epoch 28/30  (lr 1.22e-05)
+    train batch   25/103  running loss 0.0086  running acc 1.0000  3s
+    train batch   50/103  running loss 0.0083  running acc 1.0000  6s
+    train batch   75/103  running loss 0.0084  running acc 1.0000  9s
+    train batch  100/103  running loss 0.0085  running acc 1.0000  11s
+    train batch  103/103  running loss 0.0088  running acc 0.9997  12s
+    val   batch   13/13  1s
+  epoch  28/30 summary  train loss 0.0088 acc 0.9997  val loss 1.0269 acc 0.7600  13s
+  best so far: val acc 0.7625 (epoch 25)  elapsed 6.1 min, about 0.4 min left
+
+Epoch 29/30  (lr 5.46e-06)
+    train batch   25/103  running loss 0.0081  running acc 1.0000  3s
+    train batch   50/103  running loss 0.0082  running acc 1.0000  6s
+    train batch   75/103  running loss 0.0083  running acc 0.9998  9s
+    train batch  100/103  running loss 0.0082  running acc 0.9998  11s
+    train batch  103/103  running loss 0.0084  running acc 0.9998  12s
+    val   batch   13/13  1s
+  epoch  29/30 summary  train loss 0.0084 acc 0.9998  val loss 1.0255 acc 0.7575  13s
+  best so far: val acc 0.7625 (epoch 25)  elapsed 6.4 min, about 0.2 min left
+
+Epoch 30/30  (lr 1.37e-06)
+    train batch   25/103  running loss 0.0064  running acc 1.0000  3s
+    train batch   50/103  running loss 0.0083  running acc 0.9997  6s
+    train batch   75/103  running loss 0.0089  running acc 0.9996  9s
+    train batch  100/103  running loss 0.0087  running acc 0.9997  12s
+    train batch  103/103  running loss 0.0088  running acc 0.9997  12s
+    val   batch   13/13  1s
+  epoch  30/30 summary  train loss 0.0088 acc 0.9997  val loss 1.0409 acc 0.7550  13s
+  best so far: val acc 0.7625 (epoch 25)  elapsed 6.6 min, about 0.0 min left
+
+Done in 6.59 min. Best validation accuracy 0.7625 at epoch 25.
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055758_A2_lejepa_mobilenetv2_labeled_set_10pct_split2_seed0:
+  config.json        settings used
+  class_mapping.csv  label number -> class name
+  manifests.json     hashes of the train/val image lists used, plus the split audit
+  manifests/         copies of the labeled, validation and class-mapping CSVs used
+  run_info.json      status, device, versions, timing, best epoch
+  history.csv        per-epoch loss and accuracy (train and val)
+  best.pt            model weights from the best validation epoch
+  charts/            loss.pdf, accuracy.pdf, overfitting_gap.pdf, learning_rate.pdf (one chart per file)
+Next: python Experiments/mobileNetv2_LeJEPA/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055758_A2_lejepa_mobilenetv2_labeled_set_10pct_split2_seed0" --split validation
+Final test (once, when everything is fixed): python Experiments/mobileNetv2_LeJEPA/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055758_A2_lejepa_mobilenetv2_labeled_set_10pct_split2_seed0"
+Evaluating Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055758_A2_lejepa_mobilenetv2_labeled_set_10pct_split2_seed0/best.pt
+  checkpoint : epoch 25, val acc at training 0.7625
+  split      : validation, 800 images (read from disk)
+  device     : cuda (NVIDIA A100-PCIE-40GB)
+    validation batch   13/13  3s
+validation: 800 images  overall accuracy 0.7625  mean per-class accuracy 0.7625  (checkpoint epoch 25)
+Outputs in Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055758_A2_lejepa_mobilenetv2_labeled_set_10pct_split2_seed0/eval_validation:
+  metrics.json            overall and mean per-class accuracy, loss, checkpoint info
+  per_class_accuracy.csv  accuracy for each of the 40 classes
+  confusion_matrix.csv    rows = true class, columns = predicted class
+  predictions.csv         one row per image: true, predicted, confidence
+  charts/                 per_class_accuracy.pdf, confusion_matrix.pdf, top_mistakes.pdf,
+                          confidence.pdf, calibration.pdf (one chart per file)
+Evaluating Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055758_A2_lejepa_mobilenetv2_labeled_set_10pct_split2_seed0/best.pt
+  checkpoint : epoch 25, val acc at training 0.7625
+  split      : test, 29284 images (read from disk)
+  device     : cuda (NVIDIA A100-PCIE-40GB)
+    test batch   25/458  6s
+    test batch   50/458  11s
+    test batch   75/458  17s
+    test batch  100/458  24s
+    test batch  125/458  29s
+    test batch  150/458  35s
+    test batch  175/458  40s
+    test batch  200/458  45s
+    test batch  225/458  50s
+    test batch  250/458  55s
+    test batch  275/458  61s
+    test batch  300/458  75s
+    test batch  325/458  99s
+    test batch  350/458  110s
+    test batch  375/458  115s
+    test batch  400/458  120s
+    test batch  425/458  132s
+    test batch  450/458  137s
+    test batch  458/458  139s
+test: 29284 images  overall accuracy 0.7639  mean per-class accuracy 0.7629  (checkpoint epoch 25)
+Outputs in Experiments/mobileNetv2_LeJEPA/outputs/finetune/20261029-055758_A2_lejepa_mobilenetv2_labeled_set_10pct_split2_seed0/eval_test:
+  metrics.json            overall and mean per-class accuracy, loss, checkpoint info
+  per_class_accuracy.csv  accuracy for each of the 40 classes
+  confusion_matrix.csv    rows = true class, columns = predicted class
+  predictions.csv         one row per image: true, predicted, confidence
+  charts/                 per_class_accuracy.pdf, confusion_matrix.pdf, top_mistakes.pdf,
+                          confidence.pdf, calibration.pdf (one chart per file)
+==============================================================================
+                                JOB STATISTICS                                
+==============================================================================
+
+           JobId: 4579857
+      SubmitTime: 2026-10-28T15:34:40
+         EndTime: 2026-10-30T04:51:27
+         RunTime: 13:16:12
+       AllocTRES: cpu=8,mem=64G,node=1,billing=8,gres/gpu=1
+       Partition: a100
+        NodeList: gpu-n52
+         Command: /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/crc/split_run.sbatch
+
+==============================================================================
+ For more information use the command:
+   - `sacct -M gpu -j 4579857 -S 2026-10-28T15:34:40 -E 2026-10-30T04:51:27`
+
+ To control the output of the above command:
+   - Add `--format=<field1,field2,etc>` with fields of interest
+   - See the list of all possible fields by running: `sacct --helpformat`
+==============================================================================

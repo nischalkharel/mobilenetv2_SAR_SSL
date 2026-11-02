@@ -1,0 +1,2582 @@
+host gpu-n48.crc.pitt.edu  job 4579856  start Wed Oct 28 04:42:24 PM EDT 2026
+repo /ihome/ageorge/nik96/mobilenetv2_SAR_SSL  commit af308fa  branch SmokeTest_Mobilenet_with_DINO
+NVIDIA A100-PCIE-40GB, 40960 MiB, 595.91.07
+python /ix/ageorge/nik96/envs/sarssl/bin/python 3.13.16 | torch 2.10.0+cu128 | torchvision 0.25.0+cu128 | cuda available True
+route dino  split 2
+Smoke test on cuda. Outputs go to /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke
+
+1. Data
+  [PASS] split audit (leakage and consistency checks) (7 checks, counts {'ssl': 65427, 'labeled': 1962, 'validation': 800, 'excluded': 1864, 'official_test': 29284, 'classes': 40})
+  [PASS] class_mapping.csv identical to the A0 run's file (40 rows/classes, sha256 matches)
+  [PASS] SSL item is a list of views only (no label) 
+  [PASS] view shapes (global (3, 224, 224), local (3, 96, 96))
+  [PASS] 3 channels are copies of one SAR channel 
+2. Initialization
+  [SKIP] torchvision's cached IMAGENET1K_V2 file not found; not downloading it
+  ImageNet weights sha256 1f19491f7357621f...
+Student and Teacher are built: they are both MobileNetV2 networks.
+  [PASS] student backbone equals ImageNet weights 
+  [PASS] teacher equals student (all parameters and buffers) (320 entries)
+  [PASS] no ImageNet classifier in the SSL networks 
+  [PASS] teacher parameters do not require gradients 
+3. Shapes and multi-crop order
+  [PASS] feature dimension 1280 at both crop sizes {224: (2, 1280), 96: (2, 1280)}
+  [PASS] DINO head output = out_dim (not 40) (4096)
+  [PASS] multi-crop output is view-major then sample order (one backbone call per resolution)
+4. Against the original DINO code (reference/dino-main_original, untouched)
+  [PASS] DINOHead initialization identical to the original (same seed) 
+  [PASS] DINOHead output identical to the original 
+  [PASS] weight-norm scale frozen and last layer named for freezing, as in the original 
+  [PASS] DINO loss and center match the original on synthetic inputs (3 steps) (max difference 0.0e+00; original run with world size 1)
+  [PASS] cross-view pairing: teacher views 0,1 x all other student views (10 pairs, same-view pairs skipped)
+5. One training step (epoch 0) and one in epoch 1
+Loss, optimizer and schedulers ready.
+  [PASS] loss finite (loss 8.227, ln(out_dim) = 8.32)
+  [PASS] every student backbone parameter updated (156 tensors)
+  [PASS] student head MLP updated 
+  [PASS] last layer frozen in epoch 0 (freeze_last_layer = 1), weight-norm scale fixed 
+  [PASS] teacher parameters have no gradients 
+  [PASS] teacher parameters = EMA of student parameters (momentum 0.9995, max error 0.0e+00)
+  [PASS] BatchNorm batch counters: teacher +1 (global views), student +2 (global, local groups) 
+  [PASS] teacher BN running stats updated from its own batch (not by EMA) (first BN layer, max error 1.2e-07)
+  [PASS] teacher and student BN running stats now differ 
+  [PASS] center updated: 0.9 * old + 0.1 * batch mean of teacher outputs 
+  [PASS] last layer updated in epoch 1 
+  [PASS] weight-norm scale still fixed 
+6. Save and resume (smoke runs, 48 images, 2 epochs)
+Preparing the pixel cache for 48 SSL images (slow only the first time)...
+  pixels_2558900dddbca85f_48.npy ready in 7s
+Student and Teacher are built: they are both MobileNetV2 networks.
+Loss, optimizer and schedulers ready.
+
+SMOKE RUN (pipeline check only): A1_dino_ssl_mobilenetv2
+  output folder      : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-165532_A1_dino_ssl_mobilenetv2_split2_seed0_SMOKE
+  device             : cuda (NVIDIA A100-PCIE-40GB), mixed precision on
+  init               : ImageNet IMAGENET1K_V2 (student and teacher identical at start)
+  SSL images         : 48 from ssl_training_data.csv (no labels used)
+  batch              : 8 images x 10 views = 2 x 224px global + 8 x 96px local
+  dimensions         : MobileNetV2 feature 1280 (checked: {224: (2, 1280), 96: (2, 1280)}) -> DINO head output 4096 (not the 40 classes)
+  trainable params   : 10,616,832 (student backbone + head; teacher has 0)
+  steps              : 6 per epoch, 2 epochs, 12 total
+  learning rate      : reference 0.0005 per 256 images -> effective peak 1.56e-05 at batch 8 after 1 warm-up epochs, cosine to 1e-06
+  teacher momentum   : 0.9995 -> 1, teacher temperature 0.04, out_dim 4096, seed 0
+
+SSL epoch 1/2
+    step     1/6  loss 8.2245  lr 0.00e+00  teacher entropy 7.112  60s
+    step     2/6  loss 8.2446  lr 3.13e-06  teacher entropy 7.151  60s
+    step     3/6  loss 8.2501  lr 6.25e-06  teacher entropy 7.192  60s
+    step     4/6  loss 8.2596  lr 9.38e-06  teacher entropy 7.228  60s
+    step     5/6  loss 8.2645  lr 1.25e-05  teacher entropy 7.265  60s
+    step     6/6  loss 8.2714  lr 1.56e-05  teacher entropy 7.293  60s
+  epoch   1/2 summary  loss 8.2714  teacher entropy 7.293 (marginal 7.970, max 8.32)  feature cosine 0.332  1.0 min, checkpoint saved
+
+SSL epoch 2/2
+    step     1/6  loss 8.3214  lr 1.56e-05  teacher entropy 7.443  1s
+    step     2/6  loss 8.3167  lr 1.46e-05  teacher entropy 7.460  1s
+    step     3/6  loss 8.3203  lr 1.20e-05  teacher entropy 7.475  1s
+    step     4/6  loss 8.3282  lr 8.31e-06  teacher entropy 7.482  1s
+    step     5/6  loss 8.3374  lr 4.66e-06  teacher entropy 7.489  1s
+    step     6/6  loss 8.3415  lr 1.98e-06  teacher entropy 7.498  1s
+  epoch   2/2 summary  loss 8.3415  teacher entropy 7.498 (marginal 8.179, max 8.32)  feature cosine 0.346  0.0 min, checkpoint saved
+Exported teacher backbone (epoch 2): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2.
+  excluded: head.last_layer, head.mlp
+  file: /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-165532_A1_dino_ssl_mobilenetv2_split2_seed0_SMOKE/backbone_teacher_epoch2.pth
+
+Done. SSL cost: 1.03 min, 96 images seen, 12 steps.
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-165532_A1_dino_ssl_mobilenetv2_split2_seed0_SMOKE:
+  config.json, manifests.json, manifests/   settings and the image list used (with hashes)
+  run_info.json        status, environment, cost (time, images, steps, GPU memory)
+  history.csv, charts/ per-epoch loss and collapse diagnostics
+  view_preview.png     original chips beside the views used in training
+  checkpoint.pth       full training state (student, teacher, optimizer, center, RNG)
+  backbone_teacher_epoch2.pth teacher backbone for fine-tuning
+Next: python Experiments/mobileNetv2_DINO/train_supervised.py --backbone "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-165532_A1_dino_ssl_mobilenetv2_split2_seed0_SMOKE/backbone_teacher_epoch2.pth"
+Preparing the pixel cache for 48 SSL images (slow only the first time)...
+  pixels_2558900dddbca85f_48.npy ready in 1s
+Student and Teacher are built: they are both MobileNetV2 networks.
+Loss, optimizer and schedulers ready.
+
+SMOKE RUN (pipeline check only): A1_dino_ssl_mobilenetv2
+  output folder      : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-165706_A1_dino_ssl_mobilenetv2_split2_seed0_SMOKE
+  device             : cuda (NVIDIA A100-PCIE-40GB), mixed precision on
+  init               : ImageNet IMAGENET1K_V2 (student and teacher identical at start)
+  SSL images         : 48 from ssl_training_data.csv (no labels used)
+  batch              : 8 images x 10 views = 2 x 224px global + 8 x 96px local
+  dimensions         : MobileNetV2 feature 1280 (checked: {224: (2, 1280), 96: (2, 1280)}) -> DINO head output 4096 (not the 40 classes)
+  trainable params   : 10,616,832 (student backbone + head; teacher has 0)
+  steps              : 6 per epoch, 2 epochs, 12 total
+  learning rate      : reference 0.0005 per 256 images -> effective peak 1.56e-05 at batch 8 after 1 warm-up epochs, cosine to 1e-06
+  teacher momentum   : 0.9995 -> 1, teacher temperature 0.04, out_dim 4096, seed 0
+
+SSL epoch 1/2
+    step     1/6  loss 8.2245  lr 0.00e+00  teacher entropy 7.112  1s
+    step     2/6  loss 8.2446  lr 3.13e-06  teacher entropy 7.151  1s
+    step     3/6  loss 8.2501  lr 6.25e-06  teacher entropy 7.192  1s
+    step     4/6  loss 8.2596  lr 9.38e-06  teacher entropy 7.228  1s
+    step     5/6  loss 8.2645  lr 1.25e-05  teacher entropy 7.265  1s
+    step     6/6  loss 8.2714  lr 1.56e-05  teacher entropy 7.293  1s
+  epoch   1/2 summary  loss 8.2714  teacher entropy 7.293 (marginal 7.970, max 8.32)  feature cosine 0.332  0.0 min, checkpoint saved
+
+Stopped after epoch 1 of 2. Continue with:
+  python Experiments/mobileNetv2_DINO/train_ssl.py --resume "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-165706_A1_dino_ssl_mobilenetv2_split2_seed0_SMOKE"
+  [PASS] stopped run is marked resumable after epoch 1 
+  [PASS] resume with a changed config (momentum_teacher) is rejected 
+Preparing the pixel cache for 48 SSL images (slow only the first time)...
+  pixels_2558900dddbca85f_48.npy ready in 1s
+Student and Teacher are built: they are both MobileNetV2 networks.
+Loss, optimizer and schedulers ready.
+
+SMOKE RUN (pipeline check only): A1_dino_ssl_mobilenetv2  (RESUMED at epoch 2)
+  output folder      : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-165706_A1_dino_ssl_mobilenetv2_split2_seed0_SMOKE
+  device             : cuda (NVIDIA A100-PCIE-40GB), mixed precision on
+  init               : ImageNet IMAGENET1K_V2 (student and teacher identical at start)
+  SSL images         : 48 from ssl_training_data.csv (no labels used)
+  batch              : 8 images x 10 views = 2 x 224px global + 8 x 96px local
+  dimensions         : MobileNetV2 feature 1280 (checked: {224: (2, 1280), 96: (2, 1280)}) -> DINO head output 4096 (not the 40 classes)
+  trainable params   : 10,616,832 (student backbone + head; teacher has 0)
+  steps              : 6 per epoch, 2 epochs, 12 total
+  learning rate      : reference 0.0005 per 256 images -> effective peak 1.56e-05 at batch 8 after 1 warm-up epochs, cosine to 1e-06
+  teacher momentum   : 0.9995 -> 1, teacher temperature 0.04, out_dim 4096, seed 0
+
+SSL epoch 2/2
+    step     1/6  loss 8.3214  lr 1.56e-05  teacher entropy 7.443  0s
+    step     2/6  loss 8.3167  lr 1.46e-05  teacher entropy 7.460  0s
+    step     3/6  loss 8.3203  lr 1.20e-05  teacher entropy 7.475  1s
+    step     4/6  loss 8.3282  lr 8.31e-06  teacher entropy 7.482  1s
+    step     5/6  loss 8.3374  lr 4.66e-06  teacher entropy 7.489  1s
+    step     6/6  loss 8.3415  lr 1.98e-06  teacher entropy 7.498  1s
+  epoch   2/2 summary  loss 8.3415  teacher entropy 7.498 (marginal 8.179, max 8.32)  feature cosine 0.346  0.0 min, checkpoint saved
+Exported teacher backbone (epoch 2): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2.
+  excluded: head.last_layer, head.mlp
+  file: /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-165706_A1_dino_ssl_mobilenetv2_split2_seed0_SMOKE/backbone_teacher_epoch2.pth
+
+Done. SSL cost: 0.03 min, 96 images seen, 12 steps.
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-165706_A1_dino_ssl_mobilenetv2_split2_seed0_SMOKE:
+  config.json, manifests.json, manifests/   settings and the image list used (with hashes)
+  run_info.json        status, environment, cost (time, images, steps, GPU memory)
+  history.csv, charts/ per-epoch loss and collapse diagnostics
+  view_preview.png     original chips beside the views used in training
+  checkpoint.pth       full training state (student, teacher, optimizer, center, RNG)
+  backbone_teacher_epoch2.pth teacher backbone for fine-tuning
+Next: python Experiments/mobileNetv2_DINO/train_supervised.py --backbone "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-165706_A1_dino_ssl_mobilenetv2_split2_seed0_SMOKE/backbone_teacher_epoch2.pth"
+  [PASS] same epoch, global step and schedule after resume 
+  [PASS] resumed run matches the uninterrupted run (max difference student 0.0e+00, teacher 0.0e+00, center 0.0e+00; tolerance 0.001 on cuda: cuDNN picks non-deterministic kernels on the GPU)
+  [PASS] learning rate and momentum per epoch identical after resume 
+7. Export
+  [PASS] exported backbone loads strictly into a fresh MobileNetV2 (156 parameters + 156 buffers)
+  [PASS] export contains no DINO head or classifier 
+  [PASS] export equals the teacher backbone of the final checkpoint 
+Imports
+  [PASS] every project module in use was loaded from this folder (data, dino, engine, evaluate, export_backbone, model, paths, plots, preview_views, ssl_data, train_ssl, train_supervised, utils)
+  [PASS] no module from Baseline or dino-main 
+
+PASSED (SSL part)
+Smoke folders (not results): 20261028-165532_A1_dino_ssl_mobilenetv2_split2_seed0_SMOKE, 20261028-165706_A1_dino_ssl_mobilenetv2_split2_seed0_SMOKE in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke
+8. Downstream fine-tuning from the exported backbone
+  [PASS] fine-tuning model starts from the exported backbone 
+  [PASS] new head: 40 outputs, dropout 0.2 kept 
+  [PASS] one step updates backbone and new classifier (158/158 tensors)
+SMOKE RUN (pipeline check only): A1_dino_mobilenetv2
+  output folder : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-170004_A1_dino_mobilenetv2_split2_seed0_SMOKE
+  device        : cuda (NVIDIA A100-PCIE-40GB)
+  init          : backbone_checkpoint  /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-165532_A1_dino_ssl_mobilenetv2_split2_seed0_SMOKE/backbone_teacher_epoch2.pth
+  train images  : 320 from labeled_set.csv
+  val images    : 320 from validation.csv (picks best.pt)
+  settings      : 2 epochs, batch 64, adamw lr 0.0005, cosine schedule, seed 0
+Reading all train and val images into memory (once per run)...
+  done in 51s
+
+Epoch 1/2  (lr 5.00e-04)
+    train batch    5/5  running loss 3.7089  running acc 0.0219  2s
+    val   batch    5/5  0s
+  epoch   1/2 summary  train loss 3.7089 acc 0.0219  val loss 3.6885 acc 0.0219  3s  *new best, saved best.pt
+  best so far: val acc 0.0219 (epoch 1)  elapsed 0.0 min, about 0.0 min left
+
+Epoch 2/2  (lr 2.50e-04)
+    train batch    5/5  running loss 3.6227  running acc 0.0875  1s
+    val   batch    5/5  0s
+  epoch   2/2 summary  train loss 3.6227 acc 0.0875  val loss 3.6855 acc 0.0250  1s  *new best, saved best.pt
+  best so far: val acc 0.0250 (epoch 2)  elapsed 0.2 min, about 0.0 min left
+
+Done in 0.24 min. Best validation accuracy 0.0250 at epoch 2.
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-170004_A1_dino_mobilenetv2_split2_seed0_SMOKE:
+  config.json        settings used
+  class_mapping.csv  label number -> class name
+  manifests.json     hashes of the train/val image lists used, plus the split audit
+  manifests/         copies of the labeled, validation and class-mapping CSVs used
+  run_info.json      status, device, versions, timing, best epoch
+  history.csv        per-epoch loss and accuracy (train and val)
+  best.pt            model weights from the best validation epoch
+  charts/            loss.pdf, accuracy.pdf, overfitting_gap.pdf, learning_rate.pdf (one chart per file)
+Next: python Experiments/mobileNetv2_DINO/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-170004_A1_dino_mobilenetv2_split2_seed0_SMOKE" --split validation
+Final test (once, when everything is fixed): python Experiments/mobileNetv2_DINO/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-170004_A1_dino_mobilenetv2_split2_seed0_SMOKE"
+  [PASS] fine-tuning run completed and records the SSL provenance 
+  [PASS] reloaded best.pt reproduces the recorded validation accuracy (0.0250 vs 0.0250 recorded; tolerance one image of 320, because the GPU can pick different kernels after a reload and flip a near-tie)
+Evaluating /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-170004_A1_dino_mobilenetv2_split2_seed0_SMOKE/best.pt
+  checkpoint : epoch 2, val acc at training 0.0250
+  split      : validation, 320 images (read from disk)
+  device     : cuda (NVIDIA A100-PCIE-40GB)
+    validation batch    5/5  17s
+validation: 320 images  overall accuracy 0.0250  mean per-class accuracy 0.0250  (checkpoint epoch 2)
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke/20261028-170004_A1_dino_mobilenetv2_split2_seed0_SMOKE/eval_validation:
+  metrics.json            overall and mean per-class accuracy, loss, checkpoint info
+  per_class_accuracy.csv  accuracy for each of the 40 classes
+  confusion_matrix.csv    rows = true class, columns = predicted class
+  predictions.csv         one row per image: true, predicted, confidence
+  charts/                 per_class_accuracy.pdf, confusion_matrix.pdf, top_mistakes.pdf,
+                          confidence.pdf, calibration.pdf (one chart per file)
+  [PASS] evaluate.py --split validation uses the run's manifest copies and reproduces the record (0.0250)
+Imports
+  [PASS] every project module in use was loaded from this folder (data, dino, engine, evaluate, export_backbone, model, paths, plots, preview_views, ssl_data, train_ssl, train_supervised, utils)
+  [PASS] no module from Baseline or dino-main 
+
+PASSED (downstream part)
+Smoke folders (not results): 20261028-170004_A1_dino_mobilenetv2_split2_seed0_SMOKE in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/smoke
+
+SMOKE TEST PASSED (both parts)
+Preparing the pixel cache for 65427 SSL images (slow only the first time)...
+    decoded 10000/65427 images into the cache, 1008s
+    decoded 20000/65427 images into the cache, 2169s
+    decoded 30000/65427 images into the cache, 2912s
+    decoded 40000/65427 images into the cache, 3724s
+    decoded 50000/65427 images into the cache, 7651s
+    decoded 60000/65427 images into the cache, 9983s
+  pixels_7588844f9a1e3f89_65427.npy ready in 10510s
+Student and Teacher are built: they are both MobileNetV2 networks.
+Loss, optimizer and schedulers ready.
+
+DINO SSL run: A1_dino_ssl_mobilenetv2
+  output folder      : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/ssl/20261028-170414_A1_dino_ssl_mobilenetv2_split2_seed0
+  device             : cuda (NVIDIA A100-PCIE-40GB), mixed precision on
+  init               : ImageNet IMAGENET1K_V2 (student and teacher identical at start)
+  SSL images         : 65427 from ssl_training_data.csv (no labels used)
+  batch              : 64 images x 10 views = 2 x 224px global + 8 x 96px local
+  dimensions         : MobileNetV2 feature 1280 (checked: {224: (2, 1280), 96: (2, 1280)}) -> DINO head output 4096 (not the 40 classes)
+  trainable params   : 10,616,832 (student backbone + head; teacher has 0)
+  steps              : 1022 per epoch, 100 epochs, 102200 total
+  learning rate      : reference 0.0005 per 256 images -> effective peak 0.000125 at batch 64 after 10 warm-up epochs, cosine to 1e-06
+  teacher momentum   : 0.9995 -> 1, teacher temperature 0.04, out_dim 4096, seed 0
+
+SSL epoch 1/100
+  measured speed: 0.253 s/step -> about 4.3 min per epoch, about 7.18 h until epoch 100, peak GPU memory 9.19 GB
+    step   100/1022  loss 8.4455  lr 1.21e-06  teacher entropy 7.521  63s
+    step   200/1022  loss 8.4515  lr 2.43e-06  teacher entropy 7.532  91s
+    step   300/1022  loss 8.4469  lr 3.66e-06  teacher entropy 7.534  118s
+    step   400/1022  loss 8.4383  lr 4.88e-06  teacher entropy 7.535  145s
+    step   500/1022  loss 8.4283  lr 6.10e-06  teacher entropy 7.536  173s
+    step   600/1022  loss 8.4181  lr 7.33e-06  teacher entropy 7.537  200s
+    step   700/1022  loss 8.4071  lr 8.55e-06  teacher entropy 7.536  227s
+    step   800/1022  loss 8.3956  lr 9.77e-06  teacher entropy 7.535  254s
+    step   900/1022  loss 8.3834  lr 1.10e-05  teacher entropy 7.533  282s
+    step  1000/1022  loss 8.3706  lr 1.22e-05  teacher entropy 7.529  309s
+    step  1022/1022  loss 8.3677  lr 1.25e-05  teacher entropy 7.528  315s
+  epoch   1/100 summary  loss 8.3677  teacher entropy 7.528 (marginal 8.298, max 8.32)  feature cosine 0.340  5.3 min, checkpoint saved
+
+SSL epoch 2/100
+    step   100/1022  loss 8.2115  lr 1.37e-05  teacher entropy 7.470  28s
+    step   200/1022  loss 8.1925  lr 1.49e-05  teacher entropy 7.459  55s
+    step   300/1022  loss 8.1753  lr 1.62e-05  teacher entropy 7.449  82s
+    step   400/1022  loss 8.1558  lr 1.74e-05  teacher entropy 7.440  109s
+    step   500/1022  loss 8.1355  lr 1.86e-05  teacher entropy 7.432  136s
+    step   600/1022  loss 8.1148  lr 1.98e-05  teacher entropy 7.425  164s
+    step   700/1022  loss 8.0943  lr 2.11e-05  teacher entropy 7.418  191s
+    step   800/1022  loss 8.0734  lr 2.23e-05  teacher entropy 7.411  218s
+    step   900/1022  loss 8.0525  lr 2.35e-05  teacher entropy 7.403  245s
+    step  1000/1022  loss 8.0310  lr 2.47e-05  teacher entropy 7.394  272s
+    step  1022/1022  loss 8.0264  lr 2.50e-05  teacher entropy 7.392  278s
+  epoch   2/100 summary  loss 8.0264  teacher entropy 7.392 (marginal 8.223, max 8.32)  feature cosine 0.335  4.6 min, checkpoint saved
+
+SSL epoch 3/100
+    step   100/1022  loss 7.7810  lr 2.62e-05  teacher entropy 7.272  28s
+    step   200/1022  loss 7.7552  lr 2.74e-05  teacher entropy 7.252  55s
+    step   300/1022  loss 7.7305  lr 2.87e-05  teacher entropy 7.231  82s
+    step   400/1022  loss 7.7051  lr 2.99e-05  teacher entropy 7.207  109s
+    step   500/1022  loss 7.6798  lr 3.11e-05  teacher entropy 7.183  137s
+    step   600/1022  loss 7.6502  lr 3.23e-05  teacher entropy 7.154  164s
+    step   700/1022  loss 7.6199  lr 3.36e-05  teacher entropy 7.124  191s
+    step   800/1022  loss 7.5887  lr 3.48e-05  teacher entropy 7.092  218s
+    step   900/1022  loss 7.5567  lr 3.60e-05  teacher entropy 7.059  245s
+    step  1000/1022  loss 7.5233  lr 3.72e-05  teacher entropy 7.024  272s
+    step  1022/1022  loss 7.5160  lr 3.75e-05  teacher entropy 7.016  278s
+  epoch   3/100 summary  loss 7.5160  teacher entropy 7.016 (marginal 7.993, max 8.32)  feature cosine 0.322  4.6 min, checkpoint saved
+
+SSL epoch 4/100
+    step   100/1022  loss 7.1231  lr 3.87e-05  teacher entropy 6.590  28s
+    step   200/1022  loss 7.0825  lr 3.99e-05  teacher entropy 6.543  55s
+    step   300/1022  loss 7.0413  lr 4.12e-05  teacher entropy 6.496  82s
+    step   400/1022  loss 6.9990  lr 4.24e-05  teacher entropy 6.445  109s
+    step   500/1022  loss 6.9524  lr 4.36e-05  teacher entropy 6.392  136s
+    step   600/1022  loss 6.9040  lr 4.48e-05  teacher entropy 6.337  164s
+    step   700/1022  loss 6.8576  lr 4.61e-05  teacher entropy 6.284  191s
+    step   800/1022  loss 6.8088  lr 4.73e-05  teacher entropy 6.228  219s
+    step   900/1022  loss 6.7597  lr 4.85e-05  teacher entropy 6.171  247s
+    step  1000/1022  loss 6.7134  lr 4.97e-05  teacher entropy 6.116  274s
+    step  1022/1022  loss 6.7029  lr 5.00e-05  teacher entropy 6.104  281s
+  epoch   4/100 summary  loss 6.7029  teacher entropy 6.104 (marginal 7.553, max 8.32)  feature cosine 0.305  4.7 min, checkpoint saved
+
+SSL epoch 5/100
+    step   100/1022  loss 6.1655  lr 5.12e-05  teacher entropy 5.473  28s
+    step   200/1022  loss 6.0982  lr 5.24e-05  teacher entropy 5.401  56s
+    step   300/1022  loss 6.0449  lr 5.37e-05  teacher entropy 5.340  84s
+    step   400/1022  loss 5.9969  lr 5.49e-05  teacher entropy 5.283  111s
+    step   500/1022  loss 5.9531  lr 5.61e-05  teacher entropy 5.229  139s
+    step   600/1022  loss 5.9063  lr 5.73e-05  teacher entropy 5.174  167s
+    step   700/1022  loss 5.8608  lr 5.86e-05  teacher entropy 5.120  195s
+    step   800/1022  loss 5.8116  lr 5.98e-05  teacher entropy 5.063  223s
+    step   900/1022  loss 5.7627  lr 6.10e-05  teacher entropy 5.008  251s
+    step  1000/1022  loss 5.7178  lr 6.22e-05  teacher entropy 4.955  279s
+    step  1022/1022  loss 5.7069  lr 6.25e-05  teacher entropy 4.942  285s
+  epoch   5/100 summary  loss 5.7069  teacher entropy 4.942 (marginal 6.959, max 8.32)  feature cosine 0.289  4.7 min, checkpoint saved
+
+SSL epoch 6/100
+    step   100/1022  loss 5.2083  lr 6.37e-05  teacher entropy 4.352  28s
+    step   200/1022  loss 5.1629  lr 6.49e-05  teacher entropy 4.304  56s
+    step   300/1022  loss 5.1284  lr 6.62e-05  teacher entropy 4.261  84s
+    step   400/1022  loss 5.0871  lr 6.74e-05  teacher entropy 4.213  112s
+    step   500/1022  loss 5.0550  lr 6.86e-05  teacher entropy 4.173  140s
+    step   600/1022  loss 5.0206  lr 6.98e-05  teacher entropy 4.131  168s
+    step   700/1022  loss 4.9859  lr 7.11e-05  teacher entropy 4.089  196s
+    step   800/1022  loss 4.9536  lr 7.23e-05  teacher entropy 4.049  224s
+    step   900/1022  loss 4.9234  lr 7.35e-05  teacher entropy 4.012  252s
+    step  1000/1022  loss 4.8964  lr 7.47e-05  teacher entropy 3.977  280s
+    step  1022/1022  loss 4.8907  lr 7.50e-05  teacher entropy 3.970  286s
+  epoch   6/100 summary  loss 4.8907  teacher entropy 3.970 (marginal 6.481, max 8.32)  feature cosine 0.275  4.8 min, checkpoint saved
+
+SSL epoch 7/100
+    step   100/1022  loss 4.5578  lr 7.62e-05  teacher entropy 3.561  28s
+    step   200/1022  loss 4.5358  lr 7.74e-05  teacher entropy 3.534  56s
+    step   300/1022  loss 4.5066  lr 7.87e-05  teacher entropy 3.498  84s
+    step   400/1022  loss 4.4762  lr 7.99e-05  teacher entropy 3.464  112s
+    step   500/1022  loss 4.4609  lr 8.11e-05  teacher entropy 3.440  140s
+    step   600/1022  loss 4.4416  lr 8.23e-05  teacher entropy 3.415  168s
+    step   700/1022  loss 4.4256  lr 8.36e-05  teacher entropy 3.392  196s
+    step   800/1022  loss 4.4048  lr 8.48e-05  teacher entropy 3.365  224s
+    step   900/1022  loss 4.3837  lr 8.60e-05  teacher entropy 3.338  252s
+    step  1000/1022  loss 4.3604  lr 8.72e-05  teacher entropy 3.310  279s
+    step  1022/1022  loss 4.3570  lr 8.75e-05  teacher entropy 3.305  285s
+  epoch   7/100 summary  loss 4.3570  teacher entropy 3.305 (marginal 6.204, max 8.32)  feature cosine 0.267  4.8 min, checkpoint saved
+
+SSL epoch 8/100
+    step   100/1022  loss 4.1107  lr 8.87e-05  teacher entropy 3.000  28s
+    step   200/1022  loss 4.1120  lr 8.99e-05  teacher entropy 2.991  56s
+    step   300/1022  loss 4.0926  lr 9.12e-05  teacher entropy 2.970  83s
+    step   400/1022  loss 4.0858  lr 9.24e-05  teacher entropy 2.955  110s
+    step   500/1022  loss 4.0672  lr 9.36e-05  teacher entropy 2.932  138s
+    step   600/1022  loss 4.0499  lr 9.48e-05  teacher entropy 2.910  165s
+    step   700/1022  loss 4.0349  lr 9.61e-05  teacher entropy 2.890  193s
+    step   800/1022  loss 4.0211  lr 9.73e-05  teacher entropy 2.871  220s
+    step   900/1022  loss 4.0052  lr 9.85e-05  teacher entropy 2.851  248s
+    step  1000/1022  loss 3.9924  lr 9.97e-05  teacher entropy 2.833  276s
+    step  1022/1022  loss 3.9899  lr 1.00e-04  teacher entropy 2.829  282s
+  epoch   8/100 summary  loss 3.9899  teacher entropy 2.829 (marginal 6.023, max 8.32)  feature cosine 0.261  4.7 min, checkpoint saved
+
+SSL epoch 9/100
+    step   100/1022  loss 3.7966  lr 1.01e-04  teacher entropy 2.589  28s
+    step   200/1022  loss 3.7932  lr 1.02e-04  teacher entropy 2.583  56s
+    step   300/1022  loss 3.7892  lr 1.04e-04  teacher entropy 2.571  84s
+    step   400/1022  loss 3.7898  lr 1.05e-04  teacher entropy 2.564  111s
+    step   500/1022  loss 3.7712  lr 1.06e-04  teacher entropy 2.542  139s
+    step   600/1022  loss 3.7579  lr 1.07e-04  teacher entropy 2.526  166s
+    step   700/1022  loss 3.7455  lr 1.09e-04  teacher entropy 2.509  194s
+    step   800/1022  loss 3.7331  lr 1.10e-04  teacher entropy 2.494  222s
+    step   900/1022  loss 3.7193  lr 1.11e-04  teacher entropy 2.478  249s
+    step  1000/1022  loss 3.7098  lr 1.12e-04  teacher entropy 2.464  277s
+    step  1022/1022  loss 3.7079  lr 1.12e-04  teacher entropy 2.461  283s
+  epoch   9/100 summary  loss 3.7079  teacher entropy 2.461 (marginal 5.875, max 8.32)  feature cosine 0.258  4.7 min, checkpoint saved
+
+SSL epoch 10/100
+    step   100/1022  loss 3.5767  lr 1.14e-04  teacher entropy 2.287  28s
+    step   200/1022  loss 3.5694  lr 1.15e-04  teacher entropy 2.272  56s
+    step   300/1022  loss 3.5545  lr 1.16e-04  teacher entropy 2.256  84s
+    step   400/1022  loss 3.5452  lr 1.17e-04  teacher entropy 2.243  112s
+    step   500/1022  loss 3.5311  lr 1.19e-04  teacher entropy 2.228  139s
+    step   600/1022  loss 3.5229  lr 1.20e-04  teacher entropy 2.217  167s
+    step   700/1022  loss 3.5128  lr 1.21e-04  teacher entropy 2.203  194s
+    step   800/1022  loss 3.5004  lr 1.22e-04  teacher entropy 2.189  222s
+    step   900/1022  loss 3.4928  lr 1.24e-04  teacher entropy 2.177  249s
+    step  1000/1022  loss 3.4805  lr 1.25e-04  teacher entropy 2.163  277s
+    step  1022/1022  loss 3.4779  lr 1.25e-04  teacher entropy 2.161  283s
+  epoch  10/100 summary  loss 3.4779  teacher entropy 2.161 (marginal 5.739, max 8.32)  feature cosine 0.257  4.7 min, checkpoint saved
+
+SSL epoch 11/100
+    step   100/1022  loss 3.3670  lr 1.25e-04  teacher entropy 2.021  28s
+    step   200/1022  loss 3.3605  lr 1.25e-04  teacher entropy 2.007  55s
+    step   300/1022  loss 3.3443  lr 1.25e-04  teacher entropy 1.993  82s
+    step   400/1022  loss 3.3332  lr 1.25e-04  teacher entropy 1.980  110s
+    step   500/1022  loss 3.3226  lr 1.25e-04  teacher entropy 1.968  137s
+    step   600/1022  loss 3.3149  lr 1.25e-04  teacher entropy 1.959  164s
+    step   700/1022  loss 3.3027  lr 1.25e-04  teacher entropy 1.946  191s
+    step   800/1022  loss 3.2960  lr 1.25e-04  teacher entropy 1.936  219s
+    step   900/1022  loss 3.2870  lr 1.25e-04  teacher entropy 1.925  246s
+    step  1000/1022  loss 3.2777  lr 1.25e-04  teacher entropy 1.914  273s
+    step  1022/1022  loss 3.2763  lr 1.25e-04  teacher entropy 1.911  279s
+  epoch  11/100 summary  loss 3.2763  teacher entropy 1.911 (marginal 5.611, max 8.32)  feature cosine 0.257  4.7 min, checkpoint saved
+
+SSL epoch 12/100
+    step   100/1022  loss 3.1622  lr 1.25e-04  teacher entropy 1.778  28s
+    step   200/1022  loss 3.1614  lr 1.25e-04  teacher entropy 1.774  56s
+    step   300/1022  loss 3.1651  lr 1.25e-04  teacher entropy 1.771  83s
+    step   400/1022  loss 3.1530  lr 1.25e-04  teacher entropy 1.761  110s
+    step   500/1022  loss 3.1413  lr 1.25e-04  teacher entropy 1.750  138s
+    step   600/1022  loss 3.1368  lr 1.25e-04  teacher entropy 1.742  165s
+    step   700/1022  loss 3.1290  lr 1.25e-04  teacher entropy 1.733  192s
+    step   800/1022  loss 3.1212  lr 1.25e-04  teacher entropy 1.723  219s
+    step   900/1022  loss 3.1135  lr 1.25e-04  teacher entropy 1.714  247s
+    step  1000/1022  loss 3.1084  lr 1.25e-04  teacher entropy 1.705  274s
+    step  1022/1022  loss 3.1067  lr 1.25e-04  teacher entropy 1.703  280s
+  epoch  12/100 summary  loss 3.1067  teacher entropy 1.703 (marginal 5.494, max 8.32)  feature cosine 0.258  4.7 min, checkpoint saved
+
+SSL epoch 13/100
+    step   100/1022  loss 3.0104  lr 1.25e-04  teacher entropy 1.601  29s
+    step   200/1022  loss 3.0171  lr 1.25e-04  teacher entropy 1.596  56s
+    step   300/1022  loss 3.0082  lr 1.25e-04  teacher entropy 1.586  83s
+    step   400/1022  loss 2.9983  lr 1.25e-04  teacher entropy 1.580  110s
+    step   500/1022  loss 2.9923  lr 1.25e-04  teacher entropy 1.572  138s
+    step   600/1022  loss 2.9878  lr 1.25e-04  teacher entropy 1.565  165s
+    step   700/1022  loss 2.9797  lr 1.25e-04  teacher entropy 1.556  192s
+    step   800/1022  loss 2.9724  lr 1.25e-04  teacher entropy 1.548  219s
+    step   900/1022  loss 2.9682  lr 1.25e-04  teacher entropy 1.541  247s
+    step  1000/1022  loss 2.9645  lr 1.25e-04  teacher entropy 1.534  274s
+    step  1022/1022  loss 2.9635  lr 1.25e-04  teacher entropy 1.533  280s
+  epoch  13/100 summary  loss 2.9635  teacher entropy 1.533 (marginal 5.393, max 8.32)  feature cosine 0.260  4.7 min, checkpoint saved
+
+SSL epoch 14/100
+    step   100/1022  loss 2.8950  lr 1.25e-04  teacher entropy 1.452  29s
+    step   200/1022  loss 2.8765  lr 1.25e-04  teacher entropy 1.441  56s
+    step   300/1022  loss 2.8759  lr 1.25e-04  teacher entropy 1.436  84s
+    step   400/1022  loss 2.8738  lr 1.25e-04  teacher entropy 1.431  111s
+    step   500/1022  loss 2.8668  lr 1.25e-04  teacher entropy 1.424  139s
+    step   600/1022  loss 2.8645  lr 1.25e-04  teacher entropy 1.420  167s
+    step   700/1022  loss 2.8630  lr 1.24e-04  teacher entropy 1.415  194s
+    step   800/1022  loss 2.8584  lr 1.24e-04  teacher entropy 1.409  222s
+    step   900/1022  loss 2.8536  lr 1.24e-04  teacher entropy 1.403  249s
+    step  1000/1022  loss 2.8473  lr 1.24e-04  teacher entropy 1.396  277s
+    step  1022/1022  loss 2.8459  lr 1.24e-04  teacher entropy 1.394  283s
+  epoch  14/100 summary  loss 2.8459  teacher entropy 1.394 (marginal 5.307, max 8.32)  feature cosine 0.262  4.7 min, checkpoint saved
+
+SSL epoch 15/100
+    step   100/1022  loss 2.8075  lr 1.24e-04  teacher entropy 1.333  28s
+    step   200/1022  loss 2.7954  lr 1.24e-04  teacher entropy 1.328  55s
+    step   300/1022  loss 2.7891  lr 1.24e-04  teacher entropy 1.321  83s
+    step   400/1022  loss 2.7775  lr 1.24e-04  teacher entropy 1.313  110s
+    step   500/1022  loss 2.7700  lr 1.24e-04  teacher entropy 1.307  137s
+    step   600/1022  loss 2.7695  lr 1.24e-04  teacher entropy 1.303  165s
+    step   700/1022  loss 2.7640  lr 1.24e-04  teacher entropy 1.298  193s
+    step   800/1022  loss 2.7599  lr 1.24e-04  teacher entropy 1.292  220s
+    step   900/1022  loss 2.7551  lr 1.24e-04  teacher entropy 1.287  247s
+    step  1000/1022  loss 2.7502  lr 1.24e-04  teacher entropy 1.282  274s
+    step  1022/1022  loss 2.7497  lr 1.24e-04  teacher entropy 1.281  280s
+  epoch  15/100 summary  loss 2.7497  teacher entropy 1.281 (marginal 5.233, max 8.32)  feature cosine 0.264  4.7 min, checkpoint saved
+
+SSL epoch 16/100
+    step   100/1022  loss 2.6610  lr 1.24e-04  teacher entropy 1.222  28s
+    step   200/1022  loss 2.6772  lr 1.24e-04  teacher entropy 1.219  55s
+    step   300/1022  loss 2.6777  lr 1.24e-04  teacher entropy 1.214  82s
+    step   400/1022  loss 2.6832  lr 1.24e-04  teacher entropy 1.211  109s
+    step   500/1022  loss 2.6772  lr 1.24e-04  teacher entropy 1.208  136s
+    step   600/1022  loss 2.6756  lr 1.24e-04  teacher entropy 1.204  163s
+    step   700/1022  loss 2.6780  lr 1.24e-04  teacher entropy 1.201  191s
+    step   800/1022  loss 2.6744  lr 1.24e-04  teacher entropy 1.198  218s
+    step   900/1022  loss 2.6711  lr 1.24e-04  teacher entropy 1.193  245s
+    step  1000/1022  loss 2.6682  lr 1.24e-04  teacher entropy 1.188  273s
+    step  1022/1022  loss 2.6663  lr 1.24e-04  teacher entropy 1.186  279s
+  epoch  16/100 summary  loss 2.6663  teacher entropy 1.186 (marginal 5.169, max 8.32)  feature cosine 0.266  4.7 min, checkpoint saved
+
+SSL epoch 17/100
+    step   100/1022  loss 2.5839  lr 1.24e-04  teacher entropy 1.125  28s
+    step   200/1022  loss 2.6064  lr 1.24e-04  teacher entropy 1.135  55s
+    step   300/1022  loss 2.6095  lr 1.24e-04  teacher entropy 1.135  82s
+    step   400/1022  loss 2.6116  lr 1.23e-04  teacher entropy 1.132  110s
+    step   500/1022  loss 2.6062  lr 1.23e-04  teacher entropy 1.127  137s
+    step   600/1022  loss 2.6028  lr 1.23e-04  teacher entropy 1.123  164s
+    step   700/1022  loss 2.5966  lr 1.23e-04  teacher entropy 1.119  192s
+    step   800/1022  loss 2.5949  lr 1.23e-04  teacher entropy 1.116  219s
+    step   900/1022  loss 2.5921  lr 1.23e-04  teacher entropy 1.112  246s
+    step  1000/1022  loss 2.5889  lr 1.23e-04  teacher entropy 1.108  273s
+    step  1022/1022  loss 2.5892  lr 1.23e-04  teacher entropy 1.108  279s
+  epoch  17/100 summary  loss 2.5892  teacher entropy 1.108 (marginal 5.113, max 8.32)  feature cosine 0.268  4.7 min, checkpoint saved
+
+SSL epoch 18/100
+    step   100/1022  loss 2.5512  lr 1.23e-04  teacher entropy 1.068  28s
+    step   200/1022  loss 2.5556  lr 1.23e-04  teacher entropy 1.066  55s
+    step   300/1022  loss 2.5451  lr 1.23e-04  teacher entropy 1.064  83s
+    step   400/1022  loss 2.5460  lr 1.23e-04  teacher entropy 1.061  111s
+    step   500/1022  loss 2.5449  lr 1.23e-04  teacher entropy 1.057  139s
+    step   600/1022  loss 2.5412  lr 1.23e-04  teacher entropy 1.054  166s
+    step   700/1022  loss 2.5386  lr 1.23e-04  teacher entropy 1.050  194s
+    step   800/1022  loss 2.5358  lr 1.23e-04  teacher entropy 1.047  221s
+    step   900/1022  loss 2.5311  lr 1.23e-04  teacher entropy 1.043  249s
+    step  1000/1022  loss 2.5314  lr 1.23e-04  teacher entropy 1.041  276s
+    step  1022/1022  loss 2.5307  lr 1.23e-04  teacher entropy 1.040  282s
+  epoch  18/100 summary  loss 2.5307  teacher entropy 1.040 (marginal 5.066, max 8.32)  feature cosine 0.270  4.7 min, checkpoint saved
+
+SSL epoch 19/100
+    step   100/1022  loss 2.4760  lr 1.23e-04  teacher entropy 0.997  31s
+    step   200/1022  loss 2.4731  lr 1.22e-04  teacher entropy 0.997  58s
+    step   300/1022  loss 2.4798  lr 1.22e-04  teacher entropy 1.000  85s
+    step   400/1022  loss 2.4788  lr 1.22e-04  teacher entropy 0.995  112s
+    step   500/1022  loss 2.4774  lr 1.22e-04  teacher entropy 0.994  139s
+    step   600/1022  loss 2.4789  lr 1.22e-04  teacher entropy 0.994  166s
+    step   700/1022  loss 2.4742  lr 1.22e-04  teacher entropy 0.989  194s
+    step   800/1022  loss 2.4727  lr 1.22e-04  teacher entropy 0.987  222s
+    step   900/1022  loss 2.4737  lr 1.22e-04  teacher entropy 0.985  249s
+    step  1000/1022  loss 2.4714  lr 1.22e-04  teacher entropy 0.982  277s
+    step  1022/1022  loss 2.4708  lr 1.22e-04  teacher entropy 0.982  283s
+  epoch  19/100 summary  loss 2.4708  teacher entropy 0.982 (marginal 5.023, max 8.32)  feature cosine 0.271  4.7 min, checkpoint saved
+
+SSL epoch 20/100
+    step   100/1022  loss 2.4532  lr 1.22e-04  teacher entropy 0.964  28s
+    step   200/1022  loss 2.4532  lr 1.22e-04  teacher entropy 0.958  55s
+    step   300/1022  loss 2.4402  lr 1.22e-04  teacher entropy 0.952  83s
+    step   400/1022  loss 2.4333  lr 1.22e-04  teacher entropy 0.947  110s
+    step   500/1022  loss 2.4313  lr 1.22e-04  teacher entropy 0.945  137s
+    step   600/1022  loss 2.4331  lr 1.22e-04  teacher entropy 0.943  165s
+    step   700/1022  loss 2.4339  lr 1.21e-04  teacher entropy 0.942  193s
+    step   800/1022  loss 2.4303  lr 1.21e-04  teacher entropy 0.938  221s
+    step   900/1022  loss 2.4257  lr 1.21e-04  teacher entropy 0.935  249s
+    step  1000/1022  loss 2.4227  lr 1.21e-04  teacher entropy 0.931  277s
+    step  1022/1022  loss 2.4224  lr 1.21e-04  teacher entropy 0.931  283s
+  epoch  20/100 summary  loss 2.4224  teacher entropy 0.931 (marginal 4.985, max 8.32)  feature cosine 0.273  4.7 min, checkpoint saved
+
+SSL epoch 21/100
+    step   100/1022  loss 2.3623  lr 1.21e-04  teacher entropy 0.899  28s
+    step   200/1022  loss 2.3769  lr 1.21e-04  teacher entropy 0.903  55s
+    step   300/1022  loss 2.3801  lr 1.21e-04  teacher entropy 0.902  82s
+    step   400/1022  loss 2.3730  lr 1.21e-04  teacher entropy 0.897  109s
+    step   500/1022  loss 2.3732  lr 1.21e-04  teacher entropy 0.895  137s
+    step   600/1022  loss 2.3706  lr 1.21e-04  teacher entropy 0.892  165s
+    step   700/1022  loss 2.3734  lr 1.21e-04  teacher entropy 0.892  193s
+    step   800/1022  loss 2.3710  lr 1.21e-04  teacher entropy 0.888  221s
+    step   900/1022  loss 2.3714  lr 1.21e-04  teacher entropy 0.887  248s
+    step  1000/1022  loss 2.3706  lr 1.21e-04  teacher entropy 0.885  275s
+    step  1022/1022  loss 2.3706  lr 1.20e-04  teacher entropy 0.885  281s
+  epoch  21/100 summary  loss 2.3706  teacher entropy 0.885 (marginal 4.946, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 22/100
+    step   100/1022  loss 2.3341  lr 1.20e-04  teacher entropy 0.855  28s
+    step   200/1022  loss 2.3324  lr 1.20e-04  teacher entropy 0.853  55s
+    step   300/1022  loss 2.3305  lr 1.20e-04  teacher entropy 0.853  83s
+    step   400/1022  loss 2.3319  lr 1.20e-04  teacher entropy 0.851  111s
+    step   500/1022  loss 2.3275  lr 1.20e-04  teacher entropy 0.848  138s
+    step   600/1022  loss 2.3275  lr 1.20e-04  teacher entropy 0.848  166s
+    step   700/1022  loss 2.3277  lr 1.20e-04  teacher entropy 0.847  194s
+    step   800/1022  loss 2.3249  lr 1.20e-04  teacher entropy 0.844  222s
+    step   900/1022  loss 2.3240  lr 1.20e-04  teacher entropy 0.842  249s
+    step  1000/1022  loss 2.3231  lr 1.20e-04  teacher entropy 0.841  277s
+    step  1022/1022  loss 2.3231  lr 1.20e-04  teacher entropy 0.840  283s
+  epoch  22/100 summary  loss 2.3231  teacher entropy 0.840 (marginal 4.914, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 23/100
+    step   100/1022  loss 2.2872  lr 1.20e-04  teacher entropy 0.819  28s
+    step   200/1022  loss 2.2887  lr 1.19e-04  teacher entropy 0.816  56s
+    step   300/1022  loss 2.2920  lr 1.19e-04  teacher entropy 0.818  83s
+    step   400/1022  loss 2.2898  lr 1.19e-04  teacher entropy 0.814  110s
+    step   500/1022  loss 2.2876  lr 1.19e-04  teacher entropy 0.813  138s
+    step   600/1022  loss 2.2860  lr 1.19e-04  teacher entropy 0.810  166s
+    step   700/1022  loss 2.2840  lr 1.19e-04  teacher entropy 0.809  194s
+    step   800/1022  loss 2.2856  lr 1.19e-04  teacher entropy 0.808  221s
+    step   900/1022  loss 2.2872  lr 1.19e-04  teacher entropy 0.808  249s
+    step  1000/1022  loss 2.2834  lr 1.19e-04  teacher entropy 0.805  276s
+    step  1022/1022  loss 2.2827  lr 1.19e-04  teacher entropy 0.805  282s
+  epoch  23/100 summary  loss 2.2827  teacher entropy 0.805 (marginal 4.887, max 8.32)  feature cosine 0.276  4.7 min, checkpoint saved
+
+SSL epoch 24/100
+    step   100/1022  loss 2.2823  lr 1.19e-04  teacher entropy 0.798  28s
+    step   200/1022  loss 2.2669  lr 1.19e-04  teacher entropy 0.788  56s
+    step   300/1022  loss 2.2581  lr 1.18e-04  teacher entropy 0.789  83s
+    step   400/1022  loss 2.2563  lr 1.18e-04  teacher entropy 0.785  111s
+    step   500/1022  loss 2.2489  lr 1.18e-04  teacher entropy 0.781  138s
+    step   600/1022  loss 2.2478  lr 1.18e-04  teacher entropy 0.779  165s
+    step   700/1022  loss 2.2468  lr 1.18e-04  teacher entropy 0.777  192s
+    step   800/1022  loss 2.2428  lr 1.18e-04  teacher entropy 0.775  220s
+    step   900/1022  loss 2.2419  lr 1.18e-04  teacher entropy 0.773  247s
+    step  1000/1022  loss 2.2449  lr 1.18e-04  teacher entropy 0.773  274s
+    step  1022/1022  loss 2.2443  lr 1.18e-04  teacher entropy 0.773  280s
+  epoch  24/100 summary  loss 2.2443  teacher entropy 0.773 (marginal 4.861, max 8.32)  feature cosine 0.277  4.7 min, checkpoint saved
+
+SSL epoch 25/100
+    step   100/1022  loss 2.2304  lr 1.18e-04  teacher entropy 0.762  28s
+    step   200/1022  loss 2.2193  lr 1.18e-04  teacher entropy 0.756  55s
+    step   300/1022  loss 2.2144  lr 1.17e-04  teacher entropy 0.753  83s
+    step   400/1022  loss 2.2116  lr 1.17e-04  teacher entropy 0.752  110s
+    step   500/1022  loss 2.2114  lr 1.17e-04  teacher entropy 0.750  137s
+    step   600/1022  loss 2.2113  lr 1.17e-04  teacher entropy 0.749  165s
+    step   700/1022  loss 2.2066  lr 1.17e-04  teacher entropy 0.746  192s
+    step   800/1022  loss 2.2069  lr 1.17e-04  teacher entropy 0.745  220s
+    step   900/1022  loss 2.2057  lr 1.17e-04  teacher entropy 0.743  247s
+    step  1000/1022  loss 2.2060  lr 1.17e-04  teacher entropy 0.743  274s
+    step  1022/1022  loss 2.2055  lr 1.17e-04  teacher entropy 0.742  280s
+  epoch  25/100 summary  loss 2.2055  teacher entropy 0.742 (marginal 4.835, max 8.32)  feature cosine 0.277  4.7 min, checkpoint saved
+
+SSL epoch 26/100
+    step   100/1022  loss 2.1399  lr 1.17e-04  teacher entropy 0.709  29s
+    step   200/1022  loss 2.1592  lr 1.16e-04  teacher entropy 0.716  56s
+    step   300/1022  loss 2.1678  lr 1.16e-04  teacher entropy 0.718  84s
+    step   400/1022  loss 2.1682  lr 1.16e-04  teacher entropy 0.718  111s
+    step   500/1022  loss 2.1676  lr 1.16e-04  teacher entropy 0.717  139s
+    step   600/1022  loss 2.1717  lr 1.16e-04  teacher entropy 0.718  166s
+    step   700/1022  loss 2.1713  lr 1.16e-04  teacher entropy 0.717  194s
+    step   800/1022  loss 2.1706  lr 1.16e-04  teacher entropy 0.715  221s
+    step   900/1022  loss 2.1718  lr 1.16e-04  teacher entropy 0.715  248s
+    step  1000/1022  loss 2.1693  lr 1.16e-04  teacher entropy 0.714  276s
+    step  1022/1022  loss 2.1708  lr 1.16e-04  teacher entropy 0.714  282s
+  epoch  26/100 summary  loss 2.1708  teacher entropy 0.714 (marginal 4.812, max 8.32)  feature cosine 0.278  4.7 min, checkpoint saved
+
+SSL epoch 27/100
+    step   100/1022  loss 2.1366  lr 1.15e-04  teacher entropy 0.697  28s
+    step   200/1022  loss 2.1370  lr 1.15e-04  teacher entropy 0.698  55s
+    step   300/1022  loss 2.1397  lr 1.15e-04  teacher entropy 0.696  82s
+    step   400/1022  loss 2.1339  lr 1.15e-04  teacher entropy 0.694  109s
+    step   500/1022  loss 2.1374  lr 1.15e-04  teacher entropy 0.694  136s
+    step   600/1022  loss 2.1345  lr 1.15e-04  teacher entropy 0.692  164s
+    step   700/1022  loss 2.1330  lr 1.15e-04  teacher entropy 0.690  191s
+    step   800/1022  loss 2.1335  lr 1.15e-04  teacher entropy 0.689  218s
+    step   900/1022  loss 2.1336  lr 1.15e-04  teacher entropy 0.688  245s
+    step  1000/1022  loss 2.1328  lr 1.14e-04  teacher entropy 0.687  272s
+    step  1022/1022  loss 2.1325  lr 1.14e-04  teacher entropy 0.687  278s
+  epoch  27/100 summary  loss 2.1325  teacher entropy 0.687 (marginal 4.784, max 8.32)  feature cosine 0.278  4.6 min, checkpoint saved
+
+SSL epoch 28/100
+    step   100/1022  loss 2.0967  lr 1.14e-04  teacher entropy 0.669  28s
+    step   200/1022  loss 2.0987  lr 1.14e-04  teacher entropy 0.671  56s
+    step   300/1022  loss 2.1084  lr 1.14e-04  teacher entropy 0.672  83s
+    step   400/1022  loss 2.1092  lr 1.14e-04  teacher entropy 0.669  111s
+    step   500/1022  loss 2.1074  lr 1.14e-04  teacher entropy 0.668  138s
+    step   600/1022  loss 2.1063  lr 1.14e-04  teacher entropy 0.667  166s
+    step   700/1022  loss 2.1006  lr 1.14e-04  teacher entropy 0.665  193s
+    step   800/1022  loss 2.1003  lr 1.13e-04  teacher entropy 0.665  221s
+    step   900/1022  loss 2.0991  lr 1.13e-04  teacher entropy 0.663  249s
+    step  1000/1022  loss 2.0988  lr 1.13e-04  teacher entropy 0.662  277s
+    step  1022/1022  loss 2.0993  lr 1.13e-04  teacher entropy 0.662  283s
+  epoch  28/100 summary  loss 2.0993  teacher entropy 0.662 (marginal 4.765, max 8.32)  feature cosine 0.278  4.7 min, checkpoint saved
+
+SSL epoch 29/100
+    step   100/1022  loss 2.0432  lr 1.13e-04  teacher entropy 0.641  28s
+    step   200/1022  loss 2.0408  lr 1.13e-04  teacher entropy 0.637  55s
+    step   300/1022  loss 2.0548  lr 1.13e-04  teacher entropy 0.640  83s
+    step   400/1022  loss 2.0569  lr 1.13e-04  teacher entropy 0.642  110s
+    step   500/1022  loss 2.0621  lr 1.13e-04  teacher entropy 0.642  138s
+    step   600/1022  loss 2.0615  lr 1.12e-04  teacher entropy 0.641  165s
+    step   700/1022  loss 2.0662  lr 1.12e-04  teacher entropy 0.642  193s
+    step   800/1022  loss 2.0649  lr 1.12e-04  teacher entropy 0.641  221s
+    step   900/1022  loss 2.0652  lr 1.12e-04  teacher entropy 0.640  249s
+    step  1000/1022  loss 2.0662  lr 1.12e-04  teacher entropy 0.640  276s
+    step  1022/1022  loss 2.0678  lr 1.12e-04  teacher entropy 0.640  282s
+  epoch  29/100 summary  loss 2.0678  teacher entropy 0.640 (marginal 4.746, max 8.32)  feature cosine 0.278  4.7 min, checkpoint saved
+
+SSL epoch 30/100
+    step   100/1022  loss 2.0379  lr 1.12e-04  teacher entropy 0.614  28s
+    step   200/1022  loss 2.0365  lr 1.12e-04  teacher entropy 0.617  56s
+    step   300/1022  loss 2.0326  lr 1.11e-04  teacher entropy 0.618  83s
+    step   400/1022  loss 2.0334  lr 1.11e-04  teacher entropy 0.618  110s
+    step   500/1022  loss 2.0379  lr 1.11e-04  teacher entropy 0.620  138s
+    step   600/1022  loss 2.0380  lr 1.11e-04  teacher entropy 0.619  165s
+    step   700/1022  loss 2.0372  lr 1.11e-04  teacher entropy 0.619  192s
+    step   800/1022  loss 2.0363  lr 1.11e-04  teacher entropy 0.619  219s
+    step   900/1022  loss 2.0370  lr 1.11e-04  teacher entropy 0.618  246s
+    step  1000/1022  loss 2.0382  lr 1.11e-04  teacher entropy 0.618  274s
+    step  1022/1022  loss 2.0388  lr 1.10e-04  teacher entropy 0.618  279s
+  epoch  30/100 summary  loss 2.0388  teacher entropy 0.618 (marginal 4.726, max 8.32)  feature cosine 0.277  4.7 min, checkpoint saved
+
+SSL epoch 31/100
+    step   100/1022  loss 2.0045  lr 1.10e-04  teacher entropy 0.608  28s
+    step   200/1022  loss 2.0151  lr 1.10e-04  teacher entropy 0.611  55s
+    step   300/1022  loss 2.0182  lr 1.10e-04  teacher entropy 0.611  83s
+    step   400/1022  loss 2.0254  lr 1.10e-04  teacher entropy 0.610  110s
+    step   500/1022  loss 2.0263  lr 1.10e-04  teacher entropy 0.608  138s
+    step   600/1022  loss 2.0218  lr 1.10e-04  teacher entropy 0.607  165s
+    step   700/1022  loss 2.0202  lr 1.10e-04  teacher entropy 0.605  193s
+    step   800/1022  loss 2.0187  lr 1.09e-04  teacher entropy 0.604  220s
+    step   900/1022  loss 2.0137  lr 1.09e-04  teacher entropy 0.602  248s
+    step  1000/1022  loss 2.0111  lr 1.09e-04  teacher entropy 0.601  275s
+    step  1022/1022  loss 2.0112  lr 1.09e-04  teacher entropy 0.601  282s
+  epoch  31/100 summary  loss 2.0112  teacher entropy 0.601 (marginal 4.711, max 8.32)  feature cosine 0.277  4.7 min, checkpoint saved
+
+SSL epoch 32/100
+    step   100/1022  loss 1.9689  lr 1.09e-04  teacher entropy 0.581  28s
+    step   200/1022  loss 1.9761  lr 1.09e-04  teacher entropy 0.584  56s
+    step   300/1022  loss 1.9845  lr 1.09e-04  teacher entropy 0.585  84s
+    step   400/1022  loss 1.9831  lr 1.09e-04  teacher entropy 0.584  111s
+    step   500/1022  loss 1.9826  lr 1.08e-04  teacher entropy 0.586  138s
+    step   600/1022  loss 1.9856  lr 1.08e-04  teacher entropy 0.585  166s
+    step   700/1022  loss 1.9833  lr 1.08e-04  teacher entropy 0.584  193s
+    step   800/1022  loss 1.9854  lr 1.08e-04  teacher entropy 0.584  221s
+    step   900/1022  loss 1.9854  lr 1.08e-04  teacher entropy 0.584  248s
+    step  1000/1022  loss 1.9843  lr 1.08e-04  teacher entropy 0.583  275s
+    step  1022/1022  loss 1.9842  lr 1.08e-04  teacher entropy 0.583  281s
+  epoch  32/100 summary  loss 1.9842  teacher entropy 0.583 (marginal 4.695, max 8.32)  feature cosine 0.277  4.7 min, checkpoint saved
+
+SSL epoch 33/100
+    step   100/1022  loss 1.9441  lr 1.07e-04  teacher entropy 0.570  28s
+    step   200/1022  loss 1.9443  lr 1.07e-04  teacher entropy 0.569  55s
+    step   300/1022  loss 1.9458  lr 1.07e-04  teacher entropy 0.571  83s
+    step   400/1022  loss 1.9492  lr 1.07e-04  teacher entropy 0.569  110s
+    step   500/1022  loss 1.9560  lr 1.07e-04  teacher entropy 0.570  138s
+    step   600/1022  loss 1.9595  lr 1.07e-04  teacher entropy 0.570  166s
+    step   700/1022  loss 1.9595  lr 1.07e-04  teacher entropy 0.570  194s
+    step   800/1022  loss 1.9596  lr 1.06e-04  teacher entropy 0.568  222s
+    step   900/1022  loss 1.9571  lr 1.06e-04  teacher entropy 0.567  249s
+    step  1000/1022  loss 1.9561  lr 1.06e-04  teacher entropy 0.566  277s
+    step  1022/1022  loss 1.9565  lr 1.06e-04  teacher entropy 0.566  283s
+  epoch  33/100 summary  loss 1.9565  teacher entropy 0.566 (marginal 4.677, max 8.32)  feature cosine 0.277  4.7 min, checkpoint saved
+
+SSL epoch 34/100
+    step   100/1022  loss 1.9535  lr 1.06e-04  teacher entropy 0.561  28s
+    step   200/1022  loss 1.9440  lr 1.06e-04  teacher entropy 0.559  55s
+    step   300/1022  loss 1.9385  lr 1.06e-04  teacher entropy 0.556  83s
+    step   400/1022  loss 1.9371  lr 1.05e-04  teacher entropy 0.556  110s
+    step   500/1022  loss 1.9356  lr 1.05e-04  teacher entropy 0.554  137s
+    step   600/1022  loss 1.9325  lr 1.05e-04  teacher entropy 0.553  165s
+    step   700/1022  loss 1.9345  lr 1.05e-04  teacher entropy 0.553  192s
+    step   800/1022  loss 1.9329  lr 1.05e-04  teacher entropy 0.552  219s
+    step   900/1022  loss 1.9333  lr 1.05e-04  teacher entropy 0.551  246s
+    step  1000/1022  loss 1.9338  lr 1.05e-04  teacher entropy 0.550  274s
+    step  1022/1022  loss 1.9341  lr 1.04e-04  teacher entropy 0.550  280s
+  epoch  34/100 summary  loss 1.9341  teacher entropy 0.550 (marginal 4.667, max 8.32)  feature cosine 0.277  4.7 min, checkpoint saved
+
+SSL epoch 35/100
+    step   100/1022  loss 1.9040  lr 1.04e-04  teacher entropy 0.537  28s
+    step   200/1022  loss 1.9090  lr 1.04e-04  teacher entropy 0.540  55s
+    step   300/1022  loss 1.9096  lr 1.04e-04  teacher entropy 0.540  83s
+    step   400/1022  loss 1.9078  lr 1.04e-04  teacher entropy 0.538  110s
+    step   500/1022  loss 1.9068  lr 1.04e-04  teacher entropy 0.537  137s
+    step   600/1022  loss 1.9055  lr 1.04e-04  teacher entropy 0.536  164s
+    step   700/1022  loss 1.9047  lr 1.03e-04  teacher entropy 0.535  191s
+    step   800/1022  loss 1.9061  lr 1.03e-04  teacher entropy 0.535  218s
+    step   900/1022  loss 1.9054  lr 1.03e-04  teacher entropy 0.536  246s
+    step  1000/1022  loss 1.9058  lr 1.03e-04  teacher entropy 0.535  273s
+    step  1022/1022  loss 1.9053  lr 1.03e-04  teacher entropy 0.535  279s
+  epoch  35/100 summary  loss 1.9053  teacher entropy 0.535 (marginal 4.651, max 8.32)  feature cosine 0.276  4.7 min, checkpoint saved
+
+SSL epoch 36/100
+    step   100/1022  loss 1.8825  lr 1.03e-04  teacher entropy 0.525  28s
+    step   200/1022  loss 1.8800  lr 1.03e-04  teacher entropy 0.526  55s
+    step   300/1022  loss 1.8825  lr 1.02e-04  teacher entropy 0.524  82s
+    step   400/1022  loss 1.8844  lr 1.02e-04  teacher entropy 0.523  110s
+    step   500/1022  loss 1.8879  lr 1.02e-04  teacher entropy 0.524  138s
+    step   600/1022  loss 1.8868  lr 1.02e-04  teacher entropy 0.523  165s
+    step   700/1022  loss 1.8839  lr 1.02e-04  teacher entropy 0.522  193s
+    step   800/1022  loss 1.8814  lr 1.02e-04  teacher entropy 0.521  221s
+    step   900/1022  loss 1.8827  lr 1.01e-04  teacher entropy 0.521  248s
+    step  1000/1022  loss 1.8835  lr 1.01e-04  teacher entropy 0.521  275s
+    step  1022/1022  loss 1.8822  lr 1.01e-04  teacher entropy 0.520  281s
+  epoch  36/100 summary  loss 1.8822  teacher entropy 0.520 (marginal 4.637, max 8.32)  feature cosine 0.276  4.7 min, checkpoint saved
+
+SSL epoch 37/100
+    step   100/1022  loss 1.8624  lr 1.01e-04  teacher entropy 0.513  28s
+    step   200/1022  loss 1.8543  lr 1.01e-04  teacher entropy 0.511  55s
+    step   300/1022  loss 1.8627  lr 1.01e-04  teacher entropy 0.511  82s
+    step   400/1022  loss 1.8578  lr 1.01e-04  teacher entropy 0.510  110s
+    step   500/1022  loss 1.8569  lr 1.00e-04  teacher entropy 0.509  137s
+    step   600/1022  loss 1.8601  lr 1.00e-04  teacher entropy 0.511  165s
+    step   700/1022  loss 1.8631  lr 1.00e-04  teacher entropy 0.512  192s
+    step   800/1022  loss 1.8596  lr 9.98e-05  teacher entropy 0.510  219s
+    step   900/1022  loss 1.8620  lr 9.97e-05  teacher entropy 0.509  247s
+    step  1000/1022  loss 1.8603  lr 9.95e-05  teacher entropy 0.508  274s
+    step  1022/1022  loss 1.8598  lr 9.94e-05  teacher entropy 0.508  280s
+  epoch  37/100 summary  loss 1.8598  teacher entropy 0.508 (marginal 4.625, max 8.32)  feature cosine 0.276  4.7 min, checkpoint saved
+
+SSL epoch 38/100
+    step   100/1022  loss 1.8327  lr 9.93e-05  teacher entropy 0.506  28s
+    step   200/1022  loss 1.8437  lr 9.91e-05  teacher entropy 0.506  55s
+    step   300/1022  loss 1.8371  lr 9.89e-05  teacher entropy 0.503  83s
+    step   400/1022  loss 1.8356  lr 9.88e-05  teacher entropy 0.501  110s
+    step   500/1022  loss 1.8356  lr 9.86e-05  teacher entropy 0.501  137s
+    step   600/1022  loss 1.8354  lr 9.84e-05  teacher entropy 0.499  165s
+    step   700/1022  loss 1.8399  lr 9.82e-05  teacher entropy 0.500  193s
+    step   800/1022  loss 1.8398  lr 9.81e-05  teacher entropy 0.499  221s
+    step   900/1022  loss 1.8391  lr 9.79e-05  teacher entropy 0.497  248s
+    step  1000/1022  loss 1.8394  lr 9.77e-05  teacher entropy 0.496  275s
+    step  1022/1022  loss 1.8396  lr 9.77e-05  teacher entropy 0.496  281s
+  epoch  38/100 summary  loss 1.8396  teacher entropy 0.496 (marginal 4.614, max 8.32)  feature cosine 0.276  4.7 min, checkpoint saved
+
+SSL epoch 39/100
+    step   100/1022  loss 1.8306  lr 9.75e-05  teacher entropy 0.493  28s
+    step   200/1022  loss 1.8217  lr 9.73e-05  teacher entropy 0.488  56s
+    step   300/1022  loss 1.8137  lr 9.71e-05  teacher entropy 0.485  84s
+    step   400/1022  loss 1.8219  lr 9.70e-05  teacher entropy 0.485  111s
+    step   500/1022  loss 1.8231  lr 9.68e-05  teacher entropy 0.486  139s
+    step   600/1022  loss 1.8173  lr 9.66e-05  teacher entropy 0.484  167s
+    step   700/1022  loss 1.8178  lr 9.64e-05  teacher entropy 0.483  194s
+    step   800/1022  loss 1.8186  lr 9.63e-05  teacher entropy 0.483  222s
+    step   900/1022  loss 1.8177  lr 9.61e-05  teacher entropy 0.483  249s
+    step  1000/1022  loss 1.8190  lr 9.59e-05  teacher entropy 0.483  276s
+    step  1022/1022  loss 1.8187  lr 9.59e-05  teacher entropy 0.483  282s
+  epoch  39/100 summary  loss 1.8187  teacher entropy 0.483 (marginal 4.601, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 40/100
+    step   100/1022  loss 1.8025  lr 9.57e-05  teacher entropy 0.478  28s
+    step   200/1022  loss 1.7997  lr 9.55e-05  teacher entropy 0.476  55s
+    step   300/1022  loss 1.7975  lr 9.53e-05  teacher entropy 0.477  82s
+    step   400/1022  loss 1.7958  lr 9.51e-05  teacher entropy 0.475  109s
+    step   500/1022  loss 1.7957  lr 9.50e-05  teacher entropy 0.474  136s
+    step   600/1022  loss 1.7986  lr 9.48e-05  teacher entropy 0.474  164s
+    step   700/1022  loss 1.7967  lr 9.46e-05  teacher entropy 0.473  191s
+    step   800/1022  loss 1.7970  lr 9.44e-05  teacher entropy 0.473  218s
+    step   900/1022  loss 1.7965  lr 9.42e-05  teacher entropy 0.472  246s
+    step  1000/1022  loss 1.7963  lr 9.40e-05  teacher entropy 0.471  274s
+    step  1022/1022  loss 1.7969  lr 9.40e-05  teacher entropy 0.472  280s
+  epoch  40/100 summary  loss 1.7969  teacher entropy 0.472 (marginal 4.591, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 41/100
+    step   100/1022  loss 1.7765  lr 9.38e-05  teacher entropy 0.469  29s
+    step   200/1022  loss 1.7848  lr 9.36e-05  teacher entropy 0.468  56s
+    step   300/1022  loss 1.7780  lr 9.35e-05  teacher entropy 0.465  84s
+    step   400/1022  loss 1.7739  lr 9.33e-05  teacher entropy 0.464  112s
+    step   500/1022  loss 1.7714  lr 9.31e-05  teacher entropy 0.462  139s
+    step   600/1022  loss 1.7726  lr 9.29e-05  teacher entropy 0.461  167s
+    step   700/1022  loss 1.7751  lr 9.27e-05  teacher entropy 0.462  194s
+    step   800/1022  loss 1.7759  lr 9.25e-05  teacher entropy 0.461  221s
+    step   900/1022  loss 1.7768  lr 9.23e-05  teacher entropy 0.461  249s
+    step  1000/1022  loss 1.7760  lr 9.22e-05  teacher entropy 0.461  276s
+    step  1022/1022  loss 1.7757  lr 9.21e-05  teacher entropy 0.461  282s
+  epoch  41/100 summary  loss 1.7757  teacher entropy 0.461 (marginal 4.580, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 42/100
+    step   100/1022  loss 1.7242  lr 9.19e-05  teacher entropy 0.449  28s
+    step   200/1022  loss 1.7429  lr 9.17e-05  teacher entropy 0.453  55s
+    step   300/1022  loss 1.7510  lr 9.15e-05  teacher entropy 0.454  82s
+    step   400/1022  loss 1.7470  lr 9.14e-05  teacher entropy 0.451  109s
+    step   500/1022  loss 1.7515  lr 9.12e-05  teacher entropy 0.452  137s
+    step   600/1022  loss 1.7550  lr 9.10e-05  teacher entropy 0.452  164s
+    step   700/1022  loss 1.7551  lr 9.08e-05  teacher entropy 0.452  191s
+    step   800/1022  loss 1.7548  lr 9.06e-05  teacher entropy 0.451  218s
+    step   900/1022  loss 1.7567  lr 9.04e-05  teacher entropy 0.451  245s
+    step  1000/1022  loss 1.7553  lr 9.02e-05  teacher entropy 0.451  272s
+    step  1022/1022  loss 1.7550  lr 9.02e-05  teacher entropy 0.450  279s
+  epoch  42/100 summary  loss 1.7550  teacher entropy 0.450 (marginal 4.568, max 8.32)  feature cosine 0.275  4.6 min, checkpoint saved
+
+SSL epoch 43/100
+    step   100/1022  loss 1.7457  lr 9.00e-05  teacher entropy 0.443  29s
+    step   200/1022  loss 1.7371  lr 8.98e-05  teacher entropy 0.443  57s
+    step   300/1022  loss 1.7405  lr 8.96e-05  teacher entropy 0.444  84s
+    step   400/1022  loss 1.7364  lr 8.94e-05  teacher entropy 0.443  112s
+    step   500/1022  loss 1.7359  lr 8.92e-05  teacher entropy 0.443  139s
+    step   600/1022  loss 1.7375  lr 8.90e-05  teacher entropy 0.444  167s
+    step   700/1022  loss 1.7388  lr 8.88e-05  teacher entropy 0.444  194s
+    step   800/1022  loss 1.7380  lr 8.86e-05  teacher entropy 0.443  221s
+    step   900/1022  loss 1.7373  lr 8.85e-05  teacher entropy 0.443  248s
+    step  1000/1022  loss 1.7380  lr 8.83e-05  teacher entropy 0.443  275s
+    step  1022/1022  loss 1.7381  lr 8.82e-05  teacher entropy 0.442  281s
+  epoch  43/100 summary  loss 1.7381  teacher entropy 0.442 (marginal 4.564, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 44/100
+    step   100/1022  loss 1.7172  lr 8.80e-05  teacher entropy 0.435  28s
+    step   200/1022  loss 1.7103  lr 8.78e-05  teacher entropy 0.433  55s
+    step   300/1022  loss 1.7121  lr 8.76e-05  teacher entropy 0.433  82s
+    step   400/1022  loss 1.7097  lr 8.74e-05  teacher entropy 0.432  110s
+    step   500/1022  loss 1.7070  lr 8.72e-05  teacher entropy 0.430  138s
+    step   600/1022  loss 1.7087  lr 8.71e-05  teacher entropy 0.430  165s
+    step   700/1022  loss 1.7087  lr 8.69e-05  teacher entropy 0.429  193s
+    step   800/1022  loss 1.7115  lr 8.67e-05  teacher entropy 0.430  221s
+    step   900/1022  loss 1.7114  lr 8.65e-05  teacher entropy 0.430  249s
+    step  1000/1022  loss 1.7140  lr 8.63e-05  teacher entropy 0.430  276s
+    step  1022/1022  loss 1.7151  lr 8.62e-05  teacher entropy 0.430  282s
+  epoch  44/100 summary  loss 1.7151  teacher entropy 0.430 (marginal 4.550, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 45/100
+    step   100/1022  loss 1.6868  lr 8.60e-05  teacher entropy 0.424  28s
+    step   200/1022  loss 1.6857  lr 8.58e-05  teacher entropy 0.424  56s
+    step   300/1022  loss 1.6881  lr 8.56e-05  teacher entropy 0.424  83s
+    step   400/1022  loss 1.6910  lr 8.54e-05  teacher entropy 0.424  110s
+    step   500/1022  loss 1.6906  lr 8.52e-05  teacher entropy 0.424  138s
+    step   600/1022  loss 1.6921  lr 8.50e-05  teacher entropy 0.423  165s
+    step   700/1022  loss 1.6919  lr 8.48e-05  teacher entropy 0.422  192s
+    step   800/1022  loss 1.6936  lr 8.46e-05  teacher entropy 0.422  219s
+    step   900/1022  loss 1.6945  lr 8.44e-05  teacher entropy 0.422  247s
+    step  1000/1022  loss 1.6948  lr 8.43e-05  teacher entropy 0.421  274s
+    step  1022/1022  loss 1.6945  lr 8.42e-05  teacher entropy 0.421  280s
+  epoch  45/100 summary  loss 1.6945  teacher entropy 0.421 (marginal 4.539, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 46/100
+    step   100/1022  loss 1.6885  lr 8.40e-05  teacher entropy 0.420  29s
+    step   200/1022  loss 1.6719  lr 8.38e-05  teacher entropy 0.416  56s
+    step   300/1022  loss 1.6719  lr 8.36e-05  teacher entropy 0.414  83s
+    step   400/1022  loss 1.6681  lr 8.34e-05  teacher entropy 0.412  111s
+    step   500/1022  loss 1.6705  lr 8.32e-05  teacher entropy 0.412  138s
+    step   600/1022  loss 1.6699  lr 8.30e-05  teacher entropy 0.412  165s
+    step   700/1022  loss 1.6706  lr 8.28e-05  teacher entropy 0.412  192s
+    step   800/1022  loss 1.6717  lr 8.26e-05  teacher entropy 0.412  220s
+    step   900/1022  loss 1.6730  lr 8.24e-05  teacher entropy 0.412  248s
+    step  1000/1022  loss 1.6759  lr 8.22e-05  teacher entropy 0.412  276s
+    step  1022/1022  loss 1.6769  lr 8.22e-05  teacher entropy 0.412  282s
+  epoch  46/100 summary  loss 1.6769  teacher entropy 0.412 (marginal 4.533, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 47/100
+    step   100/1022  loss 1.6606  lr 8.20e-05  teacher entropy 0.407  28s
+    step   200/1022  loss 1.6566  lr 8.18e-05  teacher entropy 0.406  56s
+    step   300/1022  loss 1.6625  lr 8.16e-05  teacher entropy 0.406  84s
+    step   400/1022  loss 1.6589  lr 8.14e-05  teacher entropy 0.405  112s
+    step   500/1022  loss 1.6555  lr 8.12e-05  teacher entropy 0.405  139s
+    step   600/1022  loss 1.6566  lr 8.09e-05  teacher entropy 0.405  167s
+    step   700/1022  loss 1.6595  lr 8.07e-05  teacher entropy 0.405  195s
+    step   800/1022  loss 1.6608  lr 8.05e-05  teacher entropy 0.404  222s
+    step   900/1022  loss 1.6632  lr 8.03e-05  teacher entropy 0.405  250s
+    step  1000/1022  loss 1.6645  lr 8.01e-05  teacher entropy 0.405  277s
+    step  1022/1022  loss 1.6640  lr 8.01e-05  teacher entropy 0.405  283s
+  epoch  47/100 summary  loss 1.6640  teacher entropy 0.405 (marginal 4.523, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 48/100
+    step   100/1022  loss 1.6248  lr 7.99e-05  teacher entropy 0.391  28s
+    step   200/1022  loss 1.6393  lr 7.97e-05  teacher entropy 0.396  55s
+    step   300/1022  loss 1.6495  lr 7.95e-05  teacher entropy 0.398  82s
+    step   400/1022  loss 1.6495  lr 7.93e-05  teacher entropy 0.398  109s
+    step   500/1022  loss 1.6524  lr 7.91e-05  teacher entropy 0.399  136s
+    step   600/1022  loss 1.6490  lr 7.89e-05  teacher entropy 0.398  164s
+    step   700/1022  loss 1.6508  lr 7.87e-05  teacher entropy 0.398  191s
+    step   800/1022  loss 1.6502  lr 7.85e-05  teacher entropy 0.398  218s
+    step   900/1022  loss 1.6498  lr 7.83e-05  teacher entropy 0.398  245s
+    step  1000/1022  loss 1.6503  lr 7.80e-05  teacher entropy 0.397  272s
+    step  1022/1022  loss 1.6503  lr 7.80e-05  teacher entropy 0.397  278s
+  epoch  48/100 summary  loss 1.6503  teacher entropy 0.397 (marginal 4.517, max 8.32)  feature cosine 0.275  4.6 min, checkpoint saved
+
+SSL epoch 49/100
+    step   100/1022  loss 1.6286  lr 7.78e-05  teacher entropy 0.390  28s
+    step   200/1022  loss 1.6221  lr 7.76e-05  teacher entropy 0.389  55s
+    step   300/1022  loss 1.6256  lr 7.74e-05  teacher entropy 0.392  82s
+    step   400/1022  loss 1.6264  lr 7.72e-05  teacher entropy 0.392  110s
+    step   500/1022  loss 1.6288  lr 7.70e-05  teacher entropy 0.392  138s
+    step   600/1022  loss 1.6286  lr 7.68e-05  teacher entropy 0.391  166s
+    step   700/1022  loss 1.6263  lr 7.66e-05  teacher entropy 0.390  193s
+    step   800/1022  loss 1.6244  lr 7.64e-05  teacher entropy 0.390  221s
+    step   900/1022  loss 1.6243  lr 7.61e-05  teacher entropy 0.390  248s
+    step  1000/1022  loss 1.6269  lr 7.59e-05  teacher entropy 0.390  275s
+    step  1022/1022  loss 1.6273  lr 7.59e-05  teacher entropy 0.390  282s
+  epoch  49/100 summary  loss 1.6273  teacher entropy 0.390 (marginal 4.511, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 50/100
+    step   100/1022  loss 1.6165  lr 7.57e-05  teacher entropy 0.388  28s
+    step   200/1022  loss 1.6126  lr 7.55e-05  teacher entropy 0.384  55s
+    step   300/1022  loss 1.6117  lr 7.53e-05  teacher entropy 0.381  82s
+    step   400/1022  loss 1.6101  lr 7.51e-05  teacher entropy 0.381  109s
+    step   500/1022  loss 1.6114  lr 7.49e-05  teacher entropy 0.382  136s
+    step   600/1022  loss 1.6151  lr 7.46e-05  teacher entropy 0.384  164s
+    step   700/1022  loss 1.6158  lr 7.44e-05  teacher entropy 0.382  192s
+    step   800/1022  loss 1.6182  lr 7.42e-05  teacher entropy 0.383  219s
+    step   900/1022  loss 1.6175  lr 7.40e-05  teacher entropy 0.382  247s
+    step  1000/1022  loss 1.6174  lr 7.38e-05  teacher entropy 0.382  274s
+    step  1022/1022  loss 1.6181  lr 7.38e-05  teacher entropy 0.382  280s
+  epoch  50/100 summary  loss 1.6181  teacher entropy 0.382 (marginal 4.501, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 51/100
+    step   100/1022  loss 1.6111  lr 7.36e-05  teacher entropy 0.377  28s
+    step   200/1022  loss 1.5963  lr 7.34e-05  teacher entropy 0.374  56s
+    step   300/1022  loss 1.5903  lr 7.31e-05  teacher entropy 0.373  83s
+    step   400/1022  loss 1.5899  lr 7.29e-05  teacher entropy 0.373  111s
+    step   500/1022  loss 1.5953  lr 7.27e-05  teacher entropy 0.374  138s
+    step   600/1022  loss 1.5962  lr 7.25e-05  teacher entropy 0.375  165s
+    step   700/1022  loss 1.5979  lr 7.23e-05  teacher entropy 0.375  193s
+    step   800/1022  loss 1.5998  lr 7.21e-05  teacher entropy 0.375  220s
+    step   900/1022  loss 1.6000  lr 7.19e-05  teacher entropy 0.375  247s
+    step  1000/1022  loss 1.6012  lr 7.17e-05  teacher entropy 0.375  275s
+    step  1022/1022  loss 1.6004  lr 7.16e-05  teacher entropy 0.375  281s
+  epoch  51/100 summary  loss 1.6004  teacher entropy 0.375 (marginal 4.496, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 52/100
+    step   100/1022  loss 1.5630  lr 7.14e-05  teacher entropy 0.363  28s
+    step   200/1022  loss 1.5719  lr 7.12e-05  teacher entropy 0.366  55s
+    step   300/1022  loss 1.5667  lr 7.10e-05  teacher entropy 0.364  82s
+    step   400/1022  loss 1.5718  lr 7.08e-05  teacher entropy 0.366  110s
+    step   500/1022  loss 1.5705  lr 7.06e-05  teacher entropy 0.365  137s
+    step   600/1022  loss 1.5742  lr 7.04e-05  teacher entropy 0.366  164s
+    step   700/1022  loss 1.5770  lr 7.02e-05  teacher entropy 0.366  191s
+    step   800/1022  loss 1.5786  lr 7.00e-05  teacher entropy 0.367  219s
+    step   900/1022  loss 1.5843  lr 6.97e-05  teacher entropy 0.368  246s
+    step  1000/1022  loss 1.5849  lr 6.95e-05  teacher entropy 0.368  273s
+    step  1022/1022  loss 1.5838  lr 6.95e-05  teacher entropy 0.368  279s
+  epoch  52/100 summary  loss 1.5838  teacher entropy 0.368 (marginal 4.486, max 8.32)  feature cosine 0.274  4.6 min, checkpoint saved
+
+SSL epoch 53/100
+    step   100/1022  loss 1.5677  lr 6.93e-05  teacher entropy 0.367  28s
+    step   200/1022  loss 1.5668  lr 6.91e-05  teacher entropy 0.367  55s
+    step   300/1022  loss 1.5755  lr 6.89e-05  teacher entropy 0.368  82s
+    step   400/1022  loss 1.5737  lr 6.86e-05  teacher entropy 0.367  109s
+    step   500/1022  loss 1.5777  lr 6.84e-05  teacher entropy 0.368  136s
+    step   600/1022  loss 1.5759  lr 6.82e-05  teacher entropy 0.367  163s
+    step   700/1022  loss 1.5759  lr 6.80e-05  teacher entropy 0.367  190s
+    step   800/1022  loss 1.5755  lr 6.78e-05  teacher entropy 0.366  218s
+    step   900/1022  loss 1.5758  lr 6.76e-05  teacher entropy 0.365  245s
+    step  1000/1022  loss 1.5738  lr 6.74e-05  teacher entropy 0.364  272s
+    step  1022/1022  loss 1.5730  lr 6.73e-05  teacher entropy 0.364  278s
+  epoch  53/100 summary  loss 1.5730  teacher entropy 0.364 (marginal 4.482, max 8.32)  feature cosine 0.274  4.6 min, checkpoint saved
+
+SSL epoch 54/100
+    step   100/1022  loss 1.5303  lr 6.71e-05  teacher entropy 0.347  28s
+    step   200/1022  loss 1.5352  lr 6.69e-05  teacher entropy 0.353  55s
+    step   300/1022  loss 1.5405  lr 6.67e-05  teacher entropy 0.354  83s
+    step   400/1022  loss 1.5446  lr 6.65e-05  teacher entropy 0.354  110s
+    step   500/1022  loss 1.5459  lr 6.63e-05  teacher entropy 0.355  137s
+    step   600/1022  loss 1.5480  lr 6.61e-05  teacher entropy 0.356  165s
+    step   700/1022  loss 1.5525  lr 6.58e-05  teacher entropy 0.356  192s
+    step   800/1022  loss 1.5529  lr 6.56e-05  teacher entropy 0.356  219s
+    step   900/1022  loss 1.5540  lr 6.54e-05  teacher entropy 0.355  247s
+    step  1000/1022  loss 1.5558  lr 6.52e-05  teacher entropy 0.355  274s
+    step  1022/1022  loss 1.5559  lr 6.52e-05  teacher entropy 0.355  280s
+  epoch  54/100 summary  loss 1.5559  teacher entropy 0.355 (marginal 4.475, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 55/100
+    step   100/1022  loss 1.5367  lr 6.50e-05  teacher entropy 0.354  28s
+    step   200/1022  loss 1.5526  lr 6.47e-05  teacher entropy 0.355  55s
+    step   300/1022  loss 1.5499  lr 6.45e-05  teacher entropy 0.353  83s
+    step   400/1022  loss 1.5477  lr 6.43e-05  teacher entropy 0.351  110s
+    step   500/1022  loss 1.5426  lr 6.41e-05  teacher entropy 0.351  137s
+    step   600/1022  loss 1.5477  lr 6.39e-05  teacher entropy 0.353  164s
+    step   700/1022  loss 1.5454  lr 6.37e-05  teacher entropy 0.352  192s
+    step   800/1022  loss 1.5445  lr 6.35e-05  teacher entropy 0.351  219s
+    step   900/1022  loss 1.5470  lr 6.33e-05  teacher entropy 0.351  246s
+    step  1000/1022  loss 1.5464  lr 6.30e-05  teacher entropy 0.350  274s
+    step  1022/1022  loss 1.5461  lr 6.30e-05  teacher entropy 0.350  280s
+  epoch  55/100 summary  loss 1.5461  teacher entropy 0.350 (marginal 4.470, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 56/100
+    step   100/1022  loss 1.5217  lr 6.28e-05  teacher entropy 0.349  28s
+    step   200/1022  loss 1.5316  lr 6.26e-05  teacher entropy 0.351  55s
+    step   300/1022  loss 1.5270  lr 6.24e-05  teacher entropy 0.347  82s
+    step   400/1022  loss 1.5324  lr 6.22e-05  teacher entropy 0.348  109s
+    step   500/1022  loss 1.5324  lr 6.19e-05  teacher entropy 0.347  137s
+    step   600/1022  loss 1.5316  lr 6.17e-05  teacher entropy 0.346  164s
+    step   700/1022  loss 1.5330  lr 6.15e-05  teacher entropy 0.347  191s
+    step   800/1022  loss 1.5332  lr 6.13e-05  teacher entropy 0.346  218s
+    step   900/1022  loss 1.5333  lr 6.11e-05  teacher entropy 0.346  245s
+    step  1000/1022  loss 1.5309  lr 6.09e-05  teacher entropy 0.345  272s
+    step  1022/1022  loss 1.5310  lr 6.08e-05  teacher entropy 0.345  278s
+  epoch  56/100 summary  loss 1.5310  teacher entropy 0.345 (marginal 4.464, max 8.32)  feature cosine 0.274  4.6 min, checkpoint saved
+
+SSL epoch 57/100
+    step   100/1022  loss 1.5072  lr 6.06e-05  teacher entropy 0.335  28s
+    step   200/1022  loss 1.5014  lr 6.04e-05  teacher entropy 0.335  55s
+    step   300/1022  loss 1.5023  lr 6.02e-05  teacher entropy 0.336  82s
+    step   400/1022  loss 1.5056  lr 6.00e-05  teacher entropy 0.337  109s
+    step   500/1022  loss 1.5095  lr 5.98e-05  teacher entropy 0.337  136s
+    step   600/1022  loss 1.5095  lr 5.96e-05  teacher entropy 0.337  163s
+    step   700/1022  loss 1.5065  lr 5.94e-05  teacher entropy 0.336  190s
+    step   800/1022  loss 1.5108  lr 5.91e-05  teacher entropy 0.337  217s
+    step   900/1022  loss 1.5128  lr 5.89e-05  teacher entropy 0.338  244s
+    step  1000/1022  loss 1.5146  lr 5.87e-05  teacher entropy 0.338  271s
+    step  1022/1022  loss 1.5156  lr 5.87e-05  teacher entropy 0.338  277s
+  epoch  57/100 summary  loss 1.5156  teacher entropy 0.338 (marginal 4.457, max 8.32)  feature cosine 0.274  4.6 min, checkpoint saved
+
+SSL epoch 58/100
+    step   100/1022  loss 1.5099  lr 5.85e-05  teacher entropy 0.334  28s
+    step   200/1022  loss 1.5055  lr 5.83e-05  teacher entropy 0.337  55s
+    step   300/1022  loss 1.5049  lr 5.80e-05  teacher entropy 0.336  82s
+    step   400/1022  loss 1.5049  lr 5.78e-05  teacher entropy 0.335  109s
+    step   500/1022  loss 1.5067  lr 5.76e-05  teacher entropy 0.335  136s
+    step   600/1022  loss 1.5073  lr 5.74e-05  teacher entropy 0.336  163s
+    step   700/1022  loss 1.5058  lr 5.72e-05  teacher entropy 0.335  190s
+    step   800/1022  loss 1.5044  lr 5.70e-05  teacher entropy 0.335  217s
+    step   900/1022  loss 1.5053  lr 5.68e-05  teacher entropy 0.335  244s
+    step  1000/1022  loss 1.5055  lr 5.66e-05  teacher entropy 0.335  271s
+    step  1022/1022  loss 1.5056  lr 5.65e-05  teacher entropy 0.335  277s
+  epoch  58/100 summary  loss 1.5056  teacher entropy 0.335 (marginal 4.455, max 8.32)  feature cosine 0.274  4.6 min, checkpoint saved
+
+SSL epoch 59/100
+    step   100/1022  loss 1.4984  lr 5.63e-05  teacher entropy 0.331  28s
+    step   200/1022  loss 1.4967  lr 5.61e-05  teacher entropy 0.331  55s
+    step   300/1022  loss 1.4938  lr 5.59e-05  teacher entropy 0.331  83s
+    step   400/1022  loss 1.4922  lr 5.57e-05  teacher entropy 0.331  110s
+    step   500/1022  loss 1.4919  lr 5.55e-05  teacher entropy 0.330  137s
+    step   600/1022  loss 1.4923  lr 5.53e-05  teacher entropy 0.330  165s
+    step   700/1022  loss 1.4918  lr 5.50e-05  teacher entropy 0.329  192s
+    step   800/1022  loss 1.4916  lr 5.48e-05  teacher entropy 0.329  220s
+    step   900/1022  loss 1.4926  lr 5.46e-05  teacher entropy 0.329  247s
+    step  1000/1022  loss 1.4941  lr 5.44e-05  teacher entropy 0.329  275s
+    step  1022/1022  loss 1.4944  lr 5.44e-05  teacher entropy 0.329  281s
+  epoch  59/100 summary  loss 1.4944  teacher entropy 0.329 (marginal 4.448, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 60/100
+    step   100/1022  loss 1.4813  lr 5.42e-05  teacher entropy 0.327  28s
+    step   200/1022  loss 1.4757  lr 5.40e-05  teacher entropy 0.324  56s
+    step   300/1022  loss 1.4768  lr 5.37e-05  teacher entropy 0.324  83s
+    step   400/1022  loss 1.4734  lr 5.35e-05  teacher entropy 0.323  111s
+    step   500/1022  loss 1.4728  lr 5.33e-05  teacher entropy 0.323  138s
+    step   600/1022  loss 1.4737  lr 5.31e-05  teacher entropy 0.323  165s
+    step   700/1022  loss 1.4770  lr 5.29e-05  teacher entropy 0.324  192s
+    step   800/1022  loss 1.4799  lr 5.27e-05  teacher entropy 0.324  220s
+    step   900/1022  loss 1.4806  lr 5.25e-05  teacher entropy 0.324  247s
+    step  1000/1022  loss 1.4820  lr 5.23e-05  teacher entropy 0.325  274s
+    step  1022/1022  loss 1.4818  lr 5.22e-05  teacher entropy 0.325  280s
+  epoch  60/100 summary  loss 1.4818  teacher entropy 0.325 (marginal 4.442, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 61/100
+    step   100/1022  loss 1.4674  lr 5.20e-05  teacher entropy 0.323  28s
+    step   200/1022  loss 1.4618  lr 5.18e-05  teacher entropy 0.321  55s
+    step   300/1022  loss 1.4680  lr 5.16e-05  teacher entropy 0.321  82s
+    step   400/1022  loss 1.4718  lr 5.14e-05  teacher entropy 0.324  109s
+    step   500/1022  loss 1.4706  lr 5.12e-05  teacher entropy 0.322  137s
+    step   600/1022  loss 1.4677  lr 5.10e-05  teacher entropy 0.322  164s
+    step   700/1022  loss 1.4683  lr 5.08e-05  teacher entropy 0.321  191s
+    step   800/1022  loss 1.4711  lr 5.06e-05  teacher entropy 0.321  219s
+    step   900/1022  loss 1.4714  lr 5.04e-05  teacher entropy 0.321  246s
+    step  1000/1022  loss 1.4720  lr 5.02e-05  teacher entropy 0.321  274s
+    step  1022/1022  loss 1.4721  lr 5.01e-05  teacher entropy 0.321  280s
+  epoch  61/100 summary  loss 1.4721  teacher entropy 0.321 (marginal 4.437, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 62/100
+    step   100/1022  loss 1.4590  lr 4.99e-05  teacher entropy 0.325  28s
+    step   200/1022  loss 1.4583  lr 4.97e-05  teacher entropy 0.322  56s
+    step   300/1022  loss 1.4597  lr 4.95e-05  teacher entropy 0.320  83s
+    step   400/1022  loss 1.4602  lr 4.93e-05  teacher entropy 0.321  111s
+    step   500/1022  loss 1.4605  lr 4.91e-05  teacher entropy 0.320  138s
+    step   600/1022  loss 1.4596  lr 4.89e-05  teacher entropy 0.319  166s
+    step   700/1022  loss 1.4601  lr 4.87e-05  teacher entropy 0.319  193s
+    step   800/1022  loss 1.4603  lr 4.85e-05  teacher entropy 0.318  221s
+    step   900/1022  loss 1.4612  lr 4.83e-05  teacher entropy 0.317  249s
+    step  1000/1022  loss 1.4618  lr 4.80e-05  teacher entropy 0.318  276s
+    step  1022/1022  loss 1.4617  lr 4.80e-05  teacher entropy 0.317  282s
+  epoch  62/100 summary  loss 1.4617  teacher entropy 0.317 (marginal 4.437, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 63/100
+    step   100/1022  loss 1.4469  lr 4.78e-05  teacher entropy 0.320  28s
+    step   200/1022  loss 1.4598  lr 4.76e-05  teacher entropy 0.319  56s
+    step   300/1022  loss 1.4509  lr 4.74e-05  teacher entropy 0.316  83s
+    step   400/1022  loss 1.4517  lr 4.72e-05  teacher entropy 0.317  111s
+    step   500/1022  loss 1.4504  lr 4.70e-05  teacher entropy 0.316  138s
+    step   600/1022  loss 1.4486  lr 4.68e-05  teacher entropy 0.315  166s
+    step   700/1022  loss 1.4480  lr 4.66e-05  teacher entropy 0.314  193s
+    step   800/1022  loss 1.4491  lr 4.64e-05  teacher entropy 0.314  221s
+    step   900/1022  loss 1.4511  lr 4.62e-05  teacher entropy 0.315  248s
+    step  1000/1022  loss 1.4510  lr 4.60e-05  teacher entropy 0.315  276s
+    step  1022/1022  loss 1.4513  lr 4.59e-05  teacher entropy 0.315  282s
+  epoch  63/100 summary  loss 1.4513  teacher entropy 0.315 (marginal 4.433, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 64/100
+    step   100/1022  loss 1.4259  lr 4.57e-05  teacher entropy 0.307  28s
+    step   200/1022  loss 1.4453  lr 4.55e-05  teacher entropy 0.312  55s
+    step   300/1022  loss 1.4442  lr 4.53e-05  teacher entropy 0.310  83s
+    step   400/1022  loss 1.4466  lr 4.51e-05  teacher entropy 0.310  110s
+    step   500/1022  loss 1.4471  lr 4.49e-05  teacher entropy 0.310  138s
+    step   600/1022  loss 1.4475  lr 4.47e-05  teacher entropy 0.310  166s
+    step   700/1022  loss 1.4450  lr 4.45e-05  teacher entropy 0.310  193s
+    step   800/1022  loss 1.4416  lr 4.43e-05  teacher entropy 0.309  221s
+    step   900/1022  loss 1.4411  lr 4.41e-05  teacher entropy 0.308  248s
+    step  1000/1022  loss 1.4428  lr 4.39e-05  teacher entropy 0.308  276s
+    step  1022/1022  loss 1.4429  lr 4.38e-05  teacher entropy 0.309  282s
+  epoch  64/100 summary  loss 1.4429  teacher entropy 0.309 (marginal 4.427, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 65/100
+    step   100/1022  loss 1.4071  lr 4.36e-05  teacher entropy 0.301  28s
+    step   200/1022  loss 1.4233  lr 4.34e-05  teacher entropy 0.304  56s
+    step   300/1022  loss 1.4270  lr 4.32e-05  teacher entropy 0.303  83s
+    step   400/1022  loss 1.4304  lr 4.30e-05  teacher entropy 0.305  111s
+    step   500/1022  loss 1.4296  lr 4.28e-05  teacher entropy 0.305  139s
+    step   600/1022  loss 1.4314  lr 4.26e-05  teacher entropy 0.305  166s
+    step   700/1022  loss 1.4329  lr 4.24e-05  teacher entropy 0.305  194s
+    step   800/1022  loss 1.4309  lr 4.22e-05  teacher entropy 0.304  221s
+    step   900/1022  loss 1.4312  lr 4.20e-05  teacher entropy 0.304  249s
+    step  1000/1022  loss 1.4314  lr 4.18e-05  teacher entropy 0.304  276s
+    step  1022/1022  loss 1.4325  lr 4.18e-05  teacher entropy 0.305  282s
+  epoch  65/100 summary  loss 1.4325  teacher entropy 0.305 (marginal 4.423, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 66/100
+    step   100/1022  loss 1.4364  lr 4.16e-05  teacher entropy 0.314  28s
+    step   200/1022  loss 1.4329  lr 4.14e-05  teacher entropy 0.311  56s
+    step   300/1022  loss 1.4309  lr 4.12e-05  teacher entropy 0.309  83s
+    step   400/1022  loss 1.4289  lr 4.10e-05  teacher entropy 0.308  111s
+    step   500/1022  loss 1.4300  lr 4.08e-05  teacher entropy 0.308  138s
+    step   600/1022  loss 1.4257  lr 4.06e-05  teacher entropy 0.306  166s
+    step   700/1022  loss 1.4264  lr 4.04e-05  teacher entropy 0.305  193s
+    step   800/1022  loss 1.4247  lr 4.02e-05  teacher entropy 0.304  221s
+    step   900/1022  loss 1.4263  lr 4.00e-05  teacher entropy 0.304  248s
+    step  1000/1022  loss 1.4260  lr 3.98e-05  teacher entropy 0.303  276s
+    step  1022/1022  loss 1.4254  lr 3.98e-05  teacher entropy 0.303  282s
+  epoch  66/100 summary  loss 1.4254  teacher entropy 0.303 (marginal 4.420, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 67/100
+    step   100/1022  loss 1.3910  lr 3.96e-05  teacher entropy 0.298  28s
+    step   200/1022  loss 1.4078  lr 3.94e-05  teacher entropy 0.302  56s
+    step   300/1022  loss 1.4161  lr 3.92e-05  teacher entropy 0.302  83s
+    step   400/1022  loss 1.4136  lr 3.90e-05  teacher entropy 0.301  111s
+    step   500/1022  loss 1.4123  lr 3.88e-05  teacher entropy 0.301  138s
+    step   600/1022  loss 1.4165  lr 3.86e-05  teacher entropy 0.302  166s
+    step   700/1022  loss 1.4168  lr 3.84e-05  teacher entropy 0.301  193s
+    step   800/1022  loss 1.4187  lr 3.82e-05  teacher entropy 0.301  221s
+    step   900/1022  loss 1.4181  lr 3.80e-05  teacher entropy 0.301  249s
+    step  1000/1022  loss 1.4139  lr 3.78e-05  teacher entropy 0.299  277s
+    step  1022/1022  loss 1.4141  lr 3.78e-05  teacher entropy 0.299  283s
+  epoch  67/100 summary  loss 1.4141  teacher entropy 0.299 (marginal 4.417, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 68/100
+    step   100/1022  loss 1.3851  lr 3.76e-05  teacher entropy 0.295  28s
+    step   200/1022  loss 1.4038  lr 3.74e-05  teacher entropy 0.298  56s
+    step   300/1022  loss 1.4041  lr 3.72e-05  teacher entropy 0.298  83s
+    step   400/1022  loss 1.3990  lr 3.70e-05  teacher entropy 0.296  111s
+    step   500/1022  loss 1.4031  lr 3.68e-05  teacher entropy 0.297  138s
+    step   600/1022  loss 1.4017  lr 3.66e-05  teacher entropy 0.297  166s
+    step   700/1022  loss 1.4012  lr 3.64e-05  teacher entropy 0.296  193s
+    step   800/1022  loss 1.4020  lr 3.62e-05  teacher entropy 0.296  221s
+    step   900/1022  loss 1.4027  lr 3.61e-05  teacher entropy 0.296  248s
+    step  1000/1022  loss 1.4035  lr 3.59e-05  teacher entropy 0.296  276s
+    step  1022/1022  loss 1.4026  lr 3.58e-05  teacher entropy 0.295  282s
+  epoch  68/100 summary  loss 1.4026  teacher entropy 0.295 (marginal 4.414, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 69/100
+    step   100/1022  loss 1.3910  lr 3.56e-05  teacher entropy 0.291  28s
+    step   200/1022  loss 1.3784  lr 3.54e-05  teacher entropy 0.289  55s
+    step   300/1022  loss 1.3833  lr 3.53e-05  teacher entropy 0.291  83s
+    step   400/1022  loss 1.3916  lr 3.51e-05  teacher entropy 0.293  110s
+    step   500/1022  loss 1.3908  lr 3.49e-05  teacher entropy 0.294  138s
+    step   600/1022  loss 1.3908  lr 3.47e-05  teacher entropy 0.294  165s
+    step   700/1022  loss 1.3935  lr 3.45e-05  teacher entropy 0.294  193s
+    step   800/1022  loss 1.3949  lr 3.43e-05  teacher entropy 0.294  220s
+    step   900/1022  loss 1.3965  lr 3.41e-05  teacher entropy 0.294  248s
+    step  1000/1022  loss 1.3961  lr 3.39e-05  teacher entropy 0.293  275s
+    step  1022/1022  loss 1.3962  lr 3.39e-05  teacher entropy 0.294  281s
+  epoch  69/100 summary  loss 1.3962  teacher entropy 0.294 (marginal 4.411, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 70/100
+    step   100/1022  loss 1.3805  lr 3.37e-05  teacher entropy 0.293  28s
+    step   200/1022  loss 1.3882  lr 3.35e-05  teacher entropy 0.294  56s
+    step   300/1022  loss 1.3896  lr 3.33e-05  teacher entropy 0.294  83s
+    step   400/1022  loss 1.3919  lr 3.31e-05  teacher entropy 0.294  110s
+    step   500/1022  loss 1.3881  lr 3.30e-05  teacher entropy 0.292  138s
+    step   600/1022  loss 1.3884  lr 3.28e-05  teacher entropy 0.292  165s
+    step   700/1022  loss 1.3900  lr 3.26e-05  teacher entropy 0.292  193s
+    step   800/1022  loss 1.3905  lr 3.24e-05  teacher entropy 0.292  220s
+    step   900/1022  loss 1.3903  lr 3.22e-05  teacher entropy 0.292  248s
+    step  1000/1022  loss 1.3904  lr 3.20e-05  teacher entropy 0.291  275s
+    step  1022/1022  loss 1.3912  lr 3.20e-05  teacher entropy 0.291  281s
+  epoch  70/100 summary  loss 1.3912  teacher entropy 0.291 (marginal 4.409, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 71/100
+    step   100/1022  loss 1.3724  lr 3.18e-05  teacher entropy 0.284  28s
+    step   200/1022  loss 1.3774  lr 3.16e-05  teacher entropy 0.288  55s
+    step   300/1022  loss 1.3754  lr 3.15e-05  teacher entropy 0.290  83s
+    step   400/1022  loss 1.3789  lr 3.13e-05  teacher entropy 0.290  110s
+    step   500/1022  loss 1.3795  lr 3.11e-05  teacher entropy 0.290  137s
+    step   600/1022  loss 1.3794  lr 3.09e-05  teacher entropy 0.289  165s
+    step   700/1022  loss 1.3784  lr 3.07e-05  teacher entropy 0.288  192s
+    step   800/1022  loss 1.3784  lr 3.05e-05  teacher entropy 0.288  219s
+    step   900/1022  loss 1.3785  lr 3.04e-05  teacher entropy 0.288  247s
+    step  1000/1022  loss 1.3802  lr 3.02e-05  teacher entropy 0.288  274s
+    step  1022/1022  loss 1.3802  lr 3.01e-05  teacher entropy 0.288  280s
+  epoch  71/100 summary  loss 1.3802  teacher entropy 0.288 (marginal 4.407, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 72/100
+    step   100/1022  loss 1.3814  lr 3.00e-05  teacher entropy 0.291  28s
+    step   200/1022  loss 1.3808  lr 2.98e-05  teacher entropy 0.288  56s
+    step   300/1022  loss 1.3800  lr 2.96e-05  teacher entropy 0.289  83s
+    step   400/1022  loss 1.3882  lr 2.94e-05  teacher entropy 0.290  111s
+    step   500/1022  loss 1.3903  lr 2.93e-05  teacher entropy 0.290  138s
+    step   600/1022  loss 1.3874  lr 2.91e-05  teacher entropy 0.289  166s
+    step   700/1022  loss 1.3850  lr 2.89e-05  teacher entropy 0.289  193s
+    step   800/1022  loss 1.3830  lr 2.87e-05  teacher entropy 0.289  221s
+    step   900/1022  loss 1.3809  lr 2.85e-05  teacher entropy 0.288  248s
+    step  1000/1022  loss 1.3781  lr 2.84e-05  teacher entropy 0.287  276s
+    step  1022/1022  loss 1.3785  lr 2.83e-05  teacher entropy 0.287  282s
+  epoch  72/100 summary  loss 1.3785  teacher entropy 0.287 (marginal 4.404, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 73/100
+    step   100/1022  loss 1.3741  lr 2.82e-05  teacher entropy 0.290  28s
+    step   200/1022  loss 1.3760  lr 2.80e-05  teacher entropy 0.288  55s
+    step   300/1022  loss 1.3731  lr 2.78e-05  teacher entropy 0.287  82s
+    step   400/1022  loss 1.3752  lr 2.76e-05  teacher entropy 0.287  110s
+    step   500/1022  loss 1.3750  lr 2.75e-05  teacher entropy 0.287  137s
+    step   600/1022  loss 1.3761  lr 2.73e-05  teacher entropy 0.287  164s
+    step   700/1022  loss 1.3733  lr 2.71e-05  teacher entropy 0.286  192s
+    step   800/1022  loss 1.3715  lr 2.69e-05  teacher entropy 0.286  219s
+    step   900/1022  loss 1.3713  lr 2.68e-05  teacher entropy 0.286  246s
+    step  1000/1022  loss 1.3723  lr 2.66e-05  teacher entropy 0.286  274s
+    step  1022/1022  loss 1.3732  lr 2.66e-05  teacher entropy 0.286  280s
+  epoch  73/100 summary  loss 1.3732  teacher entropy 0.286 (marginal 4.404, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 74/100
+    step   100/1022  loss 1.3702  lr 2.64e-05  teacher entropy 0.283  28s
+    step   200/1022  loss 1.3562  lr 2.62e-05  teacher entropy 0.281  55s
+    step   300/1022  loss 1.3572  lr 2.60e-05  teacher entropy 0.280  82s
+    step   400/1022  loss 1.3608  lr 2.59e-05  teacher entropy 0.281  110s
+    step   500/1022  loss 1.3609  lr 2.57e-05  teacher entropy 0.281  138s
+    step   600/1022  loss 1.3586  lr 2.55e-05  teacher entropy 0.281  165s
+    step   700/1022  loss 1.3591  lr 2.54e-05  teacher entropy 0.281  193s
+    step   800/1022  loss 1.3594  lr 2.52e-05  teacher entropy 0.281  220s
+    step   900/1022  loss 1.3604  lr 2.50e-05  teacher entropy 0.281  247s
+    step  1000/1022  loss 1.3620  lr 2.49e-05  teacher entropy 0.282  275s
+    step  1022/1022  loss 1.3618  lr 2.48e-05  teacher entropy 0.282  281s
+  epoch  74/100 summary  loss 1.3618  teacher entropy 0.282 (marginal 4.398, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 75/100
+    step   100/1022  loss 1.3648  lr 2.47e-05  teacher entropy 0.285  28s
+    step   200/1022  loss 1.3684  lr 2.45e-05  teacher entropy 0.284  56s
+    step   300/1022  loss 1.3673  lr 2.43e-05  teacher entropy 0.283  83s
+    step   400/1022  loss 1.3596  lr 2.42e-05  teacher entropy 0.281  110s
+    step   500/1022  loss 1.3597  lr 2.40e-05  teacher entropy 0.281  137s
+    step   600/1022  loss 1.3600  lr 2.38e-05  teacher entropy 0.281  165s
+    step   700/1022  loss 1.3599  lr 2.37e-05  teacher entropy 0.281  192s
+    step   800/1022  loss 1.3594  lr 2.35e-05  teacher entropy 0.280  219s
+    step   900/1022  loss 1.3613  lr 2.33e-05  teacher entropy 0.281  247s
+    step  1000/1022  loss 1.3610  lr 2.32e-05  teacher entropy 0.281  274s
+    step  1022/1022  loss 1.3610  lr 2.31e-05  teacher entropy 0.281  280s
+  epoch  75/100 summary  loss 1.3610  teacher entropy 0.281 (marginal 4.397, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 76/100
+    step   100/1022  loss 1.3462  lr 2.30e-05  teacher entropy 0.282  28s
+    step   200/1022  loss 1.3521  lr 2.28e-05  teacher entropy 0.282  55s
+    step   300/1022  loss 1.3480  lr 2.27e-05  teacher entropy 0.281  83s
+    step   400/1022  loss 1.3503  lr 2.25e-05  teacher entropy 0.280  110s
+    step   500/1022  loss 1.3513  lr 2.23e-05  teacher entropy 0.280  137s
+    step   600/1022  loss 1.3507  lr 2.22e-05  teacher entropy 0.279  165s
+    step   700/1022  loss 1.3516  lr 2.20e-05  teacher entropy 0.279  192s
+    step   800/1022  loss 1.3534  lr 2.19e-05  teacher entropy 0.279  220s
+    step   900/1022  loss 1.3526  lr 2.17e-05  teacher entropy 0.279  247s
+    step  1000/1022  loss 1.3535  lr 2.16e-05  teacher entropy 0.279  274s
+    step  1022/1022  loss 1.3541  lr 2.15e-05  teacher entropy 0.279  281s
+  epoch  76/100 summary  loss 1.3541  teacher entropy 0.279 (marginal 4.396, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 77/100
+    step   100/1022  loss 1.3328  lr 2.14e-05  teacher entropy 0.278  28s
+    step   200/1022  loss 1.3421  lr 2.12e-05  teacher entropy 0.278  55s
+    step   300/1022  loss 1.3469  lr 2.10e-05  teacher entropy 0.281  83s
+    step   400/1022  loss 1.3465  lr 2.09e-05  teacher entropy 0.278  110s
+    step   500/1022  loss 1.3445  lr 2.07e-05  teacher entropy 0.277  137s
+    step   600/1022  loss 1.3439  lr 2.06e-05  teacher entropy 0.278  165s
+    step   700/1022  loss 1.3442  lr 2.04e-05  teacher entropy 0.278  192s
+    step   800/1022  loss 1.3465  lr 2.03e-05  teacher entropy 0.278  220s
+    step   900/1022  loss 1.3476  lr 2.01e-05  teacher entropy 0.278  247s
+    step  1000/1022  loss 1.3467  lr 2.00e-05  teacher entropy 0.278  274s
+    step  1022/1022  loss 1.3473  lr 1.99e-05  teacher entropy 0.278  280s
+  epoch  77/100 summary  loss 1.3473  teacher entropy 0.278 (marginal 4.393, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 78/100
+    step   100/1022  loss 1.3516  lr 1.98e-05  teacher entropy 0.282  28s
+    step   200/1022  loss 1.3480  lr 1.96e-05  teacher entropy 0.281  56s
+    step   300/1022  loss 1.3515  lr 1.95e-05  teacher entropy 0.280  83s
+    step   400/1022  loss 1.3483  lr 1.93e-05  teacher entropy 0.279  111s
+    step   500/1022  loss 1.3450  lr 1.92e-05  teacher entropy 0.277  138s
+    step   600/1022  loss 1.3429  lr 1.90e-05  teacher entropy 0.276  165s
+    step   700/1022  loss 1.3442  lr 1.89e-05  teacher entropy 0.276  193s
+    step   800/1022  loss 1.3429  lr 1.87e-05  teacher entropy 0.276  220s
+    step   900/1022  loss 1.3422  lr 1.86e-05  teacher entropy 0.275  247s
+    step  1000/1022  loss 1.3421  lr 1.84e-05  teacher entropy 0.276  274s
+    step  1022/1022  loss 1.3433  lr 1.84e-05  teacher entropy 0.276  280s
+  epoch  78/100 summary  loss 1.3433  teacher entropy 0.276 (marginal 4.391, max 8.32)  feature cosine 0.274  4.7 min, checkpoint saved
+
+SSL epoch 79/100
+    step   100/1022  loss 1.3332  lr 1.83e-05  teacher entropy 0.278  28s
+    step   200/1022  loss 1.3354  lr 1.81e-05  teacher entropy 0.276  55s
+    step   300/1022  loss 1.3341  lr 1.80e-05  teacher entropy 0.276  83s
+    step   400/1022  loss 1.3315  lr 1.78e-05  teacher entropy 0.275  110s
+    step   500/1022  loss 1.3301  lr 1.77e-05  teacher entropy 0.273  137s
+    step   600/1022  loss 1.3305  lr 1.75e-05  teacher entropy 0.274  165s
+    step   700/1022  loss 1.3344  lr 1.74e-05  teacher entropy 0.274  192s
+    step   800/1022  loss 1.3356  lr 1.72e-05  teacher entropy 0.275  219s
+    step   900/1022  loss 1.3345  lr 1.71e-05  teacher entropy 0.273  246s
+    step  1000/1022  loss 1.3371  lr 1.70e-05  teacher entropy 0.274  274s
+    step  1022/1022  loss 1.3368  lr 1.69e-05  teacher entropy 0.274  280s
+  epoch  79/100 summary  loss 1.3368  teacher entropy 0.274 (marginal 4.390, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 80/100
+    step   100/1022  loss 1.3468  lr 1.68e-05  teacher entropy 0.279  28s
+    step   200/1022  loss 1.3364  lr 1.66e-05  teacher entropy 0.277  56s
+    step   300/1022  loss 1.3393  lr 1.65e-05  teacher entropy 0.278  83s
+    step   400/1022  loss 1.3337  lr 1.64e-05  teacher entropy 0.276  110s
+    step   500/1022  loss 1.3341  lr 1.62e-05  teacher entropy 0.276  138s
+    step   600/1022  loss 1.3333  lr 1.61e-05  teacher entropy 0.276  165s
+    step   700/1022  loss 1.3319  lr 1.59e-05  teacher entropy 0.275  193s
+    step   800/1022  loss 1.3350  lr 1.58e-05  teacher entropy 0.276  220s
+    step   900/1022  loss 1.3357  lr 1.57e-05  teacher entropy 0.275  248s
+    step  1000/1022  loss 1.3352  lr 1.55e-05  teacher entropy 0.275  275s
+    step  1022/1022  loss 1.3352  lr 1.55e-05  teacher entropy 0.275  281s
+  epoch  80/100 summary  loss 1.3352  teacher entropy 0.275 (marginal 4.390, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 81/100
+    step   100/1022  loss 1.3060  lr 1.54e-05  teacher entropy 0.268  30s
+    step   200/1022  loss 1.3218  lr 1.52e-05  teacher entropy 0.271  58s
+    step   300/1022  loss 1.3248  lr 1.51e-05  teacher entropy 0.271  85s
+    step   400/1022  loss 1.3312  lr 1.50e-05  teacher entropy 0.272  113s
+    step   500/1022  loss 1.3292  lr 1.48e-05  teacher entropy 0.273  140s
+    step   600/1022  loss 1.3284  lr 1.47e-05  teacher entropy 0.273  168s
+    step   700/1022  loss 1.3271  lr 1.46e-05  teacher entropy 0.272  195s
+    step   800/1022  loss 1.3236  lr 1.44e-05  teacher entropy 0.271  223s
+    step   900/1022  loss 1.3267  lr 1.43e-05  teacher entropy 0.273  250s
+    step  1000/1022  loss 1.3286  lr 1.42e-05  teacher entropy 0.273  277s
+    step  1022/1022  loss 1.3291  lr 1.41e-05  teacher entropy 0.273  283s
+  epoch  81/100 summary  loss 1.3291  teacher entropy 0.273 (marginal 4.388, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 82/100
+    step   100/1022  loss 1.3273  lr 1.40e-05  teacher entropy 0.270  28s
+    step   200/1022  loss 1.3274  lr 1.39e-05  teacher entropy 0.272  55s
+    step   300/1022  loss 1.3229  lr 1.38e-05  teacher entropy 0.270  83s
+    step   400/1022  loss 1.3210  lr 1.36e-05  teacher entropy 0.270  110s
+    step   500/1022  loss 1.3239  lr 1.35e-05  teacher entropy 0.271  138s
+    step   600/1022  loss 1.3240  lr 1.34e-05  teacher entropy 0.271  165s
+    step   700/1022  loss 1.3255  lr 1.32e-05  teacher entropy 0.271  192s
+    step   800/1022  loss 1.3273  lr 1.31e-05  teacher entropy 0.271  220s
+    step   900/1022  loss 1.3250  lr 1.30e-05  teacher entropy 0.270  247s
+    step  1000/1022  loss 1.3241  lr 1.29e-05  teacher entropy 0.270  275s
+    step  1022/1022  loss 1.3244  lr 1.28e-05  teacher entropy 0.270  281s
+  epoch  82/100 summary  loss 1.3244  teacher entropy 0.270 (marginal 4.385, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 83/100
+    step   100/1022  loss 1.3204  lr 1.27e-05  teacher entropy 0.267  28s
+    step   200/1022  loss 1.3269  lr 1.26e-05  teacher entropy 0.271  55s
+    step   300/1022  loss 1.3244  lr 1.25e-05  teacher entropy 0.271  83s
+    step   400/1022  loss 1.3241  lr 1.23e-05  teacher entropy 0.271  110s
+    step   500/1022  loss 1.3227  lr 1.22e-05  teacher entropy 0.271  138s
+    step   600/1022  loss 1.3215  lr 1.21e-05  teacher entropy 0.270  165s
+    step   700/1022  loss 1.3201  lr 1.20e-05  teacher entropy 0.270  192s
+    step   800/1022  loss 1.3200  lr 1.19e-05  teacher entropy 0.270  220s
+    step   900/1022  loss 1.3211  lr 1.17e-05  teacher entropy 0.270  247s
+    step  1000/1022  loss 1.3216  lr 1.16e-05  teacher entropy 0.269  274s
+    step  1022/1022  loss 1.3224  lr 1.16e-05  teacher entropy 0.270  280s
+  epoch  83/100 summary  loss 1.3224  teacher entropy 0.270 (marginal 4.387, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 84/100
+    step   100/1022  loss 1.3099  lr 1.15e-05  teacher entropy 0.270  28s
+    step   200/1022  loss 1.3092  lr 1.14e-05  teacher entropy 0.265  56s
+    step   300/1022  loss 1.3193  lr 1.12e-05  teacher entropy 0.268  83s
+    step   400/1022  loss 1.3185  lr 1.11e-05  teacher entropy 0.269  111s
+    step   500/1022  loss 1.3235  lr 1.10e-05  teacher entropy 0.270  138s
+    step   600/1022  loss 1.3232  lr 1.09e-05  teacher entropy 0.270  166s
+    step   700/1022  loss 1.3268  lr 1.08e-05  teacher entropy 0.272  193s
+    step   800/1022  loss 1.3275  lr 1.07e-05  teacher entropy 0.272  221s
+    step   900/1022  loss 1.3252  lr 1.06e-05  teacher entropy 0.272  248s
+    step  1000/1022  loss 1.3249  lr 1.04e-05  teacher entropy 0.272  276s
+    step  1022/1022  loss 1.3238  lr 1.04e-05  teacher entropy 0.272  282s
+  epoch  84/100 summary  loss 1.3238  teacher entropy 0.272 (marginal 4.385, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 85/100
+    step   100/1022  loss 1.3138  lr 1.03e-05  teacher entropy 0.265  28s
+    step   200/1022  loss 1.3230  lr 1.02e-05  teacher entropy 0.268  56s
+    step   300/1022  loss 1.3205  lr 1.01e-05  teacher entropy 0.266  83s
+    step   400/1022  loss 1.3202  lr 9.98e-06  teacher entropy 0.267  110s
+    step   500/1022  loss 1.3165  lr 9.87e-06  teacher entropy 0.267  138s
+    step   600/1022  loss 1.3161  lr 9.76e-06  teacher entropy 0.268  165s
+    step   700/1022  loss 1.3158  lr 9.65e-06  teacher entropy 0.268  193s
+    step   800/1022  loss 1.3153  lr 9.54e-06  teacher entropy 0.267  220s
+    step   900/1022  loss 1.3154  lr 9.44e-06  teacher entropy 0.268  248s
+    step  1000/1022  loss 1.3175  lr 9.33e-06  teacher entropy 0.268  275s
+    step  1022/1022  loss 1.3175  lr 9.31e-06  teacher entropy 0.268  281s
+  epoch  85/100 summary  loss 1.3175  teacher entropy 0.268 (marginal 4.383, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 86/100
+    step   100/1022  loss 1.3080  lr 9.20e-06  teacher entropy 0.264  28s
+    step   200/1022  loss 1.3107  lr 9.10e-06  teacher entropy 0.266  55s
+    step   300/1022  loss 1.3222  lr 8.99e-06  teacher entropy 0.267  83s
+    step   400/1022  loss 1.3222  lr 8.89e-06  teacher entropy 0.268  110s
+    step   500/1022  loss 1.3201  lr 8.79e-06  teacher entropy 0.268  137s
+    step   600/1022  loss 1.3179  lr 8.68e-06  teacher entropy 0.268  164s
+    step   700/1022  loss 1.3160  lr 8.58e-06  teacher entropy 0.267  192s
+    step   800/1022  loss 1.3153  lr 8.48e-06  teacher entropy 0.268  219s
+    step   900/1022  loss 1.3155  lr 8.38e-06  teacher entropy 0.268  246s
+    step  1000/1022  loss 1.3143  lr 8.28e-06  teacher entropy 0.268  274s
+    step  1022/1022  loss 1.3146  lr 8.26e-06  teacher entropy 0.268  280s
+  epoch  86/100 summary  loss 1.3146  teacher entropy 0.268 (marginal 4.381, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 87/100
+    step   100/1022  loss 1.3217  lr 8.16e-06  teacher entropy 0.273  28s
+    step   200/1022  loss 1.3131  lr 8.06e-06  teacher entropy 0.270  55s
+    step   300/1022  loss 1.3065  lr 7.96e-06  teacher entropy 0.268  82s
+    step   400/1022  loss 1.3096  lr 7.87e-06  teacher entropy 0.268  110s
+    step   500/1022  loss 1.3096  lr 7.77e-06  teacher entropy 0.269  137s
+    step   600/1022  loss 1.3105  lr 7.67e-06  teacher entropy 0.269  164s
+    step   700/1022  loss 1.3110  lr 7.58e-06  teacher entropy 0.269  192s
+    step   800/1022  loss 1.3131  lr 7.48e-06  teacher entropy 0.269  219s
+    step   900/1022  loss 1.3114  lr 7.39e-06  teacher entropy 0.268  246s
+    step  1000/1022  loss 1.3119  lr 7.30e-06  teacher entropy 0.268  274s
+    step  1022/1022  loss 1.3126  lr 7.28e-06  teacher entropy 0.268  280s
+  epoch  87/100 summary  loss 1.3126  teacher entropy 0.268 (marginal 4.384, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 88/100
+    step   100/1022  loss 1.3159  lr 7.18e-06  teacher entropy 0.269  28s
+    step   200/1022  loss 1.3095  lr 7.09e-06  teacher entropy 0.268  56s
+    step   300/1022  loss 1.3145  lr 7.00e-06  teacher entropy 0.268  83s
+    step   400/1022  loss 1.3113  lr 6.91e-06  teacher entropy 0.268  111s
+    step   500/1022  loss 1.3112  lr 6.82e-06  teacher entropy 0.268  138s
+    step   600/1022  loss 1.3057  lr 6.73e-06  teacher entropy 0.266  165s
+    step   700/1022  loss 1.3051  lr 6.64e-06  teacher entropy 0.266  193s
+    step   800/1022  loss 1.3049  lr 6.55e-06  teacher entropy 0.266  220s
+    step   900/1022  loss 1.3042  lr 6.47e-06  teacher entropy 0.266  247s
+    step  1000/1022  loss 1.3057  lr 6.38e-06  teacher entropy 0.266  275s
+    step  1022/1022  loss 1.3061  lr 6.36e-06  teacher entropy 0.266  281s
+  epoch  88/100 summary  loss 1.3061  teacher entropy 0.266 (marginal 4.383, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 89/100
+    step   100/1022  loss 1.3130  lr 6.28e-06  teacher entropy 0.263  28s
+    step   200/1022  loss 1.3138  lr 6.19e-06  teacher entropy 0.265  55s
+    step   300/1022  loss 1.3093  lr 6.11e-06  teacher entropy 0.264  83s
+    step   400/1022  loss 1.3092  lr 6.02e-06  teacher entropy 0.265  110s
+    step   500/1022  loss 1.3117  lr 5.94e-06  teacher entropy 0.266  138s
+    step   600/1022  loss 1.3102  lr 5.86e-06  teacher entropy 0.266  165s
+    step   700/1022  loss 1.3106  lr 5.77e-06  teacher entropy 0.267  192s
+    step   800/1022  loss 1.3115  lr 5.69e-06  teacher entropy 0.267  219s
+    step   900/1022  loss 1.3108  lr 5.61e-06  teacher entropy 0.266  247s
+    step  1000/1022  loss 1.3093  lr 5.53e-06  teacher entropy 0.266  274s
+    step  1022/1022  loss 1.3096  lr 5.52e-06  teacher entropy 0.267  280s
+  epoch  89/100 summary  loss 1.3096  teacher entropy 0.267 (marginal 4.384, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 90/100
+    step   100/1022  loss 1.2989  lr 5.44e-06  teacher entropy 0.265  28s
+    step   200/1022  loss 1.2966  lr 5.36e-06  teacher entropy 0.264  56s
+    step   300/1022  loss 1.2954  lr 5.28e-06  teacher entropy 0.264  83s
+    step   400/1022  loss 1.2980  lr 5.20e-06  teacher entropy 0.265  110s
+    step   500/1022  loss 1.3003  lr 5.13e-06  teacher entropy 0.266  138s
+    step   600/1022  loss 1.3006  lr 5.05e-06  teacher entropy 0.265  165s
+    step   700/1022  loss 1.3053  lr 4.98e-06  teacher entropy 0.266  192s
+    step   800/1022  loss 1.3056  lr 4.90e-06  teacher entropy 0.267  220s
+    step   900/1022  loss 1.3062  lr 4.83e-06  teacher entropy 0.267  247s
+    step  1000/1022  loss 1.3056  lr 4.76e-06  teacher entropy 0.267  275s
+    step  1022/1022  loss 1.3050  lr 4.74e-06  teacher entropy 0.266  281s
+  epoch  90/100 summary  loss 1.3050  teacher entropy 0.266 (marginal 4.380, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 91/100
+    step   100/1022  loss 1.2989  lr 4.67e-06  teacher entropy 0.265  28s
+    step   200/1022  loss 1.3028  lr 4.60e-06  teacher entropy 0.266  55s
+    step   300/1022  loss 1.3068  lr 4.53e-06  teacher entropy 0.268  82s
+    step   400/1022  loss 1.3054  lr 4.46e-06  teacher entropy 0.266  109s
+    step   500/1022  loss 1.3059  lr 4.39e-06  teacher entropy 0.267  137s
+    step   600/1022  loss 1.3047  lr 4.32e-06  teacher entropy 0.266  164s
+    step   700/1022  loss 1.3017  lr 4.25e-06  teacher entropy 0.266  191s
+    step   800/1022  loss 1.3015  lr 4.18e-06  teacher entropy 0.266  219s
+    step   900/1022  loss 1.3030  lr 4.12e-06  teacher entropy 0.266  246s
+    step  1000/1022  loss 1.3018  lr 4.05e-06  teacher entropy 0.266  273s
+    step  1022/1022  loss 1.3028  lr 4.04e-06  teacher entropy 0.266  279s
+  epoch  91/100 summary  loss 1.3028  teacher entropy 0.266 (marginal 4.380, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 92/100
+    step   100/1022  loss 1.2866  lr 3.97e-06  teacher entropy 0.263  28s
+    step   200/1022  loss 1.2884  lr 3.91e-06  teacher entropy 0.262  56s
+    step   300/1022  loss 1.2923  lr 3.84e-06  teacher entropy 0.262  83s
+    step   400/1022  loss 1.2983  lr 3.78e-06  teacher entropy 0.265  110s
+    step   500/1022  loss 1.2979  lr 3.72e-06  teacher entropy 0.265  138s
+    step   600/1022  loss 1.2995  lr 3.65e-06  teacher entropy 0.265  165s
+    step   700/1022  loss 1.2994  lr 3.59e-06  teacher entropy 0.265  192s
+    step   800/1022  loss 1.2987  lr 3.53e-06  teacher entropy 0.265  220s
+    step   900/1022  loss 1.2978  lr 3.47e-06  teacher entropy 0.265  247s
+    step  1000/1022  loss 1.2983  lr 3.42e-06  teacher entropy 0.265  274s
+    step  1022/1022  loss 1.2992  lr 3.40e-06  teacher entropy 0.265  280s
+  epoch  92/100 summary  loss 1.2992  teacher entropy 0.265 (marginal 4.381, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 93/100
+    step   100/1022  loss 1.2954  lr 3.34e-06  teacher entropy 0.259  28s
+    step   200/1022  loss 1.3036  lr 3.29e-06  teacher entropy 0.264  56s
+    step   300/1022  loss 1.3041  lr 3.23e-06  teacher entropy 0.264  83s
+    step   400/1022  loss 1.3049  lr 3.17e-06  teacher entropy 0.265  110s
+    step   500/1022  loss 1.3063  lr 3.12e-06  teacher entropy 0.266  137s
+    step   600/1022  loss 1.3046  lr 3.06e-06  teacher entropy 0.265  165s
+    step   700/1022  loss 1.3045  lr 3.01e-06  teacher entropy 0.266  192s
+    step   800/1022  loss 1.3057  lr 2.96e-06  teacher entropy 0.266  220s
+    step   900/1022  loss 1.3036  lr 2.91e-06  teacher entropy 0.265  247s
+    step  1000/1022  loss 1.3013  lr 2.85e-06  teacher entropy 0.265  274s
+    step  1022/1022  loss 1.3013  lr 2.84e-06  teacher entropy 0.265  280s
+  epoch  93/100 summary  loss 1.3013  teacher entropy 0.265 (marginal 4.380, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 94/100
+    step   100/1022  loss 1.2847  lr 2.79e-06  teacher entropy 0.263  29s
+    step   200/1022  loss 1.2954  lr 2.74e-06  teacher entropy 0.267  57s
+    step   300/1022  loss 1.2987  lr 2.69e-06  teacher entropy 0.266  84s
+    step   400/1022  loss 1.2988  lr 2.64e-06  teacher entropy 0.266  111s
+    step   500/1022  loss 1.2997  lr 2.59e-06  teacher entropy 0.266  139s
+    step   600/1022  loss 1.2970  lr 2.55e-06  teacher entropy 0.265  166s
+    step   700/1022  loss 1.2963  lr 2.50e-06  teacher entropy 0.265  193s
+    step   800/1022  loss 1.2959  lr 2.45e-06  teacher entropy 0.265  221s
+    step   900/1022  loss 1.2982  lr 2.41e-06  teacher entropy 0.266  248s
+    step  1000/1022  loss 1.2997  lr 2.36e-06  teacher entropy 0.266  275s
+    step  1022/1022  loss 1.2992  lr 2.36e-06  teacher entropy 0.266  281s
+  epoch  94/100 summary  loss 1.2992  teacher entropy 0.266 (marginal 4.381, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 95/100
+    step   100/1022  loss 1.2989  lr 2.31e-06  teacher entropy 0.265  28s
+    step   200/1022  loss 1.3011  lr 2.27e-06  teacher entropy 0.266  56s
+    step   300/1022  loss 1.2971  lr 2.23e-06  teacher entropy 0.263  83s
+    step   400/1022  loss 1.2963  lr 2.18e-06  teacher entropy 0.263  111s
+    step   500/1022  loss 1.2973  lr 2.14e-06  teacher entropy 0.264  138s
+    step   600/1022  loss 1.2968  lr 2.10e-06  teacher entropy 0.265  166s
+    step   700/1022  loss 1.2964  lr 2.06e-06  teacher entropy 0.265  193s
+    step   800/1022  loss 1.2973  lr 2.03e-06  teacher entropy 0.265  220s
+    step   900/1022  loss 1.2973  lr 1.99e-06  teacher entropy 0.265  248s
+    step  1000/1022  loss 1.2987  lr 1.95e-06  teacher entropy 0.265  275s
+    step  1022/1022  loss 1.2989  lr 1.94e-06  teacher entropy 0.266  281s
+  epoch  95/100 summary  loss 1.2989  teacher entropy 0.266 (marginal 4.381, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 96/100
+    step   100/1022  loss 1.2795  lr 1.91e-06  teacher entropy 0.262  28s
+    step   200/1022  loss 1.2856  lr 1.87e-06  teacher entropy 0.264  55s
+    step   300/1022  loss 1.2921  lr 1.84e-06  teacher entropy 0.264  83s
+    step   400/1022  loss 1.2921  lr 1.80e-06  teacher entropy 0.265  110s
+    step   500/1022  loss 1.2926  lr 1.77e-06  teacher entropy 0.264  137s
+    step   600/1022  loss 1.2921  lr 1.73e-06  teacher entropy 0.264  165s
+    step   700/1022  loss 1.2932  lr 1.70e-06  teacher entropy 0.264  192s
+    step   800/1022  loss 1.2966  lr 1.67e-06  teacher entropy 0.265  220s
+    step   900/1022  loss 1.2985  lr 1.64e-06  teacher entropy 0.266  247s
+    step  1000/1022  loss 1.2994  lr 1.61e-06  teacher entropy 0.266  274s
+    step  1022/1022  loss 1.2994  lr 1.60e-06  teacher entropy 0.266  280s
+  epoch  96/100 summary  loss 1.2994  teacher entropy 0.266 (marginal 4.381, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 97/100
+    step   100/1022  loss 1.3000  lr 1.57e-06  teacher entropy 0.263  28s
+    step   200/1022  loss 1.2981  lr 1.55e-06  teacher entropy 0.262  55s
+    step   300/1022  loss 1.2959  lr 1.52e-06  teacher entropy 0.264  83s
+    step   400/1022  loss 1.2970  lr 1.49e-06  teacher entropy 0.265  110s
+    step   500/1022  loss 1.3000  lr 1.47e-06  teacher entropy 0.265  137s
+    step   600/1022  loss 1.2992  lr 1.44e-06  teacher entropy 0.266  165s
+    step   700/1022  loss 1.2993  lr 1.41e-06  teacher entropy 0.266  192s
+    step   800/1022  loss 1.2965  lr 1.39e-06  teacher entropy 0.266  220s
+    step   900/1022  loss 1.2975  lr 1.37e-06  teacher entropy 0.266  247s
+    step  1000/1022  loss 1.2988  lr 1.34e-06  teacher entropy 0.266  274s
+    step  1022/1022  loss 1.2981  lr 1.34e-06  teacher entropy 0.266  280s
+  epoch  97/100 summary  loss 1.2981  teacher entropy 0.266 (marginal 4.381, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 98/100
+    step   100/1022  loss 1.2808  lr 1.32e-06  teacher entropy 0.266  28s
+    step   200/1022  loss 1.2910  lr 1.30e-06  teacher entropy 0.264  56s
+    step   300/1022  loss 1.2933  lr 1.28e-06  teacher entropy 0.265  83s
+    step   400/1022  loss 1.2945  lr 1.26e-06  teacher entropy 0.265  111s
+    step   500/1022  loss 1.2964  lr 1.24e-06  teacher entropy 0.265  138s
+    step   600/1022  loss 1.2965  lr 1.22e-06  teacher entropy 0.266  166s
+    step   700/1022  loss 1.2960  lr 1.20e-06  teacher entropy 0.265  193s
+    step   800/1022  loss 1.2972  lr 1.19e-06  teacher entropy 0.266  220s
+    step   900/1022  loss 1.2967  lr 1.17e-06  teacher entropy 0.266  248s
+    step  1000/1022  loss 1.2957  lr 1.15e-06  teacher entropy 0.265  275s
+    step  1022/1022  loss 1.2963  lr 1.15e-06  teacher entropy 0.265  281s
+  epoch  98/100 summary  loss 1.2963  teacher entropy 0.265 (marginal 4.378, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 99/100
+    step   100/1022  loss 1.3189  lr 1.14e-06  teacher entropy 0.275  28s
+    step   200/1022  loss 1.3041  lr 1.12e-06  teacher entropy 0.270  55s
+    step   300/1022  loss 1.3029  lr 1.11e-06  teacher entropy 0.267  83s
+    step   400/1022  loss 1.3020  lr 1.10e-06  teacher entropy 0.268  110s
+    step   500/1022  loss 1.2998  lr 1.09e-06  teacher entropy 0.268  137s
+    step   600/1022  loss 1.2975  lr 1.08e-06  teacher entropy 0.267  164s
+    step   700/1022  loss 1.2963  lr 1.07e-06  teacher entropy 0.267  192s
+    step   800/1022  loss 1.2965  lr 1.06e-06  teacher entropy 0.267  219s
+    step   900/1022  loss 1.2951  lr 1.05e-06  teacher entropy 0.266  247s
+    step  1000/1022  loss 1.2937  lr 1.04e-06  teacher entropy 0.266  274s
+    step  1022/1022  loss 1.2933  lr 1.04e-06  teacher entropy 0.266  280s
+  epoch  99/100 summary  loss 1.2933  teacher entropy 0.266 (marginal 4.381, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+
+SSL epoch 100/100
+    step   100/1022  loss 1.2900  lr 1.03e-06  teacher entropy 0.261  28s
+    step   200/1022  loss 1.2993  lr 1.02e-06  teacher entropy 0.264  55s
+    step   300/1022  loss 1.2957  lr 1.02e-06  teacher entropy 0.263  83s
+    step   400/1022  loss 1.2902  lr 1.01e-06  teacher entropy 0.262  110s
+    step   500/1022  loss 1.2927  lr 1.01e-06  teacher entropy 0.263  138s
+    step   600/1022  loss 1.2945  lr 1.01e-06  teacher entropy 0.263  165s
+    step   700/1022  loss 1.2934  lr 1.00e-06  teacher entropy 0.264  192s
+    step   800/1022  loss 1.2956  lr 1.00e-06  teacher entropy 0.264  220s
+    step   900/1022  loss 1.2982  lr 1.00e-06  teacher entropy 0.264  247s
+    step  1000/1022  loss 1.2997  lr 1.00e-06  teacher entropy 0.265  274s
+    step  1022/1022  loss 1.2998  lr 1.00e-06  teacher entropy 0.265  280s
+  epoch 100/100 summary  loss 1.2998  teacher entropy 0.265 (marginal 4.380, max 8.32)  feature cosine 0.275  4.7 min, checkpoint saved
+Exported teacher backbone (epoch 100): 312 tensors (156 parameters, 156 BatchNorm buffers), loaded strictly into a fresh MobileNetV2.
+  excluded: head.last_layer, head.mlp
+  file: /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/ssl/20261028-170414_A1_dino_ssl_mobilenetv2_split2_seed0/backbone_teacher_epoch100.pth
+
+Done. SSL cost: 468.76 min, 6,540,800 images seen, 102,200 steps.
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/ssl/20261028-170414_A1_dino_ssl_mobilenetv2_split2_seed0:
+  config.json, manifests.json, manifests/   settings and the image list used (with hashes)
+  run_info.json        status, environment, cost (time, images, steps, GPU memory)
+  history.csv, charts/ per-epoch loss and collapse diagnostics
+  view_preview.png     original chips beside the views used in training
+  checkpoint.pth       full training state (student, teacher, optimizer, center, RNG)
+  backbone_teacher_epoch100.pth teacher backbone for fine-tuning
+Next: python Experiments/mobileNetv2_DINO/train_supervised.py --backbone "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/ssl/20261028-170414_A1_dino_ssl_mobilenetv2_split2_seed0/backbone_teacher_epoch100.pth"
+SSL run folder: Experiments/mobileNetv2_DINO/outputs/ssl/20261028-170414_A1_dino_ssl_mobilenetv2_split2_seed0
+Training run: A1_dino_mobilenetv2_labeled_set_1pct
+  output folder : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/finetune/20261029-035154_A1_dino_mobilenetv2_labeled_set_1pct_split2_seed0
+  device        : cuda (NVIDIA A100-PCIE-40GB)
+  init          : backbone_checkpoint  /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/ssl/20261028-170414_A1_dino_ssl_mobilenetv2_split2_seed0/backbone_teacher_epoch100.pth
+  train images  : 653 from labeled_set_1pct.csv
+  val images    : 800 from validation.csv (picks best.pt)
+  settings      : 30 epochs, batch 64, adamw lr 0.0005, cosine schedule, seed 0
+Reading all train and val images into memory (once per run)...
+  done in 57s
+
+Epoch 1/30  (lr 5.00e-04)
+    train batch   11/11  running loss 3.6359  running acc 0.0613  2s
+    val   batch   13/13  1s
+  epoch   1/30 summary  train loss 3.6359 acc 0.0613  val loss 3.4743 acc 0.1088  3s  *new best, saved best.pt
+  best so far: val acc 0.1088 (epoch 1)  elapsed 0.0 min, about 1.3 min left
+
+Epoch 2/30  (lr 4.99e-04)
+    train batch   11/11  running loss 3.0889  running acc 0.2894  1s
+    val   batch   13/13  1s
+  epoch   2/30 summary  train loss 3.0889 acc 0.2894  val loss 3.2381 acc 0.1538  2s  *new best, saved best.pt
+  best so far: val acc 0.1538 (epoch 2)  elapsed 0.1 min, about 2.0 min left
+
+Epoch 3/30  (lr 4.95e-04)
+    train batch   11/11  running loss 2.6140  running acc 0.4104  1s
+    val   batch   13/13  1s
+  epoch   3/30 summary  train loss 2.6140 acc 0.4104  val loss 3.0305 acc 0.2212  2s  *new best, saved best.pt
+  best so far: val acc 0.2212 (epoch 3)  elapsed 0.2 min, about 1.7 min left
+
+Epoch 4/30  (lr 4.88e-04)
+    train batch   11/11  running loss 2.1657  running acc 0.5406  1s
+    val   batch   13/13  1s
+  epoch   4/30 summary  train loss 2.1657 acc 0.5406  val loss 2.8728 acc 0.2262  2s  *new best, saved best.pt
+  best so far: val acc 0.2262 (epoch 4)  elapsed 0.2 min, about 1.5 min left
+
+Epoch 5/30  (lr 4.78e-04)
+    train batch   11/11  running loss 1.7675  running acc 0.6508  1s
+    val   batch   13/13  1s
+  epoch   5/30 summary  train loss 1.7675 acc 0.6508  val loss 2.7089 acc 0.2475  2s  *new best, saved best.pt
+  best so far: val acc 0.2475 (epoch 5)  elapsed 0.3 min, about 1.4 min left
+
+Epoch 6/30  (lr 4.67e-04)
+    train batch   11/11  running loss 1.4302  running acc 0.7397  1s
+    val   batch   13/13  1s
+  epoch   6/30 summary  train loss 1.4302 acc 0.7397  val loss 2.6687 acc 0.2600  2s  *new best, saved best.pt
+  best so far: val acc 0.2600 (epoch 6)  elapsed 0.3 min, about 1.3 min left
+
+Epoch 7/30  (lr 4.52e-04)
+    train batch   11/11  running loss 1.1270  running acc 0.8055  1s
+    val   batch   13/13  1s
+  epoch   7/30 summary  train loss 1.1270 acc 0.8055  val loss 2.6045 acc 0.2812  2s  *new best, saved best.pt
+  best so far: val acc 0.2812 (epoch 7)  elapsed 0.4 min, about 1.2 min left
+
+Epoch 8/30  (lr 4.36e-04)
+    train batch   11/11  running loss 0.8710  running acc 0.8698  1s
+    val   batch   13/13  1s
+  epoch   8/30 summary  train loss 0.8710 acc 0.8698  val loss 2.5385 acc 0.2962  2s  *new best, saved best.pt
+  best so far: val acc 0.2962 (epoch 8)  elapsed 0.4 min, about 1.1 min left
+
+Epoch 9/30  (lr 4.17e-04)
+    train batch   11/11  running loss 0.6807  running acc 0.9188  1s
+    val   batch   13/13  1s
+  epoch   9/30 summary  train loss 0.6807 acc 0.9188  val loss 2.5863 acc 0.2912  2s
+  best so far: val acc 0.2962 (epoch 8)  elapsed 0.5 min, about 1.1 min left
+
+Epoch 10/30  (lr 3.97e-04)
+    train batch   11/11  running loss 0.4807  running acc 0.9602  1s
+    val   batch   13/13  1s
+  epoch  10/30 summary  train loss 0.4807 acc 0.9602  val loss 2.5545 acc 0.3075  2s  *new best, saved best.pt
+  best so far: val acc 0.3075 (epoch 10)  elapsed 0.5 min, about 1.0 min left
+
+Epoch 11/30  (lr 3.75e-04)
+    train batch   11/11  running loss 0.3556  running acc 0.9770  1s
+    val   batch   13/13  1s
+  epoch  11/30 summary  train loss 0.3556 acc 0.9770  val loss 2.5284 acc 0.3137  2s  *new best, saved best.pt
+  best so far: val acc 0.3137 (epoch 11)  elapsed 0.5 min, about 0.9 min left
+
+Epoch 12/30  (lr 3.52e-04)
+    train batch   11/11  running loss 0.2748  running acc 0.9877  1s
+    val   batch   13/13  1s
+  epoch  12/30 summary  train loss 0.2748 acc 0.9877  val loss 2.5567 acc 0.3125  2s
+  best so far: val acc 0.3137 (epoch 11)  elapsed 0.6 min, about 0.9 min left
+
+Epoch 13/30  (lr 3.27e-04)
+    train batch   11/11  running loss 0.1968  running acc 0.9939  1s
+    val   batch   13/13  1s
+  epoch  13/30 summary  train loss 0.1968 acc 0.9939  val loss 2.6371 acc 0.3013  2s
+  best so far: val acc 0.3137 (epoch 11)  elapsed 0.6 min, about 0.8 min left
+
+Epoch 14/30  (lr 3.02e-04)
+    train batch   11/11  running loss 0.1399  running acc 1.0000  1s
+    val   batch   13/13  1s
+  epoch  14/30 summary  train loss 0.1399 acc 1.0000  val loss 2.6096 acc 0.3125  2s
+  best so far: val acc 0.3137 (epoch 11)  elapsed 0.7 min, about 0.8 min left
+
+Epoch 15/30  (lr 2.76e-04)
+    train batch   11/11  running loss 0.1167  running acc 0.9985  1s
+    val   batch   13/13  1s
+  epoch  15/30 summary  train loss 0.1167 acc 0.9985  val loss 2.6047 acc 0.3250  2s  *new best, saved best.pt
+  best so far: val acc 0.3250 (epoch 15)  elapsed 0.7 min, about 0.7 min left
+
+Epoch 16/30  (lr 2.50e-04)
+    train batch   11/11  running loss 0.0933  running acc 1.0000  1s
+    val   batch   13/13  1s
+  epoch  16/30 summary  train loss 0.0933 acc 1.0000  val loss 2.5634 acc 0.3325  2s  *new best, saved best.pt
+  best so far: val acc 0.3325 (epoch 16)  elapsed 0.8 min, about 0.7 min left
+
+Epoch 17/30  (lr 2.24e-04)
+    train batch   11/11  running loss 0.0882  running acc 1.0000  1s
+    val   batch   13/13  1s
+  epoch  17/30 summary  train loss 0.0882 acc 1.0000  val loss 2.5921 acc 0.3325  2s
+  best so far: val acc 0.3325 (epoch 16)  elapsed 0.8 min, about 0.6 min left
+
+Epoch 18/30  (lr 1.98e-04)
+    train batch   11/11  running loss 0.0714  running acc 1.0000  1s
+    val   batch   13/13  1s
+  epoch  18/30 summary  train loss 0.0714 acc 1.0000  val loss 2.6072 acc 0.3300  2s
+  best so far: val acc 0.3325 (epoch 16)  elapsed 0.9 min, about 0.6 min left
+
+Epoch 19/30  (lr 1.73e-04)
+    train batch   11/11  running loss 0.0653  running acc 1.0000  1s
+    val   batch   13/13  1s
+  epoch  19/30 summary  train loss 0.0653 acc 1.0000  val loss 2.6064 acc 0.3313  2s
+  best so far: val acc 0.3325 (epoch 16)  elapsed 0.9 min, about 0.5 min left
+
+Epoch 20/30  (lr 1.48e-04)
+    train batch   11/11  running loss 0.0615  running acc 1.0000  1s
+    val   batch   13/13  1s
+  epoch  20/30 summary  train loss 0.0615 acc 1.0000  val loss 2.6055 acc 0.3275  2s
+  best so far: val acc 0.3325 (epoch 16)  elapsed 0.9 min, about 0.5 min left
+
+Epoch 21/30  (lr 1.25e-04)
+    train batch   11/11  running loss 0.0584  running acc 0.9985  1s
+    val   batch   13/13  1s
+  epoch  21/30 summary  train loss 0.0584 acc 0.9985  val loss 2.6235 acc 0.3162  2s
+  best so far: val acc 0.3325 (epoch 16)  elapsed 1.0 min, about 0.4 min left
+
+Epoch 22/30  (lr 1.03e-04)
+    train batch   11/11  running loss 0.0526  running acc 1.0000  1s
+    val   batch   13/13  1s
+  epoch  22/30 summary  train loss 0.0526 acc 1.0000  val loss 2.6124 acc 0.3175  2s
+  best so far: val acc 0.3325 (epoch 16)  elapsed 1.0 min, about 0.4 min left
+
+Epoch 23/30  (lr 8.27e-05)
+    train batch   11/11  running loss 0.0519  running acc 1.0000  1s
+    val   batch   13/13  1s
+  epoch  23/30 summary  train loss 0.0519 acc 1.0000  val loss 2.6200 acc 0.3262  2s
+  best so far: val acc 0.3325 (epoch 16)  elapsed 1.1 min, about 0.3 min left
+
+Epoch 24/30  (lr 6.42e-05)
+    train batch   11/11  running loss 0.0454  running acc 1.0000  1s
+    val   batch   13/13  1s
+  epoch  24/30 summary  train loss 0.0454 acc 1.0000  val loss 2.6407 acc 0.3250  2s
+  best so far: val acc 0.3325 (epoch 16)  elapsed 1.1 min, about 0.3 min left
+
+Epoch 25/30  (lr 4.77e-05)
+    train batch   11/11  running loss 0.0419  running acc 1.0000  1s
+    val   batch   13/13  1s
+  epoch  25/30 summary  train loss 0.0419 acc 1.0000  val loss 2.6362 acc 0.3288  2s
+  best so far: val acc 0.3325 (epoch 16)  elapsed 1.2 min, about 0.2 min left
+
+Epoch 26/30  (lr 3.35e-05)
+    train batch   11/11  running loss 0.0437  running acc 1.0000  1s
+    val   batch   13/13  1s
+  epoch  26/30 summary  train loss 0.0437 acc 1.0000  val loss 2.6283 acc 0.3313  2s
+  best so far: val acc 0.3325 (epoch 16)  elapsed 1.2 min, about 0.2 min left
+
+Epoch 27/30  (lr 2.16e-05)
+    train batch   11/11  running loss 0.0416  running acc 1.0000  1s
+    val   batch   13/13  1s
+  epoch  27/30 summary  train loss 0.0416 acc 1.0000  val loss 2.6285 acc 0.3250  2s
+  best so far: val acc 0.3325 (epoch 16)  elapsed 1.2 min, about 0.1 min left
+
+Epoch 28/30  (lr 1.22e-05)
+    train batch   11/11  running loss 0.0394  running acc 1.0000  1s
+    val   batch   13/13  1s
+  epoch  28/30 summary  train loss 0.0394 acc 1.0000  val loss 2.6185 acc 0.3338  2s  *new best, saved best.pt
+  best so far: val acc 0.3338 (epoch 28)  elapsed 1.3 min, about 0.1 min left
+
+Epoch 29/30  (lr 5.46e-06)
+    train batch   11/11  running loss 0.0434  running acc 1.0000  1s
+    val   batch   13/13  1s
+  epoch  29/30 summary  train loss 0.0434 acc 1.0000  val loss 2.6083 acc 0.3313  2s
+  best so far: val acc 0.3338 (epoch 28)  elapsed 1.3 min, about 0.0 min left
+
+Epoch 30/30  (lr 1.37e-06)
+    train batch   11/11  running loss 0.0426  running acc 1.0000  1s
+    val   batch   13/13  1s
+  epoch  30/30 summary  train loss 0.0426 acc 1.0000  val loss 2.6283 acc 0.3325  2s
+  best so far: val acc 0.3338 (epoch 28)  elapsed 1.4 min, about 0.0 min left
+
+Done in 1.38 min. Best validation accuracy 0.3338 at epoch 28.
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/finetune/20261029-035154_A1_dino_mobilenetv2_labeled_set_1pct_split2_seed0:
+  config.json        settings used
+  class_mapping.csv  label number -> class name
+  manifests.json     hashes of the train/val image lists used, plus the split audit
+  manifests/         copies of the labeled, validation and class-mapping CSVs used
+  run_info.json      status, device, versions, timing, best epoch
+  history.csv        per-epoch loss and accuracy (train and val)
+  best.pt            model weights from the best validation epoch
+  charts/            loss.pdf, accuracy.pdf, overfitting_gap.pdf, learning_rate.pdf (one chart per file)
+Next: python Experiments/mobileNetv2_DINO/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/finetune/20261029-035154_A1_dino_mobilenetv2_labeled_set_1pct_split2_seed0" --split validation
+Final test (once, when everything is fixed): python Experiments/mobileNetv2_DINO/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/finetune/20261029-035154_A1_dino_mobilenetv2_labeled_set_1pct_split2_seed0"
+Evaluating Experiments/mobileNetv2_DINO/outputs/finetune/20261029-035154_A1_dino_mobilenetv2_labeled_set_1pct_split2_seed0/best.pt
+  checkpoint : epoch 28, val acc at training 0.3338
+  split      : validation, 800 images (read from disk)
+  device     : cuda (NVIDIA A100-PCIE-40GB)
+    validation batch   13/13  28s
+validation: 800 images  overall accuracy 0.3338  mean per-class accuracy 0.3338  (checkpoint epoch 28)
+Outputs in Experiments/mobileNetv2_DINO/outputs/finetune/20261029-035154_A1_dino_mobilenetv2_labeled_set_1pct_split2_seed0/eval_validation:
+  metrics.json            overall and mean per-class accuracy, loss, checkpoint info
+  per_class_accuracy.csv  accuracy for each of the 40 classes
+  confusion_matrix.csv    rows = true class, columns = predicted class
+  predictions.csv         one row per image: true, predicted, confidence
+  charts/                 per_class_accuracy.pdf, confusion_matrix.pdf, top_mistakes.pdf,
+                          confidence.pdf, calibration.pdf (one chart per file)
+Evaluating Experiments/mobileNetv2_DINO/outputs/finetune/20261029-035154_A1_dino_mobilenetv2_labeled_set_1pct_split2_seed0/best.pt
+  checkpoint : epoch 28, val acc at training 0.3338
+  split      : test, 29284 images (read from disk)
+  device     : cuda (NVIDIA A100-PCIE-40GB)
+    test batch   25/458  55s
+    test batch   50/458  115s
+    test batch   75/458  191s
+    test batch  100/458  235s
+    test batch  125/458  276s
+    test batch  150/458  313s
+    test batch  175/458  346s
+    test batch  200/458  374s
+    test batch  225/458  408s
+    test batch  250/458  448s
+    test batch  275/458  487s
+    test batch  300/458  517s
+    test batch  325/458  545s
+    test batch  350/458  569s
+    test batch  375/458  612s
+    test batch  400/458  654s
+    test batch  425/458  711s
+    test batch  450/458  737s
+    test batch  458/458  746s
+test: 29284 images  overall accuracy 0.3468  mean per-class accuracy 0.3461  (checkpoint epoch 28)
+Outputs in Experiments/mobileNetv2_DINO/outputs/finetune/20261029-035154_A1_dino_mobilenetv2_labeled_set_1pct_split2_seed0/eval_test:
+  metrics.json            overall and mean per-class accuracy, loss, checkpoint info
+  per_class_accuracy.csv  accuracy for each of the 40 classes
+  confusion_matrix.csv    rows = true class, columns = predicted class
+  predictions.csv         one row per image: true, predicted, confidence
+  charts/                 per_class_accuracy.pdf, confusion_matrix.pdf, top_mistakes.pdf,
+                          confidence.pdf, calibration.pdf (one chart per file)
+Training run: A1_dino_mobilenetv2
+  output folder : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041020_A1_dino_mobilenetv2_split2_seed0
+  device        : cuda (NVIDIA A100-PCIE-40GB)
+  init          : backbone_checkpoint  /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/ssl/20261028-170414_A1_dino_ssl_mobilenetv2_split2_seed0/backbone_teacher_epoch100.pth
+  train images  : 1962 from labeled_set.csv
+  val images    : 800 from validation.csv (picks best.pt)
+  settings      : 30 epochs, batch 64, adamw lr 0.0005, cosine schedule, seed 0
+Reading all train and val images into memory (once per run)...
+  done in 27s
+
+Epoch 1/30  (lr 5.00e-04)
+    train batch   25/31  running loss 3.4594  running acc 0.1050  3s
+    train batch   31/31  running loss 3.3994  running acc 0.1188  4s
+    val   batch   13/13  1s
+  epoch   1/30 summary  train loss 3.3994 acc 0.1188  val loss 2.9239 acc 0.2225  5s  *new best, saved best.pt
+  best so far: val acc 0.2225 (epoch 1)  elapsed 0.1 min, about 2.4 min left
+
+Epoch 2/30  (lr 4.99e-04)
+    train batch   25/31  running loss 2.5484  running acc 0.3444  3s
+    train batch   31/31  running loss 2.4960  running acc 0.3527  4s
+    val   batch   13/13  1s
+  epoch   2/30 summary  train loss 2.4960 acc 0.3527  val loss 2.4304 acc 0.3300  4s  *new best, saved best.pt
+  best so far: val acc 0.3300 (epoch 2)  elapsed 0.2 min, about 2.7 min left
+
+Epoch 3/30  (lr 4.95e-04)
+    train batch   25/31  running loss 1.8812  running acc 0.4975  3s
+    train batch   31/31  running loss 1.8623  running acc 0.4980  3s
+    val   batch   13/13  1s
+  epoch   3/30 summary  train loss 1.8623 acc 0.4980  val loss 2.1218 acc 0.3850  4s  *new best, saved best.pt
+  best so far: val acc 0.3850 (epoch 3)  elapsed 0.3 min, about 2.5 min left
+
+Epoch 4/30  (lr 4.88e-04)
+    train batch   25/31  running loss 1.4222  running acc 0.6388  3s
+    train batch   31/31  running loss 1.4098  running acc 0.6391  3s
+    val   batch   13/13  1s
+  epoch   4/30 summary  train loss 1.4098 acc 0.6391  val loss 1.9505 acc 0.4288  4s  *new best, saved best.pt
+  best so far: val acc 0.4288 (epoch 4)  elapsed 0.4 min, about 2.3 min left
+
+Epoch 5/30  (lr 4.78e-04)
+    train batch   25/31  running loss 1.0783  running acc 0.7238  3s
+    train batch   31/31  running loss 1.0811  running acc 0.7146  3s
+    val   batch   13/13  1s
+  epoch   5/30 summary  train loss 1.0811 acc 0.7146  val loss 1.8658 acc 0.4563  4s  *new best, saved best.pt
+  best so far: val acc 0.4563 (epoch 5)  elapsed 0.4 min, about 2.2 min left
+
+Epoch 6/30  (lr 4.67e-04)
+    train batch   25/31  running loss 0.7503  running acc 0.8263  3s
+    train batch   31/31  running loss 0.7565  running acc 0.8201  3s
+    val   batch   13/13  1s
+  epoch   6/30 summary  train loss 0.7565 acc 0.8201  val loss 1.8360 acc 0.4963  4s  *new best, saved best.pt
+  best so far: val acc 0.4963 (epoch 6)  elapsed 0.5 min, about 2.1 min left
+
+Epoch 7/30  (lr 4.52e-04)
+    train batch   25/31  running loss 0.5104  running acc 0.8956  3s
+    train batch   31/31  running loss 0.5240  running acc 0.8904  3s
+    val   batch   13/13  1s
+  epoch   7/30 summary  train loss 0.5240 acc 0.8904  val loss 1.7895 acc 0.4850  4s
+  best so far: val acc 0.4963 (epoch 6)  elapsed 0.6 min, about 2.0 min left
+
+Epoch 8/30  (lr 4.36e-04)
+    train batch   25/31  running loss 0.3615  running acc 0.9294  3s
+    train batch   31/31  running loss 0.3673  running acc 0.9256  3s
+    val   batch   13/13  1s
+  epoch   8/30 summary  train loss 0.3673 acc 0.9256  val loss 1.7457 acc 0.4925  4s
+  best so far: val acc 0.4963 (epoch 6)  elapsed 0.7 min, about 1.9 min left
+
+Epoch 9/30  (lr 4.17e-04)
+    train batch   25/31  running loss 0.2439  running acc 0.9619  3s
+    train batch   31/31  running loss 0.2472  running acc 0.9577  3s
+    val   batch   13/13  1s
+  epoch   9/30 summary  train loss 0.2472 acc 0.9577  val loss 1.8041 acc 0.4988  4s  *new best, saved best.pt
+  best so far: val acc 0.4988 (epoch 9)  elapsed 0.8 min, about 1.8 min left
+
+Epoch 10/30  (lr 3.97e-04)
+    train batch   25/31  running loss 0.1665  running acc 0.9781  3s
+    train batch   31/31  running loss 0.1677  running acc 0.9766  4s
+    val   batch   13/13  1s
+  epoch  10/30 summary  train loss 0.1677 acc 0.9766  val loss 1.8338 acc 0.5150  4s  *new best, saved best.pt
+  best so far: val acc 0.5150 (epoch 10)  elapsed 0.8 min, about 1.7 min left
+
+Epoch 11/30  (lr 3.75e-04)
+    train batch   25/31  running loss 0.1126  running acc 0.9869  3s
+    train batch   31/31  running loss 0.1116  running acc 0.9873  3s
+    val   batch   13/13  1s
+  epoch  11/30 summary  train loss 0.1116 acc 0.9873  val loss 1.7946 acc 0.5325  4s  *new best, saved best.pt
+  best so far: val acc 0.5325 (epoch 11)  elapsed 0.9 min, about 1.6 min left
+
+Epoch 12/30  (lr 3.52e-04)
+    train batch   25/31  running loss 0.0710  running acc 0.9944  3s
+    train batch   31/31  running loss 0.0708  running acc 0.9934  3s
+    val   batch   13/13  1s
+  epoch  12/30 summary  train loss 0.0708 acc 0.9934  val loss 1.8246 acc 0.5213  4s
+  best so far: val acc 0.5325 (epoch 11)  elapsed 1.0 min, about 1.5 min left
+
+Epoch 13/30  (lr 3.27e-04)
+    train batch   25/31  running loss 0.0489  running acc 0.9975  3s
+    train batch   31/31  running loss 0.0481  running acc 0.9969  3s
+    val   batch   13/13  1s
+  epoch  13/30 summary  train loss 0.0481 acc 0.9969  val loss 1.7811 acc 0.5500  4s  *new best, saved best.pt
+  best so far: val acc 0.5500 (epoch 13)  elapsed 1.1 min, about 1.4 min left
+
+Epoch 14/30  (lr 3.02e-04)
+    train batch   25/31  running loss 0.0375  running acc 0.9988  3s
+    train batch   31/31  running loss 0.0374  running acc 0.9990  4s
+    val   batch   13/13  1s
+  epoch  14/30 summary  train loss 0.0374 acc 0.9990  val loss 1.7746 acc 0.5487  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 1.2 min, about 1.3 min left
+
+Epoch 15/30  (lr 2.76e-04)
+    train batch   25/31  running loss 0.0316  running acc 0.9981  3s
+    train batch   31/31  running loss 0.0302  running acc 0.9985  3s
+    val   batch   13/13  1s
+  epoch  15/30 summary  train loss 0.0302 acc 0.9985  val loss 1.7376 acc 0.5437  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 1.2 min, about 1.2 min left
+
+Epoch 16/30  (lr 2.50e-04)
+    train batch   25/31  running loss 0.0240  running acc 0.9994  3s
+    train batch   31/31  running loss 0.0251  running acc 0.9990  3s
+    val   batch   13/13  1s
+  epoch  16/30 summary  train loss 0.0251 acc 0.9990  val loss 1.7402 acc 0.5437  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 1.3 min, about 1.2 min left
+
+Epoch 17/30  (lr 2.24e-04)
+    train batch   25/31  running loss 0.0206  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0199  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  17/30 summary  train loss 0.0199 acc 1.0000  val loss 1.7565 acc 0.5425  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 1.4 min, about 1.1 min left
+
+Epoch 18/30  (lr 1.98e-04)
+    train batch   25/31  running loss 0.0155  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0155  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  18/30 summary  train loss 0.0155 acc 1.0000  val loss 1.7534 acc 0.5412  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 1.5 min, about 1.0 min left
+
+Epoch 19/30  (lr 1.73e-04)
+    train batch   25/31  running loss 0.0136  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0135  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  19/30 summary  train loss 0.0135 acc 1.0000  val loss 1.7394 acc 0.5387  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 1.6 min, about 0.9 min left
+
+Epoch 20/30  (lr 1.48e-04)
+    train batch   25/31  running loss 0.0126  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0128  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  20/30 summary  train loss 0.0128 acc 1.0000  val loss 1.7371 acc 0.5400  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 1.6 min, about 0.8 min left
+
+Epoch 21/30  (lr 1.25e-04)
+    train batch   25/31  running loss 0.0106  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0115  running acc 1.0000  3s
+    val   batch   13/13  1s
+  epoch  21/30 summary  train loss 0.0115 acc 1.0000  val loss 1.7355 acc 0.5400  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 1.7 min, about 0.7 min left
+
+Epoch 22/30  (lr 1.03e-04)
+    train batch   25/31  running loss 0.0107  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0108  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  22/30 summary  train loss 0.0108 acc 1.0000  val loss 1.7369 acc 0.5387  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 1.8 min, about 0.7 min left
+
+Epoch 23/30  (lr 8.27e-05)
+    train batch   25/31  running loss 0.0107  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0107  running acc 1.0000  3s
+    val   batch   13/13  1s
+  epoch  23/30 summary  train loss 0.0107 acc 1.0000  val loss 1.7425 acc 0.5462  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 1.9 min, about 0.6 min left
+
+Epoch 24/30  (lr 6.42e-05)
+    train batch   25/31  running loss 0.0097  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0104  running acc 1.0000  3s
+    val   batch   13/13  1s
+  epoch  24/30 summary  train loss 0.0104 acc 1.0000  val loss 1.7483 acc 0.5362  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 2.0 min, about 0.5 min left
+
+Epoch 25/30  (lr 4.77e-05)
+    train batch   25/31  running loss 0.0091  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0093  running acc 1.0000  3s
+    val   batch   13/13  1s
+  epoch  25/30 summary  train loss 0.0093 acc 1.0000  val loss 1.7383 acc 0.5387  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 2.1 min, about 0.4 min left
+
+Epoch 26/30  (lr 3.35e-05)
+    train batch   25/31  running loss 0.0090  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0091  running acc 1.0000  3s
+    val   batch   13/13  1s
+  epoch  26/30 summary  train loss 0.0091 acc 1.0000  val loss 1.7483 acc 0.5350  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 2.1 min, about 0.3 min left
+
+Epoch 27/30  (lr 2.16e-05)
+    train batch   25/31  running loss 0.0096  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0094  running acc 1.0000  3s
+    val   batch   13/13  1s
+  epoch  27/30 summary  train loss 0.0094 acc 1.0000  val loss 1.7478 acc 0.5437  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 2.2 min, about 0.2 min left
+
+Epoch 28/30  (lr 1.22e-05)
+    train batch   25/31  running loss 0.0092  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0097  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  28/30 summary  train loss 0.0097 acc 1.0000  val loss 1.7467 acc 0.5387  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 2.3 min, about 0.2 min left
+
+Epoch 29/30  (lr 5.46e-06)
+    train batch   25/31  running loss 0.0089  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0089  running acc 1.0000  4s
+    val   batch   13/13  1s
+  epoch  29/30 summary  train loss 0.0089 acc 1.0000  val loss 1.7570 acc 0.5387  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 2.4 min, about 0.1 min left
+
+Epoch 30/30  (lr 1.37e-06)
+    train batch   25/31  running loss 0.0097  running acc 1.0000  3s
+    train batch   31/31  running loss 0.0096  running acc 1.0000  3s
+    val   batch   13/13  1s
+  epoch  30/30 summary  train loss 0.0096 acc 1.0000  val loss 1.7459 acc 0.5450  4s
+  best so far: val acc 0.5500 (epoch 13)  elapsed 2.5 min, about 0.0 min left
+
+Done in 2.47 min. Best validation accuracy 0.5500 at epoch 13.
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041020_A1_dino_mobilenetv2_split2_seed0:
+  config.json        settings used
+  class_mapping.csv  label number -> class name
+  manifests.json     hashes of the train/val image lists used, plus the split audit
+  manifests/         copies of the labeled, validation and class-mapping CSVs used
+  run_info.json      status, device, versions, timing, best epoch
+  history.csv        per-epoch loss and accuracy (train and val)
+  best.pt            model weights from the best validation epoch
+  charts/            loss.pdf, accuracy.pdf, overfitting_gap.pdf, learning_rate.pdf (one chart per file)
+Next: python Experiments/mobileNetv2_DINO/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041020_A1_dino_mobilenetv2_split2_seed0" --split validation
+Final test (once, when everything is fixed): python Experiments/mobileNetv2_DINO/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041020_A1_dino_mobilenetv2_split2_seed0"
+Evaluating Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041020_A1_dino_mobilenetv2_split2_seed0/best.pt
+  checkpoint : epoch 13, val acc at training 0.5500
+  split      : validation, 800 images (read from disk)
+  device     : cuda (NVIDIA A100-PCIE-40GB)
+    validation batch   13/13  5s
+validation: 800 images  overall accuracy 0.5500  mean per-class accuracy 0.5500  (checkpoint epoch 13)
+Outputs in Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041020_A1_dino_mobilenetv2_split2_seed0/eval_validation:
+  metrics.json            overall and mean per-class accuracy, loss, checkpoint info
+  per_class_accuracy.csv  accuracy for each of the 40 classes
+  confusion_matrix.csv    rows = true class, columns = predicted class
+  predictions.csv         one row per image: true, predicted, confidence
+  charts/                 per_class_accuracy.pdf, confusion_matrix.pdf, top_mistakes.pdf,
+                          confidence.pdf, calibration.pdf (one chart per file)
+Evaluating Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041020_A1_dino_mobilenetv2_split2_seed0/best.pt
+  checkpoint : epoch 13, val acc at training 0.5500
+  split      : test, 29284 images (read from disk)
+  device     : cuda (NVIDIA A100-PCIE-40GB)
+    test batch   25/458  10s
+    test batch   50/458  21s
+    test batch   75/458  33s
+    test batch  100/458  44s
+    test batch  125/458  55s
+    test batch  150/458  69s
+    test batch  175/458  80s
+    test batch  200/458  93s
+    test batch  225/458  104s
+    test batch  250/458  116s
+    test batch  275/458  128s
+    test batch  300/458  137s
+    test batch  325/458  149s
+    test batch  350/458  159s
+    test batch  375/458  170s
+    test batch  400/458  184s
+    test batch  425/458  197s
+    test batch  450/458  209s
+    test batch  458/458  213s
+test: 29284 images  overall accuracy 0.5476  mean per-class accuracy 0.5463  (checkpoint epoch 13)
+Outputs in Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041020_A1_dino_mobilenetv2_split2_seed0/eval_test:
+  metrics.json            overall and mean per-class accuracy, loss, checkpoint info
+  per_class_accuracy.csv  accuracy for each of the 40 classes
+  confusion_matrix.csv    rows = true class, columns = predicted class
+  predictions.csv         one row per image: true, predicted, confidence
+  charts/                 per_class_accuracy.pdf, confusion_matrix.pdf, top_mistakes.pdf,
+                          confidence.pdf, calibration.pdf (one chart per file)
+Training run: A1_dino_mobilenetv2_labeled_set_10pct
+  output folder : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041748_A1_dino_mobilenetv2_labeled_set_10pct_split2_seed0
+  device        : cuda (NVIDIA A100-PCIE-40GB)
+  init          : backbone_checkpoint  /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/ssl/20261028-170414_A1_dino_ssl_mobilenetv2_split2_seed0/backbone_teacher_epoch100.pth
+  train images  : 6543 from labeled_set_10pct.csv
+  val images    : 800 from validation.csv (picks best.pt)
+  settings      : 30 epochs, batch 64, adamw lr 0.0005, cosine schedule, seed 0
+Reading all train and val images into memory (once per run)...
+  done in 47s
+
+Epoch 1/30  (lr 5.00e-04)
+    train batch   25/103  running loss 3.4367  running acc 0.1200  3s
+    train batch   50/103  running loss 3.1458  running acc 0.1756  6s
+    train batch   75/103  running loss 2.9008  running acc 0.2285  9s
+    train batch  100/103  running loss 2.7062  running acc 0.2697  12s
+    train batch  103/103  running loss 2.6879  running acc 0.2733  13s
+    val   batch   13/13  1s
+  epoch   1/30 summary  train loss 2.6879 acc 0.2733  val loss 2.0396 acc 0.4200  13s  *new best, saved best.pt
+  best so far: val acc 0.4200 (epoch 1)  elapsed 0.2 min, about 6.5 min left
+
+Epoch 2/30  (lr 4.99e-04)
+    train batch   25/103  running loss 1.7410  running acc 0.4969  3s
+    train batch   50/103  running loss 1.6740  running acc 0.5150  6s
+    train batch   75/103  running loss 1.6407  running acc 0.5231  9s
+    train batch  100/103  running loss 1.6065  running acc 0.5289  11s
+    train batch  103/103  running loss 1.6050  running acc 0.5291  12s
+    val   batch   13/13  1s
+  epoch   2/30 summary  train loss 1.6050 acc 0.5291  val loss 1.6215 acc 0.4938  12s  *new best, saved best.pt
+  best so far: val acc 0.4938 (epoch 2)  elapsed 0.5 min, about 6.3 min left
+
+Epoch 3/30  (lr 4.95e-04)
+    train batch   25/103  running loss 1.2019  running acc 0.6394  3s
+    train batch   50/103  running loss 1.1743  running acc 0.6453  6s
+    train batch   75/103  running loss 1.1656  running acc 0.6485  9s
+    train batch  100/103  running loss 1.1667  running acc 0.6491  11s
+    train batch  103/103  running loss 1.1679  running acc 0.6489  12s
+    val   batch   13/13  1s
+  epoch   3/30 summary  train loss 1.1679 acc 0.6489  val loss 1.3761 acc 0.5775  13s  *new best, saved best.pt
+  best so far: val acc 0.5775 (epoch 3)  elapsed 0.7 min, about 6.0 min left
+
+Epoch 4/30  (lr 4.88e-04)
+    train batch   25/103  running loss 0.9058  running acc 0.7350  3s
+    train batch   50/103  running loss 0.9049  running acc 0.7300  6s
+    train batch   75/103  running loss 0.8925  running acc 0.7333  8s
+    train batch  100/103  running loss 0.8921  running acc 0.7334  11s
+    train batch  103/103  running loss 0.8926  running acc 0.7324  11s
+    val   batch   13/13  1s
+  epoch   4/30 summary  train loss 0.8926 acc 0.7324  val loss 1.2909 acc 0.6150  12s  *new best, saved best.pt
+  best so far: val acc 0.6150 (epoch 4)  elapsed 0.9 min, about 5.8 min left
+
+Epoch 5/30  (lr 4.78e-04)
+    train batch   25/103  running loss 0.7219  running acc 0.7844  3s
+    train batch   50/103  running loss 0.6940  running acc 0.7966  6s
+    train batch   75/103  running loss 0.6791  running acc 0.7987  8s
+    train batch  100/103  running loss 0.6879  running acc 0.7958  11s
+    train batch  103/103  running loss 0.6879  running acc 0.7954  11s
+    val   batch   13/13  1s
+  epoch   5/30 summary  train loss 0.6879 acc 0.7954  val loss 1.2662 acc 0.6187  12s  *new best, saved best.pt
+  best so far: val acc 0.6187 (epoch 5)  elapsed 1.1 min, about 5.5 min left
+
+Epoch 6/30  (lr 4.67e-04)
+    train batch   25/103  running loss 0.5499  running acc 0.8350  3s
+    train batch   50/103  running loss 0.5485  running acc 0.8356  6s
+    train batch   75/103  running loss 0.5396  running acc 0.8392  8s
+    train batch  100/103  running loss 0.5448  running acc 0.8356  11s
+    train batch  103/103  running loss 0.5461  running acc 0.8348  11s
+    val   batch   13/13  1s
+  epoch   6/30 summary  train loss 0.5461 acc 0.8348  val loss 1.2209 acc 0.6575  12s  *new best, saved best.pt
+  best so far: val acc 0.6575 (epoch 6)  elapsed 1.3 min, about 5.3 min left
+
+Epoch 7/30  (lr 4.52e-04)
+    train batch   25/103  running loss 0.4401  running acc 0.8694  3s
+    train batch   50/103  running loss 0.4120  running acc 0.8759  6s
+    train batch   75/103  running loss 0.4002  running acc 0.8819  9s
+    train batch  100/103  running loss 0.3985  running acc 0.8838  11s
+    train batch  103/103  running loss 0.3992  running acc 0.8834  12s
+    val   batch   13/13  1s
+  epoch   7/30 summary  train loss 0.3992 acc 0.8834  val loss 1.1368 acc 0.6875  13s  *new best, saved best.pt
+  best so far: val acc 0.6875 (epoch 7)  elapsed 1.5 min, about 5.0 min left
+
+Epoch 8/30  (lr 4.36e-04)
+    train batch   25/103  running loss 0.3040  running acc 0.9137  3s
+    train batch   50/103  running loss 0.3180  running acc 0.9072  6s
+    train batch   75/103  running loss 0.3120  running acc 0.9102  8s
+    train batch  100/103  running loss 0.3115  running acc 0.9091  11s
+    train batch  103/103  running loss 0.3105  running acc 0.9092  11s
+    val   batch   13/13  1s
+  epoch   8/30 summary  train loss 0.3105 acc 0.9092  val loss 1.0795 acc 0.6888  12s  *new best, saved best.pt
+  best so far: val acc 0.6888 (epoch 8)  elapsed 1.7 min, about 4.8 min left
+
+Epoch 9/30  (lr 4.17e-04)
+    train batch   25/103  running loss 0.2124  running acc 0.9475  3s
+    train batch   50/103  running loss 0.2144  running acc 0.9434  6s
+    train batch   75/103  running loss 0.2239  running acc 0.9383  8s
+    train batch  100/103  running loss 0.2368  running acc 0.9337  11s
+    train batch  103/103  running loss 0.2370  running acc 0.9341  11s
+    val   batch   13/13  1s
+  epoch   9/30 summary  train loss 0.2370 acc 0.9341  val loss 1.1381 acc 0.6762  12s
+  best so far: val acc 0.6888 (epoch 8)  elapsed 2.0 min, about 4.6 min left
+
+Epoch 10/30  (lr 3.97e-04)
+    train batch   25/103  running loss 0.2290  running acc 0.9275  3s
+    train batch   50/103  running loss 0.2006  running acc 0.9409  6s
+    train batch   75/103  running loss 0.1941  running acc 0.9444  8s
+    train batch  100/103  running loss 0.1900  running acc 0.9461  11s
+    train batch  103/103  running loss 0.1898  running acc 0.9460  11s
+    val   batch   13/13  1s
+  epoch  10/30 summary  train loss 0.1898 acc 0.9460  val loss 1.0724 acc 0.7113  12s  *new best, saved best.pt
+  best so far: val acc 0.7113 (epoch 10)  elapsed 2.2 min, about 4.4 min left
+
+Epoch 11/30  (lr 3.75e-04)
+    train batch   25/103  running loss 0.1447  running acc 0.9594  3s
+    train batch   50/103  running loss 0.1321  running acc 0.9650  6s
+    train batch   75/103  running loss 0.1337  running acc 0.9642  9s
+    train batch  100/103  running loss 0.1308  running acc 0.9658  11s
+    train batch  103/103  running loss 0.1303  running acc 0.9662  12s
+    val   batch   13/13  1s
+  epoch  11/30 summary  train loss 0.1303 acc 0.9662  val loss 1.1081 acc 0.7175  12s  *new best, saved best.pt
+  best so far: val acc 0.7175 (epoch 11)  elapsed 2.4 min, about 4.1 min left
+
+Epoch 12/30  (lr 3.52e-04)
+    train batch   25/103  running loss 0.1188  running acc 0.9694  3s
+    train batch   50/103  running loss 0.1115  running acc 0.9716  6s
+    train batch   75/103  running loss 0.1024  running acc 0.9744  9s
+    train batch  100/103  running loss 0.1034  running acc 0.9745  11s
+    train batch  103/103  running loss 0.1037  running acc 0.9745  12s
+    val   batch   13/13  1s
+  epoch  12/30 summary  train loss 0.1037 acc 0.9745  val loss 1.0703 acc 0.6988  13s
+  best so far: val acc 0.7175 (epoch 11)  elapsed 2.6 min, about 3.9 min left
+
+Epoch 13/30  (lr 3.27e-04)
+    train batch   25/103  running loss 0.0956  running acc 0.9744  3s
+    train batch   50/103  running loss 0.0975  running acc 0.9716  6s
+    train batch   75/103  running loss 0.0913  running acc 0.9754  8s
+    train batch  100/103  running loss 0.0880  running acc 0.9778  11s
+    train batch  103/103  running loss 0.0871  running acc 0.9783  12s
+    val   batch   13/13  1s
+  epoch  13/30 summary  train loss 0.0871 acc 0.9783  val loss 1.1109 acc 0.7163  12s
+  best so far: val acc 0.7175 (epoch 11)  elapsed 2.8 min, about 3.7 min left
+
+Epoch 14/30  (lr 3.02e-04)
+    train batch   25/103  running loss 0.0730  running acc 0.9844  3s
+    train batch   50/103  running loss 0.0691  running acc 0.9856  6s
+    train batch   75/103  running loss 0.0633  running acc 0.9875  9s
+    train batch  100/103  running loss 0.0610  running acc 0.9880  11s
+    train batch  103/103  running loss 0.0605  running acc 0.9882  12s
+    val   batch   13/13  1s
+  epoch  14/30 summary  train loss 0.0605 acc 0.9882  val loss 1.0207 acc 0.7425  12s  *new best, saved best.pt
+  best so far: val acc 0.7425 (epoch 14)  elapsed 3.0 min, about 3.5 min left
+
+Epoch 15/30  (lr 2.76e-04)
+    train batch   25/103  running loss 0.0391  running acc 0.9950  3s
+    train batch   50/103  running loss 0.0444  running acc 0.9906  6s
+    train batch   75/103  running loss 0.0441  running acc 0.9912  8s
+    train batch  100/103  running loss 0.0457  running acc 0.9905  11s
+    train batch  103/103  running loss 0.0462  running acc 0.9904  12s
+    val   batch   13/13  1s
+  epoch  15/30 summary  train loss 0.0462 acc 0.9904  val loss 1.0634 acc 0.7125  12s
+  best so far: val acc 0.7425 (epoch 14)  elapsed 3.3 min, about 3.3 min left
+
+Epoch 16/30  (lr 2.50e-04)
+    train batch   25/103  running loss 0.0315  running acc 0.9975  3s
+    train batch   50/103  running loss 0.0308  running acc 0.9966  6s
+    train batch   75/103  running loss 0.0292  running acc 0.9967  9s
+    train batch  100/103  running loss 0.0288  running acc 0.9964  11s
+    train batch  103/103  running loss 0.0289  running acc 0.9963  12s
+    val   batch   13/13  1s
+  epoch  16/30 summary  train loss 0.0289 acc 0.9963  val loss 1.0225 acc 0.7412  13s
+  best so far: val acc 0.7425 (epoch 14)  elapsed 3.5 min, about 3.0 min left
+
+Epoch 17/30  (lr 2.24e-04)
+    train batch   25/103  running loss 0.0436  running acc 0.9888  3s
+    train batch   50/103  running loss 0.0386  running acc 0.9912  6s
+    train batch   75/103  running loss 0.0377  running acc 0.9917  9s
+    train batch  100/103  running loss 0.0354  running acc 0.9928  11s
+    train batch  103/103  running loss 0.0350  running acc 0.9930  12s
+    val   batch   13/13  1s
+  epoch  17/30 summary  train loss 0.0350 acc 0.9930  val loss 1.0431 acc 0.7362  12s
+  best so far: val acc 0.7425 (epoch 14)  elapsed 3.7 min, about 2.8 min left
+
+Epoch 18/30  (lr 1.98e-04)
+    train batch   25/103  running loss 0.0180  running acc 0.9981  3s
+    train batch   50/103  running loss 0.0211  running acc 0.9975  6s
+    train batch   75/103  running loss 0.0208  running acc 0.9975  9s
+    train batch  100/103  running loss 0.0197  running acc 0.9978  11s
+    train batch  103/103  running loss 0.0199  running acc 0.9979  12s
+    val   batch   13/13  1s
+  epoch  18/30 summary  train loss 0.0199 acc 0.9979  val loss 1.0191 acc 0.7487  12s  *new best, saved best.pt
+  best so far: val acc 0.7487 (epoch 18)  elapsed 3.9 min, about 2.6 min left
+
+Epoch 19/30  (lr 1.73e-04)
+    train batch   25/103  running loss 0.0169  running acc 0.9975  3s
+    train batch   50/103  running loss 0.0157  running acc 0.9981  6s
+    train batch   75/103  running loss 0.0146  running acc 0.9983  9s
+    train batch  100/103  running loss 0.0150  running acc 0.9983  12s
+    train batch  103/103  running loss 0.0155  running acc 0.9980  12s
+    val   batch   13/13  1s
+  epoch  19/30 summary  train loss 0.0155 acc 0.9980  val loss 1.0006 acc 0.7400  13s
+  best so far: val acc 0.7487 (epoch 18)  elapsed 4.1 min, about 2.4 min left
+
+Epoch 20/30  (lr 1.48e-04)
+    train batch   25/103  running loss 0.0166  running acc 0.9981  3s
+    train batch   50/103  running loss 0.0170  running acc 0.9981  6s
+    train batch   75/103  running loss 0.0159  running acc 0.9983  8s
+    train batch  100/103  running loss 0.0150  running acc 0.9986  11s
+    train batch  103/103  running loss 0.0157  running acc 0.9983  11s
+    val   batch   13/13  1s
+  epoch  20/30 summary  train loss 0.0157 acc 0.9983  val loss 0.9848 acc 0.7462  12s
+  best so far: val acc 0.7487 (epoch 18)  elapsed 4.3 min, about 2.2 min left
+
+Epoch 21/30  (lr 1.25e-04)
+    train batch   25/103  running loss 0.0173  running acc 0.9950  3s
+    train batch   50/103  running loss 0.0173  running acc 0.9966  6s
+    train batch   75/103  running loss 0.0161  running acc 0.9973  9s
+    train batch  100/103  running loss 0.0147  running acc 0.9978  11s
+    train batch  103/103  running loss 0.0146  running acc 0.9979  12s
+    val   batch   13/13  1s
+  epoch  21/30 summary  train loss 0.0146 acc 0.9979  val loss 0.9889 acc 0.7475  13s
+  best so far: val acc 0.7487 (epoch 18)  elapsed 4.6 min, about 2.0 min left
+
+Epoch 22/30  (lr 1.03e-04)
+    train batch   25/103  running loss 0.0086  running acc 1.0000  3s
+    train batch   50/103  running loss 0.0084  running acc 1.0000  6s
+    train batch   75/103  running loss 0.0083  running acc 1.0000  9s
+    train batch  100/103  running loss 0.0085  running acc 0.9998  11s
+    train batch  103/103  running loss 0.0085  running acc 0.9998  12s
+    val   batch   13/13  1s
+  epoch  22/30 summary  train loss 0.0085 acc 0.9998  val loss 0.9842 acc 0.7538  13s  *new best, saved best.pt
+  best so far: val acc 0.7538 (epoch 22)  elapsed 4.8 min, about 1.7 min left
+
+Epoch 23/30  (lr 8.27e-05)
+    train batch   25/103  running loss 0.0077  running acc 1.0000  3s
+    train batch   50/103  running loss 0.0087  running acc 0.9997  6s
+    train batch   75/103  running loss 0.0079  running acc 0.9998  9s
+    train batch  100/103  running loss 0.0078  running acc 0.9998  11s
+    train batch  103/103  running loss 0.0079  running acc 0.9998  12s
+    val   batch   13/13  1s
+  epoch  23/30 summary  train loss 0.0079 acc 0.9998  val loss 0.9857 acc 0.7538  13s
+  best so far: val acc 0.7538 (epoch 22)  elapsed 5.0 min, about 1.5 min left
+
+Epoch 24/30  (lr 6.42e-05)
+    train batch   25/103  running loss 0.0071  running acc 0.9994  3s
+    train batch   50/103  running loss 0.0069  running acc 0.9997  6s
+    train batch   75/103  running loss 0.0069  running acc 0.9998  9s
+    train batch  100/103  running loss 0.0068  running acc 0.9998  11s
+    train batch  103/103  running loss 0.0069  running acc 0.9998  12s
+    val   batch   13/13  1s
+  epoch  24/30 summary  train loss 0.0069 acc 0.9998  val loss 0.9673 acc 0.7563  13s  *new best, saved best.pt
+  best so far: val acc 0.7563 (epoch 24)  elapsed 5.2 min, about 1.3 min left
+
+Epoch 25/30  (lr 4.77e-05)
+    train batch   25/103  running loss 0.0075  running acc 0.9994  3s
+    train batch   50/103  running loss 0.0070  running acc 0.9997  6s
+    train batch   75/103  running loss 0.0074  running acc 0.9992  9s
+    train batch  100/103  running loss 0.0071  running acc 0.9994  11s
+    train batch  103/103  running loss 0.0074  running acc 0.9994  12s
+    val   batch   13/13  1s
+  epoch  25/30 summary  train loss 0.0074 acc 0.9994  val loss 0.9624 acc 0.7575  12s  *new best, saved best.pt
+  best so far: val acc 0.7575 (epoch 25)  elapsed 5.4 min, about 1.1 min left
+
+Epoch 26/30  (lr 3.35e-05)
+    train batch   25/103  running loss 0.0069  running acc 0.9994  3s
+    train batch   50/103  running loss 0.0067  running acc 0.9997  6s
+    train batch   75/103  running loss 0.0069  running acc 0.9996  9s
+    train batch  100/103  running loss 0.0074  running acc 0.9995  11s
+    train batch  103/103  running loss 0.0075  running acc 0.9995  12s
+    val   batch   13/13  1s
+  epoch  26/30 summary  train loss 0.0075 acc 0.9995  val loss 0.9823 acc 0.7475  12s
+  best so far: val acc 0.7575 (epoch 25)  elapsed 5.7 min, about 0.9 min left
+
+Epoch 27/30  (lr 2.16e-05)
+    train batch   25/103  running loss 0.0074  running acc 0.9994  3s
+    train batch   50/103  running loss 0.0067  running acc 0.9997  6s
+    train batch   75/103  running loss 0.0066  running acc 0.9998  9s
+    train batch  100/103  running loss 0.0065  running acc 0.9998  11s
+    train batch  103/103  running loss 0.0067  running acc 0.9997  12s
+    val   batch   13/13  1s
+  epoch  27/30 summary  train loss 0.0067 acc 0.9997  val loss 0.9867 acc 0.7575  12s
+  best so far: val acc 0.7575 (epoch 25)  elapsed 5.9 min, about 0.7 min left
+
+Epoch 28/30  (lr 1.22e-05)
+    train batch   25/103  running loss 0.0049  running acc 1.0000  3s
+    train batch   50/103  running loss 0.0054  running acc 0.9997  6s
+    train batch   75/103  running loss 0.0059  running acc 0.9994  9s
+    train batch  100/103  running loss 0.0058  running acc 0.9995  12s
+    train batch  103/103  running loss 0.0059  running acc 0.9995  12s
+    val   batch   13/13  1s
+  epoch  28/30 summary  train loss 0.0059 acc 0.9995  val loss 0.9719 acc 0.7600  13s  *new best, saved best.pt
+  best so far: val acc 0.7600 (epoch 28)  elapsed 6.1 min, about 0.4 min left
+
+Epoch 29/30  (lr 5.46e-06)
+    train batch   25/103  running loss 0.0073  running acc 0.9994  3s
+    train batch   50/103  running loss 0.0065  running acc 0.9997  6s
+    train batch   75/103  running loss 0.0063  running acc 0.9998  9s
+    train batch  100/103  running loss 0.0061  running acc 0.9998  11s
+    train batch  103/103  running loss 0.0061  running acc 0.9998  12s
+    val   batch   13/13  1s
+  epoch  29/30 summary  train loss 0.0061 acc 0.9998  val loss 0.9809 acc 0.7600  13s
+  best so far: val acc 0.7600 (epoch 28)  elapsed 6.3 min, about 0.2 min left
+
+Epoch 30/30  (lr 1.37e-06)
+    train batch   25/103  running loss 0.0066  running acc 0.9994  3s
+    train batch   50/103  running loss 0.0065  running acc 0.9997  6s
+    train batch   75/103  running loss 0.0065  running acc 0.9998  9s
+    train batch  100/103  running loss 0.0060  running acc 0.9998  11s
+    train batch  103/103  running loss 0.0063  running acc 0.9997  12s
+    val   batch   13/13  1s
+  epoch  30/30 summary  train loss 0.0063 acc 0.9997  val loss 0.9879 acc 0.7588  13s
+  best so far: val acc 0.7600 (epoch 28)  elapsed 6.5 min, about 0.0 min left
+
+Done in 6.54 min. Best validation accuracy 0.7600 at epoch 28.
+Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041748_A1_dino_mobilenetv2_labeled_set_10pct_split2_seed0:
+  config.json        settings used
+  class_mapping.csv  label number -> class name
+  manifests.json     hashes of the train/val image lists used, plus the split audit
+  manifests/         copies of the labeled, validation and class-mapping CSVs used
+  run_info.json      status, device, versions, timing, best epoch
+  history.csv        per-epoch loss and accuracy (train and val)
+  best.pt            model weights from the best validation epoch
+  charts/            loss.pdf, accuracy.pdf, overfitting_gap.pdf, learning_rate.pdf (one chart per file)
+Next: python Experiments/mobileNetv2_DINO/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041748_A1_dino_mobilenetv2_labeled_set_10pct_split2_seed0" --split validation
+Final test (once, when everything is fixed): python Experiments/mobileNetv2_DINO/evaluate.py --run "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041748_A1_dino_mobilenetv2_labeled_set_10pct_split2_seed0"
+Evaluating Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041748_A1_dino_mobilenetv2_labeled_set_10pct_split2_seed0/best.pt
+  checkpoint : epoch 28, val acc at training 0.7600
+  split      : validation, 800 images (read from disk)
+  device     : cuda (NVIDIA A100-PCIE-40GB)
+    validation batch   13/13  10s
+validation: 800 images  overall accuracy 0.7600  mean per-class accuracy 0.7600  (checkpoint epoch 28)
+Outputs in Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041748_A1_dino_mobilenetv2_labeled_set_10pct_split2_seed0/eval_validation:
+  metrics.json            overall and mean per-class accuracy, loss, checkpoint info
+  per_class_accuracy.csv  accuracy for each of the 40 classes
+  confusion_matrix.csv    rows = true class, columns = predicted class
+  predictions.csv         one row per image: true, predicted, confidence
+  charts/                 per_class_accuracy.pdf, confusion_matrix.pdf, top_mistakes.pdf,
+                          confidence.pdf, calibration.pdf (one chart per file)
+Evaluating Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041748_A1_dino_mobilenetv2_labeled_set_10pct_split2_seed0/best.pt
+  checkpoint : epoch 28, val acc at training 0.7600
+  split      : test, 29284 images (read from disk)
+  device     : cuda (NVIDIA A100-PCIE-40GB)
+    test batch   25/458  9s
+    test batch   50/458  19s
+    test batch   75/458  29s
+    test batch  100/458  39s
+    test batch  125/458  48s
+    test batch  150/458  57s
+    test batch  175/458  67s
+    test batch  200/458  78s
+    test batch  225/458  89s
+    test batch  250/458  99s
+    test batch  275/458  109s
+    test batch  300/458  119s
+    test batch  325/458  130s
+    test batch  350/458  139s
+    test batch  375/458  148s
+    test batch  400/458  158s
+    test batch  425/458  167s
+    test batch  450/458  178s
+    test batch  458/458  181s
+test: 29284 images  overall accuracy 0.7763  mean per-class accuracy 0.7758  (checkpoint epoch 28)
+Outputs in Experiments/mobileNetv2_DINO/outputs/finetune/20261029-041748_A1_dino_mobilenetv2_labeled_set_10pct_split2_seed0/eval_test:
+  metrics.json            overall and mean per-class accuracy, loss, checkpoint info
+  per_class_accuracy.csv  accuracy for each of the 40 classes
+  confusion_matrix.csv    rows = true class, columns = predicted class
+  predictions.csv         one row per image: true, predicted, confidence
+  charts/                 per_class_accuracy.pdf, confusion_matrix.pdf, top_mistakes.pdf,
+                          confidence.pdf, calibration.pdf (one chart per file)
+==============================================================================
+                                JOB STATISTICS                                
+==============================================================================
+
+           JobId: 4579856
+      SubmitTime: 2026-10-28T15:34:40
+         EndTime: 2026-10-30T04:42:21
+         RunTime: 11:46:31
+       AllocTRES: cpu=8,mem=64G,node=1,billing=8,gres/gpu=1
+       Partition: a100
+        NodeList: gpu-n48
+         Command: /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/crc/split_run.sbatch
+
+==============================================================================
+ For more information use the command:
+   - `sacct -M gpu -j 4579856 -S 2026-10-28T15:34:40 -E 2026-10-30T04:42:21`
+
+ To control the output of the above command:
+   - Add `--format=<field1,field2,etc>` with fields of interest
+   - See the list of all possible fields by running: `sacct --helpformat`
+==============================================================================
