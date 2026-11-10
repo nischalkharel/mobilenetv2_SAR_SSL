@@ -51,7 +51,7 @@ from cond_center import CELL_FIELDS, CellSSLDataset, CondCenterDINOLoss, assign_
 from export_backbone import export
 from plots import plot_ssl_history
 from preview_views import save_view_preview
-from ssl_data import audit_splits, build_pixel_cache, flat_args, paths_hash, read_rows, read_ssl_paths
+from ssl_data import audit_splits, build_pixel_cache, flat_args, make_run_dir, paths_hash, read_rows, read_ssl_paths
 from utils import environment_info, git_info, resolve_device, save_json, set_seed, sha256_file, sha256_text
 
 DEFAULT_CONFIG = Path(__file__).resolve().parent / "config_ssl.json"
@@ -359,10 +359,9 @@ def run(cfg: dict | None, smoke: bool = False, output_root: Path | None = None,
 
     # ---- Run folder and records ----------------------------------------------------------------
     if resume_dir is None:
-        stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         root = Path(output_root) if output_root else (paths.SMOKE_OUTPUT_DIR if smoke else paths.SSL_OUTPUT_DIR)
-        run_dir = root / f"{stamp}_{cfg['run_name']}{paths.RUN_TAG}_seed{args.seed}{'_SMOKE' if smoke else ''}"
-        run_dir.mkdir(parents=True, exist_ok=False)  # never overwrite an earlier run
+        # stamped folder, never overwriting an earlier run; a stamp taken by a job started in the same second is skipped
+        run_dir = make_run_dir(root, f"{cfg['run_name']}{paths.RUN_TAG}_seed{args.seed}{'_SMOKE' if smoke else ''}")
         save_json(cfg, run_dir / "config.json")
         (run_dir / "manifests").mkdir()
         for f in [args.ssl_csv, "class_mapping.csv"]:

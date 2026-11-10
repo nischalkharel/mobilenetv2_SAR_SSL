@@ -64,11 +64,12 @@ must not gain over A1; if it does, the gain is not coming from the physical grou
 |---|---|---|
 | `cond_center.py` | new | cell assignment from the CSV rows, `CellSSLDataset` (views + cell id), `CondCenterDINOLoss` |
 | `train_ssl.py` | modified (CHANGES.md 2.3) | reads the cell fields, builds the per-cell loss, writes `cells.csv`, `cell_center_stats.csv`, `cells_seen` |
-| `ssl_data.py` | modified (CHANGES.md 2.1) | `flat_args()` carries the `cond_center` section; per-process temp name for the pixel cache |
+| `ssl_data.py` | modified (CHANGES.md 2.1) | `flat_args()` carries the `cond_center` section; per-process temp name for the pixel cache; `make_run_dir()` (stamped run folders safe for jobs started in the same second) |
 | `export_backbone.py` | modified (CHANGES.md 2.2) | records "per-condition-cell" in the backbone file's `ssl_method`; command path |
-| `smoke_test.py` | modified (CHANGES.md 2.4) | A1 checks kept, P4 checks added (cells, per-cell loss, real step, resume, export, imports) |
+| `smoke_test.py` | modified (CHANGES.md 2.4) | A1 checks kept, P4 checks added (cells, per-cell loss, real step, resume, export, imports, stamp collision) |
 | `paths.py` | docstring only | identical settings; outputs land under this folder |
-| `train_supervised.py`, `evaluate.py`, `plots.py`, `preview_views.py` | command paths in docstrings / printed hints only | unchanged logic |
+| `train_supervised.py` | modified (CHANGES.md 2.6) | run folder via `make_run_dir()`; training logic unchanged |
+| `evaluate.py`, `plots.py`, `preview_views.py` | command paths in docstrings / printed hints only | unchanged logic |
 | `dino.py`, `data.py`, `model.py`, `engine.py`, `utils.py`, `reference/` | identical | byte-for-byte A1 copies |
 | `config_ssl.json` | A1 values + `cond_center` section | P4 |
 | `config_ssl_perm.json`, `config_ssl_3field.json` | variants | scrambled control; deployable cells |

@@ -14,6 +14,7 @@ CSVs are consistent and leak-free before any training starts. It does not change
 import csv
 import os
 import time
+from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -198,3 +199,21 @@ class SSLDataset(Dataset):
 
     def __getstate__(self):  # do not send an open memory map to worker processes
         return {**self.__dict__, "cache": None}
+
+
+def make_run_dir(root: Path, name: str, tries: int = 10) -> Path:
+    """Create and return root/<stamp>_<name>, stamp = the current time to the second, never overwriting an earlier run.
+
+    Jobs that start the same script in the same second compute the same stamp: on 2026-11-10 the five P4 jobs on CRC
+    started within one minute, ran the identical smoke test in step, three reached its save-and-resume section in the
+    same second, and two stopped on the folder the third had just created (jobs 4718972 and 4718977). mkdir is atomic,
+    so a process that loses that race waits one second and takes the next stamp instead; the names are unchanged.
+    """
+    for _ in range(tries):
+        run_dir = Path(root) / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}_{name}"
+        try:
+            run_dir.mkdir(parents=True, exist_ok=False)
+            return run_dir
+        except FileExistsError:
+            time.sleep(1.0)
+    raise FileExistsError(f"no free run folder name under {root} for {name} after {tries} tries")

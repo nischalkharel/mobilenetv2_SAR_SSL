@@ -45,7 +45,7 @@
  from plots import plot_ssl_history
  from preview_views import save_view_preview
 -from ssl_data import SSLDataset, audit_splits, build_pixel_cache, flat_args, paths_hash, read_ssl_paths
-+from ssl_data import audit_splits, build_pixel_cache, flat_args, paths_hash, read_rows, read_ssl_paths
++from ssl_data import audit_splits, build_pixel_cache, flat_args, make_run_dir, paths_hash, read_rows, read_ssl_paths
  from utils import environment_info, git_info, resolve_device, save_json, set_seed, sha256_file, sha256_text
  
  DEFAULT_CONFIG = Path(__file__).resolve().parent / "config_ssl.json"
@@ -151,7 +151,7 @@
      manifest = {
          "ssl_csv": args.ssl_csv,
          "csv_sha256": sha256_file(paths.SPLITS_DIR / args.ssl_csv),
-@@ -306,6 +349,12 @@
+@@ -306,19 +349,31 @@
          "split_audit": audit,
          "note": "used_paths_hash identifies the image list actually used (a manifest hash of sorted paths; "
                  "not a hash of image contents). A smoke run uses a subset.",
@@ -164,7 +164,15 @@
      }
  
      # ---- Run folder and records ----------------------------------------------------------------
-@@ -319,6 +368,13 @@
+     if resume_dir is None:
+-        stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+         root = Path(output_root) if output_root else (paths.SMOKE_OUTPUT_DIR if smoke else paths.SSL_OUTPUT_DIR)
+-        run_dir = root / f"{stamp}_{cfg['run_name']}{paths.RUN_TAG}_seed{args.seed}{'_SMOKE' if smoke else ''}"
+-        run_dir.mkdir(parents=True, exist_ok=False)  # never overwrite an earlier run
++        # stamped folder, never overwriting an earlier run; a stamp taken by a job started in the same second is skipped
++        run_dir = make_run_dir(root, f"{cfg['run_name']}{paths.RUN_TAG}_seed{args.seed}{'_SMOKE' if smoke else ''}")
+         save_json(cfg, run_dir / "config.json")
+         (run_dir / "manifests").mkdir()
          for f in [args.ssl_csv, "class_mapping.csv"]:
              shutil.copy(paths.SPLITS_DIR / f, run_dir / "manifests" / f)
          save_json(manifest, run_dir / "manifests.json")
@@ -178,7 +186,7 @@
          run_info = {"status": "running", "started": datetime.now().isoformat(timespec="seconds"),
                      "smoke": smoke, "environment": environment_info(device), "git": git_info(paths.REPO_ROOT),
                      "initialization": {"type": "imagenet", "file": paths.MOBILENETV2_IMAGENET_WEIGHTS.name,
-@@ -331,7 +387,7 @@
+@@ -331,7 +386,7 @@
              csv.writer(f).writerow(HISTORY_COLUMNS)
      else:
          recorded = json.loads((run_dir / "manifests.json").read_text(encoding="utf-8"))
@@ -187,7 +195,7 @@
              if recorded[k] != manifest[k]:
                  raise ValueError(f"cannot resume: the SSL manifest changed since the run started ({k})")
          run_info = json.loads((run_dir / "run_info.json").read_text(encoding="utf-8"))
-@@ -352,7 +408,7 @@
+@@ -352,7 +407,7 @@
              # Image-content identity: hash of the decoded pixels themselves (unlike the manifest hash,
              # which only identifies the list of file paths).
              run_info["pixel_cache"] = {"file": cache_file.name, "sha256_of_pixels": sha256_file(cache_file)}
@@ -196,7 +204,7 @@
          niter_per_ep = len(dataset) // args.batch_size_per_gpu  # drop_last=True, as in main_dino.py
  
          if args.num_workers > 0:
-@@ -373,7 +429,7 @@
+@@ -373,7 +428,7 @@
          # ---- Networks, loss, optimizer, schedules -----------------------------------------------------
          student, teacher, embed_dim, dims = build_networks(args, device)
          dino_loss, optimizer, fp16_scaler, schedules, schedule_info = build_training_parts(
@@ -205,7 +213,7 @@
          lr_schedule, wd_schedule, momentum_schedule = schedules
  
          start_epoch = 0
-@@ -406,6 +462,10 @@
+@@ -406,6 +461,10 @@
              with preserved_rng():
                  save_view_preview(ssl_paths, args, run_dir / "view_preview.png")
  
@@ -216,7 +224,7 @@
          n_views = 2 + args.local_crops_number
          n_trainable = sum(p.numel() for p in student.parameters() if p.requires_grad)
          gpu = f" ({torch.cuda.get_device_name(device)})" if device.type == "cuda" else ""
-@@ -415,6 +475,7 @@
+@@ -415,6 +474,7 @@
                f"  device             : {device}{gpu}, mixed precision {'on' if fp16_scaler else 'off'}\n"
                f"  init               : ImageNet IMAGENET1K_V2 (student and teacher identical at start)\n"
                f"  SSL images         : {len(ssl_paths)} from {args.ssl_csv} (no labels used)\n"
@@ -224,7 +232,7 @@
                f"  batch              : {args.batch_size_per_gpu} images x {n_views} views = "
                f"2 x {args.global_crop_size}px global + {args.local_crops_number} x {args.local_crop_size}px local\n"
                f"  dimensions         : MobileNetV2 feature {embed_dim} (checked: {dims}) -> DINO head output "
-@@ -427,7 +488,7 @@
+@@ -427,7 +487,7 @@
                f"  teacher momentum   : {args.momentum_teacher} -> 1, teacher temperature {args.teacher_temp}, "
                f"out_dim {args.out_dim}, seed {args.seed}", flush=True)
          run_info.update(num_trainable_parameters=n_trainable, feature_dim=embed_dim, out_dim=args.out_dim,
@@ -233,7 +241,7 @@
          save_json(run_info, run_dir / "run_info.json")
  
          # ---- Training ---------------------------------------------------------------------------
-@@ -479,6 +540,18 @@
+@@ -479,6 +539,18 @@
              # <<< end E14
  
              stats["center_norm"] = dino_loss.center.norm().item()
@@ -252,7 +260,7 @@
              with open(run_dir / "history.csv", "a", newline="") as f:
                  csv.writer(f).writerow([epoch + 1] + [f"{stats[k]:.6g}" for k in HISTORY_COLUMNS[1:-1]] + [f"{secs:.1f}"])
              images_this_epoch = niter_per_ep * args.batch_size_per_gpu
-@@ -495,7 +568,13 @@
+@@ -495,7 +567,13 @@
              print(f"  epoch {epoch + 1:3d}/{args.epochs} summary  loss {stats['loss']:.4f}  "
                    f"teacher entropy {stats['teacher_entropy']:.3f} (marginal {stats['teacher_marginal_entropy']:.3f}, "
                    f"max {math.log(args.out_dim):.2f})  feature cosine {stats['feature_cosine']:.3f}  "
@@ -267,7 +275,7 @@
              try:
                  plot_ssl_history(run_dir)
              except Exception as e:  # a chart problem should not stop training; history.csv has the numbers
-@@ -517,10 +596,10 @@
+@@ -517,10 +595,10 @@
                    f"  view_preview.png     original chips beside the views used in training\n"
                    f"  checkpoint.pth       full training state (student, teacher, optimizer, center, RNG)\n"
                    f"  {out.name:<20} teacher backbone for fine-tuning\n"

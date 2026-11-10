@@ -29,7 +29,7 @@ from data import SARDataset, build_transform, load_class_names, manifest_hash, r
 from engine import predict, train_one_epoch
 from model import build_model
 from plots import plot_history
-from ssl_data import audit_splits
+from ssl_data import audit_splits, make_run_dir
 from utils import environment_info, git_info, resolve_device, save_json, set_seed, sha256_file
 
 DEFAULT_CONFIG = Path(__file__).resolve().parent / "config_finetune.json"
@@ -90,9 +90,8 @@ def run(cfg: dict, smoke: bool = False, output_root: Path = paths.FINETUNE_OUTPU
         raise ValueError("training/validation manifests must only contain official train/ images")
 
     # ---- Run folder and records --------------------------------------------------
-    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    run_dir = Path(output_root) / f"{stamp}_{cfg['run_name']}{paths.RUN_TAG}_seed{train_cfg['seed']}{'_SMOKE' if smoke else ''}"
-    run_dir.mkdir(parents=True, exist_ok=False)  # never overwrite an earlier run
+    # stamped folder, never overwriting an earlier run; a stamp taken by a job started in the same second is skipped
+    run_dir = make_run_dir(output_root, f"{cfg['run_name']}{paths.RUN_TAG}_seed{train_cfg['seed']}{'_SMOKE' if smoke else ''}")
     save_json({**cfg, "smoke": smoke}, run_dir / "config.json")
     shutil.copy(paths.SPLITS_DIR / "class_mapping.csv", run_dir / "class_mapping.csv")
     (run_dir / "manifests").mkdir()  # exact membership used; evaluate.py reads these copies

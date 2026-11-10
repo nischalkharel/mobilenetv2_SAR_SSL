@@ -6,7 +6,7 @@ and changed (the hunks are explained in CHANGES.md; the exact diff is in diffs/)
 | File | Status | A1 sha256 | P4 sha256 | A1 lines | P4 lines | changed lines |
 |---|---|---|---|---|---|---|
 | cell_report.py | new | - | 207b94e7637c | - | 150 | 0 |
-| CHANGES.md | new | - | 83120202c4a7 | - | 118 | 0 |
+| CHANGES.md | new | - | a1930cec5a1d | - | 133 | 0 |
 | cond_center.py | new | - | 7c0351b4d72a | - | 180 | 0 |
 | config_finetune.json | modified | 333162b8a5dd | a9bbde3ecd6c | 34 | 39 | 21 |
 | config_finetune_3field.json | new | - | 8fea16a65dc5 | - | 39 | 0 |
@@ -24,7 +24,7 @@ and changed (the hunks are explained in CHANGES.md; the exact diff is in diffs/)
 | paths.py | modified | e7258f40722b | 751767059d0d | 55 | 57 | 4 |
 | plots.py | modified | 0963a275ddab | b5b83e3187eb | 237 | 237 | 4 |
 | preview_views.py | modified | 5ca6e8fbbb86 | 8ce15ef6cd17 | 123 | 123 | 4 |
-| README.md | new | - | 4f8c0e39b6b9 | - | 150 | 0 |
+| README.md | new | - | 57dfc06772e1 | - | 151 | 0 |
 | reference/baseline_original/config.json | identical | 463f47321a4e | 463f47321a4e | 33 | 33 | 0 |
 | reference/baseline_original/data.py | identical | f93852656e4d | f93852656e4d | 118 | 118 | 0 |
 | reference/baseline_original/engine.py | identical | e0b767766de4 | e0b767766de4 | 55 | 55 | 0 |
@@ -40,10 +40,10 @@ and changed (the hunks are explained in CHANGES.md; the exact diff is in diffs/)
 | reference/dino-main_original/utils.py | identical | 962a97e1acda | 962a97e1acda | 829 | 829 | 0 |
 | reference/dino-main_original/vision_transformer.py | identical | b1f998d5f49a | b1f998d5f49a | 291 | 291 | 0 |
 | reference/SOURCE.md | identical | 902a5c7d11c2 | 902a5c7d11c2 | 31 | 31 | 0 |
-| smoke_test.py | modified | 64bf949615aa | 5a682b20ff35 | 383 | 534 | 191 |
-| ssl_data.py | modified | 2cf0393379ef | 5bfedaccb7c2 | 185 | 200 | 19 |
-| train_ssl.py | modified | 9c58ed41412d | 63c4331180c3 | 554 | 633 | 123 |
-| train_supervised.py | modified | 96a218694d9c | 3f9a2c0dcd34 | 239 | 239 | 10 |
+| smoke_test.py | modified | 64bf949615aa | 5d9e6bbc4c0f | 383 | 540 | 197 |
+| ssl_data.py | modified | 2cf0393379ef | 83ddee70da9c | 185 | 219 | 38 |
+| train_ssl.py | modified | 9c58ed41412d | 65498d27fab0 | 554 | 632 | 128 |
+| train_supervised.py | modified | 96a218694d9c | aa077b10b7eb | 239 | 238 | 17 |
 | utils.py | identical | dbaaad5ad7ac | dbaaad5ad7ac | 62 | 62 | 0 |
 
 A1 files not copied (not needed here): none; A1's DINO_CHANGES.md,

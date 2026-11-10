@@ -58,7 +58,7 @@
  from evaluate import evaluate
  from model import build_model, load_finetuned
 -from ssl_data import SSLDataset, audit_splits, flat_args, read_ssl_paths
-+from ssl_data import SSLDataset, audit_splits, flat_args, read_rows, read_ssl_paths
++from ssl_data import SSLDataset, audit_splits, flat_args, make_run_dir, read_rows, read_ssl_paths
  from utils import resolve_device, save_json, sha256_file
  
  REF = paths.EXPERIMENT_DIR / "reference" / "dino-main_original"
@@ -210,7 +210,7 @@
      bn_t, bn_s = teacher.backbone.features[0][1], student.backbone.features[0][1]
      s_before = {k: v.detach().clone() for k, v in student.state_dict().items()}
      t_before = {k: v.detach().clone() for k, v in teacher.state_dict().items()}
-@@ -265,10 +382,21 @@
+@@ -265,15 +382,32 @@
      check("teacher and student BN running stats now differ",
            not torch.equal(t_after["backbone.features.0.1.running_mean"], s_after["backbone.features.0.1.running_mean"]))
      exp_center = 0.1 * t_outputs[0].mean(0, keepdim=True)
@@ -233,7 +233,18 @@
      check("last layer updated in epoch 1", not torch.equal(student.state_dict()[lw], before_e1))
      check("weight-norm scale still fixed", torch.equal(student.state_dict()[lg], s_before[lg]))
      del student, teacher, optimizer
-@@ -286,6 +414,14 @@
+ 
+     print("6. Save and resume (smoke runs, 48 images, 2 epochs)")
++    a = make_run_dir(paths.SMOKE_OUTPUT_DIR, "stamp_collision_check_SMOKE")  # two folders asked for in the same second
++    b = make_run_dir(paths.SMOKE_OUTPUT_DIR, "stamp_collision_check_SMOKE")
++    check("a run folder whose stamp is already taken is skipped, never reused (jobs started in the same second)",
++          a != b and a.is_dir() and b.is_dir() and b.name > a.name, f"({a.name[:15]} then {b.name[:15]})")
++    a.rmdir()
++    b.rmdir()
+     straight = train_ssl.run(base_cfg, smoke=True)
+     stopped = train_ssl.run(base_cfg, smoke=True, stop_after_epoch=1)
+     info = json.loads((stopped / "run_info.json").read_text(encoding="utf-8"))
+@@ -286,6 +420,14 @@
      except ValueError as e:
          rejected = "momentum_teacher" in str(e)
      check("resume with a changed config (momentum_teacher) is rejected", rejected)
@@ -248,7 +259,7 @@
      train_ssl.run(None, resume_dir=stopped)
      a = torch.load(straight / "checkpoint.pth", map_location="cpu", weights_only=False)
      b = torch.load(stopped / "checkpoint.pth", map_location="cpu", weights_only=False)
-@@ -293,10 +429,18 @@
+@@ -293,10 +435,18 @@
            and a["global_step"] == b["global_step"] and a["schedule_info"] == b["schedule_info"])
      d_s, d_t = max_diff(a["student"], b["student"]), max_diff(a["teacher"], b["teacher"])
      d_c = (a["dino_loss"]["center"] - b["dino_loss"]["center"]).abs().max().item()
@@ -270,7 +281,7 @@
      h_a = (straight / "history.csv").read_text().splitlines()
      h_b = (stopped / "history.csv").read_text().splitlines()
      check("learning rate and momentum per epoch identical after resume",
-@@ -313,8 +457,11 @@
+@@ -313,8 +463,11 @@
      check("export contains no DINO head or classifier", not any(k.startswith(("head", "classifier")) for k in sd))
      check("export equals the teacher backbone of the final checkpoint",
            all(torch.equal(sd[k], a["teacher"]["backbone.features." + k]) for k in sd) and e["source"] == "teacher")
@@ -284,7 +295,7 @@
      imports_check()
      finish("SSL", f"{straight.name}, {stopped.name}")
  
-@@ -324,6 +471,7 @@
+@@ -324,6 +477,7 @@
      device = resolve_device(cli.device)
      latest = json.loads(LATEST.read_text(encoding="utf-8"))
      straight, exported = Path(latest["ssl_run"]), Path(latest["exported"])
@@ -292,7 +303,7 @@
      sd = torch.load(exported, map_location="cpu", weights_only=True)["backbone_state_dict"]
      print("8. Downstream fine-tuning from the exported backbone")
      ft_cfg = json.loads(train_supervised.DEFAULT_CONFIG.read_text(encoding="utf-8"))
-@@ -352,6 +500,8 @@
+@@ -352,6 +506,8 @@
      check("fine-tuning run completed and records the SSL provenance", ft_info["status"] == "completed"
            and ft_info["initialization"]["ssl_record"]["ssl_run_dir"] == straight.name
            and ft_info["initialization"]["sha256"] == sha256_file(exported))
@@ -301,7 +312,7 @@
      reloaded, ckpt = load_finetuned(ft_dir / "best.pt", len(class_names))
      val = train_supervised.first_per_class(read_manifest("validation.csv", class_names), train_supervised.SMOKE_PER_CLASS)
      loader = DataLoader(SARDataset(val, build_transform(ft_cfg["data"], train=False)), batch_size=64)
-@@ -369,8 +519,9 @@
+@@ -369,8 +525,9 @@
  
  
  def main():

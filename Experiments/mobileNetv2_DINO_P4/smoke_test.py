@@ -72,7 +72,7 @@ from dino import DataAugmentationDINO, DINOHead, DINOLoss, MultiCropWrapper
 from engine import predict
 from evaluate import evaluate
 from model import build_model, load_finetuned
-from ssl_data import SSLDataset, audit_splits, flat_args, read_rows, read_ssl_paths
+from ssl_data import SSLDataset, audit_splits, flat_args, make_run_dir, read_rows, read_ssl_paths
 from utils import resolve_device, save_json, sha256_file
 
 REF = paths.EXPERIMENT_DIR / "reference" / "dino-main_original"
@@ -402,6 +402,12 @@ def part_ssl(cli):
     del student, teacher, optimizer
 
     print("6. Save and resume (smoke runs, 48 images, 2 epochs)")
+    a = make_run_dir(paths.SMOKE_OUTPUT_DIR, "stamp_collision_check_SMOKE")  # two folders asked for in the same second
+    b = make_run_dir(paths.SMOKE_OUTPUT_DIR, "stamp_collision_check_SMOKE")
+    check("a run folder whose stamp is already taken is skipped, never reused (jobs started in the same second)",
+          a != b and a.is_dir() and b.is_dir() and b.name > a.name, f"({a.name[:15]} then {b.name[:15]})")
+    a.rmdir()
+    b.rmdir()
     straight = train_ssl.run(base_cfg, smoke=True)
     stopped = train_ssl.run(base_cfg, smoke=True, stop_after_epoch=1)
     info = json.loads((stopped / "run_info.json").read_text(encoding="utf-8"))

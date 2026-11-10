@@ -12,9 +12,10 @@ whether it can change what DINO computes. The pilot copy in `Independent_Study_F
 | `dino.py` | identical | DINO components (head, loss, multi-crop wrapper, augmentation, diagnostics): untouched |
 | `data.py`, `model.py`, `engine.py`, `utils.py` | identical | manifests and images, MobileNetV2 construction, epoch loop, helpers |
 | `reference/` | identical | untouched originals (DINO repository extracts, baseline) used by `smoke_test.py` section 4 |
-| `plots.py`, `preview_views.py`, `train_supervised.py`, `evaluate.py` | command paths only | `Experiments/mobileNetv2_DINO/` -> `Experiments/mobileNetv2_DINO_P4/` in docstrings and printed hints; no code changed |
+| `plots.py`, `preview_views.py`, `evaluate.py` | command paths only | `Experiments/mobileNetv2_DINO/` -> `Experiments/mobileNetv2_DINO_P4/` in docstrings and printed hints; no code changed |
+| `train_supervised.py` | modified | run folder created by `make_run_dir()` (2.6); command path in the docstring |
 | `paths.py` | docstring only | same settings; `EXPERIMENT_DIR` is derived from the file location, so outputs land in this folder |
-| `ssl_data.py` | modified | `flat_args()` carries the `cond_center` section; per-process temp name for the pixel cache (section 2.1) |
+| `ssl_data.py` | modified | `flat_args()` carries the `cond_center` section; per-process temp name for the pixel cache; `make_run_dir()` (section 2.1) |
 | `export_backbone.py` | modified | `ssl_method` says "per-condition-cell teacher centering" when the run used it; command path (2.2) |
 | `train_ssl.py` | modified | section 2.3 (changes listed by topic; the unified diff is `diffs/train_ssl.py.diff`) |
 | `smoke_test.py` | modified | A1 checks kept; P4 checks added (2.4) |
@@ -34,6 +35,13 @@ resume check compares, a changed cell definition is rejected on resume (checked 
 `build_pixel_cache()` writes its temporary file as `pixels_<hash>_<N>.<pid>.tmp.npy` instead of a fixed name: two
 jobs that start on the same split at the same time (P4 and its scrambled control) build the same cache from the same
 image list and must not truncate each other's half-written file; the final rename is atomic (same bytes either way).
+`make_run_dir(root, name)` (added 2026-11-10 after CRC jobs 4718972 and 4718977 failed) creates `root/<stamp>_<name>`
+with the current second as the stamp and returns it; when that folder already exists, because another job started
+the same script in the same second, it waits one second and takes the next stamp (up to 10 tries) instead of
+stopping. The five P4 jobs on CRC started within one minute and ran the identical smoke test in step; three reached
+its save-and-resume section in the same second and two stopped on the folder the third had just created.
+`train_ssl.py`, `train_supervised.py` and the smoke test use it; the names are unchanged and a folder is still never
+overwritten.
 
 ### 2.2 `export_backbone.py` (cannot change results)
 The exported backbone file's `ssl_method` string says "DINO with per-condition-cell teacher centering (experiment P4)"
@@ -71,6 +79,8 @@ clipping, last-layer freezing, optimizer, EMA, BatchNorm behaviour, schedules an
     summed over the epochs so far, center norms) and `cell_center_stats.csv` (one row per cell, rewritten every epoch).
 15. Epoch summary print: one extra line with the cell statistics.
 16. Command paths in printed hints: this folder.
+17. Run folder: `make_run_dir()` (2.1) replaces the inline stamp + `mkdir(exist_ok=False)`; same names; cannot change
+    results (added 2026-11-10).
 (Hunks are numbered by topic; the unified diff is `diffs/train_ssl.py.diff`.)
 
 ### 2.4 `smoke_test.py`
@@ -86,7 +96,8 @@ state_dict); **5** the real step uses 3 cells and checks the per-cell updates ne
 step checks the EMA rule from the now non-zero centers; **6** resume
 matches on the cell centers and counts, a changed `permute_cells` is rejected, `cells.csv` / `cell_center_stats.csv` /
 `cells_seen` written; **7** the export records P4; **8** the fine-tuning record carries the cell definition; **9** no
-module loaded from the A1 folder.
+module loaded from the A1 folder. Added 2026-11-10: section 6 first checks that `make_run_dir()` skips a taken stamp
+(two folders asked for within the same second come out distinct, the second with a later stamp).
 
 ### 2.5 `cond_center.py` (new)
 - `CELL_FIELDS`, `cell_key()`, `assign_cells()` (sorted names, deterministic ids; `permute` shuffles the id vector with
@@ -98,6 +109,10 @@ module loaded from the A1 folder.
   never subtracted) and the per-cell EMA update of the cells present in the batch (`index_add_` sums, `bincount`
   counts, momentum `center_momentum`). The pilot's `PilotDINOLoss` had the same arithmetic plus optional loss weights;
   the weights are not carried here.
+
+### 2.6 `train_supervised.py` (cannot change results)
+The run folder is created by `make_run_dir()` (2.1) instead of the inline stamp + `mkdir(exist_ok=False)`; names
+unchanged (added 2026-11-10). Docstring command path. Everything else is A1's.
 
 ## 3. Config deltas (relative to A1's `config_ssl.json` / `config_finetune.json`)
 `config_ssl.json`: `run_name` `P4_dino_ssl_mobilenetv2`; `_note`; new section `cond_center` = `enabled true`, `cell`
