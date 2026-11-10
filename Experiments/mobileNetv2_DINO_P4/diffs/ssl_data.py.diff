@@ -1,0 +1,54 @@
+--- A1/ssl_data.py
++++ P4/ssl_data.py
+@@ -1,4 +1,8 @@
+ """Unlabeled SSL data and the split audit.
++
++P4 COPY of Experiments/mobileNetv2_DINO/ssl_data.py: identical except that flat_args() carries the "cond_center"
++config section as one nested dict and build_pixel_cache() writes its temporary file under a per-process name. The
++dataset that returns (views, cell id) is cond_center.CellSSLDataset, a subclass of SSLDataset below.
+ 
+ SSL training reads only the `relative_path` column of ssl_training_data.csv. The dataset returns
+ image views and nothing else: labels never reach the DINO loss, the sampler, the view generation,
+@@ -8,6 +12,7 @@
+ CSVs are consistent and leak-free before any training starts. It does not change any file.
+ """
+ import csv
++import os
+ import time
+ from pathlib import Path
+ from types import SimpleNamespace
+@@ -29,7 +34,9 @@
+ 
+ 
+ def flat_args(cfg: dict) -> SimpleNamespace:
+-    """Merge the config sections into one object with the original DINO argument names."""
++    """Merge the config sections into one object with the original DINO argument names.
++    P4: the "cond_center" section is kept as ONE nested dict (args.cond_center, "_" keys dropped) so its keys
++    cannot clash with the DINO argument names; a missing section means the original global centering."""
+     flat = {"run_name": cfg["run_name"]}
+     for section in ["setup", "views", "dino", "optim"]:
+         for k, v in cfg[section].items():
+@@ -38,6 +45,11 @@
+             if k in flat:
+                 raise ValueError(f"config key {k} appears twice")
+             flat[k] = v
++    cc = cfg.get("cond_center", {"enabled": False})
++    flat["cond_center"] = {k: v for k, v in cc.items() if not k.startswith("_")}
++    flat["cond_center"].setdefault("cell", [])
++    flat["cond_center"].setdefault("permute_cells", False)
++    flat["cond_center"].setdefault("permute_seed", 0)
+     return SimpleNamespace(**flat)
+ 
+ 
+@@ -142,7 +154,10 @@
+     path = cache_dir / f"pixels_{paths_hash(relative_paths)[:16]}_{len(relative_paths)}.npy"
+     if not path.exists():
+         t0 = time.time()
+-        tmp = path.with_suffix(".tmp.npy")
++        # P4: a temp name unique to this process. Two jobs that build the same cache at the same time (P4 and its
++        # scrambled control on one split start from the same image list) must not truncate each other's file; the
++        # final rename is atomic and both end with identical bytes.
++        tmp = path.with_name(f"{path.stem}.{os.getpid()}.tmp.npy")
+         arr = np.lib.format.open_memmap(tmp, mode="w+", dtype=np.uint8,
+                                         shape=(len(relative_paths), NATIVE_SIZE, NATIVE_SIZE))
+         for i, p in enumerate(relative_paths):

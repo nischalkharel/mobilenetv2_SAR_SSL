@@ -1,0 +1,22 @@
+--- A1/export_backbone.py
++++ P4/export_backbone.py
+@@ -1,7 +1,7 @@
+ """Export the MobileNetV2 backbone of a DINO run for supervised fine-tuning.
+ 
+ Run from the repository root (train_ssl.py already does this automatically after the last epoch):
+-    python Experiments/mobileNetv2_DINO/export_backbone.py --run Experiments/mobileNetv2_DINO/outputs/ssl/<run folder>
++    python Experiments/mobileNetv2_DINO_P4/export_backbone.py --run Experiments/mobileNetv2_DINO_P4/outputs/ssl/<run folder>
+ 
+ Default and fixed in advance: the TEACHER backbone from the run's final checkpoint.pth. The teacher is
+ the network DINO evaluates in the original paper. The student can be exported with --which student
+@@ -48,7 +48,9 @@
+     torch.save({
+         "backbone_state_dict": backbone,
+         "source": which,
+-        "ssl_method": "DINO (adapted to MobileNetV2, single GPU; see DINO_CHANGES.md)",
++        "ssl_method": ("DINO with per-condition-cell teacher centering (experiment P4; see Experiments/mobileNetv2_DINO_P4/CHANGES.md)"
++                       if ckpt["args"].get("cond_center", {}).get("enabled") else
++                       "DINO (adapted to MobileNetV2, single GPU; see Experiments/mobileNetv2_DINO/DINO_CHANGES.md)"),
+         "ssl_run_dir": run_dir.name,
+         "ssl_checkpoint_sha256": sha256_file(ckpt_path),
+         "ssl_epoch": ckpt["epoch"],

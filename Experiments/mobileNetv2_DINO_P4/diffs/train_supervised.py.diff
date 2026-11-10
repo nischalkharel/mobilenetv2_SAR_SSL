@@ -1,0 +1,27 @@
+--- A1/train_supervised.py
++++ P4/train_supervised.py
+@@ -4,9 +4,9 @@
+ in DINO_CHANGES.md (section "Downstream code versus the baseline").
+ 
+ Run from the repository root:
+-    python Experiments/mobileNetv2_DINO/train_supervised.py --backbone <SSL run>/backbone_teacher_epoch100.pth   # A1
+-    python Experiments/mobileNetv2_DINO/train_supervised.py --init imagenet     # parity check: same as A0
+-    python Experiments/mobileNetv2_DINO/train_supervised.py --device cpu ...    # override config train.device
++    python Experiments/mobileNetv2_DINO_P4/train_supervised.py --backbone <SSL run>/backbone_teacher_epoch100.pth   # A1
++    python Experiments/mobileNetv2_DINO_P4/train_supervised.py --init imagenet     # parity check: same as A0
++    python Experiments/mobileNetv2_DINO_P4/train_supervised.py --device cpu ...    # override config train.device
+ 
+ The whole model (backbone + new 40-class head) is trained on data.train_csv. After every
+ epoch the model is evaluated on data.val_csv, and the epoch with the highest validation
+@@ -198,9 +198,9 @@
+               f"  history.csv        per-epoch loss and accuracy (train and val)\n"
+               f"  best.pt            model weights from the best validation epoch\n"
+               f"  charts/            loss.pdf, accuracy.pdf, overfitting_gap.pdf, learning_rate.pdf (one chart per file)\n"
+-              f"Next: python Experiments/mobileNetv2_DINO/evaluate.py --run \"{run_dir}\" --split validation\n"
++              f"Next: python Experiments/mobileNetv2_DINO_P4/evaluate.py --run \"{run_dir}\" --split validation\n"
+               f"Final test (once, when everything is fixed): "
+-              f"python Experiments/mobileNetv2_DINO/evaluate.py --run \"{run_dir}\"", flush=True)
++              f"python Experiments/mobileNetv2_DINO_P4/evaluate.py --run \"{run_dir}\"", flush=True)
+         return run_dir
+     except BaseException:
+         run_info.update(status="failed", error=traceback.format_exc(limit=3))

@@ -25,7 +25,7 @@ Decide before running (research decisions for Nischal):
 ## 3. A2 (LeJEPA)
 
 - [x] Main A2 implemented, smoke-tested and piloted (`Experiments/mobileNetv2_LeJEPA`, 2026-10-16).
-- [ ] Full A2 SSL run (100 epochs, about 14 h; started 2026-10-16), then fine-tune from the final backbone, validation, and (when frozen) test.
+- [x] Full A2 SSL run (100 epochs, about 14 h; started 2026-10-16), then fine-tune from the final backbone, validation, and (when frozen) test.
 - [ ] Accuracy vs SSL epoch for A2 from the 5-epoch exports (analysis only).
 - [ ] Possible later A2 variants (one at a time, chosen on validation): projector output 64 (paper's ViT ablation), lambda, batch (gradient checkpointing for 64+).
 - [ ] Separate controlled experiment: LeJEPA with DINO's crops (2 x 224 + 8 x 96, scales as A1) and 100 epochs.
@@ -39,9 +39,9 @@ Decide before running (research decisions for Nischal):
 
 Asked of Nischal:
 - [ ] Results as a side-by-side **bar chart** (A0/A1/A2, later A3), not only a table; add test accuracy once settings are frozen.
-- [ ] Implement **SparK (A3)** and run it on CRC.
-- [ ] **Seeds re-draw the data split** (labeled set + SSL pool), not only the training seed (Joey). Re-apply the leakage control for each new split.
-- [ ] **Label budgets spread wide**: e.g. 1%, 3%, 10%.
+- [x] Implement **SparK (A3)** and run it on CRC.
+- [ ] (jobs running 2026-10-28, see section 9) **Seeds re-draw the data split** (labeled set + SSL pool), not only the training seed (Joey). Re-apply the leakage control for each new split.
+- [x] **Label budgets spread wide**: e.g. 1%, 3%, 10%.
 - [ ] **Cost of the gain**: SSL training time / GPU-hours / peak memory per method (have: DINO 469.6 min 9.19 GB, LeJEPA 633.7 min 19.8 GB on A100); inference cost is the same backbone for all. Propose the cost metrics on a slide next meeting and ask for feedback.
 - [ ] **Second architecture**: collect SHREC lab backbone studies (Pitt and other SHREC sites); candidates EfficientNet (NG has good SAR results with it), MobileNetV3, ResNet. Short list for next meeting.
 - [ ] CPU latency: low priority (same MobileNetV2 for every method). If done: Intel server-grade CPUs, roughly 24-50+ cores, inference only.
@@ -91,4 +91,28 @@ Literature so far: SSLight (ICLR 2023, crops for small nets incl. MobileNetV2 + 
 - [ ] Choose the base method to improve (see 2026-10-28 discussion).
 - [ ] SSL on a bigger model (ViT-S and/or ResNet-50) on the same data: show big models gain more than small ones (the gap our method should close).
 - [ ] SSL on unlabeled data NOT matching the labeled set (other SAR datasets/sensors/targets, e.g. SARDet-100K, OpenSARShip, Sentinel-1 chips), then fine-tune on the same few ATRNet-STAR labels: does SSL learn general image understanding, or only help when unlabeled = labeled domain? Check overlap with ATRNet-STAR first.
-- [ ] **Splits 2 and 3 (made 2026-10-28)**: `preprocessing_dataset/split2/`, `split3/` (seeds 1, 2; new validation, SSL pool, 1/3/10% labeled sets; same test folder and recipes; training seed 0). Switch: env `SAR_SPLIT`; run folders tagged `_split2/_split3`. Jobs: `sbatch crc/split_run.sbatch <baseline|dino|lejepa|spark> <2|3>`. Then mean +- spread over splits 1-3 per route and budget.
+- [x] (done 2026-11-01, results in claude_log) **Splits 2 and 3 (made 2026-10-28)**: `preprocessing_dataset/split2/`, `split3/` (seeds 1, 2; new validation, SSL pool, 1/3/10% labeled sets; same test folder and recipes; training seed 0). Switch: env `SAR_SPLIT`; run folders tagged `_split2/_split3`. Jobs: `sbatch crc/split_run.sbatch <baseline|dino|lejepa|spark> <2|3>`. Then mean +- spread over splits 1-3 per route and budget.
+- [ ] **More scene context (Brittany's suggestion)**: SSL and/or fine-tune on SARDet-100K (larger scenes than the 128 px ATRNet-STAR chips) to test whether more context helps. Check overlap with ATRNet-STAR/MSTAR first (see section 5).
+- [ ] **Experiment 1, cross-dataset SSL (started 2026-11-01, doing now)**: SSL on unlabeled SARDet-100K scenes (train + val, deduplicated, larger images tiled to 256 px, their test set untouched), then fine-tune and test on the same few ATRNet-STAR labels; compare with A0/A1/A2. Covers the two items above. Rebuilt step by step, typed by Nischal, in `SARDet-work/Experiments_SARDet/` (Baseline first, then DINO from the original code). Audit of the download done 2026-11-01: boxes only, test labeled, ~77% of images 256 px, class = source shortcut (car only SIVED, harbor only OGSOD), 6,782 exact duplicates.
+- [ ] **Experiment 2 (later)**: detection on SARDet-100K's own labels with its own ImageNet baseline. Not classification (source shortcut above).
+- [ ] **Detection and segmentation**: repeat the route comparison (A0-A3 backbones) on a detection task (SARDet-100K or HRSID) and a segmentation task (HRSID has masks; verify), to see if the SSL ranking holds beyond classification.
+
+## 10. From the NG meeting (2026-11-02; Joey, Brittany, Chris, Abby; joint with Dikchhya)
+
+Presented: SparK done; label budgets 1/3/10%; 3 data splits; mean test bars + per-split tables; SSL cost; SARDet-100K plan; MobileViT idea. Done from section 5: bar chart, SparK, splits, budgets, cost slide.
+- [ ] **Batch size (Joey):** DINO uses 9 GB of a 40 GB A100 (a100 partition = 40 GB; Nischal was unsure), so max out the batch (and raise the LR a little) to train faster and possibly better. Caution: batch is part of each recipe (DINO EMA momentum and LR scaling are tied to it; LeJEPA's SIGReg statistics come from the batch), and all methods use 64 now for fairness. If tried, change it for every method, one variable at a time, on validation.
+- [ ] **What cost to report (Joey, Brittany):** peak GPU memory ("what GPU do I need") and rough training time are enough; more important: model size, parameters, inference memory/time. Inference cost is identical for A0-A3 (same MobileNetV2), so it matters for the bigger-model and MobileViT comparisons.
+- [ ] **SARDet-100K (Brittany):** check pixel scaling/contrast per source and visualize before training. Joey/team liked Experiment 1 (SSL on varied SAR, fine-tune on ground targets) as realistic.
+  - Open decision: in the meeting Nischal said "feed whole images and let the methods crop"; the 2026-11-01 plan was tiling >256 px images to 256. With 800 px scenes, DINO's 0.4-1.0 global crops resized to 224 shrink 28 px objects ~3x. Decide with the visual check.
+- [ ] **CRC storage:** access was suspended after putting SARDet on a shared drive. When restored: data on /vast/<group> (ML data) or /ix/<group>, never the shared/home area; ask CRC if unsure. Do not retry until access is back.
+- [ ] **Novelty check (Chris):** is a controlled DINO vs LeJEPA vs SparK study on small models (MobileNetV2, MobileViT) new? Literature check before the next meeting.
+- [ ] **Combine the methods (Joey, again):** masking + multi-crop + SIGReg in one SSL (see section 6). Nischal: understanding each method in depth first. Joey: "a cooler name than LeJEPA".
+- [ ] **Second architecture: MobileViT** (lab suggestion, team interested). Plus the bigger-model comparison (section 9).
+- [ ] **Detection** results in a later meeting (Experiment 2).
+- Precision for next time: we did change recipe settings from the authors' code (DINO head size, teacher momentum, crop scales; LeJEPA views; SparK recon channels), all listed in each folder's *_CHANGES.md. Say "authors' code, with documented recipe adaptations" rather than "no changes".
+
+## 11. P4 real test (2026-11-10)
+- [ ] Commit and push `Experiments/mobileNetv2_DINO_P4/`, `crc/p4.sbatch`, `crc/README.md`, `.gitignore`.
+- [ ] CRC (once access is restored): `git pull`; optional `cp Experiments/mobileNetv2_DINO/outputs/cache/pixels_*.npy Experiments/mobileNetv2_DINO_P4/outputs/cache/`; `sbatch crc/p4.sbatch 1`, `2`, `3`; `sbatch --job-name=P4perm_dino crc/p4.sbatch 1 perm`; `sbatch --job-name=P4d_dino crc/p4.sbatch 1 3field`.
+- [ ] After the jobs: commit the small result files on CRC, push, pull on the PC; compare with A1 per split and label budget, then the mean of three splits (test accuracy), as in `Biweekly_nischal_ngc/11_2_2026/make_split_pdfs.py`.
+- [ ] Decision rules: P4 must beat A1 beyond about 1 point (seed noise) at 1 % and 3 % and not lose at 10 %; P4perm must not gain; P4d tells whether the deployable cells keep the gain.

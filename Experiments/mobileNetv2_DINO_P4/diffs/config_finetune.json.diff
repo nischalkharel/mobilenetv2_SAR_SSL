@@ -1,0 +1,47 @@
+--- A1/config_finetune.json
++++ P4/config_finetune.json
+@@ -1,24 +1,29 @@
+ {
+-  "run_name": "A1_dino_mobilenetv2",
+-
++  "run_name": "P4_dino_mobilenetv2",
+   "init": {
+     "type": "backbone_checkpoint",
+     "backbone_checkpoint": null,
+-    "_note": "set on the command line: --backbone <file exported by train_ssl.py> (A1), or --init imagenet (A0 parity check)"
++    "_note": "set on the command line: --backbone <backbone_teacher_epoch100.pth exported by this folder's train_ssl.py>"
+   },
+-
+   "data": {
+     "train_csv": "labeled_set.csv",
+     "val_csv": "validation.csv",
+     "input_size": 224,
+-    "normalize_mean": [0.485, 0.456, 0.406],
+-    "normalize_std": [0.229, 0.224, 0.225],
++    "normalize_mean": [
++      0.485,
++      0.456,
++      0.406
++    ],
++    "normalize_std": [
++      0.229,
++      0.224,
++      0.225
++    ],
+     "augment_hflip_p": 0.5,
+     "augment_translate_pad": 8,
+     "cache_in_memory": true,
+     "num_workers": 0
+   },
+-
+   "train": {
+     "seed": 0,
+     "epochs": 30,
+@@ -29,6 +34,6 @@
+     "scheduler": "cosine",
+     "device": "cuda",
+     "log_every_batches": 25,
+-    "_note": "Same values as Experiments/Baseline/config.json (A0), so only the backbone initialization differs. This seed is the downstream seed; the SSL seed is separate (config_ssl.json)."
++    "_note": "Same values as Experiments/mobileNetv2_DINO/config_finetune.json (A1) and Experiments/Baseline/config.json (A0), so only the backbone initialization differs. This seed is the downstream seed; the SSL seed is separate (config_ssl.json)."
+   }
+ }

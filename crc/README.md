@@ -29,5 +29,6 @@ Layout on CRC (set up and verified 2026-10-18):
 | `lejepa.sbatch` | A2: smoke test, LeJEPA SSL 100 epochs (batch 64), fine-tune, validation evaluation | 36 h (QoS normal) |
 | `label_budgets.sbatch` | A0/A1/A2 fine-tunes on the 1% and 10% labeled sets from the existing SSL backbones (hash-checked); validation + test for each; test for the existing 3% runs | 6 h |
 | `spark.sbatch` | A3: smoke test, SparK SSL 100 epochs (batch 64, full float32), fine-tune on the 3%, 1% and 10% labeled sets, validation + test for each | 36 h (QoS normal) |
+| `p4.sbatch <split> [p4 / perm / 3field]` | P4: DINO with per-condition-cell teacher centering (`Experiments/mobileNetv2_DINO_P4`): smoke test, cell report, SSL 100 epochs, fine-tune on the 1%, 3% and 10% labeled sets of that split, validation + test for each. `perm` = scrambled-cell control, `3field` = deployable cells | 20 h (QoS short) |
 
 Cancel a job: `scancel -M gpu <job id>`. Test-set rule (Nischal, 2026-10-26): test scores are recorded for finished runs, but every decision (best epoch, settings, ablations) is made on validation only. A setting changed after seeing a test score must be reported as such.
