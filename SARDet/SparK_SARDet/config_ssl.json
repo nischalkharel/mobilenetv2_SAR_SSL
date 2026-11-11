@@ -1,0 +1,31 @@
+{
+  "run_name": "spark_ssl_mobilenetv2",
+  "method": "spark",
+  "_note": "SparK SSL stage. Shared keys (epochs, batch_size, view sizes, zoom, flip, jitter, blur sigma) live in shared/ssl_common.json and may not appear here. Values below are the ATRNet-STAR A3 values (mobilenetv2_SAR_SSL/Experiments/mobileNetv2_SparK/config_ssl.json); origin of each in CHANGES.md.",
+  "spark_views": {
+    "blur_p": 0.0,
+    "_blur_note": "one 224 px global view per image from the shared recipe; the authors use crop + flip only ('minimal augmentation'), so no blur"
+  },
+  "spark": {
+    "mask_ratio": 0.6,
+    "densify_norm": "bn",
+    "_densify_note": "set explicitly: the authors' arg_util.py leaves it EMPTY (no normalisation) for any model name without 'resnet'/'convnext'",
+    "decoder_width": 768,
+    "recon_channels": 1,
+    "_recon_note": "1 = reconstruct the single SAR channel (A3 change); 3 = the authors' literal target, which here would include the per-channel ImageNet offsets (CHANGES.md)",
+    "precision": "fp32",
+    "_precision_note": "true float32: TF32 is switched OFF for cudnn and matmul in SparKMethod.build (flags recorded in run output and the export)"
+  },
+  "optim": {
+    "optimizer": "lamb",
+    "base_lr": 0.0002,
+    "_lr_note": "peak lr = base_lr x batch_size / 256 = 5e-5 at the shared batch 64 (the authors' rule, arg_util.py L132; paper Section 4.1)",
+    "beta2": 0.95,
+    "_beta2_note": "set explicitly: arg_util.py leaves beta2 = 0.0 for any model name without 'resnet'/'convnext'",
+    "weight_decay": 0.04,
+    "weight_decay_end": 0.2,
+    "max_grad_norm": 5.0,
+    "warmup_epochs": 2.5,
+    "_warmup_note": "the authors' 40 of 1,600 epochs = the first 2.5% of training; here 2.5 of the shared 100 epochs (linear from 0.005 x peak, then cosine to 0.001 x peak)"
+  }
+}

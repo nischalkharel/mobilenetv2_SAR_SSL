@@ -1,0 +1,28 @@
+{
+  "run_name": "lejepa_ssl_mobilenetv2",
+  "method": "lejepa",
+  "_note": "LeJEPA SSL stage. Shared keys (epochs, batch_size, view sizes, zoom, flip, jitter, blur sigma) live in shared/ssl_common.json and may not appear here. Values below are the ATRNet-STAR A2 values (mobilenetv2_SAR_SSL/Experiments/mobileNetv2_LeJEPA/config_ssl.json); origin of each value in CHANGES.md.",
+  "lejepa_views": {
+    "n_global_views": 8,
+    "_views_note": "all views are global at the shared global_size (224): paper Section 5.1, for non-ViT backbones set global_views = all_views; no local views",
+    "blur_p": 0.5
+  },
+  "lejepa": {
+    "proj_hidden_dim": 2048,
+    "proj_dim": 512,
+    "lamb": 0.05,
+    "num_slices": 1024,
+    "t_max": 3.0,
+    "n_points": 17
+  },
+  "optim": {
+    "optimizer": "adamw",
+    "lr": 0.0005,
+    "_lr_note": "absolute value from the authors' README (5e-4); NOT scaled with the batch size, unlike DINO",
+    "weight_decay": 0.0005,
+    "warmup_epochs": 1,
+    "warmup_start_factor": 0.01,
+    "final_lr_ratio": 0.001,
+    "precision": "bf16"
+  }
+}

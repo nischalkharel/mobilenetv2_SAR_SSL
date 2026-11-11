@@ -1,0 +1,44 @@
+{
+  "run_name": "condcenter_radiometric",
+  "method": "conddino",
+  "_note": "Label-free, DEPLOYABLE cells computed from the image itself: k-means (k = 16, fixed seed) on a 32-bin intensity histogram of the 512-resized grey image + log(native width x height), fitted on the SSL pool and cached under outputs/cache/. The closest honest substitute for a per-image acquisition condition; its class leak is measured by cell_report.py. Every other value is DINO_SARDet/config_ssl.json; shared keys (epochs, batch, views) live in shared/ssl_common.json and may not appear here.",
+  "dino_views": {
+    "local_crops_number": 8,
+    "blur_p": [
+      1.0,
+      0.1,
+      0.5
+    ]
+  },
+  "dino": {
+    "out_dim": 4096,
+    "use_bn_in_head": false,
+    "norm_last_layer": true,
+    "momentum_teacher": 0.9995,
+    "warmup_teacher_temp": 0.04,
+    "teacher_temp": 0.04,
+    "warmup_teacher_temp_epochs": 0,
+    "student_temp": 0.1,
+    "center_momentum": 0.9
+  },
+  "optim": {
+    "optimizer": "adamw",
+    "lr": 0.0005,
+    "_lr_note": "reference rate for a batch of 256; the rate used is lr * batch_size / 256 (linear scaling, as in main_dino.py)",
+    "min_lr": 1e-06,
+    "warmup_epochs": 10,
+    "weight_decay": 0.04,
+    "weight_decay_end": 0.04,
+    "clip_grad": 3.0,
+    "freeze_last_layer": 1,
+    "use_fp16": true
+  },
+  "cond_center": {
+    "enabled": true,
+    "cells": "radiometric",
+    "permute_seed": 0,
+    "center_momentum_cell": 0.9,
+    "label_use": "none (pixels and native image size only)",
+    "_note": "cells: source_pol | perm | oracle_class | radiometric (cells.py). label_use must state the truth for the variant (train_ssl.py refuses otherwise). permute_seed is used by perm only. center_momentum_cell = EMA momentum of each cell center (the global center keeps dino.center_momentum and is tracked but never subtracted)."
+  }
+}
