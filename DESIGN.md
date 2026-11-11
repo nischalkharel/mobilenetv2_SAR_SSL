@@ -121,8 +121,11 @@ gives, per image, only what the source name carries, and the source IS the class
 statement: no per-image acquisition field that is independent of the class exists in SARDet-100K. The suite
 therefore runs the mechanism with the fields that exist and measures the leak instead of hiding it:
 - `source_pol` (default cells): source dataset, refined by the per-image satellite x polarisation for Shipdataset
-  and the sub-source for SIVED (17 cells of ~40 to ~27,000 images; cell sizes are recorded, and the ATRNet
-  "rare-cell momentum" argument does not apply here). `cell_report.py` prints the class-vs-cell contingency,
+  and the sub-source for SIVED (19 cells of 80 to 27,159 images incl. two "unknown" cells for Shipdataset
+  names without sensor tokens and SIVED-unknown; cell sizes are recorded, and the ATRNet "rare-cell momentum"
+  argument does not apply here). Measured leak on the split-1 pool: 17 of 19 cells are 100 % one class; the
+  cell alone predicts the dominant class at 94.7 % (majority 64.9 %, scrambled 64.9 %); I(cell; class set)
+  1.22 of 1.56 bits (scrambled 0.002). `cell_report.py` prints the class-vs-cell contingency,
   purity and I(cell; class) so the reader sees how much of the cell is class information. This is a condition
   in the sensor sense (resolution, band, polarisation bundle) but NOT deployable and NOT class-independent.
 - `perm`: the same cells with the image-to-cell assignment scrambled (size-matched control).
@@ -130,8 +133,10 @@ therefore runs the mechanism with the fields that exist and measures the leak in
   never a method). If `source_pol` ~ `oracle_class` >> `perm`, the gain is class information, not condition.
 - `radiometric`: label-free, deployable cells computed from the image itself (k-means, k = 16, on a 32-bin
   intensity histogram + log image size, fitted on the SSL pool): the closest honest substitute for a
-  per-image acquisition condition, available at deployment. Its class leak is also measured by the cell report.
-- Dropped: `sensor_band` (v1), because sensor/band are not per-image for 7 of 9 sources.
+  per-image acquisition condition, available at deployment. Measured leak: 16 cells, majority vote 73.0 %
+  (scrambled 64.9 %), I(cell; class set) 0.52 bits, 5 cells > 90 % one class: about a third of source_pol's.
+  `oracle_class` (13 cells) reaches 99.9 % and the full 1.56 bits by construction.
+- Dropped: `sensor_band` (v1), because sensor/band are not per-image for 7 of 9 sources (removed from the code too).
 Cells are used only inside the DINO loss during SSL; the detector never sees them.
 
 ## 6. Metrics, charts, analyses

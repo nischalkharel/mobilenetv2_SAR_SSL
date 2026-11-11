@@ -77,6 +77,11 @@ mutual information; `perm` scrambles the assignment (size-matched control); `ora
 ground-truth class set (labels used; a ceiling, never a method); `radiometric` uses label-free, deployable
 cells (k-means on an intensity histogram + size). Reading rule: if `source_pol` ~ `oracle_class` >> `perm`, the
 gain is class information, not condition. Cells are used only inside the SSL loss; the detector never sees them.
+Measured on the split-1 pool (`CondDINO_SARDet/outputs/cell_report/source_pol_split1.md`): 19 cells of 80 to
+27,159 images; 17 of them are > 90 % one class; the cell alone predicts the dominant class with 94.7 % accuracy
+(majority baseline 64.9 %, scrambled cells 64.9 %); I(cell; class set) = 1.22 bits vs 0.002 scrambled. The label-free
+`radiometric` cells leak about a third of that (73.0 % majority vote, 0.52 bits); `oracle_class` is the ceiling
+(99.9 %, 1.56 bits). So on this dataset the P4 cells ARE largely class information, and the paper must say so.
 
 **Metrics and analyses.** COCO mAP@[.5:.95], AP50, AP75, APs/m/l, per-class AP and AP50, per-source mAP (ship
 across HRSID / SSDD / Shipdataset / AIR separates sensor from class), PR curves, saved detections; training

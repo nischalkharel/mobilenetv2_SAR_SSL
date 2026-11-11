@@ -109,9 +109,9 @@ def read_metadata(csv_path=None) -> list:
 
 # Condition-cell definitions for CondDINO (fields that exist for every image; labels never used)
 CELL_DEFINITIONS = {
-    "source_pol": ["source", "satellite", "polarization"],   # Shipdataset split by satellite x pol, SIVED by sub-source
-    "sensor_band": ["satellite", "band", "polarization"],    # deployable fields only (paper table + name tokens)
+    "source_pol": ["source", "satellite", "polarization"],   # Shipdataset split by satellite x pol, SIVED by sub-source (19 cells)
     "source": ["source"],                                    # 9 cells
+    # "sensor_band" (v1 of the design) was dropped: sensor and band are not per-image for 7 of 9 sources.
 }
 
 
