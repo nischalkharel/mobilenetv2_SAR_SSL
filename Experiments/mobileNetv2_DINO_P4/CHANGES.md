@@ -20,7 +20,7 @@ whether it can change what DINO computes. The pilot copy in `Independent_Study_F
 | `train_ssl.py` | modified | section 2.3 (changes listed by topic; the unified diff is `diffs/train_ssl.py.diff`) |
 | `smoke_test.py` | modified | A1 checks kept; P4 checks added (2.4) |
 | `cond_center.py` | new | cells, `CellSSLDataset`, `CondCenterDINOLoss` (2.5) |
-| `cell_report.py`, `make_changes_record.py` | new | analysis and record tools; not used by training |
+| `cell_report.py`, `make_changes_record.py`, `compare_p4.py`, `analysis_data.py`, `feature_probe.py`, `saliency_figure.py` | new | analysis and record tools; not used by training |
 | `config_ssl.json` | A1 values + `cond_center` | section 3 |
 | `config_ssl_perm.json`, `config_ssl_3field.json`, `config_finetune*.json` | new | section 3 |
 | not copied | | `DINO_CHANGES.md`, `README.md`, `tools/`, `diffs/` (A1's own records of its DINO extracts), `outputs/` |

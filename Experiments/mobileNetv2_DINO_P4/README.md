@@ -75,6 +75,8 @@ must not gain over A1; if it does, the gain is not coming from the physical grou
 | `config_ssl_perm.json`, `config_ssl_3field.json` | variants | scrambled control; deployable cells |
 | `config_finetune.json` (+ `_perm`, `_3field`) | A1 values, run names | fine-tuning, identical recipe to A0 / A1 |
 | `cell_report.py` | new | cell table and label-leak numbers for a split (CPU) |
+| `compare_p4.py` | new | P4 / P4perm / P4d versus A1 and A0 from the finished CRC runs: tables and SSL cost (CPU) |
+| `analysis_data.py`, `feature_probe.py`, `saliency_figure.py` | new | analyses of the finished backbones (GPU, minutes; `crc/p4_analysis.sbatch`): test-chip metadata from the .xml sidecars (scene, vehicle box); frozen-feature probes (class vs scene / azimuth sector / depression / band); Grad-CAM and backbone response maps with the share of map mass on the vehicle box, A1 vs P4 |
 | `make_changes_record.py` | new | regenerates `diffs/` and `diffs/SUMMARY.md` (status and hashes of every file vs A1) |
 | `CHANGES.md` | new | every hunk explained, and whether it can change what DINO computes |
 
@@ -134,7 +136,10 @@ layout as the A1 fine-tuning runs, with `eval_validation/` and `eval_test/` afte
 
 Same splits, same labeled sets, same fine-tuning recipe and seed, same test set; the only difference is the SSL
 centering. Compare `overall_accuracy` (and `mean_per_class_accuracy`) per split and label budget, then the mean over
-the three splits, as in `../Biweekly_nischal_ngc/11_2_2026/make_split_pdfs.py` (outside this repository). Expected SSL
+the three splits, as in `../Biweekly_nischal_ngc/11_2_2026/make_split_pdfs.py` (outside this repository). `compare_p4.py` does
+this for the finished CRC runs (`python Experiments/mobileNetv2_DINO_P4/compare_p4.py`, CPU, seconds): test and
+validation accuracy per split and budget with the P4 - A1 differences, the mean over the splits, and the SSL cost;
+written to `outputs/compare/p4_vs_a1.md` and `.csv`. Expected SSL
 cost: the same as A1 within noise (the per-cell centering adds one gather and one scatter-add per step).
 
 ## Known limitations

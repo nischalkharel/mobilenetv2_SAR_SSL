@@ -5,8 +5,10 @@ and changed (the hunks are explained in CHANGES.md; the exact diff is in diffs/)
 
 | File | Status | A1 sha256 | P4 sha256 | A1 lines | P4 lines | changed lines |
 |---|---|---|---|---|---|---|
+| analysis_data.py | new | - | e3424f32d89e | - | 134 | 0 |
 | cell_report.py | new | - | 207b94e7637c | - | 150 | 0 |
-| CHANGES.md | new | - | a1930cec5a1d | - | 133 | 0 |
+| CHANGES.md | new | - | 030d34c68c74 | - | 133 | 0 |
+| compare_p4.py | new | - | 75927f4c0560 | - | 162 | 0 |
 | cond_center.py | new | - | 7c0351b4d72a | - | 180 | 0 |
 | config_finetune.json | modified | 333162b8a5dd | a9bbde3ecd6c | 34 | 39 | 21 |
 | config_finetune_3field.json | new | - | 8fea16a65dc5 | - | 39 | 0 |
@@ -19,12 +21,13 @@ and changed (the hunks are explained in CHANGES.md; the exact diff is in diffs/)
 | engine.py | identical | e0b767766de4 | e0b767766de4 | 55 | 55 | 0 |
 | evaluate.py | modified | 0a99f9c83b25 | e5c9c12ee5b3 | 140 | 140 | 4 |
 | export_backbone.py | modified | d2adef15e82d | 9e13eaa8e5ed | 83 | 85 | 6 |
+| feature_probe.py | new | - | 1b2ad00d03fd | - | 204 | 0 |
 | make_changes_record.py | new | - | f4246a347754 | - | 77 | 0 |
 | model.py | identical | e5b36ae6b2b4 | e5b36ae6b2b4 | 56 | 56 | 0 |
 | paths.py | modified | e7258f40722b | 751767059d0d | 55 | 57 | 4 |
 | plots.py | modified | 0963a275ddab | b5b83e3187eb | 237 | 237 | 4 |
 | preview_views.py | modified | 5ca6e8fbbb86 | 8ce15ef6cd17 | 123 | 123 | 4 |
-| README.md | new | - | 57dfc06772e1 | - | 151 | 0 |
+| README.md | new | - | 02e20750a604 | - | 156 | 0 |
 | reference/baseline_original/config.json | identical | 463f47321a4e | 463f47321a4e | 33 | 33 | 0 |
 | reference/baseline_original/data.py | identical | f93852656e4d | f93852656e4d | 118 | 118 | 0 |
 | reference/baseline_original/engine.py | identical | e0b767766de4 | e0b767766de4 | 55 | 55 | 0 |
@@ -40,6 +43,7 @@ and changed (the hunks are explained in CHANGES.md; the exact diff is in diffs/)
 | reference/dino-main_original/utils.py | identical | 962a97e1acda | 962a97e1acda | 829 | 829 | 0 |
 | reference/dino-main_original/vision_transformer.py | identical | b1f998d5f49a | b1f998d5f49a | 291 | 291 | 0 |
 | reference/SOURCE.md | identical | 902a5c7d11c2 | 902a5c7d11c2 | 31 | 31 | 0 |
+| saliency_figure.py | new | - | 06f0b68f9a3f | - | 195 | 0 |
 | smoke_test.py | modified | 64bf949615aa | 5d9e6bbc4c0f | 383 | 540 | 197 |
 | ssl_data.py | modified | 2cf0393379ef | 83ddee70da9c | 185 | 219 | 38 |
 | train_ssl.py | modified | 9c58ed41412d | 65498d27fab0 | 554 | 632 | 128 |

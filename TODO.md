@@ -112,7 +112,11 @@ Presented: SparK done; label budgets 1/3/10%; 3 data splits; mean test bars + pe
 - Precision for next time: we did change recipe settings from the authors' code (DINO head size, teacher momentum, crop scales; LeJEPA views; SparK recon channels), all listed in each folder's *_CHANGES.md. Say "authors' code, with documented recipe adaptations" rather than "no changes".
 
 ## 11. P4 real test (2026-11-10)
-- [ ] Commit and push `Experiments/mobileNetv2_DINO_P4/`, `crc/p4.sbatch`, `crc/README.md`, `.gitignore`.
-- [ ] CRC (once access is restored): `git pull`; optional `cp Experiments/mobileNetv2_DINO/outputs/cache/pixels_*.npy Experiments/mobileNetv2_DINO_P4/outputs/cache/`; `sbatch crc/p4.sbatch 1`, `2`, `3`; `sbatch --job-name=P4perm_dino crc/p4.sbatch 1 perm`; `sbatch --job-name=P4d_dino crc/p4.sbatch 1 3field`.
-- [ ] After the jobs: commit the small result files on CRC, push, pull on the PC; compare with A1 per split and label budget, then the mean of three splits (test accuracy), as in `Biweekly_nischal_ngc/11_2_2026/make_split_pdfs.py`.
-- [ ] Decision rules: P4 must beat A1 beyond about 1 point (seed noise) at 1 % and 3 % and not lose at 10 %; P4perm must not gain; P4d tells whether the deployable cells keep the gain.
+- [x] Committed and pushed (eca218b; c9abcbe fixed a smoke-test folder collision between jobs started in the same second).
+- [x] CRC 2026-11-10: jobs 4720591 (split 1), 4718974 (split 2), 4718976 (split 3), 4720592 (perm), 4718978 (3field); 8.0 h SSL each, 9.2 GB (A1: 7.8 h).
+- [x] Results pulled (15c3e73). `python Experiments/mobileNetv2_DINO_P4/compare_p4.py` -> `outputs/compare/p4_vs_a1.md` (test + validation per split, mean of 3, SSL cost).
+- [x] Decision rules, outcome (test accuracy, P4 minus A1 per split): 1 % +4.2 / +6.3 / +6.3; 3 % +3.3 / +5.5 / +3.7; 10 % +0.5 / +1.2 / +1.3 (mean +5.6 / +4.2 / +1.0). P4perm = A1 (-0.3 / 0.0 / -0.5): the gain comes from the physical grouping. P4d (scene | band | depression, 36 cells) = A1 (-0.4 / -0.4 / -1.1): the deployable cells do NOT keep the gain; the azimuth sector is the field doing the work.
+- [ ] Isolate the field (split 1, one job each, same sbatch with new variants): cells = `az_sector30` only (12 cells) and `scene | az_sector30` (60 cells). If azimuth alone gives the full gain, P4 is pose-conditioned centering.
+- [ ] Seed 1 for P4 and A1 on split 1 (seed-noise bound before quoting the 10 % gain, which is within about 1 point).
+- [ ] Deployability: `az_sector30` is the target aspect angle (README, Known limitations), not known for an unlabeled field chip. Verify against the ATRNet-STAR paper what the azimuth field is; then either (a) a label-free aspect proxy (orientation estimated from the chip: shadow / long-axis), or (b) frame P4 as pose-conditioned self-distillation for curated collections where the aspect is logged. Decide with Nischal before writing.
+- [ ] Commit `compare_p4.py`, the README row and `outputs/compare/` when Nischal says.
