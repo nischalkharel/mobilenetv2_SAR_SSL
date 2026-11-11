@@ -1,6 +1,7 @@
 # SARDet: SSL pretraining comparison for a compact SAR object detector
 
-The ATRNet-STAR study (`mobilenetv2_SAR_SSL`) compared a supervised baseline, DINO, LeJEPA, SparK and P4
+This folder lives inside the `mobilenetv2_SAR_SSL` repository but is a self-contained suite: it reads nothing
+from the ATRNet-STAR experiments next to it (only the ImageNet weights file). The ATRNet-STAR study compared a supervised baseline, DINO, LeJEPA, SparK and P4
 (DINO with per-condition-cell teacher centering) for MobileNetV2 *classification* of 128 px vehicle chips.
 This suite repeats that comparison as *object detection* on SARDet-100K (116,598 images, 6 classes, larger
 scenes with context), with one shared detector, one shared fine-tuning protocol, audited splits and run
@@ -92,7 +93,7 @@ and of the fine-tuned backbones; response-map + prediction panels per source. `c
 ## Running on the PC (setup, data preparation, smoke tests)
 
 ```
-cd SARDet-work\SARDet
+cd mobilenetv2_SAR_SSL\SARDet
 py -3.13 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu130
 .\.venv\Scripts\python.exe -m pip install numpy pillow pycocotools matplotlib pandas psutil

@@ -66,7 +66,7 @@ each config must state the truth for its variant word for word, or `train_ssl.py
 ## Commands (from the suite root, with the suite's interpreter)
 
 ```powershell
-cd C:\Users\nisch\Documents\SHREC\2026_2027\SARDet-work\SARDet
+cd C:\Users\nisch\Documents\SHREC\2026_2027\mobilenetv2_SAR_SSL\SARDet
 .\.venv\Scripts\python.exe CondDINO_SARDet\smoke_test.py                               # minutes; never a result
 .\.venv\Scripts\python.exe CondDINO_SARDet\cell_report.py --cells source_pol           # seconds (labels read for the report only)
 .\.venv\Scripts\python.exe CondDINO_SARDet\cell_report.py --cells oracle_class

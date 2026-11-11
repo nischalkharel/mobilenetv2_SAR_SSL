@@ -1,6 +1,6 @@
 # Running the SARDet suite on Pitt CRC
 
-Same conventions as `mobilenetv2_SAR_SSL/crc/`: code moves through GitHub (push on the PC, pull on CRC), data
+Same conventions as the repository's own `crc/`: code moves through GitHub (push on the PC, pull on CRC), data
 and weights through scp/rsync, small result files are committed on CRC and pulled on the PC. Large data goes to
 `/ix/ageorge/nik96` (never a shared drive: CRC notice of 2026-11-02). `env.sh` holds every CRC-specific path.
 
@@ -8,7 +8,7 @@ and weights through scp/rsync, small result files are committed on CRC and pulle
 
 | What | Where |
 |---|---|
-| Code (this suite) | `/ihome/ageorge/nik96/SARDet` (clone of the GitHub repo) |
+| Code (this suite) | `/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet` (the existing clone, after `git pull`) |
 | Dataset (JPEGImages 116,598 files, Annotations/, test.json, mapping.json; 7.2 GB) | `/ix/ageorge/nik96/data/SARDet_100K` |
 | ImageNet weights (already there from the ATRNet-STAR work) | `/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth` |
 | Python env (already there; needs pycocotools added) | `/ix/ageorge/nik96/envs/sarssl` |
@@ -17,13 +17,13 @@ and weights through scp/rsync, small result files are committed on CRC and pulle
 
 ```
 /ix/ageorge/nik96/envs/sarssl/bin/pip install pycocotools
-cd ~/SARDet && git pull
+cd ~/mobilenetv2_SAR_SSL && git pull && cd SARDet
 source crc/env.sh                       # prints host, commit, GPU (none on a login node), torch, and every path with ok/MISSING
 python data/audit_splits.py             # must end with "ok" (the committed manifests match the dataset copy)
 mkdir -p crc/logs                       # Slurm writes the job logs here (also created by every job script)
 ```
 
-## Jobs (submit from the suite root)
+## Jobs (submit from the suite root: `cd ~/mobilenetv2_SAR_SSL/SARDet` first)
 
 | Script | What | Time / QoS |
 |---|---|---|
