@@ -14,7 +14,8 @@ Method interface (duck-typed; see DINO_SARDet/train_ssl.py for the reference imp
     smoke_overrides              dict of flat-arg overrides applied in smoke mode (e.g. warmup epochs)
     build(args, rows, n_steps_per_epoch, device)   networks, loss, optimizer, schedules
     schedule_fingerprint()       str; checked on resume
-    train_epoch(loader, epoch, device, log_every)  -> dict of stats (must include every history column)
+    train_epoch(loader, epoch, device, log_every, timing)  -> dict of stats (must include every history column);
+                                 call timing(step) once per step (the engine measures speed from it)
     state_dict() / load_state_dict(d)              everything needed to resume exactly
     export_state()               -> (features state dict with torchvision keys, extra metadata dict)
     describe(args)               -> str printed at the start
@@ -176,6 +177,7 @@ def run(method_cls, experiment_dir, config_path=None, resume_dir=None, smoke=Fal
         record.info["resumed"] = record.info.get("resumed", []) + [time.strftime("%Y-%m-%dT%H:%M:%S")]
         record.update(status="running")
 
+    method.run_dir = run_dir          # methods may write per-epoch files (previews, cell stats) here
     try:
         set_seed(args.seed)
         if device.type == "cuda":
@@ -196,6 +198,13 @@ def run(method_cls, experiment_dir, config_path=None, resume_dir=None, smoke=Fal
             method.load_state_dict(ckpt["method"])
             start_epoch = ckpt["epoch"]
             restore_rng(ckpt["rng_state"])
+            # a kill between the checkpoint and the history append loses that epoch's row: repair it
+            with open(run_dir / "history.csv", newline="", encoding="utf-8") as f:
+                last = list(csv.reader(f))[-1]
+            if last[0] != str(start_epoch) and "history_row" in ckpt:
+                with open(run_dir / "history.csv", "a", newline="", encoding="utf-8") as f:
+                    csv.writer(f).writerow(ckpt["history_row"])
+                print(f"  repaired history.csv row for epoch {start_epoch}")
             if start_epoch >= args.epochs:
                 print("run already complete; nothing to resume")
                 record.update(status="completed")
@@ -218,12 +227,14 @@ def run(method_cls, experiment_dir, config_path=None, resume_dir=None, smoke=Fal
             t0 = time.time()
             marks = {}
 
+            t_from, t_to = min(TIMING_FROM, max(1, n_steps - 1)), min(TIMING_TO, n_steps)   # smoke runs have few steps
+
             def timing(step):
-                if epoch != start_epoch or step not in (TIMING_FROM, TIMING_TO):
+                if epoch != start_epoch or step not in (t_from, t_to) or t_to <= t_from:
                     return
                 marks[step] = time.time()
-                if step == TIMING_TO:
-                    s = (marks[TIMING_TO] - marks[TIMING_FROM]) / (TIMING_TO - TIMING_FROM)
+                if step == t_to:
+                    s = (marks[t_to] - marks[t_from]) / (t_to - t_from)
                     print(f"  measured speed: {s:.3f} s/step -> {s * n_steps / 60:.1f} min per epoch, "
                           f"about {s * n_steps * (last_epoch - epoch) / 3600:.2f} h until epoch {last_epoch}", flush=True)
                     record.update(measured_seconds_per_step=round(s, 4),
@@ -232,13 +243,14 @@ def run(method_cls, experiment_dir, config_path=None, resume_dir=None, smoke=Fal
             loader = build_ssl_loader(dataset, args.batch_size, args.num_workers, args.seed, epoch)
             stats = method.train_epoch(loader, epoch, device, args.log_every_steps, timing)
             secs = time.time() - t0
+            history_row = [epoch + 1] + [f"{stats[k]:.6g}" for k in method.history_columns] + [f"{secs:.1f}"]
             ckpt = {"method": method.state_dict(), "epoch": epoch + 1, "args": vars(args), "global_step": (epoch + 1) * n_steps,
-                    "schedule_fingerprint": fingerprint, "rng_state": rng_state()}
+                    "schedule_fingerprint": fingerprint, "rng_state": rng_state(), "history_row": history_row}
             tmp = run_dir / "checkpoint.pth.tmp"
             torch.save(ckpt, tmp)
             os.replace(tmp, run_dir / "checkpoint.pth")
             with open(run_dir / "history.csv", "a", newline="", encoding="utf-8") as f:
-                csv.writer(f).writerow([epoch + 1] + [f"{stats[k]:.6g}" for k in method.history_columns] + [f"{secs:.1f}"])
+                csv.writer(f).writerow(history_row)
             images_epoch = n_steps * args.batch_size
             cost.update(epochs_done=epoch + 1, optimizer_steps=(epoch + 1) * n_steps, images_seen=(epoch + 1) * images_epoch,
                         view_forwards=(epoch + 1) * images_epoch * n_views,

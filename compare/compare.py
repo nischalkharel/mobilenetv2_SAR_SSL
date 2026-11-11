@@ -1,6 +1,6 @@
 """Gather every completed fine-tune run of every experiment into tables and charts: one command.
 
-    python compare/compare.py [--out compare/outputs/<timestamp>] [--include-deviations]
+    python compare/compare.py [--out compare/outputs/<timestamp>] [--include-deviations] [--from-smoke]
 
 Reads <experiment>/outputs/finetune/*/run_info.json (status completed, no protocol deviation, seed 0) and the
 eval_*/metrics.json next to them. Method = experiment folder name (plus the SSL config variant for CondDINO).
@@ -33,10 +33,10 @@ def read_json(p):
         return json.load(f)
 
 
-def collect(include_deviations=False):
+def collect(include_deviations=False, subfolder="finetune"):
     runs = []
     for exp in EXPERIMENTS:
-        out = paths.experiment_output_dir(paths.SUITE_ROOT / exp) / "finetune"
+        out = paths.experiment_output_dir(paths.SUITE_ROOT / exp) / subfolder
         for info_path in sorted(out.glob("*/run_info.json")):
             info = read_json(info_path)
             if info.get("status") != "completed" or info.get("kind") != "finetune":
@@ -78,10 +78,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=None)
     ap.add_argument("--include-deviations", action="store_true")
+    ap.add_argument("--from-smoke", action="store_true", help="read outputs/smoke instead of outputs/finetune (code check only)")
     args = ap.parse_args()
     out = Path(args.out or paths.SUITE_ROOT / "compare" / "outputs" / datetime.now().strftime("%Y%m%d-%H%M%S"))
     (out / "charts").mkdir(parents=True, exist_ok=True)
-    runs = collect(args.include_deviations)
+    runs = collect(args.include_deviations or args.from_smoke, "smoke" if args.from_smoke else "finetune")
     if not runs:
         sys.exit("no completed fine-tune runs found")
     main_runs = [r for r in runs if r["seed"] == 0]

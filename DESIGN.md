@@ -40,10 +40,16 @@ Drawn from the OFFICIAL TRAIN only. Official val and official test are never re-
   MD5 of the decoded pixels, which catches lossless re-encodings) are one group (union of the relations) and
   always land in the same subset. Groups with a member in official val or test are EXCLUDED from every
   training-side subset, so no training image is a copy or patch-neighbour of a scored image.
-- SSL pool = official train minus the excluded groups; the SAME pool for all splits (val is fixed, so nothing
-  else varies in the pool). [review] Labeled sets are drawn INSIDE the SSL pool, exactly as on ATRNet-STAR
+  Parent = the large image of the 512 px patch sources (SAR-AIRcraft, AIR_SARShip-1; 200 px = 40 % overlap).
+  HRSID's scene id is RECORDED but not a parent: its 800 px tiles overlap <= 25 %, HRSID's own split mixes
+  scenes, and grouping by scene removed 3,638 of its 3,642 train tiles in the first draw (audit 2026-11-11),
+  i.e. the whole source. With the final rule 459 train images are excluded (SAR-AIRcraft 395, Shipdataset 50,
+  SSDD 12, HRSID 2); 132 of HRSID's 136 scenes straddle the official splits, reported as a benchmark property.
+- SSL pool = official train minus the excluded groups = 94,034 images; the SAME pool for all splits (val is
+  fixed, so nothing else varies in the pool). [review] Labeled sets are drawn INSIDE the SSL pool, exactly as on ATRNet-STAR
   ("the labeled set is entirely inside the SSL pool"); SSL uses no labels, so this is the standard protocol.
-- Labeled sets per split s in {1,2,3} (seed = s-1): 1 %, 3 %, 10 % of official train (quota 945 / 2,835 / 9,449),
+- Labeled sets per split s in {1,2,3} (seed = s-1): 1 %, 3 %, 10 % of official train (quota 945 / 2,835 / 9,449;
+  actual on split 1: 962 / 2,841 / 9,460 because whole groups are added),
   NESTED (1 % inside 3 % inside 10 %), stratified by source: whole groups are added per source until that
   source's quota is reached (tolerance: the last group may overshoot), so actual counts differ slightly from the
   quota and are recorded per source per split. For the sliced sources the 1 % set is a handful of parent scenes.

@@ -44,7 +44,9 @@ sbatch --job-name=dino_ft_s1 crc/finetune.sbatch DINO_SARDet 1 auto
 sbatch --job-name=cond_ft_s1 crc/finetune.sbatch CondDINO_SARDet 1 auto condcenter_source_pol
 ```
 Watch: `crc-squeue`; logs in `crc/logs/<job name>_<job id>.out`. Cancel: `scancel -M gpu <id>`.
-SSL cost estimate (printed by every run after 25 steps as "measured speed"): check it against the 23.5 h limit;
+SSL cost estimates: on the PC (RTX 4070 SUPER) SparK runs at 8-9 ms/image, so 100 epochs over 94k images is
+about 21-24 GPU-hours there; the A100 is faster, and the ATRNet runs put LeJEPA at about 1.9x DINO's time.
+Every run prints "measured speed" after 25 steps: check it against the 23.5 h limit;
 the chain handles overruns, but an estimate far above one day means the shared `epochs` value should be
 reconsidered BEFORE the other methods start (equal epochs for all).
 

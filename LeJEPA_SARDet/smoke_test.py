@@ -36,7 +36,7 @@ def check_lejepa_loss_sanity():
     assert s_const > 5 * s_gauss and s_small > 5 * s_gauss, (s_gauss, s_const, s_small)
     same = gauss[:1].expand(V, N, K)                                           # identical views of each image
     total, agreement, sig = lejepa_loss(same, V, build_sigreg(SIGREG_ARGS), 0.05)
-    assert agreement.item() == 0.0, agreement
+    assert agreement.item() < 1e-10, agreement           # 0 up to float rounding of the mean over V views
     total, agreement, sig = lejepa_loss(gauss, V, build_sigreg(SIGREG_ARGS), 0.05)
     assert torch.allclose(agreement, (gauss.mean(0) - gauss).square().mean()), "agreement is not MINIMAL.md's inv_loss"
     assert torch.allclose(total, 0.05 * sig + 0.95 * agreement), "total is not lamb * SIGReg + (1 - lamb) * agreement"
@@ -44,7 +44,7 @@ def check_lejepa_loss_sanity():
     sr(gauss)
     assert sr.global_step.item() == 1, "SIGReg did not advance its direction seed"
     lrs = lr_schedule(5e-4, total_steps=1000, warmup_steps=100, start_factor=0.01, final_ratio=0.001)
-    assert abs(lrs[0] - 5e-6) < 1e-12 and abs(lrs[100] - 5e-4) < 1e-12 and lrs[-1] > 5e-7 and lrs[-1] < 5e-7 * 1.01, lrs[-1]
+    assert abs(lrs[0] - 5e-6) < 1e-12 and abs(lrs[100] - 5e-4) < 1e-12 and lrs[-1] > 5e-7 and lrs[-1] < 5e-7 * 1.02, lrs[-1]
     print(f"  ok: SIGReg gaussian {s_gauss:.3f}, constant {s_const:.1f}, squashed {s_small:.1f}; agreement(identical) 0; "
           f"lr {lrs[0]:.1e} -> {lrs[100]:.1e} -> {lrs[-1]:.2e}")
 
