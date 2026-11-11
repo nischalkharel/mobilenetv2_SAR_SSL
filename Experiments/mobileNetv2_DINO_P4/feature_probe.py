@@ -1,6 +1,7 @@
 """What does each frozen backbone encode? Class versus recording condition, measured the same way for every backbone.
 
-For each backbone (ImageNet start, A1, P4, and the controls whose weights are on this machine) the features of
+For each model whose weights are on this machine (ImageNet start; the A1, P4, P4perm and P4d SSL backbones; the A1 and
+P4 backbones after supervised fine-tuning at 1 % and 10 %, read from best.pt) the features of
 analysis_data.extract_features are probed without any training of the backbone:
   (1) class, few labels: linear probe (multinomial logistic regression, L-BFGS, L2 strength chosen on validation.csv)
       trained on labeled_set_1pct.csv (652 chips) and nearest-class-mean with the same chips; scored on the full
@@ -16,10 +17,11 @@ Reading: P4 is expected to raise the class numbers; whether the condition number
 left the feature geometry or only stopped dominating it (the pilot saw the latter: RESULTS.md, 1-NN scene agreement).
 
 Run from the repository root (GPU, a few minutes per backbone; feature extraction dominates):
-    python Experiments/mobileNetv2_DINO_P4/feature_probe.py                      # every backbone whose weights exist
-    python Experiments/mobileNetv2_DINO_P4/feature_probe.py --backbones ImageNet A1 P4
-    python Experiments/mobileNetv2_DINO_P4/feature_probe.py --backbone-file myrun=path/to/backbone_teacher_epoch100.pth
-Writes outputs/compare/feature_probe.md and feature_probe.csv (one row per backbone and measure).
+    python Experiments/mobileNetv2_DINO_P4/feature_probe.py                      # every model whose weights exist
+    python Experiments/mobileNetv2_DINO_P4/feature_probe.py --models ImageNet A1 P4 A1_ft1pct P4_ft1pct
+    python Experiments/mobileNetv2_DINO_P4/feature_probe.py --model myrun=path/to/backbone_teacher_epoch100.pth
+    python Experiments/mobileNetv2_DINO_P4/feature_probe.py --model myft=finetuned:path/to/best.pt
+Writes outputs/compare/feature_probe.md and feature_probe.csv (one row per model and measure).
 """
 import argparse
 import csv
@@ -33,7 +35,7 @@ import torch
 import torch.nn.functional as F
 
 import paths
-from analysis_data import BACKBONES, extract_features, labeled_rows, load_backbone_model, pool_rows, test_rows
+from analysis_data import LABELS, MODELS, available, extract_features, labeled_rows, load_model, model_spec, pool_rows, test_rows
 from data import load_class_names
 from utils import resolve_device, set_seed
 
@@ -86,8 +88,8 @@ def encode(rows: list[dict], getter) -> tuple[torch.Tensor, int]:
 
 def main():
     ap = argparse.ArgumentParser(description="frozen-feature probes: class versus condition, per backbone")
-    ap.add_argument("--backbones", nargs="+", default=list(BACKBONES), help="names from analysis_data.BACKBONES")
-    ap.add_argument("--backbone-file", action="append", default=[], metavar="NAME=PATH", help="extra backbone file(s)")
+    ap.add_argument("--models", nargs="+", default=list(MODELS), help="names from analysis_data.MODELS")
+    ap.add_argument("--model", action="append", default=[], metavar="NAME=[finetuned:]PATH", help="extra model file(s)")
     ap.add_argument("--per-class-pool", type=int, default=150)
     ap.add_argument("--per-class-test", type=int, default=100)
     ap.add_argument("--device", default="auto")
@@ -114,20 +116,20 @@ def main():
     print(f"chips: test {len(test)}, test sample {len(test_s)}, pool sample {len(pool_s)}, labeled 1 % {len(lab1)}, "
           f"validation {len(val)} (metadata read in {time.time() - t0:.0f} s)")
 
-    backbones = {n: BACKBONES[n] for n in a.backbones}
-    for spec in a.backbone_file:
-        n, p = spec.split("=", 1)
-        backbones[n] = Path(p)
+    models = {n: MODELS[n] for n in a.models}
+    for spec in a.model:
+        n, kind, p = model_spec(spec)
+        models[n] = (kind, p)
     records, lines = [], []
-    header = ["Backbone", "class LP 1 %", "class NCM 1 %", "class LP 150/class", "1-NN class", "1-NN scene", "1-NN az sector",
+    header = ["Model", "class LP 1 %", "class NCM 1 %", "class LP 150/class", "1-NN class", "1-NN scene", "1-NN az sector",
               "1-NN depression", "dec. scene", "dec. az sector", "dec. depression", "dec. band"]
     table = []
-    for name, path in backbones.items():
+    for name, (kind, path) in models.items():
         if path is not None and not Path(path).exists():
             print(f"\n{name}: weights not on this machine ({path}); skipped")
             continue
         t1 = time.time()
-        model = load_backbone_model(name, path, K)
+        model = load_model(name, kind, path, K)
         feats = {k: extract_features(model, rows, device).to(device)
                  for k, rows in (("test", test), ("pool", pool_s), ("lab1", lab1), ("val", val))}
         feats["test_s"] = feats["test"][torch.tensor(test_idx, device=device)]
@@ -168,7 +170,7 @@ def main():
             chance = float(((cnt / len(vals)) ** 2).sum())
             rec(f"nn1_{fct}", 100 * float((vals[top[:, 0]] == vals).mean()), f"chance {100 * chance:.1f}")
             rec(f"purity10_{fct}", 100 * float((vals[top] == vals[:, None]).mean()), f"chance {100 * chance:.1f}")
-        table.append([name] + [f"{res[k]:.1f}" for k in ("class_lp_1pct", "class_ncm_1pct", "class_lp_150", "nn1_class", "nn1_scene",
+        table.append([LABELS.get(name, name)] + [f"{res[k]:.1f}" for k in ("class_lp_1pct", "class_ncm_1pct", "class_lp_150", "nn1_class", "nn1_scene",
                                                             "nn1_az_sector", "nn1_depression", "dec_scene", "dec_az_sector", "dec_depression", "dec_band")])
         print(f"\n{name} ({time.time() - t1:.0f} s): " + ", ".join(f"{k} {v:.1f}" for k, v in res.items() if not k.startswith("purity")))
         del feats, S
@@ -178,7 +180,8 @@ def main():
     for fct, vals in factors.items():
         _, cnt = np.unique(vals, return_counts=True)
         chance[fct] = 100 * float(((cnt / len(vals)) ** 2).sum())
-    lines += ["# Frozen-feature probes: class versus recording condition, per backbone", "",
+    lines += ["# Frozen-feature probes: class versus recording condition, per model", "",
+              "Rows: the ImageNet start, the SSL backbones, and the same backbones after supervised fine-tuning (features of best.pt).",
               "Percent. Class LP 1 %: linear probe on the 652 labeled chips, scored on the full official test set (29,284);",
               "NCM 1 %: nearest class mean of the same chips. Class LP 150/class: probe trained on a pool sample (150 per class),",
               "scored on a test sample (100 per class). 1-NN: nearest-neighbour agreement on the test sample, own acquisition",
@@ -186,8 +189,8 @@ def main():
               f"Chance for 1-NN (sum of squared frequencies): " + ", ".join(f"{k} {v:.1f}" for k, v in chance.items()) + ".",
               f"Majority baseline for dec.: " + ", ".join(f"{k} {v:.1f}" for k, v in maj.items()) + ".", ""]
     lines += ["| " + " | ".join(header) + " |", "|" + "---|" * len(header)] + ["| " + " | ".join(r) + " |" for r in table]
-    lines += ["", f"Backbones: " + "; ".join(f"{n} = {p.name if p else 'IMAGENET1K_V2'}" + (f" ({p.parent.name})" if p else "")
-                                            for n, p in backbones.items() if p is None or Path(p).exists()),
+    lines += ["", f"Models: " + "; ".join(f"{n} = {p.name if p else 'IMAGENET1K_V2'}" + (f" ({p.parent.name})" if p else "")
+                                         for n, (k, p) in models.items() if p is None or Path(p).exists()),
               f"Written {datetime.now().isoformat(timespec='seconds')}."]
     out = paths.OUTPUT_DIR / "compare"
     out.mkdir(parents=True, exist_ok=True)

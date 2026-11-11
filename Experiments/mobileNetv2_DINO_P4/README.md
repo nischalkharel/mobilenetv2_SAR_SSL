@@ -76,7 +76,7 @@ must not gain over A1; if it does, the gain is not coming from the physical grou
 | `config_finetune.json` (+ `_perm`, `_3field`) | A1 values, run names | fine-tuning, identical recipe to A0 / A1 |
 | `cell_report.py` | new | cell table and label-leak numbers for a split (CPU) |
 | `compare_p4.py` | new | P4 / P4perm / P4d versus A1 and A0 from the finished CRC runs: tables and SSL cost (CPU) |
-| `analysis_data.py`, `feature_probe.py`, `saliency_figure.py` | new | analyses of the finished backbones (GPU, minutes; `crc/p4_analysis.sbatch`): test-chip metadata from the .xml sidecars (scene, vehicle box); frozen-feature probes (class vs scene / azimuth sector / depression / band); Grad-CAM and backbone response maps with the share of map mass on the vehicle box, A1 vs P4 |
+| `analysis_data.py`, `feature_probe.py`, `saliency_figure.py` | new | analyses of the finished backbones (GPU, minutes; `crc/p4_analysis.sbatch`): test-chip metadata from the .xml sidecars (scene, vehicle box); frozen-feature probes (class vs scene / azimuth sector / depression / band); Grad-CAM and backbone response maps with the share of map mass on the vehicle box, A1 vs P4; `neighbour_figure.py`: k nearest test chips in feature space per backbone with the same-class / scene / aspect shares |
 | `make_changes_record.py` | new | regenerates `diffs/` and `diffs/SUMMARY.md` (status and hashes of every file vs A1) |
 | `CHANGES.md` | new | every hunk explained, and whether it can change what DINO computes |
 

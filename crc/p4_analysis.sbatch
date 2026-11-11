@@ -4,7 +4,8 @@
 # the share of map mass on the vehicle box, A1 versus P4. GPU, about 15 minutes. Submit from the repository root:
 #   sbatch crc/p4_analysis.sbatch
 # Outputs (small; commit them): Experiments/mobileNetv2_DINO_P4/outputs/compare/feature_probe.{md,csv},
-# saliency_summary.md, saliency_per_chip.csv, saliency_figure.{png,pdf}.
+# saliency_summary.md, saliency_per_chip.csv, saliency_figure.{png,pdf}, neighbour_figure[_ft1pct].{png,pdf} + _summary.md.
+# feature_probe.py covers the ImageNet start, the SSL backbones and the A1 / P4 backbones after fine-tuning (1 %, 10 %).
 #SBATCH --job-name=P4_analysis
 #SBATCH --cluster=gpu
 #SBATCH --partition=a100
@@ -21,4 +22,6 @@ source crc/env.sh
 DIR=Experiments/mobileNetv2_DINO_P4
 python $DIR/feature_probe.py
 python $DIR/saliency_figure.py
+python $DIR/neighbour_figure.py
+python $DIR/neighbour_figure.py --models A1_ft1pct P4_ft1pct --out-name neighbour_figure_ft1pct
 crc-job-stats

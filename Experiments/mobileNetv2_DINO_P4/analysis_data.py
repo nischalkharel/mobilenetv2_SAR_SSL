@@ -38,6 +38,25 @@ FINETUNED_1PCT = {  # name -> best.pt of the 1 % fine-tune (split 1)
     "A1": A1_DIR / "finetune" / "20261027-155146_A1_dino_mobilenetv2_labeled_set_1pct_seed0" / "best.pt",
     "P4": P4_DIR / "finetune" / "20261111-034248_P4_dino_mobilenetv2_labeled_set_1pct_seed0" / "best.pt",
 }
+FINETUNED_10PCT = {
+    "A1": A1_DIR / "finetune" / "20261027-162940_A1_dino_mobilenetv2_labeled_set_10pct_seed0" / "best.pt",
+    "P4": P4_DIR / "finetune" / "20261111-035650_P4_dino_mobilenetv2_labeled_set_10pct_seed0" / "best.pt",
+}
+# Every model the probes can read, in table order: kind "backbone" = exported SSL teacher backbone (or the ImageNet
+# start), "finetuned" = best.pt of a supervised fine-tune (its features = the backbone after fine-tuning).
+MODELS = {**{n: ("backbone", p) for n, p in BACKBONES.items()},
+          **{f"{n}_ft1pct": ("finetuned", p) for n, p in FINETUNED_1PCT.items()},
+          **{f"{n}_ft10pct": ("finetuned", p) for n, p in FINETUNED_10PCT.items()}}
+LABELS = {"ImageNet": "ImageNet start", "A1": "A1 (DINO)", "P4": "P4 (per-cell centering)", "P4perm": "P4perm (scrambled cells)",
+          "P4d": "P4d (3-field cells)", "A1_ft1pct": "A1 fine-tuned 1 %", "P4_ft1pct": "P4 fine-tuned 1 %",
+          "A1_ft10pct": "A1 fine-tuned 10 %", "P4_ft10pct": "P4 fine-tuned 10 %"}
+
+
+def model_spec(spec: str) -> tuple[str, str, Path]:
+    """'NAME=PATH' or 'NAME=finetuned:PATH' from the command line -> (name, kind, path)."""
+    name, rest = spec.split("=", 1)
+    kind, _, path = rest.partition(":") if rest.startswith(("backbone:", "finetuned:")) else ("backbone", "", rest)
+    return name, kind, Path(path)
 
 
 def parse_xml(xml_path: Path) -> dict:
@@ -110,6 +129,15 @@ def load_finetuned_model(path: Path, num_classes: int = 40) -> torch.nn.Module:
     if not Path(path).exists():
         raise FileNotFoundError(f"{path} (copy it from CRC with scp; checkpoints are git-ignored)")
     return load_finetuned(path, num_classes)[0]
+
+
+def load_model(name: str, kind: str, path: Path | None, num_classes: int = 40) -> torch.nn.Module:
+    return load_finetuned_model(path, num_classes) if kind == "finetuned" else load_backbone_model(name, path, num_classes)
+
+
+def available(models: dict) -> dict:
+    """The entries of a {name: (kind, path)} table whose weights are on this machine (ImageNet always is)."""
+    return {n: (k, p) for n, (k, p) in models.items() if p is None or Path(p).exists()}
 
 
 _DATASETS: dict[tuple, SARDataset] = {}  # decoded chips per row set, read from disk once per process (slow part)
