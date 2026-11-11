@@ -1,0 +1,66 @@
+host gpu-n38.crc.pitt.edu  job 4722699  start Wed Nov 11 10:32:21 AM EST 2026
+repo /ihome/ageorge/nik96/mobilenetv2_SAR_SSL  commit 4c84698  branch SmokeTest_Mobilenet_with_DINO
+NVIDIA A100-PCIE-40GB, 40960 MiB, 595.91.07
+python /ix/ageorge/nik96/envs/sarssl/bin/python 3.13.16 | torch 2.10.0+cu128 | torchvision 0.25.0+cu128 | cuda available True
+chips: test 29284, test sample 4000, pool sample 6000, labeled 1 % 652, validation 800 (metadata read in 815 s)
+
+ImageNet (608 s): class_lp_1pct 10.2, class_ncm_1pct 8.4, class_lp_150 18.9, dec_scene 83.0, dec_az_sector 35.4, dec_depression 63.4, dec_band 82.9, nn1_class 12.3, nn1_scene 73.5, nn1_az_sector 29.2, nn1_depression 55.0, nn1_band 71.5
+
+A1 (47 s): class_lp_1pct 30.3, class_ncm_1pct 18.0, class_lp_150 56.1, dec_scene 96.4, dec_az_sector 66.3, dec_depression 86.6, dec_band 92.7, nn1_class 32.4, nn1_scene 91.3, nn1_az_sector 57.8, nn1_depression 74.8, nn1_band 78.1
+
+P4 (46 s): class_lp_1pct 40.0, class_ncm_1pct 28.0, class_lp_150 63.4, dec_scene 95.2, dec_az_sector 56.9, dec_depression 83.6, dec_band 88.4, nn1_class 46.7, nn1_scene 90.0, nn1_az_sector 40.8, nn1_depression 69.5, nn1_band 73.2
+
+P4perm (47 s): class_lp_1pct 30.3, class_ncm_1pct 17.9, class_lp_150 57.0, dec_scene 96.5, dec_az_sector 66.0, dec_depression 85.7, dec_band 92.5, nn1_class 32.2, nn1_scene 91.1, nn1_az_sector 57.0, nn1_depression 75.1, nn1_band 78.1
+
+P4d (46 s): class_lp_1pct 31.3, class_ncm_1pct 18.4, class_lp_150 55.8, dec_scene 95.8, dec_az_sector 66.8, dec_depression 83.3, dec_band 90.3, nn1_class 33.1, nn1_scene 88.9, nn1_az_sector 57.4, nn1_depression 67.4, nn1_band 74.9
+
+| ImageNet | 10.2 | 8.4 | 18.9 | 12.3 | 73.5 | 29.2 | 55.0 | 83.0 | 35.4 | 63.4 | 82.9 |
+| A1 | 30.3 | 18.0 | 56.1 | 32.4 | 91.3 | 57.8 | 74.8 | 96.4 | 66.3 | 86.6 | 92.7 |
+| P4 | 40.0 | 28.0 | 63.4 | 46.7 | 90.0 | 40.8 | 69.5 | 95.2 | 56.9 | 83.6 | 88.4 |
+| P4perm | 30.3 | 17.9 | 57.0 | 32.2 | 91.1 | 57.0 | 75.1 | 96.5 | 66.0 | 85.7 | 92.5 |
+| P4d | 31.3 | 18.4 | 55.8 | 33.1 | 88.9 | 57.4 | 67.4 | 95.8 | 66.8 | 83.3 | 90.3 |
+
+Backbones: ImageNet = IMAGENET1K_V2; A1 = backbone_teacher_epoch100.pth (20261018-192425_A1_dino_ssl_mobilenetv2_seed0); P4 = backbone_teacher_epoch100.pth (20261110-194252_P4_dino_ssl_mobilenetv2_seed0); P4perm = backbone_teacher_epoch100.pth (20261110-204010_P4perm_dino_ssl_mobilenetv2_seed0); P4d = backbone_teacher_epoch100.pth (20261110-150743_P4d_dino_ssl_mobilenetv2_seed0)
+Written 2026-11-11T11:01:04.
+
+Written to /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO_P4/outputs/compare: feature_probe.md, feature_probe.csv
+# Map mass on the vehicle box: A1 versus P4 (split 1), random test chips
+
+2000 official test chips (seed 0); box = the dataset's vehicle annotation, mean box area 17.2 % of the chip (what a uniform map would score). Grad-CAM: 1 % fine-tuned model, true class.
+Response map: frozen SSL backbone, channel norm of the last feature map. Concentration = mass share / box area share.
+
+| Map | Mass in box (%) | Concentration on vehicle | Accuracy on these chips (%) |
+|---|---|---|---|
+| A1 fine-tuned 1 % | 37.1 | 2.32 | 35.6 |
+| A1 backbone | 34.1 | 2.25 | - |
+| P4 fine-tuned 1 % | 39.2 | 2.48 | 39.9 |
+| P4 backbone | 36.2 | 2.40 | - |
+
+fine-tuned 1 %: P4 minus A1 mass in box, mean +1.9 points; P4 higher on 52 % of chips.
+
+backbone: P4 minus A1 mass in box, mean +2.1 points; P4 higher on 83 % of chips.
+
+Written 2026-11-11T11:01:47.
+
+Written to /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO_P4/outputs/compare: saliency_summary.md, saliency_per_chip.csv, saliency_figure.png / .pdf
+==============================================================================
+                                JOB STATISTICS                                
+==============================================================================
+
+           JobId: 4722699
+      SubmitTime: 2026-11-11T10:15:11
+         EndTime: 2026-11-11T12:32:20
+         RunTime: 00:29:35
+       AllocTRES: cpu=8,mem=32G,node=1,billing=8,gres/gpu=1
+       Partition: a100
+        NodeList: gpu-n38
+         Command: /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/crc/p4_analysis.sbatch
+
+==============================================================================
+ For more information use the command:
+   - `sacct -M gpu -j 4722699 -S 2026-11-11T10:15:11 -E 2026-11-11T12:32:20`
+
+ To control the output of the above command:
+   - Add `--format=<field1,field2,etc>` with fields of interest
+   - See the list of all possible fields by running: `sacct --helpformat`
+==============================================================================
