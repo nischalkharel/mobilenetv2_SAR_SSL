@@ -4,6 +4,7 @@ Export format (same as mobilenetv2_SAR_SSL): a dict saved with torch.save and lo
 whose "backbone_state_dict" has exactly the key names of torchvision `mobilenet_v2().features` (parameters AND
 BatchNorm buffers, 156 + 156 tensors), so the detector loads it with strict=True.
 """
+import os
 from pathlib import Path
 
 import torch
@@ -51,8 +52,10 @@ def export_backbone(features_state: dict, path, metadata: dict) -> dict:
     record = dict(metadata)
     record.update(backbone_state_dict=state, num_tensors=len(state), state_sha256=sha256_of_state_dict(state))
     path = Path(path)
-    torch.save(record, path)
-    torch.load(path, map_location="cpu", weights_only=True)  # must be loadable without pickle code
+    tmp = path.with_suffix(".tmp")
+    torch.save(record, tmp)                                  # atomic: a kill during the write never leaves a partial file
+    torch.load(tmp, map_location="cpu", weights_only=True)   # must be loadable without pickle code
+    os.replace(tmp, path)
     record["file_sha256"] = sha256_of_file(path)
     return {k: v for k, v in record.items() if k != "backbone_state_dict"}
 

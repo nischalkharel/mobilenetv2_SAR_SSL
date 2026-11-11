@@ -35,8 +35,15 @@ fi
 echo "backbone: $BACKBONE"
 PROBE_SPEC=$BACKBONE
 RUN_NAME=$(python -c "import json,os; f='$DIR/config_finetune.json'; f=f if os.path.exists(f) else '$DIR/config.json'; print(json.load(open(f))['run_name'])")
+[ -n "$MATCH" ] && RUN_NAME="${MATCH}_mobilenetv2"     # CondDINO variants get their own fine-tune run names
+mkdir -p crc/logs
 
 for BUDGET in 10pct 3pct 1pct; do
+    DONE=""
+    for d in $(ls -td $DIR/outputs/finetune/*_${RUN_NAME}_${BUDGET}_split${SAR_SPLIT}_seed0 2>/dev/null); do
+        if [ "$(python -c "import json; r=json.load(open('$d/run_info.json')); print(r['status'], r.get('protocol_deviation'))")" = "completed None" ]; then DONE=$d; break; fi
+    done
+    if [ -n "$DONE" ]; then echo "budget $BUDGET already completed in $DONE; skipping"; continue; fi
     python -m shared.finetune --experiment-dir $DIR --run-name "$RUN_NAME" --budget $BUDGET --backbone "$BACKBONE"
     RUN=$(ls -td $DIR/outputs/finetune/*_${RUN_NAME}_${BUDGET}_split${SAR_SPLIT}_seed0 | head -1)
     echo "run folder: $RUN"

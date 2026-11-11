@@ -20,6 +20,7 @@ and weights through scp/rsync, small result files are committed on CRC and pulle
 cd ~/SARDet && git pull
 source crc/env.sh                       # prints host, commit, GPU (none on a login node), torch, and every path with ok/MISSING
 python data/audit_splits.py             # must end with "ok" (the committed manifests match the dataset copy)
+mkdir -p crc/logs                       # Slurm writes the job logs here (also created by every job script)
 ```
 
 ## Jobs (submit from the suite root)
@@ -31,7 +32,11 @@ python data/audit_splits.py             # must end with "ok" (the committed mani
 | `finetune.sbatch <folder> <split> <imagenet|auto|path> [ssl run_name match]` | 10 %, 3 %, 1 % fine-tunes with full scoring, panels and probes | 12 h short |
 | `finetune_repeat.sbatch` | baseline 10 % split 1 with seed 1 (fine-tune seed noise) | 6 h short |
 
-Typical order for one split s (1, 2, 3):
+Order of operations:
+1. `sbatch crc/lr_check.sbatch` (baseline only; ~10 h). Read `best_val_select_map` of the three lrcheck runs, write
+   the winner into `shared/finetune_config.json` (`train.lr` and the `_lr_decision` note), commit and push.
+   The baseline decides; a later `sbatch crc/lr_check.sbatch <DINO backbone>` is a robustness report only.
+2. Then, per split s (1, 2, 3):
 ```
 sbatch --job-name=base_ft_s1 crc/finetune.sbatch baseline_SARDet 1 imagenet
 sbatch --job-name=dino_s1    crc/ssl.sbatch DINO_SARDet 1
@@ -43,7 +48,11 @@ sbatch --job-name=condperm_s1 crc/ssl.sbatch CondDINO_SARDet 1 config_ssl_perm.j
 sbatch --job-name=dino_ft_s1 crc/finetune.sbatch DINO_SARDet 1 auto
 sbatch --job-name=cond_ft_s1 crc/finetune.sbatch CondDINO_SARDet 1 auto condcenter_source_pol
 ```
-Watch: `crc-squeue`; logs in `crc/logs/<job name>_<job id>.out`. Cancel: `scancel -M gpu <id>`.
+Watch: `crc-squeue`; logs in `crc/logs/<job name>_<job id>.out`. Cancel a whole SSL chain with
+`scancel -M gpu --name=<job name>` (cancelling only the running link lets the pending continuation resume it).
+The partial epoch running when a job hits its time limit is lost and is NOT counted in the recorded GPU-hours;
+the resumed job repeats it. Resume is state-exact (same batches, schedules, RNG, optimizer, centers), not
+bitwise (cuDNN benchmark, mixed precision).
 SSL cost estimates: on the PC (RTX 4070 SUPER) SparK runs at 8-9 ms/image, so 100 epochs over 94k images is
 about 21-24 GPU-hours there; the A100 is faster, and the ATRNet runs put LeJEPA at about 1.9x DINO's time.
 Every run prints "measured speed" after 25 steps: check it against the 23.5 h limit;

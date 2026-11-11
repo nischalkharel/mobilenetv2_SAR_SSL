@@ -53,6 +53,8 @@ def flat_args(cfg: dict) -> argparse.Namespace:
         if section.startswith("_") or section in ("run_name", "method"):
             continue
         if not isinstance(values, dict):
+            if section in flat:
+                raise KeyError(f"config key {section!r} appears twice")
             flat[section] = values
             continue
         for k, v in values.items():
@@ -73,10 +75,9 @@ def merged_config(method_cfg: dict, smoke: bool, smoke_overrides: dict) -> dict:
     for section, values in method_cfg.items():
         if section in ("run_name", "method") or section.startswith("_"):
             continue
-        if isinstance(values, dict):
-            clash = shared_keys & set(values)
-            if clash:
-                raise KeyError(f"method config may not override shared SSL keys: {sorted(clash)}")
+        clash = shared_keys & (set(values) if isinstance(values, dict) else {section})
+        if clash:
+            raise KeyError(f"method config may not override shared SSL keys: {sorted(clash)}")
         cfg[section] = values
     cfg["common"]["seed"] = paths.SPLIT - 1
     if smoke:
@@ -142,7 +143,8 @@ def run(method_cls, experiment_dir, config_path=None, resume_dir=None, smoke=Fal
     used_hash = sha256_of_text("\n".join(r["file_name"] for r in rows))
     manifest = {"ssl_pool_csv": str(manifests.ssl_pool_csv()), "csv_sha256": audit["manifest_sha256"]["ssl_pool.csv"],
                 "used_file_list_sha256": used_hash, "num_images": len(rows), "split_audit": audit,
-                "columns_available_to_the_method": manifests.MANIFEST_COLUMNS, "labels_used": "none"}
+                "columns_available_to_the_method": manifests.MANIFEST_COLUMNS, "labels_used": "none",
+                "labels_read_for_diagnostic_only": "view_box_coverage: GT boxes of up to 300 pool images, logged in run_info, never seen by training"}
     plan = method.view_plan(args)
     dataset = SSLPoolDataset(rows, plan, seed=args.seed)
     n_steps = len(dataset) // args.batch_size
@@ -206,9 +208,15 @@ def run(method_cls, experiment_dir, config_path=None, resume_dir=None, smoke=Fal
                     csv.writer(f).writerow(ckpt["history_row"])
                 print(f"  repaired history.csv row for epoch {start_epoch}")
             if start_epoch >= args.epochs:
-                print("run already complete; nothing to resume")
-                record.update(status="completed")
-                return run_dir
+                out = run_dir / f"backbone_epoch{args.epochs}.pth"
+                try:
+                    torch.load(out, map_location="cpu", weights_only=True)
+                    print("run already complete; nothing to resume")
+                    record.update(status="completed")
+                    return run_dir
+                except Exception as e:  # noqa: BLE001 - killed between the last checkpoint and the export
+                    print(f"run complete but the exported backbone is missing or unreadable ({e}); exporting now")
+                    return _export_and_finish(method, run_dir, args, cfg, manifest, record.info.get("cost", {}), record)
         record.update(schedule_fingerprint=fingerprint, steps_per_epoch=n_steps, total_steps=n_steps * args.epochs,
                       num_trainable_parameters=method.num_trainable_parameters())
         print(f"\n{'SMOKE RUN (pipeline check only)' if smoke else method.name.upper() + ' SSL run'}: {cfg['run_name']}"
@@ -272,19 +280,23 @@ def run(method_cls, experiment_dir, config_path=None, resume_dir=None, smoke=Fal
             record.update(status="stopped (resumable)")
             print(f"\nstopped after epoch {cost.get('epochs_done')} of {args.epochs}; continue with --resume \"{run_dir}\"")
             return run_dir
-        features_state, extra = method.export_state()
-        out = run_dir / f"backbone_epoch{args.epochs}.pth"
-        meta = export_backbone(features_state, out, {
-            "ssl_method": method.name, "ssl_run_dir": str(run_dir), "ssl_epoch": args.epochs, "ssl_epochs_planned": args.epochs,
-            "ssl_seed": args.seed, "split": paths.SPLIT, "ssl_config": cfg, "ssl_manifest": {k: v for k, v in manifest.items() if k != "split_audit"},
-            "ssl_cost": cost, "initialization_before_ssl": record.info["initialization"], "exported": extra})
-        record.finish(exported_backbone={"file": out.name, **{k: meta[k] for k in ("state_sha256", "file_sha256", "num_tensors")}})
-        print(f"\ndone: {cost['train_minutes']} min, {cost['images_seen']:,} images, {cost['optimizer_steps']:,} steps; "
-              f"exported {out}")
-        return run_dir
+        return _export_and_finish(method, run_dir, args, cfg, manifest, cost, record)
     except BaseException as e:
         record.fail(e)
         raise
+
+
+def _export_and_finish(method, run_dir, args, cfg, manifest, cost, record):
+    features_state, extra = method.export_state()
+    out = run_dir / f"backbone_epoch{args.epochs}.pth"
+    meta = export_backbone(features_state, out, {
+        "ssl_method": method.name, "ssl_run_dir": str(run_dir), "ssl_epoch": args.epochs, "ssl_epochs_planned": args.epochs,
+        "ssl_seed": args.seed, "split": paths.SPLIT, "ssl_config": cfg, "ssl_manifest": {k: v for k, v in manifest.items() if k != "split_audit"},
+        "ssl_cost": cost, "initialization_before_ssl": record.info["initialization"], "exported": extra})
+    record.finish(exported_backbone={"file": out.name, **{k: meta[k] for k in ("state_sha256", "file_sha256", "num_tensors")}})
+    print(f"\ndone: {cost.get('train_minutes')} min, {cost.get('images_seen', 0):,} images, {cost.get('optimizer_steps', 0):,} steps; "
+          f"exported {out}")
+    return run_dir
 
 
 def cli(method_cls, experiment_dir, argv=None):

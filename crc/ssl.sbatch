@@ -1,6 +1,6 @@
 #!/bin/bash
 # One SSL run (DINO / LeJEPA / SparK / CondDINO) on one split, self-resuming across the QoS time limit.
-# Submit from the suite root:
+# Submit from the suite root (cancel a whole chain with: scancel -M gpu --name=<job-name>):
 #   sbatch --job-name=dino_s1 crc/ssl.sbatch DINO_SARDet 1
 #   sbatch --job-name=lejepa_s1 crc/ssl.sbatch LeJEPA_SARDet 1
 #   sbatch --job-name=spark_s1 crc/ssl.sbatch SparK_SARDet 1
@@ -27,19 +27,31 @@ SEED=$((SAR_SPLIT - 1))
 RUN_NAME=$(python -c "import json; print(json.load(open('$DIR/$CFG'))['run_name'])")
 
 # an unfinished run of this method / config / split? (status running = killed at the limit, or stopped)
-UNFINISHED=""
+UNFINISHED=""; NEWEST_STATUS=""
 for d in $(ls -td $DIR/outputs/ssl/*_${RUN_NAME}_split${SAR_SPLIT}_seed${SEED} 2>/dev/null); do
     status=$(python -c "import json; print(json.load(open('$d/run_info.json'))['status'])")
+    [ -z "$NEWEST_STATUS" ] && NEWEST_STATUS=$status
     if [ "$status" != "completed" ] && [ "$status" != "failed" ]; then UNFINISHED=$d; break; fi
     if [ "$status" = "completed" ] && [ -z "$FORCE_NEW" ]; then
         echo "run $d is complete; nothing to do (set FORCE_NEW=1 to start another)"; exit 0
     fi
 done
-
-# submit the continuation before training starts (it exits immediately if this run completes)
-if [ -n "$SLURM_JOB_ID" ] && [ -z "$NO_CHAIN" ]; then
-    sbatch --dependency=afterany:$SLURM_JOB_ID --job-name="$SLURM_JOB_NAME" crc/ssl.sbatch "$DIR" "$SAR_SPLIT" "$CFG"
+# a FAILED newest run (NaN loss, OOM, export error) must not be restarted from scratch by the chain:
+if [ -z "$UNFINISHED" ] && [ "$NEWEST_STATUS" = failed ] && [ -z "$FORCE_NEW" ]; then
+    echo "ERROR: the newest run of $RUN_NAME split $SAR_SPLIT FAILED (see its run_info.json); fix the cause, then resubmit with FORCE_NEW=1" >&2
+    exit 1
 fi
+
+# submit the continuation only now that this job will train (it exits at once if the run completes), and only
+# if no continuation of this chain is already pending (a second manual submit must not create a second chain)
+if [ -n "$SLURM_JOB_ID" ] && [ -z "$NO_CHAIN" ]; then
+    if [ -z "$(squeue -M gpu -h --name="$SLURM_JOB_NAME" -t PD 2>/dev/null | grep -v '^CLUSTER')" ]; then
+        sbatch --dependency=afterany:$SLURM_JOB_ID --job-name="$SLURM_JOB_NAME" crc/ssl.sbatch "$DIR" "$SAR_SPLIT" "$CFG"
+    else
+        echo "a continuation of $SLURM_JOB_NAME is already pending; not submitting another"
+    fi
+fi
+mkdir -p crc/logs
 
 if [ -n "$UNFINISHED" ]; then
     echo "resuming $UNFINISHED"

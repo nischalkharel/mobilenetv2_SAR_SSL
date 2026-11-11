@@ -18,6 +18,7 @@
 set -eo pipefail
 export SAR_SPLIT=1
 source crc/env.sh
+mkdir -p crc/logs
 SSL_BACKBONE=${1:-}
 for LR in 0.0001 0.0002 0.0005; do
     python -m shared.finetune --experiment-dir baseline_SARDet --run-name lrcheck_baseline_lr$LR --budget 10pct \

@@ -1,6 +1,7 @@
 """Detection data: the official COCO annotations, subsets by manifest, and the (tiny) augmentation.
 
-An image is opened as single-channel ("L"), replicated to 3 channels as a float tensor in [0, 1]; the detector's
+An image is opened as 8-bit grey ("L"; the release stores most files as RGB with three identical channels, so
+the conversion is lossless), replicated to 3 channels as a float tensor in [0, 1]; the detector's
 own transform does the 512 resize and ImageNet normalisation. Boxes are converted from COCO xywh to xyxy;
 labels are category_id + 1 (0 = background). Training augmentation: horizontal flip only (DESIGN.md section 3).
 """

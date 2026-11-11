@@ -55,6 +55,7 @@ def collect(include_deviations=False, subfolder="finetune"):
             row = {"method": method, "experiment": exp, "budget": cfg["budget"], "split": info["split"], "seed": cfg["seed"],
                    "run_dir": str(run_dir), "best_epoch": info.get("best_epoch"), "best_val_select_map": info.get("best_val_select_map"),
                    "train_minutes": info.get("train_minutes"), "backbone_kind": bb.get("kind"),
+                   "backbone_file_sha256": bb.get("file_sha256") or bb.get("sha256"), "ssl_run_dir": bb.get("ssl_run_dir"),
                    "ssl_gpu_hours": (bb.get("ssl_cost") or {}).get("gpu_hours") if isinstance(bb.get("ssl_cost"), dict) else None}
             for name in ["best_val", "best_test", "best_test_clean", "last_test"]:
                 m = info.get("final_metrics", {}).get(name)
@@ -95,7 +96,17 @@ def main():
     # ---- method x budget table -----------------------------------------------------------------------------
     by = defaultdict(dict)                      # (method, budget) -> {split: run}
     for r in main_runs:
+        prev = by[(r["method"], r["budget"])].get(r["split"])
+        if prev is not None:
+            print(f"WARNING: two completed seed-0 runs for {r['method']} {r['budget']} split {r['split']}: "
+                  f"{prev['run_dir']} and {r['run_dir']}; the NEWER folder is used. Delete or move one of them.")
         by[(r["method"], r["budget"])][r["split"]] = r
+    # one backbone per (method, split) across budgets, or the comparison is not what it claims to be
+    for (m, b), cell in list(by.items()):
+        for s in cell:
+            shas = {by[(m, b2)][s].get("backbone_file_sha256") for b2 in BUDGETS if (m, b2) in by and s in by[(m, b2)]}
+            if len(shas) > 1:
+                print(f"WARNING: {m} split {s} uses different backbones across budgets: {shas}")
     methods = sorted({r["method"] for r in main_runs}, key=lambda m: (m != BASELINE, m))
     lines = ["# SARDet-100K detection: method comparison", f"generated {datetime.now():%Y-%m-%d %H:%M}; {len(main_runs)} seed-0 runs", "",
              "Official test mAP@[.5:.95] (AP50 in brackets); per split; mean +/- std over the splits present.", "",
@@ -193,7 +204,7 @@ def main():
             d = list(paired[k].values())
             ax.bar(i, np.mean(d), color="tab:blue" if np.mean(d) > 0 else "tab:red", alpha=0.7)
             ax.scatter([i] * len(d), d, color="k", s=12, zorder=3)
-        ax.axhline(0, color="k", lw=0.8); ax.set_xticks(range(len(keys))); ax.set_xticklabels([f"{m.split('_')[0]}\n{b}" for m, b in keys], fontsize=7)
+        ax.axhline(0, color="k", lw=0.8); ax.set_xticks(range(len(keys))); ax.set_xticklabels([f"{m.replace('_SARDet', '')}\n{b}" for m, b in keys], fontsize=6)
         ax.set_ylabel("test mAP minus baseline (x100)"); ax.set_title("paired differences per split (dots) and mean (bar)")
         fig.tight_layout(); fig.savefig(out / "charts" / "paired_diff.png", dpi=130); plt.close(fig)
     cls = {m: by[(m, "10pct")][1]["per_class"] for m in methods if (m, "10pct") in by and 1 in by[(m, "10pct")] and "per_class" in by[(m, "10pct")][1]}

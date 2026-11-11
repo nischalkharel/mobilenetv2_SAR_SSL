@@ -70,8 +70,9 @@ def coco_metrics(coco_gt, results, img_ids=None) -> dict:
     ev = _coco_eval(coco_gt, results, img_ids)
     names = paths.CLASS_NAMES
     if ev is None:
-        return {"map": 0.0, "map50": 0.0, "map75": 0.0, "map_small": 0.0, "map_medium": 0.0, "map_large": 0.0,
-                "per_class": {n: {"ap": 0.0, "ap50": 0.0} for n in names}, "n_detections": 0}
+        return {"map": 0.0, "map50": 0.0, "map75": 0.0, "map_small": 0.0, "map_medium": 0.0, "map_large": 0.0, "ar100": 0.0,
+                "per_class": {n: {"ap": 0.0, "ap50": 0.0} for n in names}, "n_detections": 0,
+                "pr_curves_iou50": {n: [] for n in names}, "recall_thresholds": []}
     s = ev.stats
     metrics = {"map": float(s[0]), "map50": float(s[1]), "map75": float(s[2]), "map_small": float(s[3]),
                "map_medium": float(s[4]), "map_large": float(s[5]), "ar100": float(s[8]),
@@ -89,8 +90,11 @@ def per_source_metrics(coco_gt, results, file_names, sources_of) -> dict:
     for f in file_names:
         by_source[sources_of[f]].append(id_of[f])
     out = {}
+    by_image = defaultdict(list)
+    for r in results:
+        by_image[r["image_id"]].append(r)
     for source, ids in sorted(by_source.items()):
-        m = coco_metrics(coco_gt, [r for r in results if r["image_id"] in set(ids)], img_ids=ids)
+        m = coco_metrics(coco_gt, [r for i in ids for r in by_image.get(i, [])], img_ids=ids)
         out[source] = {"n_images": len(ids), "map": m["map"], "map50": m["map50"],
                        "per_class_ap50": {n: v["ap50"] for n, v in m["per_class"].items()}}
     return out
@@ -150,7 +154,8 @@ def evaluate_subset(model, official_split, file_names, out_dir, det_cfg, batch_s
         f.write("class,ap,ap50\n")
         for n, v in metrics["per_class"].items():
             f.write(f"{n},{v['ap']:.4f},{v['ap50']:.4f}\n")
-    plot_pr_curves(metrics, out_dir / "pr_curves.png", f"{subset_name}: PR at IoU 0.5 (mAP {metrics['map']:.3f})")
+    if metrics["n_detections"]:
+        plot_pr_curves(metrics, out_dir / "pr_curves.png", f"{subset_name}: PR at IoU 0.5 (mAP {metrics['map']:.3f})")
     return metrics
 
 

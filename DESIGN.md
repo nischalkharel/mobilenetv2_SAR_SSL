@@ -9,7 +9,7 @@ the changes it caused are marked [review].
 
 - SARDet-100K (Li et al., NeurIPS 2024). COCO-format boxes, 6 classes: ship, aircraft, car, tank, bridge, harbor.
 - Official splits (by image): train 94,493 / val 10,492 / test 11,613 (116,598). Instances 198,747 / 22,703 / 24,203.
-- Images: single-channel JPEG/PNG/BMP of varied size: 256x256 (62 %), 512x512 (15 %), 800x800, 224x224,
+- Images: 8-bit grey (stored mostly as RGB with identical channels) JPEG/PNG/BMP of varied size: 256x256 (62 %), 512x512 (15 %), 800x800, 224x224,
   1000x1000, 500x~330. 61 % of boxes are "small" (< 32^2 px at native size). No `ignore`/`iscrowd`/segmentation.
 - The release folder on this PC had only `train.json` and `val.json` extracted; the archive also holds
   `test.json` (24,203 test annotations) and `mapping.json` (original file name -> anonymised name). Both were
@@ -85,15 +85,19 @@ Drawn from the OFFICIAL TRAIN only. Official val and official test are never re-
   1-channel images replicated to RGB, ImageNet mean/std.
 - Fine-tune schedule (same for all methods, per budget): AdamW, one lr for the whole network 2e-4, weight decay
   0.05, 1-epoch linear warm-up then cosine to 1 % of lr; batch 8; epochs 1 %: 60, 3 %: 40, 10 %: 24; fp32
-  (PyTorch default TF32 flags, recorded). [review] The shared lr is checked once with `crc/lr_check.sbatch`
-  (1e-4 / 2e-4 / 5e-4 on val_select, 10 %, split 1, for the baseline AND one SSL backbone); the chosen value is
-  then frozen for all methods and recorded.
+  (PyTorch default TF32 flags, recorded). [review] The shared lr is checked ONCE, BEFORE any real fine-tune,
+  with `crc/lr_check.sbatch` (1e-4 / 2e-4 / 5e-4 on val_select, 10 %, split 1). Decision rule, fixed in advance:
+  the BASELINE check decides the value (so no SSL backbone can tune the protocol in its own favour); the same
+  check on one SSL backbone, run later, is reported as a robustness check and cannot change the value. The
+  chosen lr and the lr-check run folders are written into `shared/finetune_config.json` (`_lr_decision`).
 - Augmentation: horizontal flip 0.5 only [review: vertical flips were rejected on ATRNet because they move the
   SAR shadow/layover geometry; same rule here].
 - Seeds [review]: fine-tune seed 0 for every run; `torch.manual_seed` is called right before the FPN/RPN/box head
   are built and again before the loader, so head initialisation and data order are identical across backbones
   within a split (the smoke test asserts identical head tensors for two different backbones).
 - Model selection: val_select mAP@[.5:.95] every 2 epochs; best = highest; `best.pt` and `last.pt` kept.
+- "Exact resume" means state-exact: same batches, schedules, RNG streams, optimizer, centers and counters; the
+  numbers can differ at the cuDNN-benchmark / mixed-precision level between a resumed and an uninterrupted run.
 
 ## 4. SSL (one run per split per method; equal epochs)
 

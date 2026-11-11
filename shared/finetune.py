@@ -12,6 +12,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import random
 import shutil
 import sys
@@ -93,8 +94,11 @@ def selection_score(model, dataset, det_cfg, batch_size, num_workers, device):
 
 
 def save_checkpoint(path, model, epoch, score, cfg, backbone_record):
+    path = Path(path)
+    tmp = path.with_suffix(".tmp")
     torch.save({"model_state_dict": model.state_dict(), "epoch": epoch, "val_select_map": score,
-                "config": cfg, "backbone": backbone_record, "class_names": paths.CLASS_NAMES}, path)
+                "config": cfg, "backbone": backbone_record, "class_names": paths.CLASS_NAMES}, tmp)
+    os.replace(tmp, path)                                    # atomic: a kill never corrupts the checkpoint
 
 
 def main(argv=None):
