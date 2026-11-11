@@ -1,0 +1,84 @@
+host gpu-n37.crc.pitt.edu  job 4718977  start Tue Nov 10 02:59:38 PM EST 2026
+repo /ihome/ageorge/nik96/mobilenetv2_SAR_SSL  commit eca218b  branch SmokeTest_Mobilenet_with_DINO
+NVIDIA A100-PCIE-40GB, 40960 MiB, 595.91.07
+python /ix/ageorge/nik96/envs/sarssl/bin/python 3.13.16 | torch 2.10.0+cu128 | torchvision 0.25.0+cu128 | cuda available True
+P4 route: split 1  variant perm  config Experiments/mobileNetv2_DINO_P4/config_ssl_perm.json  fine-tune config Experiments/mobileNetv2_DINO_P4/config_finetune_perm.json
+Smoke test on cuda with config_ssl.json. Outputs go to /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO_P4/outputs/smoke
+
+1. Data
+  [PASS] split audit (leakage and consistency checks) (7 checks, counts {'ssl': 65387, 'labeled': 1961, 'validation': 800, 'excluded': 1904, 'official_test': 29284, 'classes': 40})
+  [PASS] labeled_set.csv identical to the A0 run's file (1961 rows/classes, sha256 matches)
+  [PASS] validation.csv identical to the A0 run's file (800 rows/classes, sha256 matches)
+  [PASS] class_mapping.csv identical to the A0 run's file (40 rows/classes, sha256 matches)
+  [PASS] SSL item is a list of views only (no label) 
+  [PASS] view shapes (global (3, 224, 224), local (3, 96, 96))
+  [PASS] 3 channels are copies of one SAR channel 
+1b. Condition cells (P4)
+  [PASS] config enables per-cell centering with at least one field (['scene', 'band', 'depression', 'az_sector30'])
+  [PASS] cell assignment is deterministic (432 cells from scene | band | depression | az_sector30, 65387 images)
+  [PASS] every image has exactly one cell id in range 
+  [PASS] physical cell names equal the fields parsed from each image's own file name (scene from the CSV) 
+  [PASS] cells do not identify the class (median classes per cell >= 20, every cell >= 2, largest class in any cell <= 50 %, cell-only majority vote <= 10 %) (classes per cell min/median/max 7/36/40 of 40; largest-class share max 23.5 %; majority vote from the cell alone 4.9 %, chance 2.5 %)
+  [PASS] scrambled control keeps the cell histogram and maps images to cells at random (images landing in their own physical cell 0.56 %, chance 0.53 %)
+  [PASS] CellSSLDataset returns (views, cell id) with the image's own cell 
+  [PASS] collated batch = list of view batches + (batch,) long tensor of cell ids 
+2. Initialization
+  [SKIP] torchvision's cached IMAGENET1K_V2 file not found; not downloading it
+  ImageNet weights sha256 1f19491f7357621f...
+Student and Teacher are built: they are both MobileNetV2 networks.
+  [PASS] student backbone equals ImageNet weights 
+  [PASS] teacher equals student (all parameters and buffers) (320 entries)
+  [PASS] no ImageNet classifier in the SSL networks 
+  [PASS] teacher parameters do not require gradients 
+3. Shapes and multi-crop order
+  [PASS] feature dimension 1280 at both crop sizes {224: (2, 1280), 96: (2, 1280)}
+  [PASS] DINO head output = out_dim (not 40) (4096)
+  [PASS] multi-crop output is view-major then sample order (one backbone call per resolution)
+4. Against the original DINO code (reference/dino-main_original, untouched)
+  [PASS] DINOHead initialization identical to the original (same seed) 
+  [PASS] DINOHead output identical to the original 
+  [PASS] weight-norm scale frozen and last layer named for freezing, as in the original 
+  [PASS] DINO loss and center match the original on synthetic inputs (3 steps) (max difference 0.0e+00; original run with world size 1)
+  [PASS] cross-view pairing: teacher views 0,1 x all other student views (10 pairs, same-view pairs skipped)
+4b. Per-cell centering loss (cond_center.py)
+  [PASS] with one cell the per-cell loss equals DINOLoss (loss, cell center and global center, 3 steps) (max difference 0.0e+00)
+  [PASS] warm-up left three different non-zero cell centers 
+  [PASS] present cells move to 0.9 * old + 0.1 * mean of their own teacher rows; the absent (non-zero) cell is untouched 
+  [PASS] each teacher row is centered with its own cell's non-zero center (view-major ids; sample-major would differ) 
+  [PASS] a wrong number of cell ids is rejected 
+  [PASS] cell centers and counts are in the loss state_dict (saved in checkpoint.pth) 
+5. One training step (epoch 0) and one in epoch 1
+Loss, optimizer and schedulers ready.
+  [PASS] training parts build the per-cell loss with 3 cells 
+  [PASS] loss finite (loss 8.227, ln(out_dim) = 8.32)
+  [PASS] every student backbone parameter updated (156 tensors)
+  [PASS] student head MLP updated 
+  [PASS] last layer frozen in epoch 0 (freeze_last_layer = 1), weight-norm scale fixed 
+  [PASS] teacher parameters have no gradients 
+  [PASS] teacher parameters = EMA of student parameters (momentum 0.9995, max error 0.0e+00)
+  [PASS] BatchNorm batch counters: teacher +1 (global views), student +2 (global, local groups) 
+  [PASS] teacher BN running stats updated from its own batch (not by EMA) (first BN layer, max error 1.2e-07)
+  [PASS] teacher and student BN running stats now differ 
+  [PASS] global center still tracked: 0.9 * old + 0.1 * batch mean of teacher outputs 
+  [PASS] per-cell centers updated from each cell's own teacher rows (real step) 
+  [PASS] epoch-1 step: per-cell centers follow 0.9 * old (non-zero) + 0.1 * mean of the cell's own rows 
+  [PASS] last layer updated in epoch 1 
+  [PASS] weight-norm scale still fixed 
+6. Save and resume (smoke runs, 48 images, 2 epochs)
+Traceback (most recent call last):
+  File "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO_P4/smoke_test.py", line 534, in <module>
+    main()
+    ~~~~^^
+  File "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO_P4/smoke_test.py", line 528, in main
+    part_ssl(cli)
+    ~~~~~~~~^^^^^
+  File "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO_P4/smoke_test.py", line 405, in part_ssl
+    straight = train_ssl.run(base_cfg, smoke=True)
+  File "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO_P4/train_ssl.py", line 365, in run
+    run_dir.mkdir(parents=True, exist_ok=False)  # never overwrite an earlier run
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/ix/ageorge/nik96/envs/sarssl/lib/python3.13/pathlib/_local.py", line 722, in mkdir
+    os.mkdir(self, mode)
+    ~~~~~~~~^^^^^^^^^^^^
+FileExistsError: [Errno 17] File exists: '/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO_P4/outputs/smoke/20261110-150109_P4_dino_ssl_mobilenetv2_seed0_SMOKE'
+SMOKE TEST FAILED in the ssl part (exit code 1)

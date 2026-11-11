@@ -11,4 +11,4 @@
 - cells per scene: {'bare_soil': 8, 'factory': 8, 'sandstone': 8, 'urban': 4, 'woodland': 8}
 - CSV columns the cell definition reads: ['relative_path', 'band', 'depression', 'scene'] (labels read for this report only)
 
-Per-cell table: split1_ssl_training_data_config_ssl_3field.csv. Written 2026-11-10T00:11:43.
+Per-cell table: split1_ssl_training_data_config_ssl_3field.csv. Written 2026-11-10T15:06:02.
