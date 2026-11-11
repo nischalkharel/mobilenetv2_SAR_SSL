@@ -14,4 +14,4 @@ fine-tuned 1 %: P4 minus A1 mass in box, mean +1.9 points; P4 higher on 52 % of 
 
 backbone: P4 minus A1 mass in box, mean +2.1 points; P4 higher on 83 % of chips.
 
-Written 2026-11-11T11:01:47.
+Written 2026-11-11T14:28:16.
