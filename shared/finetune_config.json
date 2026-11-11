@@ -1,0 +1,36 @@
+{
+  "_comment": "ONE fine-tuning protocol for every method. Experiment folders may not override any key here; they only choose the backbone file and the run name. See DESIGN.md section 3.",
+  "detector": {
+    "input_size": 512,
+    "fpn_return_layers": {"3": 24, "6": 32, "13": 96, "18": 1280},
+    "fpn_channels": 128,
+    "anchor_sizes": [[8, 16], [16, 32], [32, 64], [64, 128], [128, 256]],
+    "aspect_ratios": [0.5, 1.0, 2.0],
+    "image_mean": [0.485, 0.456, 0.406],
+    "image_std": [0.229, 0.224, 0.225],
+    "box_score_thresh": 0.05,
+    "box_nms_thresh": 0.5,
+    "box_detections_per_img": 100,
+    "rpn_pre_nms_top_n_train": 2000,
+    "rpn_post_nms_top_n_train": 2000,
+    "rpn_pre_nms_top_n_test": 1000,
+    "rpn_post_nms_top_n_test": 1000,
+    "backbone_bn": "train"
+  },
+  "train": {
+    "seed": 0,
+    "batch_size": 8,
+    "lr": 0.0002,
+    "weight_decay": 0.05,
+    "warmup_epochs": 1,
+    "min_lr_factor": 0.01,
+    "epochs_by_budget": {"1pct": 60, "3pct": 40, "10pct": 24},
+    "hflip_p": 0.5,
+    "num_workers": 8,
+    "precision": "fp32",
+    "grad_clip_norm": null,
+    "eval_every": 2,
+    "selection_metric": "map",
+    "selection_subset": "val_select"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "run_name": "dino_ssl_mobilenetv2",
+  "method": "dino",
+  "_note": "DINO SSL stage. Shared keys (epochs, batch_size, view sizes, jitter, blur sigma) live in shared/ssl_common.json and may not appear here. Values below are the ATRNet-STAR A1 values (mobilenetv2_SAR_SSL/Experiments/mobileNetv2_DINO/config_ssl.json).",
+  "dino_views": {
+    "local_crops_number": 8,
+    "blur_p": [1.0, 0.1, 0.5]
+  },
+  "dino": {
+    "out_dim": 4096,
+    "use_bn_in_head": false,
+    "norm_last_layer": true,
+    "momentum_teacher": 0.9995,
+    "warmup_teacher_temp": 0.04,
+    "teacher_temp": 0.04,
+    "warmup_teacher_temp_epochs": 0,
+    "student_temp": 0.1,
+    "center_momentum": 0.9
+  },
+  "optim": {
+    "optimizer": "adamw",
+    "lr": 0.0005,
+    "_lr_note": "reference rate for a batch of 256; the rate used is lr * batch_size / 256 (linear scaling, as in main_dino.py)",
+    "min_lr": 1e-06,
+    "warmup_epochs": 10,
+    "weight_decay": 0.04,
+    "weight_decay_end": 0.04,
+    "clip_grad": 3.0,
+    "freeze_last_layer": 1,
+    "use_fp16": true
+  }
+}
