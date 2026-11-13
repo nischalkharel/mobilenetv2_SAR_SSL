@@ -37,6 +37,7 @@ PROBE_SPEC=$BACKBONE
 RUN_NAME=$(python -c "import json,os; f='$DIR/config_finetune.json'; f=f if os.path.exists(f) else '$DIR/config.json'; print(json.load(open(f))['run_name'])")
 [ -n "$MATCH" ] && RUN_NAME="${MATCH}_mobilenetv2"     # CondDINO variants get their own fine-tune run names
 mkdir -p crc/logs
+stage_dataset          # copy the data to the node's local disk (node-local reads for training and the 10k-image evaluations)
 
 for BUDGET in 10pct 3pct 1pct; do
     DONE=""

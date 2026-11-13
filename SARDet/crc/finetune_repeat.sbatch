@@ -18,6 +18,7 @@ BACKBONE=${2:-imagenet}
 export SAR_SPLIT=1
 source crc/env.sh
 mkdir -p crc/logs
+stage_dataset
 RUN_NAME=$(python -c "import json,os; f='$DIR/config_finetune.json'; f=f if os.path.exists(f) else '$DIR/config.json'; print(json.load(open(f))['run_name'])")
 python -m shared.finetune --experiment-dir $DIR --run-name "$RUN_NAME" --budget 10pct --backbone "$BACKBONE" --seed 1
 crc-job-stats

@@ -76,8 +76,13 @@ test scores are recorded for finished runs and never used to choose anything.
 
 ## Data staging (added 2026-11-12)
 
-`env.sh` copies the dataset to the node-local `$SLURM_SCRATCH` at the start of every job (7.2 GB, a few minutes)
-and points `SARDET100K_ROOT` there. Reason: with six jobs reading 116k small files from the shared `/ix` at once,
+`env.sh` defines `stage_dataset`, which every job script calls right before training (after it has decided there
+is something to train): it copies the dataset to the node-local `$SLURM_SCRATCH` and points `SARDET100K_ROOT`
+there. Make the single tar file ONCE so the copy is one sequential read (about a minute) instead of 116k small
+file reads (40+ minutes on a busy /ix):
+```
+cd /ix/ageorge/nik96/data && tar -cf SARDet_100K.tar SARDet_100K
+``` Reason: with six jobs reading 116k small files from the shared `/ix` at once,
 SSL epochs took 9-21 min instead of 4-5 (GPU idle, waiting for files) and identical jobs on different nodes
 differed 3x. The copy is wiped when the job ends; `STAGE_DATA=0 sbatch ...` disables it. The run record's
 `dataset_root` then shows the scratch path; the manifest hashes identify the data, not the path.

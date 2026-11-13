@@ -22,16 +22,28 @@ export MOBILENETV2_IMAGENET_WEIGHTS=/ix/ageorge/nik96/data/mobilenet_v2_imagenet
 # files from the shared /ix at once, epochs took 9-21 min instead of the 4-5 min the GPU needs (I/O bound), and
 # identical jobs on different nodes differed 3x. The copy (7.2 GB) takes a few minutes per job and is wiped when
 # the job ends. Set STAGE_DATA=0 to read from /ix directly (login-node checks, or a scratch disk that is too small).
-if [ -n "$SLURM_SCRATCH" ] && [ "${STAGE_DATA:-1}" = 1 ]; then
-    STAGE_DST="$SLURM_SCRATCH/SARDet_100K"
-    if [ ! -f "$STAGE_DST/.staged" ]; then
-        echo "staging dataset $SARDET100K_ROOT -> $STAGE_DST ..."
-        t_stage=$(date +%s)
-        mkdir -p "$STAGE_DST" && tar -C "$SARDET100K_ROOT" -cf - . | tar -C "$STAGE_DST" -xf - && touch "$STAGE_DST/.staged"
-        echo "staged in $(( $(date +%s) - t_stage )) s: $(find "$STAGE_DST/JPEGImages" -type f | wc -l) images"
+# Not run automatically: the job scripts call `stage_dataset` right before training, AFTER they have decided
+# that there is something to train (a continuation that finds a completed run must not spend 40 min copying).
+# Source: the single tar file next to the dataset folder when it exists (one 7.2 GB sequential read; make it once
+# with `tar -cf SARDet_100K.tar SARDet_100K` in the data folder), otherwise a tar pipe over the 116k files (slow).
+stage_dataset() {
+    if [ -z "$SLURM_SCRATCH" ] || [ "${STAGE_DATA:-1}" != 1 ]; then return 0; fi
+    local src="$SARDET100K_ROOT" dst="$SLURM_SCRATCH/SARDet_100K" t0
+    if [ ! -f "$dst/.staged" ]; then
+        t0=$(date +%s)
+        if [ -f "$src.tar" ]; then
+            echo "staging dataset from $src.tar -> $dst ..."
+            mkdir -p "$SLURM_SCRATCH" && tar -C "$SLURM_SCRATCH" -xf "$src.tar" || { echo "ERROR: staging failed" >&2; exit 1; }
+        else
+            echo "staging dataset $src -> $dst (file by file; create $src.tar to make this fast) ..."
+            mkdir -p "$dst" && tar -C "$src" -cf - . | tar -C "$dst" -xf - || { echo "ERROR: staging failed" >&2; exit 1; }
+        fi
+        touch "$dst/.staged"
+        echo "staged in $(( $(date +%s) - t0 )) s: $(find "$dst/JPEGImages" -type f | wc -l) images"
     fi
-    export SARDET100K_ROOT="$STAGE_DST"
-fi
+    export SARDET100K_ROOT="$dst"
+    python shared/paths.py
+}
 # Which data split (1, 2, 3); the job scripts export it from their first argument
 export SAR_SPLIT=${SAR_SPLIT:-1}
 # Fewer, fatter data-loader threads

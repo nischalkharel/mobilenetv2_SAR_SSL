@@ -52,6 +52,7 @@ if [ -n "$SLURM_JOB_ID" ] && [ -z "$NO_CHAIN" ]; then
     fi
 fi
 mkdir -p crc/logs
+stage_dataset          # copy the data to the node's local disk only now that this job will train
 
 if [ -n "$UNFINISHED" ]; then
     echo "resuming $UNFINISHED"
