@@ -18,6 +18,20 @@ fi
 export SARDET100K_ROOT=/ix/ageorge/nik96/data/SARDet_100K
 # ImageNet MobileNetV2 start weights (same file as the ATRNet-STAR runs; sha256 1f19491f...)
 export MOBILENETV2_IMAGENET_WEIGHTS=/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth
+# Stage the dataset on the node-local scratch disk. Measured 2026-11-12: with six jobs reading the 116,598 small
+# files from the shared /ix at once, epochs took 9-21 min instead of the 4-5 min the GPU needs (I/O bound), and
+# identical jobs on different nodes differed 3x. The copy (7.2 GB) takes a few minutes per job and is wiped when
+# the job ends. Set STAGE_DATA=0 to read from /ix directly (login-node checks, or a scratch disk that is too small).
+if [ -n "$SLURM_SCRATCH" ] && [ "${STAGE_DATA:-1}" = 1 ]; then
+    STAGE_DST="$SLURM_SCRATCH/SARDet_100K"
+    if [ ! -f "$STAGE_DST/.staged" ]; then
+        echo "staging dataset $SARDET100K_ROOT -> $STAGE_DST ..."
+        t_stage=$(date +%s)
+        mkdir -p "$STAGE_DST" && tar -C "$SARDET100K_ROOT" -cf - . | tar -C "$STAGE_DST" -xf - && touch "$STAGE_DST/.staged"
+        echo "staged in $(( $(date +%s) - t_stage )) s: $(find "$STAGE_DST/JPEGImages" -type f | wc -l) images"
+    fi
+    export SARDET100K_ROOT="$STAGE_DST"
+fi
 # Which data split (1, 2, 3); the job scripts export it from their first argument
 export SAR_SPLIT=${SAR_SPLIT:-1}
 # Fewer, fatter data-loader threads

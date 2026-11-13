@@ -73,3 +73,11 @@ On the PC: `git pull`, then `python compare/compare.py`.
 
 Test-set rule (as on ATRNet-STAR): every decision (lr, best epoch, settings) is made on val_select / val only;
 test scores are recorded for finished runs and never used to choose anything.
+
+## Data staging (added 2026-11-12)
+
+`env.sh` copies the dataset to the node-local `$SLURM_SCRATCH` at the start of every job (7.2 GB, a few minutes)
+and points `SARDET100K_ROOT` there. Reason: with six jobs reading 116k small files from the shared `/ix` at once,
+SSL epochs took 9-21 min instead of 4-5 (GPU idle, waiting for files) and identical jobs on different nodes
+differed 3x. The copy is wiped when the job ends; `STAGE_DATA=0 sbatch ...` disables it. The run record's
+`dataset_root` then shows the scratch path; the manifest hashes identify the data, not the path.
