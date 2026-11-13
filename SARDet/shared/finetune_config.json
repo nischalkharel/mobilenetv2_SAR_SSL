@@ -1,6 +1,6 @@
 {
   "_comment": "ONE fine-tuning protocol for every method. Experiment folders may not override any key here; they only choose the backbone file and the run name. See DESIGN.md section 3.",
-  "_lr_decision": "PENDING: train.lr = 2e-4 is the provisional value. Decide once with crc/lr_check.sbatch (baseline, 10 %, split 1, val_select), then write the chosen value into train.lr and the lr-check run folders here, before any real fine-tune.",
+  "_lr_decision": "DECIDED 2026-11-13 from crc/lr_check.sbatch (CRC job 4727010; baseline, 10 %, split 1, val_select mAP@[.5:.95]; no SSL backbone involved): lr 1e-4 -> 0.3192, 2e-4 -> 0.3138, 5e-4 -> 0.3100. train.lr = 1e-4 for every method from here on. Run folders: baseline_SARDet/outputs/finetune/2026111*_lrcheck_baseline_lr0.000{1,2,5}_10pct_split1_seed0 (protocol_deviation runs, excluded by compare.py).",
   "detector": {
     "input_size": 512,
     "fpn_return_layers": {"3": 24, "6": 32, "13": 96, "18": 1280},
@@ -21,7 +21,7 @@
   "train": {
     "seed": 0,
     "batch_size": 8,
-    "lr": 0.0002,
+    "lr": 0.0001,
     "weight_decay": 0.05,
     "warmup_epochs": 1,
     "min_lr_factor": 0.01,

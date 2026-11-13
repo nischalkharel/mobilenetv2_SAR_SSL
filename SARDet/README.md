@@ -54,8 +54,8 @@ not t-tests.
 **Detector (same for every method).** MobileNetV2 `features` (ImageNet V2 weights for the baseline, an
 exported SSL backbone otherwise) -> FPN on strides 4/8/16/32 (128 channels) + P6 -> torchvision Faster R-CNN,
 anchors 8-256 px (after the resize only 2.7 % of boxes lack an anchor with IoU >= 0.5), input shorter side 512,
-grayscale replicated to RGB with ImageNet normalisation. Fine-tune: AdamW lr 2e-4 (checked once with
-`crc/lr_check.sbatch`), wd 0.05, 1-epoch warm-up + cosine, batch 8, epochs 60 / 40 / 24 for 1 / 3 / 10 %,
+grayscale replicated to RGB with ImageNet normalisation. Fine-tune: AdamW lr 1e-4 (decided once with
+`crc/lr_check.sbatch` on the baseline: 1e-4 beat 2e-4 and 5e-4 on val_select), wd 0.05, 1-epoch warm-up + cosine, batch 8, epochs 60 / 40 / 24 for 1 / 3 / 10 %,
 horizontal flip only, BatchNorm trained, fine-tune seed 0 with the head initialised and the loader seeded
 identically for every backbone (the smoke test asserts identical heads). val_select mAP every 2 epochs;
 `best.pt` and `last.pt` both scored on test so selection sensitivity is visible.

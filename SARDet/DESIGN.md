@@ -83,7 +83,8 @@ Drawn from the OFFICIAL TRAIN only. Official val and official test are never re-
   maxDets), RPN top-n 2000/2000 train, 1000/1000 test.
 - Input: `GeneralizedRCNNTransform` min/max side 512 (256 px images up-scaled x2, 800/1000 px down-scaled);
   1-channel images replicated to RGB, ImageNet mean/std.
-- Fine-tune schedule (same for all methods, per budget): AdamW, one lr for the whole network 2e-4, weight decay
+- Fine-tune schedule (same for all methods, per budget): AdamW, one lr for the whole network 1e-4 (decided 2026-11-13
+  by the baseline lr check: 1e-4 0.319 / 2e-4 0.314 / 5e-4 0.310 val_select mAP), weight decay
   0.05, 1-epoch linear warm-up then cosine to 1 % of lr; batch 8; epochs 1 %: 60, 3 %: 40, 10 %: 24; fp32
   (PyTorch default TF32 flags, recorded). [review] The shared lr is checked ONCE, BEFORE any real fine-tune,
   with `crc/lr_check.sbatch` (1e-4 / 2e-4 / 5e-4 on val_select, 10 %, split 1). Decision rule, fixed in advance:
