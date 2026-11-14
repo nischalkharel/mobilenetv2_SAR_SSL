@@ -1,0 +1,136 @@
+{
+  "kind": "ssl",
+  "status": "completed",
+  "started": "2026-11-12T20:08:43",
+  "run_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/SparK_SARDet/outputs/ssl/20261112-200842_spark_ssl_mobilenetv2_split1_seed0",
+  "config": {
+    "run_name": "spark_ssl_mobilenetv2",
+    "method": "spark",
+    "common": {
+      "epochs": 100,
+      "batch_size": 64,
+      "seed_rule": "split - 1",
+      "num_workers": 8,
+      "export_rule": "final epoch, no selection",
+      "seed": 0
+    },
+    "views": {
+      "resize_rule": "detector_512",
+      "global_size": 224,
+      "local_size": 96,
+      "zoom_range": [
+        0.75,
+        1.33
+      ],
+      "hflip_p": 0.5,
+      "brightness": 0.4,
+      "contrast": 0.4,
+      "color_jitter_p": 0.8,
+      "blur_sigma": [
+        0.1,
+        2.0
+      ],
+      "solarization_p": 0.0
+    },
+    "spark_views": {
+      "blur_p": 0.0,
+      "_blur_note": "one 224 px global view per image from the shared recipe; the authors use crop + flip only ('minimal augmentation'), so no blur"
+    },
+    "spark": {
+      "mask_ratio": 0.6,
+      "densify_norm": "bn",
+      "_densify_note": "set explicitly: the authors' arg_util.py leaves it EMPTY (no normalisation) for any model name without 'resnet'/'convnext'",
+      "decoder_width": 768,
+      "recon_channels": 1,
+      "_recon_note": "1 = reconstruct the single SAR channel (A3 change); 3 = the authors' literal target, which here would include the per-channel ImageNet offsets (CHANGES.md)",
+      "precision": "fp32",
+      "_precision_note": "true float32: TF32 is switched OFF for cudnn and matmul in SparKMethod.build (flags recorded in run output and the export)"
+    },
+    "optim": {
+      "optimizer": "lamb",
+      "base_lr": 0.0002,
+      "_lr_note": "peak lr = base_lr x batch_size / 256 = 5e-5 at the shared batch 64 (the authors' rule, arg_util.py L132; paper Section 4.1)",
+      "beta2": 0.95,
+      "_beta2_note": "set explicitly: arg_util.py leaves beta2 = 0.0 for any model name without 'resnet'/'convnext'",
+      "weight_decay": 0.04,
+      "weight_decay_end": 0.2,
+      "max_grad_norm": 5.0,
+      "warmup_epochs": 2.5,
+      "_warmup_note": "the authors' 40 of 1,600 epochs = the first 2.5% of training; here 2.5 of the shared 100 epochs (linear from 0.005 x peak, then cosine to 0.001 x peak)"
+    },
+    "smoke": false
+  },
+  "git": {
+    "commit": "8f9e86ae653f6a23536e3737f7c9e353cab631f4",
+    "branch": "SmokeTest_Mobilenet_with_DINO",
+    "uncommitted_changes": true
+  },
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.10.0+cu128",
+    "platform": "Linux-5.14.0-503.22.1.el9_5.x86_64-x86_64-with-glibc2.34",
+    "hostname": "gpu-n53.crc.pitt.edu",
+    "cpu_count": 64,
+    "slurm_job_id": "4727145",
+    "cuda_available": true,
+    "torchvision": "0.25.0+cu128",
+    "gpu": "NVIDIA A100-PCIE-40GB",
+    "gpu_memory_gb": 39.5
+  },
+  "dataset_root": "/ix/ageorge/nik96/data/SARDet_100K",
+  "split": 1,
+  "command": "SparK_SARDet/train_ssl.py --config SparK_SARDet/config_ssl.json",
+  "method": "spark",
+  "initialization": {
+    "kind": "imagenet",
+    "file": "/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth",
+    "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35"
+  },
+  "checkpoint_rule": "final epoch, fixed in advance; the SSL loss never selects a checkpoint",
+  "export_rule": "encoder (MobileNetV2 features), final epoch",
+  "views_per_image": 1,
+  "view_plan": [
+    [
+      "global",
+      1,
+      0.0
+    ]
+  ],
+  "cost": {
+    "epochs_done": 100,
+    "optimizer_steps": 146900,
+    "images_seen": 9401600,
+    "view_forwards": 9401600,
+    "train_minutes": 1493.84,
+    "gpu_hours": 24.897,
+    "peak_gpu_memory_gb": 12.64
+  },
+  "view_box_coverage": {
+    "global": {
+      "views_with_a_box": 0.2941666666666667,
+      "n_views": 1200
+    },
+    "local": {
+      "views_with_a_box": 0.07333333333333333,
+      "n_views": 1200
+    }
+  },
+  "schedule_fingerprint": "bd4502a1692283b84e4290a94368f8d727e61d6837e4cc9525408a04bbdeaf9a",
+  "steps_per_epoch": 1469,
+  "total_steps": 146900,
+  "num_trainable_parameters": 26803521,
+  "measured_seconds_per_step": 0.3825,
+  "estimated_hours_for_all_epochs": 15.61,
+  "resumed": [
+    "2026-11-13T20:18:51"
+  ],
+  "exported_backbone": {
+    "file": "backbone_epoch100.pth",
+    "state_sha256": "291e0f62d46673f0ce122b2407315032cce4a2e293207cbbae951258cfddb89f",
+    "file_sha256": "32273f43f3e42f9fed49e9ae3c18f4a97fa082b0a3dd89ce09768d20e2f26361",
+    "num_tensors": 312
+  },
+  "finished": "2026-11-13T21:56:02",
+  "wall_minutes": 97.2,
+  "peak_gpu_memory_gb": 12.64
+}

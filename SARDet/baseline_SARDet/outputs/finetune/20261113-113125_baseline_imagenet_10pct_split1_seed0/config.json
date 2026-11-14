@@ -1,0 +1,87 @@
+{
+  "shared_finetune_config": {
+    "_lr_decision": "DECIDED 2026-11-13 from crc/lr_check.sbatch (CRC job 4727010; baseline, 10 %, split 1, val_select mAP@[.5:.95]; no SSL backbone involved): lr 1e-4 -> 0.3192, 2e-4 -> 0.3138, 5e-4 -> 0.3100. train.lr = 1e-4 for every method from here on. Run folders: baseline_SARDet/outputs/finetune/2026111*_lrcheck_baseline_lr0.000{1,2,5}_10pct_split1_seed0 (protocol_deviation runs, excluded by compare.py).",
+    "detector": {
+      "input_size": 512,
+      "fpn_return_layers": {
+        "3": 24,
+        "6": 32,
+        "13": 96,
+        "18": 1280
+      },
+      "fpn_channels": 128,
+      "anchor_sizes": [
+        [
+          8,
+          16
+        ],
+        [
+          16,
+          32
+        ],
+        [
+          32,
+          64
+        ],
+        [
+          64,
+          128
+        ],
+        [
+          128,
+          256
+        ]
+      ],
+      "aspect_ratios": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "image_mean": [
+        0.485,
+        0.456,
+        0.406
+      ],
+      "image_std": [
+        0.229,
+        0.224,
+        0.225
+      ],
+      "box_score_thresh": 0.05,
+      "box_nms_thresh": 0.5,
+      "box_detections_per_img": 100,
+      "rpn_pre_nms_top_n_train": 2000,
+      "rpn_post_nms_top_n_train": 2000,
+      "rpn_pre_nms_top_n_test": 1000,
+      "rpn_post_nms_top_n_test": 1000,
+      "backbone_bn": "train"
+    },
+    "train": {
+      "seed": 0,
+      "batch_size": 8,
+      "lr": 0.0001,
+      "weight_decay": 0.05,
+      "warmup_epochs": 1,
+      "min_lr_factor": 0.01,
+      "epochs_by_budget": {
+        "1pct": 60,
+        "3pct": 40,
+        "10pct": 24
+      },
+      "hflip_p": 0.5,
+      "num_workers": 8,
+      "precision": "fp32",
+      "grad_clip_norm": null,
+      "eval_every": 2,
+      "selection_metric": "map",
+      "selection_subset": "val_select"
+    }
+  },
+  "budget": "10pct",
+  "epochs": 24,
+  "lr": 0.0001,
+  "seed": 0,
+  "backbone_arg": "imagenet",
+  "run_name": "baseline_imagenet",
+  "experiment_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/baseline_SARDet"
+}

@@ -1,0 +1,156 @@
+{
+  "kind": "ssl",
+  "status": "completed",
+  "started": "2026-11-12T20:07:24",
+  "run_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/CondDINO_SARDet/outputs/ssl/20261112-200724_condcenter_perm_split1_seed0",
+  "config": {
+    "run_name": "condcenter_perm",
+    "method": "conddino",
+    "common": {
+      "epochs": 100,
+      "batch_size": 64,
+      "seed_rule": "split - 1",
+      "num_workers": 8,
+      "export_rule": "final epoch, no selection",
+      "seed": 0
+    },
+    "views": {
+      "resize_rule": "detector_512",
+      "global_size": 224,
+      "local_size": 96,
+      "zoom_range": [
+        0.75,
+        1.33
+      ],
+      "hflip_p": 0.5,
+      "brightness": 0.4,
+      "contrast": 0.4,
+      "color_jitter_p": 0.8,
+      "blur_sigma": [
+        0.1,
+        2.0
+      ],
+      "solarization_p": 0.0
+    },
+    "dino_views": {
+      "local_crops_number": 8,
+      "blur_p": [
+        1.0,
+        0.1,
+        0.5
+      ]
+    },
+    "dino": {
+      "out_dim": 4096,
+      "use_bn_in_head": false,
+      "norm_last_layer": true,
+      "momentum_teacher": 0.9995,
+      "warmup_teacher_temp": 0.04,
+      "teacher_temp": 0.04,
+      "warmup_teacher_temp_epochs": 0,
+      "student_temp": 0.1,
+      "center_momentum": 0.9
+    },
+    "optim": {
+      "optimizer": "adamw",
+      "lr": 0.0005,
+      "_lr_note": "reference rate for a batch of 256; the rate used is lr * batch_size / 256 (linear scaling, as in main_dino.py)",
+      "min_lr": 1e-06,
+      "warmup_epochs": 10,
+      "weight_decay": 0.04,
+      "weight_decay_end": 0.04,
+      "clip_grad": 3.0,
+      "freeze_last_layer": 1,
+      "use_fp16": true
+    },
+    "cond_center": {
+      "enabled": true,
+      "cells": "perm",
+      "permute_seed": 0,
+      "center_momentum_cell": 0.9,
+      "label_use": "none (source_pol cells, image->cell scrambled)",
+      "_note": "cells: source_pol | perm | oracle_class | radiometric (cells.py). label_use must state the truth for the variant (train_ssl.py refuses otherwise). permute_seed is used by perm only. center_momentum_cell = EMA momentum of each cell center (the global center keeps dino.center_momentum and is tracked but never subtracted)."
+    },
+    "smoke": false
+  },
+  "git": {
+    "commit": "8f9e86ae653f6a23536e3737f7c9e353cab631f4",
+    "branch": "SmokeTest_Mobilenet_with_DINO",
+    "uncommitted_changes": true
+  },
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.10.0+cu128",
+    "platform": "Linux-5.14.0-503.22.1.el9_5.x86_64-x86_64-with-glibc2.34",
+    "hostname": "gpu-n50.crc.pitt.edu",
+    "cpu_count": 64,
+    "slurm_job_id": "4727147",
+    "cuda_available": true,
+    "torchvision": "0.25.0+cu128",
+    "gpu": "NVIDIA A100-PCIE-40GB",
+    "gpu_memory_gb": 39.5
+  },
+  "dataset_root": "/ix/ageorge/nik96/data/SARDet_100K",
+  "split": 1,
+  "command": "CondDINO_SARDet/train_ssl.py --config CondDINO_SARDet/config_ssl_perm.json",
+  "method": "conddino",
+  "initialization": {
+    "kind": "imagenet",
+    "file": "/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth",
+    "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35"
+  },
+  "checkpoint_rule": "final epoch, fixed in advance; the SSL loss never selects a checkpoint",
+  "export_rule": "teacher backbone, final epoch (as DINO)",
+  "views_per_image": 10,
+  "view_plan": [
+    [
+      "global",
+      1,
+      1.0
+    ],
+    [
+      "global",
+      1,
+      0.1
+    ],
+    [
+      "local",
+      8,
+      0.5
+    ]
+  ],
+  "cost": {
+    "epochs_done": 100,
+    "optimizer_steps": 146900,
+    "images_seen": 9401600,
+    "view_forwards": 94016000,
+    "train_minutes": 661.62,
+    "gpu_hours": 11.027,
+    "peak_gpu_memory_gb": 9.19
+  },
+  "view_box_coverage": {
+    "global": {
+      "views_with_a_box": 0.2941666666666667,
+      "n_views": 1200
+    },
+    "local": {
+      "views_with_a_box": 0.07333333333333333,
+      "n_views": 1200
+    }
+  },
+  "schedule_fingerprint": "9046d3e8b529624063eea12df46c740c479b9c8274a7f764cd3440598b623045",
+  "steps_per_epoch": 1469,
+  "total_steps": 146900,
+  "num_trainable_parameters": 10616832,
+  "measured_seconds_per_step": 0.1739,
+  "estimated_hours_for_all_epochs": 7.09,
+  "exported_backbone": {
+    "file": "backbone_epoch100.pth",
+    "state_sha256": "9884b765ee329594eb43a7c5ab86794b6fbb24f5282c4f60bfc0daa4995d0cb2",
+    "file_sha256": "acbe3477768040ef5adc982c81c7e92f9d1db507a4e3ff09da0fe6cfe15baebc",
+    "num_tensors": 312
+  },
+  "finished": "2026-11-13T07:10:32",
+  "wall_minutes": 663.13,
+  "peak_gpu_memory_gb": 9.19
+}

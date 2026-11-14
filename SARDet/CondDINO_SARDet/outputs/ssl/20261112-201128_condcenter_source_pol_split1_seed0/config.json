@@ -1,0 +1,70 @@
+{
+  "run_name": "condcenter_source_pol",
+  "method": "conddino",
+  "common": {
+    "epochs": 100,
+    "batch_size": 64,
+    "seed_rule": "split - 1",
+    "num_workers": 8,
+    "export_rule": "final epoch, no selection",
+    "seed": 0
+  },
+  "views": {
+    "resize_rule": "detector_512",
+    "global_size": 224,
+    "local_size": 96,
+    "zoom_range": [
+      0.75,
+      1.33
+    ],
+    "hflip_p": 0.5,
+    "brightness": 0.4,
+    "contrast": 0.4,
+    "color_jitter_p": 0.8,
+    "blur_sigma": [
+      0.1,
+      2.0
+    ],
+    "solarization_p": 0.0
+  },
+  "dino_views": {
+    "local_crops_number": 8,
+    "blur_p": [
+      1.0,
+      0.1,
+      0.5
+    ]
+  },
+  "dino": {
+    "out_dim": 4096,
+    "use_bn_in_head": false,
+    "norm_last_layer": true,
+    "momentum_teacher": 0.9995,
+    "warmup_teacher_temp": 0.04,
+    "teacher_temp": 0.04,
+    "warmup_teacher_temp_epochs": 0,
+    "student_temp": 0.1,
+    "center_momentum": 0.9
+  },
+  "optim": {
+    "optimizer": "adamw",
+    "lr": 0.0005,
+    "_lr_note": "reference rate for a batch of 256; the rate used is lr * batch_size / 256 (linear scaling, as in main_dino.py)",
+    "min_lr": 1e-06,
+    "warmup_epochs": 10,
+    "weight_decay": 0.04,
+    "weight_decay_end": 0.04,
+    "clip_grad": 3.0,
+    "freeze_last_layer": 1,
+    "use_fp16": true
+  },
+  "cond_center": {
+    "enabled": true,
+    "cells": "source_pol",
+    "permute_seed": 0,
+    "center_momentum_cell": 0.9,
+    "label_use": "none (manifest columns source, satellite, polarization)",
+    "_note": "cells: source_pol | perm | oracle_class | radiometric (cells.py). label_use must state the truth for the variant (train_ssl.py refuses otherwise). permute_seed is used by perm only. center_momentum_cell = EMA momentum of each cell center (the global center keeps dino.center_momentum and is tracked but never subtracted)."
+  },
+  "smoke": false
+}
