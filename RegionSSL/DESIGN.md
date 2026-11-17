@@ -92,3 +92,28 @@ can be added to the proposer later without touching the learning code, because m
    same crop twice), export loads in both downstream paths.
 5. CRC: 3 seeds x {crops-only, full, random-control} = 9 SSL runs of 100 epochs, then the existing
    fine-tune scripts. Compare with `SARDet_to_ATR/compare.py` and `SARDet/compare/compare.py`.
+
+## 6. Revisions after review with Nischal (2026-11-17)
+
+- **No dataset-specific scale.** Object-centred crops size the window relative to the region's own extent
+  (the object fills a random 20 to 80 % of the view), never a fixed pixel size, and DINO's ordinary random
+  crops are kept for a share of the views. Nothing in the method refers to 128 px chips, 224 px views or
+  any property of ATRNet-STAR or SARDet-100K.
+- **DINO's asymmetry is kept, not replaced.** The crop-level loss (teacher on 2 global views, student on
+  global + local views, local-to-global matching) stays exactly as in DINO with its original weight. The
+  region loss is an extra term with its own weight (0 recovers DINO plus crop placement), and it follows the
+  same asymmetry: teacher region vectors come only from global views, student region vectors from global
+  and local views, so a region seen in a small local crop must match the teacher's wider view of it.
+- **Two ways to get "one vector per thing", to be chosen before coding.**
+  (a) *Pooling*: one forward pass per view; the feature map (7x7 at stride 32 for a 224 view, 14x14 at
+  stride 16) is averaged over the cells belonging to region k. Cheap; the region vector still carries some
+  context from neighbouring cells.
+  (b) *Separate crops*: each region is cut out as its own small image and passed through the backbone on
+  its own. Cleaner "object alone" vectors; several more forward passes per image; the object loses its
+  surroundings entirely.
+  Hybrid: (a) for the loss, and (b) only as a view-sampling choice (local crops cut around regions), which
+  is what change 1 already does.
+- **Rows required for the ATRNet-STAR table** (SSL on SARDet-100K, fine-tune on ATRNet 1 / 3 / 10 %):
+  A0 baseline (no SSL; exists, 3 splits), XA_dino, XA_lejepa, XA_spark (9 CRC jobs submitted), and the new
+  XR_regiondino. First comparison: A0 vs XA_dino vs XR_regiondino; LeJEPA and SparK rows are reported
+  when the full table is assembled.
