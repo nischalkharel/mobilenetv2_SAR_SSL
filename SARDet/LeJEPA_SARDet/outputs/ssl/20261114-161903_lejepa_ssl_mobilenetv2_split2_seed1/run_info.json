@@ -1,0 +1,130 @@
+{
+  "kind": "ssl",
+  "status": "completed",
+  "started": "2026-11-14T16:19:03",
+  "run_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/LeJEPA_SARDet/outputs/ssl/20261114-161903_lejepa_ssl_mobilenetv2_split2_seed1",
+  "config": {
+    "run_name": "lejepa_ssl_mobilenetv2",
+    "method": "lejepa",
+    "common": {
+      "epochs": 100,
+      "batch_size": 64,
+      "seed_rule": "split - 1",
+      "num_workers": 8,
+      "export_rule": "final epoch, no selection",
+      "seed": 1
+    },
+    "views": {
+      "resize_rule": "detector_512",
+      "global_size": 224,
+      "local_size": 96,
+      "zoom_range": [
+        0.75,
+        1.33
+      ],
+      "hflip_p": 0.5,
+      "brightness": 0.4,
+      "contrast": 0.4,
+      "color_jitter_p": 0.8,
+      "blur_sigma": [
+        0.1,
+        2.0
+      ],
+      "solarization_p": 0.0
+    },
+    "lejepa_views": {
+      "n_global_views": 8,
+      "_views_note": "all views are global at the shared global_size (224): paper Section 5.1, for non-ViT backbones set global_views = all_views; no local views",
+      "blur_p": 0.5
+    },
+    "lejepa": {
+      "proj_hidden_dim": 2048,
+      "proj_dim": 512,
+      "lamb": 0.05,
+      "num_slices": 1024,
+      "t_max": 3.0,
+      "n_points": 17
+    },
+    "optim": {
+      "optimizer": "adamw",
+      "lr": 0.0005,
+      "_lr_note": "absolute value from the authors' README (5e-4); NOT scaled with the batch size, unlike DINO",
+      "weight_decay": 0.0005,
+      "warmup_epochs": 1,
+      "warmup_start_factor": 0.01,
+      "final_lr_ratio": 0.001,
+      "precision": "bf16"
+    },
+    "smoke": false
+  },
+  "git": {
+    "commit": "09e06e3987a00a3fde61e3d90f02a0d81b08de3d",
+    "branch": "SmokeTest_Mobilenet_with_DINO",
+    "uncommitted_changes": true
+  },
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.10.0+cu128",
+    "platform": "Linux-5.14.0-503.22.1.el9_5.x86_64-x86_64-with-glibc2.34",
+    "hostname": "gpu-n37.crc.pitt.edu",
+    "cpu_count": 64,
+    "slurm_job_id": "4735548",
+    "cuda_available": true,
+    "torchvision": "0.25.0+cu128",
+    "gpu": "NVIDIA A100-PCIE-40GB",
+    "gpu_memory_gb": 39.5
+  },
+  "dataset_root": "/scratch/slurm-4735548/SARDet_100K",
+  "split": 2,
+  "command": "LeJEPA_SARDet/train_ssl.py --config LeJEPA_SARDet/config_ssl.json",
+  "method": "lejepa",
+  "initialization": {
+    "kind": "imagenet",
+    "file": "/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth",
+    "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35"
+  },
+  "checkpoint_rule": "final epoch, fixed in advance; the SSL loss never selects a checkpoint",
+  "export_rule": "encoder backbone (the single network; no teacher), final epoch",
+  "views_per_image": 8,
+  "view_plan": [
+    [
+      "global",
+      8,
+      0.5
+    ]
+  ],
+  "cost": {
+    "epochs_done": 100,
+    "optimizer_steps": 146900,
+    "images_seen": 9401600,
+    "view_forwards": 75212800,
+    "train_minutes": 913.82,
+    "gpu_hours": 15.23,
+    "peak_gpu_memory_gb": 19.8
+  },
+  "view_box_coverage": {
+    "global": {
+      "views_with_a_box": 0.2941666666666667,
+      "n_views": 1200
+    },
+    "local": {
+      "views_with_a_box": 0.07333333333333333,
+      "n_views": 1200
+    }
+  },
+  "schedule_fingerprint": "78e20eb3551555af2a74a998a3bb83e1549fad17b549b16fb2de362ff0ad488a",
+  "steps_per_epoch": 1469,
+  "total_steps": 146900,
+  "num_trainable_parameters": 10100992,
+  "measured_seconds_per_step": 0.3663,
+  "estimated_hours_for_all_epochs": 14.95,
+  "exported_backbone": {
+    "file": "backbone_epoch100.pth",
+    "state_sha256": "a718ee1135c4c0790dd58bc9875160c44ca8092f2a3bbdb04cab7fca93e6a0ba",
+    "file_sha256": "31a8894a75b3323497c970e510de615078d7a66838ab43f32ea409f04f467b6a",
+    "num_tensors": 312
+  },
+  "finished": "2026-11-15T07:34:37",
+  "wall_minutes": 915.57,
+  "peak_gpu_memory_gb": 19.8
+}

@@ -1,0 +1,203 @@
+{
+  "kind": "finetune",
+  "status": "completed",
+  "started": "2026-11-14T16:18:30",
+  "run_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/baseline_SARDet/outputs/finetune/20261114-161830_baseline_imagenet_10pct_split2_seed0",
+  "config": {
+    "shared_finetune_config": {
+      "_lr_decision": "DECIDED 2026-11-13 from crc/lr_check.sbatch (CRC job 4727010; baseline, 10 %, split 1, val_select mAP@[.5:.95]; no SSL backbone involved): lr 1e-4 -> 0.3192, 2e-4 -> 0.3138, 5e-4 -> 0.3100. train.lr = 1e-4 for every method from here on. Run folders: baseline_SARDet/outputs/finetune/2026111*_lrcheck_baseline_lr0.000{1,2,5}_10pct_split1_seed0 (protocol_deviation runs, excluded by compare.py).",
+      "detector": {
+        "input_size": 512,
+        "fpn_return_layers": {
+          "3": 24,
+          "6": 32,
+          "13": 96,
+          "18": 1280
+        },
+        "fpn_channels": 128,
+        "anchor_sizes": [
+          [
+            8,
+            16
+          ],
+          [
+            16,
+            32
+          ],
+          [
+            32,
+            64
+          ],
+          [
+            64,
+            128
+          ],
+          [
+            128,
+            256
+          ]
+        ],
+        "aspect_ratios": [
+          0.5,
+          1.0,
+          2.0
+        ],
+        "image_mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "image_std": [
+          0.229,
+          0.224,
+          0.225
+        ],
+        "box_score_thresh": 0.05,
+        "box_nms_thresh": 0.5,
+        "box_detections_per_img": 100,
+        "rpn_pre_nms_top_n_train": 2000,
+        "rpn_post_nms_top_n_train": 2000,
+        "rpn_pre_nms_top_n_test": 1000,
+        "rpn_post_nms_top_n_test": 1000,
+        "backbone_bn": "train"
+      },
+      "train": {
+        "seed": 0,
+        "batch_size": 8,
+        "lr": 0.0001,
+        "weight_decay": 0.05,
+        "warmup_epochs": 1,
+        "min_lr_factor": 0.01,
+        "epochs_by_budget": {
+          "1pct": 60,
+          "3pct": 40,
+          "10pct": 24
+        },
+        "hflip_p": 0.5,
+        "num_workers": 8,
+        "precision": "fp32",
+        "grad_clip_norm": null,
+        "eval_every": 2,
+        "selection_metric": "map",
+        "selection_subset": "val_select"
+      }
+    },
+    "budget": "10pct",
+    "epochs": 24,
+    "lr": 0.0001,
+    "seed": 0,
+    "backbone_arg": "imagenet",
+    "run_name": "baseline_imagenet",
+    "experiment_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/baseline_SARDet"
+  },
+  "git": {
+    "commit": "09e06e3987a00a3fde61e3d90f02a0d81b08de3d",
+    "branch": "SmokeTest_Mobilenet_with_DINO",
+    "uncommitted_changes": true
+  },
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.10.0+cu128",
+    "platform": "Linux-5.14.0-503.22.1.el9_5.x86_64-x86_64-with-glibc2.34",
+    "hostname": "gpu-n50.crc.pitt.edu",
+    "cpu_count": 64,
+    "slurm_job_id": "4735546",
+    "cuda_available": true,
+    "torchvision": "0.25.0+cu128",
+    "gpu": "NVIDIA A100-PCIE-40GB",
+    "gpu_memory_gb": 39.5
+  },
+  "dataset_root": "/scratch/slurm-4735546/SARDet_100K",
+  "split": 2,
+  "command": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/shared/finetune.py --experiment-dir baseline_SARDet --run-name baseline_imagenet --budget 10pct --backbone imagenet",
+  "audit": {
+    "split": 2,
+    "manifest_sha256": {
+      "ssl_pool.csv": "6b72e480e6888bf81b19ef9660aaaaca6304232db2ed0984a2c1ee6a0fcb34f3",
+      "val_select.csv": "e0c8c3cc990e6f3bf17d98665cf74b8ac77963953d223eec499d256ceced709c",
+      "eval_subsets.json": "22fba97e80a49a5461b3e00165dc60c70da5defd957c67cbbaa60ea0bd8144b9",
+      "image_metadata.csv": "8ee0b986a3d73e5334ac035733cf56686ad3081769961084debfc0daa6f552a9",
+      "split2/labeled_1pct.csv": "b6006d2966e577ea8dbbf67211c24a5fee4c8a2f0fad59b4fac324a382254a32",
+      "split2/labeled_3pct.csv": "f5c3542ec02b01a7aeb8b58d6b0a54144dfdf8c7b4afa12e4f78079d574c9931",
+      "split2/labeled_10pct.csv": "e97909477af0e3c945b850d5265fb647cdae9113110f29c008d8062cd1b11436"
+    },
+    "counts": {
+      "ssl_pool": 94034,
+      "labeled_1pct": 947,
+      "labeled_3pct": 2854,
+      "labeled_10pct": 9455,
+      "val_select": 2000,
+      "val": 10492,
+      "test": 11613,
+      "test_clean": 11563,
+      "val_clean": 10208
+    }
+  },
+  "backbone": {
+    "kind": "imagenet",
+    "file": "/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth",
+    "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35"
+  },
+  "head_fingerprint_sha256": "6287b3460b729d57fd14e8c0f92753bf108c36a78953b08eec3157b386c86998",
+  "parameters": {
+    "total": 10658497,
+    "backbone": 2223872,
+    "fpn_and_heads": 8434625
+  },
+  "protocol_deviation": null,
+  "precision": {
+    "cudnn_allow_tf32": true,
+    "matmul_allow_tf32": false
+  },
+  "pycocotools": "unknown",
+  "n_train_images": 9455,
+  "n_val_select": 2000,
+  "train_minutes": 61.01,
+  "best_epoch": 24,
+  "best_val_select_map": 0.3256962498318232,
+  "checkpoints": {
+    "best.pt": "bcf7dec573175444fc34ae1baec45730448cb22514c74837469bacccf3fe4b26",
+    "last.pt": "9a1710759b820a039bbf7bf97411999ec6b786fc2bd9539dec19549eb20ca211"
+  },
+  "final_metrics": {
+    "best_val": {
+      "map": 0.3061989142676705,
+      "map50": 0.6165923034130337,
+      "map75": 0.269042151812929,
+      "map_small": 0.2716780759753097,
+      "map_medium": 0.36978688261288617,
+      "map_large": 0.28981811386380485,
+      "n_images": 10492
+    },
+    "best_test": {
+      "map": 0.28501564485984476,
+      "map50": 0.5910006248180203,
+      "map75": 0.23989160536517748,
+      "map_small": 0.2468957546926729,
+      "map_medium": 0.37379735052404695,
+      "map_large": 0.2676016505707787,
+      "n_images": 11613
+    },
+    "best_test_clean": {
+      "map": 0.28458182991537545,
+      "map50": 0.590709420342328,
+      "map75": 0.23893452930088732,
+      "map_small": 0.2470167621220944,
+      "map_medium": 0.37310715995454713,
+      "map_large": 0.26643909651005054,
+      "n_images": 11563
+    },
+    "last_test": {
+      "map": 0.28501564485984476,
+      "map50": 0.5910006248180203,
+      "map75": 0.23989160536517748,
+      "map_small": 0.2468957546926729,
+      "map_medium": 0.37379735052404695,
+      "map_large": 0.2676016505707787,
+      "n_images": 11613
+    }
+  },
+  "finished": "2026-11-14T17:26:22",
+  "wall_minutes": 67.87,
+  "peak_gpu_memory_gb": 4.78
+}

@@ -1,0 +1,303 @@
+{
+  "kind": "finetune",
+  "status": "completed",
+  "started": "2026-11-14T15:13:26",
+  "run_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/LeJEPA_SARDet/outputs/finetune/20261114-151326_lejepa_mobilenetv2_10pct_split1_seed0",
+  "config": {
+    "shared_finetune_config": {
+      "_lr_decision": "DECIDED 2026-11-13 from crc/lr_check.sbatch (CRC job 4727010; baseline, 10 %, split 1, val_select mAP@[.5:.95]; no SSL backbone involved): lr 1e-4 -> 0.3192, 2e-4 -> 0.3138, 5e-4 -> 0.3100. train.lr = 1e-4 for every method from here on. Run folders: baseline_SARDet/outputs/finetune/2026111*_lrcheck_baseline_lr0.000{1,2,5}_10pct_split1_seed0 (protocol_deviation runs, excluded by compare.py).",
+      "detector": {
+        "input_size": 512,
+        "fpn_return_layers": {
+          "3": 24,
+          "6": 32,
+          "13": 96,
+          "18": 1280
+        },
+        "fpn_channels": 128,
+        "anchor_sizes": [
+          [
+            8,
+            16
+          ],
+          [
+            16,
+            32
+          ],
+          [
+            32,
+            64
+          ],
+          [
+            64,
+            128
+          ],
+          [
+            128,
+            256
+          ]
+        ],
+        "aspect_ratios": [
+          0.5,
+          1.0,
+          2.0
+        ],
+        "image_mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "image_std": [
+          0.229,
+          0.224,
+          0.225
+        ],
+        "box_score_thresh": 0.05,
+        "box_nms_thresh": 0.5,
+        "box_detections_per_img": 100,
+        "rpn_pre_nms_top_n_train": 2000,
+        "rpn_post_nms_top_n_train": 2000,
+        "rpn_pre_nms_top_n_test": 1000,
+        "rpn_post_nms_top_n_test": 1000,
+        "backbone_bn": "train"
+      },
+      "train": {
+        "seed": 0,
+        "batch_size": 8,
+        "lr": 0.0001,
+        "weight_decay": 0.05,
+        "warmup_epochs": 1,
+        "min_lr_factor": 0.01,
+        "epochs_by_budget": {
+          "1pct": 60,
+          "3pct": 40,
+          "10pct": 24
+        },
+        "hflip_p": 0.5,
+        "num_workers": 8,
+        "precision": "fp32",
+        "grad_clip_norm": null,
+        "eval_every": 2,
+        "selection_metric": "map",
+        "selection_subset": "val_select"
+      }
+    },
+    "budget": "10pct",
+    "epochs": 24,
+    "lr": 0.0001,
+    "seed": 0,
+    "backbone_arg": "LeJEPA_SARDet/outputs/ssl/20261112-184608_lejepa_ssl_mobilenetv2_split1_seed0/backbone_epoch100.pth",
+    "run_name": "lejepa_mobilenetv2",
+    "experiment_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/LeJEPA_SARDet"
+  },
+  "git": {
+    "commit": "09e06e3987a00a3fde61e3d90f02a0d81b08de3d",
+    "branch": "SmokeTest_Mobilenet_with_DINO",
+    "uncommitted_changes": true
+  },
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.10.0+cu128",
+    "platform": "Linux-5.14.0-503.22.1.el9_5.x86_64-x86_64-with-glibc2.34",
+    "hostname": "gpu-n40.crc.pitt.edu",
+    "cpu_count": 64,
+    "slurm_job_id": "4735542",
+    "cuda_available": true,
+    "torchvision": "0.25.0+cu128",
+    "gpu": "NVIDIA A100-PCIE-40GB",
+    "gpu_memory_gb": 39.5
+  },
+  "dataset_root": "/scratch/slurm-4735542/SARDet_100K",
+  "split": 1,
+  "command": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/shared/finetune.py --experiment-dir LeJEPA_SARDet --run-name lejepa_mobilenetv2 --budget 10pct --backbone LeJEPA_SARDet/outputs/ssl/20261112-184608_lejepa_ssl_mobilenetv2_split1_seed0/backbone_epoch100.pth",
+  "audit": {
+    "split": 1,
+    "manifest_sha256": {
+      "ssl_pool.csv": "6b72e480e6888bf81b19ef9660aaaaca6304232db2ed0984a2c1ee6a0fcb34f3",
+      "val_select.csv": "e0c8c3cc990e6f3bf17d98665cf74b8ac77963953d223eec499d256ceced709c",
+      "eval_subsets.json": "22fba97e80a49a5461b3e00165dc60c70da5defd957c67cbbaa60ea0bd8144b9",
+      "image_metadata.csv": "8ee0b986a3d73e5334ac035733cf56686ad3081769961084debfc0daa6f552a9",
+      "split1/labeled_1pct.csv": "2bc21c78c0ffd44c3a09684b6d5c2da760cf0f2fde140e83b30b48eaf31532da",
+      "split1/labeled_3pct.csv": "2a8b6e40b3606dd2425a9779ba8dfa779418e50345c7f2daa8e55408f3190395",
+      "split1/labeled_10pct.csv": "17f37087fdfce265c06541431a6cec1d88d1ffa5194c1115ff4d97be6b1ef7db"
+    },
+    "counts": {
+      "ssl_pool": 94034,
+      "labeled_1pct": 962,
+      "labeled_3pct": 2841,
+      "labeled_10pct": 9460,
+      "val_select": 2000,
+      "val": 10492,
+      "test": 11613,
+      "test_clean": 11563,
+      "val_clean": 10208
+    }
+  },
+  "backbone": {
+    "kind": "ssl",
+    "ssl_method": "lejepa",
+    "ssl_run_dir": "LeJEPA_SARDet/outputs/ssl/20261112-184608_lejepa_ssl_mobilenetv2_split1_seed0",
+    "ssl_epoch": 100,
+    "ssl_epochs_planned": 100,
+    "ssl_seed": 0,
+    "split": 1,
+    "ssl_config": {
+      "run_name": "lejepa_ssl_mobilenetv2",
+      "method": "lejepa",
+      "common": {
+        "epochs": 100,
+        "batch_size": 64,
+        "seed_rule": "split - 1",
+        "num_workers": 8,
+        "export_rule": "final epoch, no selection",
+        "seed": 0
+      },
+      "views": {
+        "resize_rule": "detector_512",
+        "global_size": 224,
+        "local_size": 96,
+        "zoom_range": [
+          0.75,
+          1.33
+        ],
+        "hflip_p": 0.5,
+        "brightness": 0.4,
+        "contrast": 0.4,
+        "color_jitter_p": 0.8,
+        "blur_sigma": [
+          0.1,
+          2.0
+        ],
+        "solarization_p": 0.0
+      },
+      "lejepa_views": {
+        "n_global_views": 8,
+        "_views_note": "all views are global at the shared global_size (224): paper Section 5.1, for non-ViT backbones set global_views = all_views; no local views",
+        "blur_p": 0.5
+      },
+      "lejepa": {
+        "proj_hidden_dim": 2048,
+        "proj_dim": 512,
+        "lamb": 0.05,
+        "num_slices": 1024,
+        "t_max": 3.0,
+        "n_points": 17
+      },
+      "optim": {
+        "optimizer": "adamw",
+        "lr": 0.0005,
+        "_lr_note": "absolute value from the authors' README (5e-4); NOT scaled with the batch size, unlike DINO",
+        "weight_decay": 0.0005,
+        "warmup_epochs": 1,
+        "warmup_start_factor": 0.01,
+        "final_lr_ratio": 0.001,
+        "precision": "bf16"
+      },
+      "smoke": false
+    },
+    "ssl_manifest": {
+      "ssl_pool_csv": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/data/ssl_pool.csv",
+      "csv_sha256": "6b72e480e6888bf81b19ef9660aaaaca6304232db2ed0984a2c1ee6a0fcb34f3",
+      "used_file_list_sha256": "4c52cb0df91eb906155cc08c1c853727386acf2f98eace9ca389154d770665d5",
+      "num_images": 94034,
+      "columns_available_to_the_method": [
+        "file_name",
+        "official_split",
+        "image_id",
+        "width",
+        "height",
+        "source",
+        "satellite",
+        "polarization",
+        "band",
+        "group"
+      ],
+      "labels_used": "none",
+      "labels_read_for_diagnostic_only": "view_box_coverage: GT boxes of up to 300 pool images, logged in run_info, never seen by training"
+    },
+    "ssl_cost": {
+      "epochs_done": 100,
+      "optimizer_steps": 146900,
+      "images_seen": 9401600,
+      "view_forwards": 75212800,
+      "train_minutes": 1429.74,
+      "gpu_hours": 23.829,
+      "peak_gpu_memory_gb": 19.88
+    },
+    "initialization_before_ssl": {
+      "kind": "imagenet",
+      "file": "/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth",
+      "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35"
+    },
+    "exported": {
+      "which": "encoder (single network)",
+      "excluded_from_export": "projector, optimizer, SIGReg step"
+    },
+    "num_tensors": 312,
+    "state_sha256": "c70a6d3544101f09634044400e71a06754d30dd58472b82f9abf56549a475bee",
+    "file": "LeJEPA_SARDet/outputs/ssl/20261112-184608_lejepa_ssl_mobilenetv2_split1_seed0/backbone_epoch100.pth",
+    "file_sha256": "a9de1a498ddef1e0282fbeedcb7eebf1bdce11836d7199db389280a39c09457a"
+  },
+  "head_fingerprint_sha256": "6287b3460b729d57fd14e8c0f92753bf108c36a78953b08eec3157b386c86998",
+  "parameters": {
+    "total": 10658497,
+    "backbone": 2223872,
+    "fpn_and_heads": 8434625
+  },
+  "protocol_deviation": null,
+  "precision": {
+    "cudnn_allow_tf32": true,
+    "matmul_allow_tf32": false
+  },
+  "pycocotools": "unknown",
+  "n_train_images": 9460,
+  "n_val_select": 2000,
+  "train_minutes": 61.21,
+  "best_epoch": 24,
+  "best_val_select_map": 0.30515203944698865,
+  "checkpoints": {
+    "best.pt": "43fdf57c88780b783688984354262099dd3ea5e13ab25b9e06336a4d3980794b",
+    "last.pt": "dc9ade9e878f1ddac06de18617cb05a8a03f37d107ad5e4e3311fe340e300664"
+  },
+  "final_metrics": {
+    "best_val": {
+      "map": 0.28697088403318616,
+      "map50": 0.5864006288837458,
+      "map75": 0.2530617436219559,
+      "map_small": 0.2694364100129868,
+      "map_medium": 0.35431613814263596,
+      "map_large": 0.24808684348050936,
+      "n_images": 10492
+    },
+    "best_test": {
+      "map": 0.2748330676249083,
+      "map50": 0.5675531953196786,
+      "map75": 0.2306065684556321,
+      "map_small": 0.23700536498427666,
+      "map_medium": 0.36870237572542336,
+      "map_large": 0.24089804193516348,
+      "n_images": 11613
+    },
+    "best_test_clean": {
+      "map": 0.27446294415552325,
+      "map50": 0.5672443526924403,
+      "map75": 0.2301652785680668,
+      "map_small": 0.23696727319719443,
+      "map_medium": 0.3682063765872385,
+      "map_large": 0.2398390837148687,
+      "n_images": 11563
+    },
+    "last_test": {
+      "map": 0.2748330676249083,
+      "map50": 0.5675531953196786,
+      "map75": 0.2306065684556321,
+      "map_small": 0.23700536498427666,
+      "map_medium": 0.36870237572542336,
+      "map_large": 0.24089804193516348,
+      "n_images": 11613
+    }
+  },
+  "finished": "2026-11-14T16:21:30",
+  "wall_minutes": 68.08,
+  "peak_gpu_memory_gb": 4.14
+}

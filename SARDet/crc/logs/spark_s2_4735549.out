@@ -1,0 +1,1866 @@
+host gpu-n45.crc.pitt.edu  job 4735549  start Sat Nov 14 04:16:59 PM EST 2026
+repo /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet  commit 09e06e3  branch SmokeTest_Mobilenet_with_DINO  split 2
+NVIDIA A100-PCIE-40GB, 40960 MiB, 595.91.07
+python /ix/ageorge/nik96/envs/sarssl/bin/python 3.13.16 | torch 2.10.0+cu128 | torchvision 0.25.0+cu128 | cuda True
+split 2; output root (inside each experiment folder)
+  ok       SARDET100K_ROOT                /ix/ageorge/nik96/data/SARDet_100K
+  ok       IMAGES_DIR                     /ix/ageorge/nik96/data/SARDet_100K/JPEGImages
+  ok       train.json                     /ix/ageorge/nik96/data/SARDet_100K/Annotations/train.json
+  ok       val.json                       /ix/ageorge/nik96/data/SARDet_100K/Annotations/val.json
+  ok       test.json                      /ix/ageorge/nik96/data/SARDet_100K/test.json
+  ok       mapping.json                   /ix/ageorge/nik96/data/SARDet_100K/mapping.json
+  ok       MOBILENETV2_IMAGENET_WEIGHTS   /ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth
+  ok       METADATA_CSV                   /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/data/image_metadata.csv
+  ok       SPLIT_DIR                      /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/data/split2
+  ok       VAL_SELECT_CSV                 /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/data/val_select.csv
+Submitted batch job 4735780 on cluster gpu
+staging dataset from /ix/ageorge/nik96/data/SARDet_100K.tar -> /scratch/slurm-4735549/SARDet_100K ...
+staged in 81 s: 116598 images
+split 2; output root (inside each experiment folder)
+  ok       SARDET100K_ROOT                /scratch/slurm-4735549/SARDet_100K
+  ok       IMAGES_DIR                     /scratch/slurm-4735549/SARDet_100K/JPEGImages
+  ok       train.json                     /scratch/slurm-4735549/SARDet_100K/Annotations/train.json
+  ok       val.json                       /scratch/slurm-4735549/SARDet_100K/Annotations/val.json
+  ok       test.json                      /scratch/slurm-4735549/SARDet_100K/test.json
+  ok       mapping.json                   /scratch/slurm-4735549/SARDet_100K/mapping.json
+  ok       MOBILENETV2_IMAGENET_WEIGHTS   /ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth
+  ok       METADATA_CSV                   /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/data/image_metadata.csv
+  ok       SPLIT_DIR                      /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/data/split2
+  ok       VAL_SELECT_CSV                 /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/data/val_select.csv
+
+SPARK SSL run: spark_ssl_mobilenetv2
+  output folder : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/SparK_SARDet/outputs/ssl/20261114-161903_spark_ssl_mobilenetv2_split2_seed1
+  device        : cuda
+  SSL images    : 94034 (no labels)
+  batch         : 64 images x 1 views ([('global', 1, 0.0)])
+  steps         : 1469 per epoch, 100 epochs
+  seed          : 1 (split 2)
+  SparK         : 7 x 7 patches of 32 px, 20 visible per image (mask ratio 0.6 -> 0.592 hidden); densify norm bn; decoder width 768; target the SAR channel, normalised per patch, loss on hidden patches only
+  encoder maps  : [(2, 24, 56, 56), (2, 32, 28, 28), (2, 96, 14, 14), (2, 1280, 7, 7)]
+  parameters    : encoder (MobileNetV2 features, exported) 2,223,872, decoder (LightDecoder) 23,183,065, densify norms + projections 1,395,152, mask tokens 1,432, total 26,803,521
+  optimizer     : LAMB betas (0.9, 0.95), global grad norm clipped at 5.0; peak lr 5e-05 (= 0.0002 x 64/256) after 2.5 warm-up epochs from 2.50e-07, cosine to 5.00e-08; weight decay 0.04 -> 0.2 (cosine); no decay on biases, 1-D tensors and mask tokens
+  precision     : {'autocast': None, 'dtype': 'float32', 'cudnn_allow_tf32': False, 'matmul_allow_tf32': False}
+
+SSL epoch 1/100
+  measured speed: 0.382 s/step -> 9.4 min per epoch, about 15.60 h until epoch 100
+    step   100/1469  loss 0.9083  grad norm 0.202  feature cosine 0.246  lr 1.59e-06  wd 0.040  66s
+    step   200/1469  loss 0.9077  grad norm 0.195  feature cosine 0.246  lr 2.95e-06  wd 0.040  105s
+    step   300/1469  loss 0.9126  grad norm 0.192  feature cosine 0.245  lr 4.30e-06  wd 0.040  143s
+    step   400/1469  loss 0.9137  grad norm 0.192  feature cosine 0.246  lr 5.66e-06  wd 0.040  182s
+    step   500/1469  loss 0.9124  grad norm 0.188  feature cosine 0.246  lr 7.01e-06  wd 0.040  222s
+    step   600/1469  loss 0.9118  grad norm 0.183  feature cosine 0.246  lr 8.37e-06  wd 0.040  261s
+    step   700/1469  loss 0.9117  grad norm 0.179  feature cosine 0.246  lr 9.72e-06  wd 0.040  300s
+    step   800/1469  loss 0.9116  grad norm 0.174  feature cosine 0.246  lr 1.11e-05  wd 0.040  339s
+    step   900/1469  loss 0.9112  grad norm 0.167  feature cosine 0.246  lr 1.24e-05  wd 0.040  379s
+    step  1000/1469  loss 0.9116  grad norm 0.161  feature cosine 0.247  lr 1.38e-05  wd 0.040  418s
+    step  1100/1469  loss 0.9103  grad norm 0.155  feature cosine 0.247  lr 1.51e-05  wd 0.040  458s
+    step  1200/1469  loss 0.9102  grad norm 0.148  feature cosine 0.248  lr 1.65e-05  wd 0.040  497s
+    step  1300/1469  loss 0.9102  grad norm 0.142  feature cosine 0.248  lr 1.78e-05  wd 0.040  536s
+    step  1400/1469  loss 0.9102  grad norm 0.135  feature cosine 0.248  lr 1.92e-05  wd 0.040  576s
+    step  1469/1469  loss 0.9099  grad norm 0.131  feature cosine 0.249  lr 2.01e-05  wd 0.040  603s
+  epoch   1/100  loss 0.9099  feature_cosine 0.2487  feature_std 0.02347  grad_norm 0.1308  10.1 min, checkpoint saved
+
+SSL epoch 2/100
+    step   100/1469  loss 0.9105  grad norm 0.044  feature cosine 0.255  lr 2.15e-05  wd 0.040  40s
+    step   200/1469  loss 0.9069  grad norm 0.046  feature cosine 0.254  lr 2.28e-05  wd 0.040  79s
+    step   300/1469  loss 0.9077  grad norm 0.050  feature cosine 0.255  lr 2.42e-05  wd 0.040  119s
+    step   400/1469  loss 0.9070  grad norm 0.054  feature cosine 0.255  lr 2.56e-05  wd 0.040  158s
+    step   500/1469  loss 0.9057  grad norm 0.059  feature cosine 0.255  lr 2.69e-05  wd 0.040  198s
+    step   600/1469  loss 0.9050  grad norm 0.066  feature cosine 0.255  lr 2.83e-05  wd 0.040  238s
+    step   700/1469  loss 0.9043  grad norm 0.075  feature cosine 0.255  lr 2.96e-05  wd 0.040  277s
+    step   800/1469  loss 0.9033  grad norm 0.084  feature cosine 0.255  lr 3.10e-05  wd 0.040  317s
+    step   900/1469  loss 0.9021  grad norm 0.094  feature cosine 0.254  lr 3.23e-05  wd 0.040  357s
+    step  1000/1469  loss 0.9007  grad norm 0.104  feature cosine 0.254  lr 3.37e-05  wd 0.040  396s
+    step  1100/1469  loss 0.8993  grad norm 0.112  feature cosine 0.254  lr 3.50e-05  wd 0.040  436s
+    step  1200/1469  loss 0.8980  grad norm 0.121  feature cosine 0.253  lr 3.64e-05  wd 0.040  475s
+    step  1300/1469  loss 0.8968  grad norm 0.128  feature cosine 0.253  lr 3.78e-05  wd 0.040  515s
+    step  1400/1469  loss 0.8956  grad norm 0.134  feature cosine 0.252  lr 3.91e-05  wd 0.040  555s
+    step  1469/1469  loss 0.8949  grad norm 0.138  feature cosine 0.252  lr 4.00e-05  wd 0.040  582s
+  epoch   2/100  loss 0.8949  feature_cosine 0.252  feature_std 0.02311  grad_norm 0.1376  9.7 min, checkpoint saved
+
+SSL epoch 3/100
+    step   100/1469  loss 0.8792  grad norm 0.223  feature cosine 0.242  lr 4.14e-05  wd 0.040  40s
+    step   200/1469  loss 0.8780  grad norm 0.231  feature cosine 0.242  lr 4.28e-05  wd 0.040  79s
+    step   300/1469  loss 0.8760  grad norm 0.236  feature cosine 0.241  lr 4.41e-05  wd 0.040  119s
+    step   400/1469  loss 0.8734  grad norm 0.244  feature cosine 0.241  lr 4.55e-05  wd 0.040  159s
+    step   500/1469  loss 0.8723  grad norm 0.250  feature cosine 0.240  lr 4.68e-05  wd 0.040  198s
+    step   600/1469  loss 0.8706  grad norm 0.257  feature cosine 0.239  lr 4.82e-05  wd 0.040  238s
+    step   700/1469  loss 0.8697  grad norm 0.267  feature cosine 0.238  lr 4.95e-05  wd 0.040  277s
+    step   800/1469  loss 0.8694  grad norm 0.274  feature cosine 0.238  lr 5.00e-05  wd 0.040  317s
+    step   900/1469  loss 0.8682  grad norm 0.285  feature cosine 0.238  lr 5.00e-05  wd 0.040  357s
+    step  1000/1469  loss 0.8669  grad norm 0.292  feature cosine 0.237  lr 5.00e-05  wd 0.040  396s
+    step  1100/1469  loss 0.8654  grad norm 0.296  feature cosine 0.237  lr 5.00e-05  wd 0.040  436s
+    step  1200/1469  loss 0.8644  grad norm 0.303  feature cosine 0.237  lr 5.00e-05  wd 0.040  476s
+    step  1300/1469  loss 0.8635  grad norm 0.309  feature cosine 0.237  lr 5.00e-05  wd 0.040  515s
+    step  1400/1469  loss 0.8622  grad norm 0.317  feature cosine 0.237  lr 5.00e-05  wd 0.040  555s
+    step  1469/1469  loss 0.8617  grad norm 0.323  feature cosine 0.237  lr 5.00e-05  wd 0.040  582s
+  epoch   3/100  loss 0.8617  feature_cosine 0.2372  feature_std 0.02197  grad_norm 0.3228  9.9 min, checkpoint saved
+
+SSL epoch 4/100
+    step   100/1469  loss 0.8456  grad norm 0.419  feature cosine 0.238  lr 5.00e-05  wd 0.040  40s
+    step   200/1469  loss 0.8478  grad norm 0.389  feature cosine 0.238  lr 5.00e-05  wd 0.040  79s
+    step   300/1469  loss 0.8458  grad norm 0.397  feature cosine 0.237  lr 5.00e-05  wd 0.040  118s
+    step   400/1469  loss 0.8468  grad norm 0.393  feature cosine 0.237  lr 5.00e-05  wd 0.040  157s
+    step   500/1469  loss 0.8475  grad norm 0.402  feature cosine 0.237  lr 5.00e-05  wd 0.040  197s
+    step   600/1469  loss 0.8473  grad norm 0.405  feature cosine 0.237  lr 5.00e-05  wd 0.040  236s
+    step   700/1469  loss 0.8466  grad norm 0.416  feature cosine 0.236  lr 5.00e-05  wd 0.040  275s
+    step   800/1469  loss 0.8463  grad norm 0.416  feature cosine 0.236  lr 5.00e-05  wd 0.040  315s
+    step   900/1469  loss 0.8460  grad norm 0.418  feature cosine 0.236  lr 5.00e-05  wd 0.041  354s
+    step  1000/1469  loss 0.8454  grad norm 0.417  feature cosine 0.236  lr 5.00e-05  wd 0.041  394s
+    step  1100/1469  loss 0.8447  grad norm 0.422  feature cosine 0.235  lr 5.00e-05  wd 0.041  433s
+    step  1200/1469  loss 0.8441  grad norm 0.422  feature cosine 0.235  lr 5.00e-05  wd 0.041  473s
+    step  1300/1469  loss 0.8438  grad norm 0.423  feature cosine 0.235  lr 5.00e-05  wd 0.041  512s
+    step  1400/1469  loss 0.8431  grad norm 0.422  feature cosine 0.235  lr 5.00e-05  wd 0.041  552s
+    step  1469/1469  loss 0.8429  grad norm 0.423  feature cosine 0.234  lr 5.00e-05  wd 0.041  579s
+  epoch   4/100  loss 0.8429  feature_cosine 0.2343  feature_std 0.02145  grad_norm 0.4232  9.7 min, checkpoint saved
+
+SSL epoch 5/100
+    step   100/1469  loss 0.8386  grad norm 0.378  feature cosine 0.230  lr 5.00e-05  wd 0.041  40s
+    step   200/1469  loss 0.8373  grad norm 0.396  feature cosine 0.230  lr 5.00e-05  wd 0.041  80s
+    step   300/1469  loss 0.8367  grad norm 0.409  feature cosine 0.230  lr 5.00e-05  wd 0.041  119s
+    step   400/1469  loss 0.8365  grad norm 0.416  feature cosine 0.230  lr 5.00e-05  wd 0.041  159s
+    step   500/1469  loss 0.8360  grad norm 0.415  feature cosine 0.229  lr 5.00e-05  wd 0.041  198s
+    step   600/1469  loss 0.8348  grad norm 0.417  feature cosine 0.229  lr 5.00e-05  wd 0.041  238s
+    step   700/1469  loss 0.8345  grad norm 0.419  feature cosine 0.229  lr 4.99e-05  wd 0.041  277s
+    step   800/1469  loss 0.8342  grad norm 0.417  feature cosine 0.229  lr 4.99e-05  wd 0.041  317s
+    step   900/1469  loss 0.8340  grad norm 0.415  feature cosine 0.229  lr 4.99e-05  wd 0.041  356s
+    step  1000/1469  loss 0.8338  grad norm 0.414  feature cosine 0.229  lr 4.99e-05  wd 0.041  396s
+    step  1100/1469  loss 0.8337  grad norm 0.417  feature cosine 0.229  lr 4.99e-05  wd 0.041  436s
+    step  1200/1469  loss 0.8336  grad norm 0.415  feature cosine 0.229  lr 4.99e-05  wd 0.041  475s
+    step  1300/1469  loss 0.8337  grad norm 0.414  feature cosine 0.229  lr 4.99e-05  wd 0.041  515s
+    step  1400/1469  loss 0.8335  grad norm 0.415  feature cosine 0.229  lr 4.99e-05  wd 0.041  555s
+    step  1469/1469  loss 0.8337  grad norm 0.416  feature cosine 0.229  lr 4.99e-05  wd 0.041  582s
+  epoch   5/100  loss 0.8337  feature_cosine 0.2287  feature_std 0.02155  grad_norm 0.416  9.7 min, checkpoint saved
+
+SSL epoch 6/100
+    step   100/1469  loss 0.8335  grad norm 0.369  feature cosine 0.228  lr 4.99e-05  wd 0.041  40s
+    step   200/1469  loss 0.8309  grad norm 0.379  feature cosine 0.228  lr 4.99e-05  wd 0.041  79s
+    step   300/1469  loss 0.8307  grad norm 0.395  feature cosine 0.227  lr 4.99e-05  wd 0.041  119s
+    step   400/1469  loss 0.8290  grad norm 0.391  feature cosine 0.227  lr 4.99e-05  wd 0.041  159s
+    step   500/1469  loss 0.8289  grad norm 0.392  feature cosine 0.227  lr 4.99e-05  wd 0.041  198s
+    step   600/1469  loss 0.8289  grad norm 0.393  feature cosine 0.226  lr 4.99e-05  wd 0.041  238s
+    step   700/1469  loss 0.8290  grad norm 0.393  feature cosine 0.226  lr 4.99e-05  wd 0.041  278s
+    step   800/1469  loss 0.8291  grad norm 0.398  feature cosine 0.226  lr 4.99e-05  wd 0.041  317s
+    step   900/1469  loss 0.8288  grad norm 0.401  feature cosine 0.226  lr 4.99e-05  wd 0.041  357s
+    step  1000/1469  loss 0.8285  grad norm 0.400  feature cosine 0.226  lr 4.99e-05  wd 0.041  397s
+    step  1100/1469  loss 0.8284  grad norm 0.399  feature cosine 0.226  lr 4.99e-05  wd 0.041  437s
+    step  1200/1469  loss 0.8281  grad norm 0.399  feature cosine 0.225  lr 4.99e-05  wd 0.041  476s
+    step  1300/1469  loss 0.8280  grad norm 0.400  feature cosine 0.225  lr 4.99e-05  wd 0.041  516s
+    step  1400/1469  loss 0.8281  grad norm 0.399  feature cosine 0.225  lr 4.98e-05  wd 0.041  556s
+    step  1469/1469  loss 0.8276  grad norm 0.401  feature cosine 0.225  lr 4.98e-05  wd 0.041  583s
+  epoch   6/100  loss 0.8276  feature_cosine 0.2248  feature_std 0.02167  grad_norm 0.4009  9.7 min, checkpoint saved
+
+SSL epoch 7/100
+    step   100/1469  loss 0.8268  grad norm 0.371  feature cosine 0.223  lr 4.98e-05  wd 0.041  40s
+    step   200/1469  loss 0.8257  grad norm 0.373  feature cosine 0.222  lr 4.98e-05  wd 0.041  79s
+    step   300/1469  loss 0.8261  grad norm 0.378  feature cosine 0.222  lr 4.98e-05  wd 0.042  118s
+    step   400/1469  loss 0.8261  grad norm 0.391  feature cosine 0.222  lr 4.98e-05  wd 0.042  158s
+    step   500/1469  loss 0.8266  grad norm 0.392  feature cosine 0.222  lr 4.98e-05  wd 0.042  197s
+    step   600/1469  loss 0.8257  grad norm 0.392  feature cosine 0.222  lr 4.98e-05  wd 0.042  236s
+    step   700/1469  loss 0.8257  grad norm 0.389  feature cosine 0.222  lr 4.98e-05  wd 0.042  275s
+    step   800/1469  loss 0.8246  grad norm 0.393  feature cosine 0.222  lr 4.98e-05  wd 0.042  315s
+    step   900/1469  loss 0.8246  grad norm 0.392  feature cosine 0.222  lr 4.98e-05  wd 0.042  354s
+    step  1000/1469  loss 0.8244  grad norm 0.391  feature cosine 0.222  lr 4.98e-05  wd 0.042  394s
+    step  1100/1469  loss 0.8242  grad norm 0.389  feature cosine 0.222  lr 4.98e-05  wd 0.042  433s
+    step  1200/1469  loss 0.8240  grad norm 0.388  feature cosine 0.222  lr 4.98e-05  wd 0.042  473s
+    step  1300/1469  loss 0.8236  grad norm 0.388  feature cosine 0.222  lr 4.98e-05  wd 0.042  512s
+    step  1400/1469  loss 0.8236  grad norm 0.391  feature cosine 0.222  lr 4.97e-05  wd 0.042  552s
+    step  1469/1469  loss 0.8235  grad norm 0.391  feature cosine 0.221  lr 4.97e-05  wd 0.042  579s
+  epoch   7/100  loss 0.8235  feature_cosine 0.2215  feature_std 0.02179  grad_norm 0.3913  9.7 min, checkpoint saved
+
+SSL epoch 8/100
+    step   100/1469  loss 0.8179  grad norm 0.377  feature cosine 0.218  lr 4.97e-05  wd 0.042  40s
+    step   200/1469  loss 0.8205  grad norm 0.385  feature cosine 0.218  lr 4.97e-05  wd 0.042  79s
+    step   300/1469  loss 0.8202  grad norm 0.389  feature cosine 0.218  lr 4.97e-05  wd 0.042  118s
+    step   400/1469  loss 0.8206  grad norm 0.384  feature cosine 0.217  lr 4.97e-05  wd 0.042  158s
+    step   500/1469  loss 0.8216  grad norm 0.384  feature cosine 0.217  lr 4.97e-05  wd 0.042  197s
+    step   600/1469  loss 0.8218  grad norm 0.383  feature cosine 0.217  lr 4.97e-05  wd 0.042  237s
+    step   700/1469  loss 0.8224  grad norm 0.385  feature cosine 0.217  lr 4.97e-05  wd 0.042  276s
+    step   800/1469  loss 0.8225  grad norm 0.384  feature cosine 0.217  lr 4.97e-05  wd 0.042  316s
+    step   900/1469  loss 0.8221  grad norm 0.384  feature cosine 0.217  lr 4.97e-05  wd 0.042  355s
+    step  1000/1469  loss 0.8216  grad norm 0.383  feature cosine 0.216  lr 4.97e-05  wd 0.042  394s
+    step  1100/1469  loss 0.8215  grad norm 0.382  feature cosine 0.216  lr 4.96e-05  wd 0.042  434s
+    step  1200/1469  loss 0.8212  grad norm 0.383  feature cosine 0.216  lr 4.96e-05  wd 0.042  473s
+    step  1300/1469  loss 0.8210  grad norm 0.383  feature cosine 0.216  lr 4.96e-05  wd 0.042  513s
+    step  1400/1469  loss 0.8209  grad norm 0.382  feature cosine 0.216  lr 4.96e-05  wd 0.042  552s
+    step  1469/1469  loss 0.8212  grad norm 0.381  feature cosine 0.216  lr 4.96e-05  wd 0.043  579s
+  epoch   8/100  loss 0.8212  feature_cosine 0.216  feature_std 0.02194  grad_norm 0.3811  9.7 min, checkpoint saved
+
+SSL epoch 9/100
+    step   100/1469  loss 0.8189  grad norm 0.360  feature cosine 0.214  lr 4.96e-05  wd 0.043  40s
+    step   200/1469  loss 0.8184  grad norm 0.353  feature cosine 0.215  lr 4.96e-05  wd 0.043  79s
+    step   300/1469  loss 0.8171  grad norm 0.355  feature cosine 0.215  lr 4.96e-05  wd 0.043  119s
+    step   400/1469  loss 0.8173  grad norm 0.359  feature cosine 0.215  lr 4.96e-05  wd 0.043  158s
+    step   500/1469  loss 0.8187  grad norm 0.365  feature cosine 0.215  lr 4.96e-05  wd 0.043  198s
+    step   600/1469  loss 0.8184  grad norm 0.367  feature cosine 0.215  lr 4.95e-05  wd 0.043  237s
+    step   700/1469  loss 0.8190  grad norm 0.370  feature cosine 0.215  lr 4.95e-05  wd 0.043  277s
+    step   800/1469  loss 0.8190  grad norm 0.372  feature cosine 0.215  lr 4.95e-05  wd 0.043  316s
+    step   900/1469  loss 0.8197  grad norm 0.373  feature cosine 0.215  lr 4.95e-05  wd 0.043  355s
+    step  1000/1469  loss 0.8196  grad norm 0.371  feature cosine 0.215  lr 4.95e-05  wd 0.043  395s
+    step  1100/1469  loss 0.8193  grad norm 0.370  feature cosine 0.215  lr 4.95e-05  wd 0.043  434s
+    step  1200/1469  loss 0.8189  grad norm 0.371  feature cosine 0.215  lr 4.95e-05  wd 0.043  474s
+    step  1300/1469  loss 0.8185  grad norm 0.370  feature cosine 0.215  lr 4.95e-05  wd 0.043  513s
+    step  1400/1469  loss 0.8183  grad norm 0.368  feature cosine 0.215  lr 4.95e-05  wd 0.043  553s
+    step  1469/1469  loss 0.8182  grad norm 0.368  feature cosine 0.215  lr 4.95e-05  wd 0.043  580s
+  epoch   9/100  loss 0.8182  feature_cosine 0.2153  feature_std 0.02197  grad_norm 0.368  9.7 min, checkpoint saved
+
+SSL epoch 10/100
+    step   100/1469  loss 0.8100  grad norm 0.369  feature cosine 0.216  lr 4.94e-05  wd 0.043  40s
+    step   200/1469  loss 0.8141  grad norm 0.373  feature cosine 0.216  lr 4.94e-05  wd 0.043  79s
+    step   300/1469  loss 0.8163  grad norm 0.365  feature cosine 0.216  lr 4.94e-05  wd 0.043  119s
+    step   400/1469  loss 0.8169  grad norm 0.364  feature cosine 0.215  lr 4.94e-05  wd 0.043  158s
+    step   500/1469  loss 0.8164  grad norm 0.363  feature cosine 0.215  lr 4.94e-05  wd 0.043  197s
+    step   600/1469  loss 0.8161  grad norm 0.361  feature cosine 0.215  lr 4.94e-05  wd 0.043  237s
+    step   700/1469  loss 0.8158  grad norm 0.360  feature cosine 0.215  lr 4.94e-05  wd 0.044  276s
+    step   800/1469  loss 0.8163  grad norm 0.361  feature cosine 0.215  lr 4.94e-05  wd 0.044  316s
+    step   900/1469  loss 0.8164  grad norm 0.359  feature cosine 0.214  lr 4.93e-05  wd 0.044  355s
+    step  1000/1469  loss 0.8163  grad norm 0.359  feature cosine 0.214  lr 4.93e-05  wd 0.044  395s
+    step  1100/1469  loss 0.8164  grad norm 0.360  feature cosine 0.214  lr 4.93e-05  wd 0.044  434s
+    step  1200/1469  loss 0.8167  grad norm 0.359  feature cosine 0.214  lr 4.93e-05  wd 0.044  473s
+    step  1300/1469  loss 0.8166  grad norm 0.359  feature cosine 0.214  lr 4.93e-05  wd 0.044  513s
+    step  1400/1469  loss 0.8165  grad norm 0.359  feature cosine 0.214  lr 4.93e-05  wd 0.044  552s
+    step  1469/1469  loss 0.8165  grad norm 0.359  feature cosine 0.214  lr 4.93e-05  wd 0.044  579s
+  epoch  10/100  loss 0.8165  feature_cosine 0.2139  feature_std 0.02202  grad_norm 0.3591  9.7 min, checkpoint saved
+
+SSL epoch 11/100
+    step   100/1469  loss 0.8111  grad norm 0.358  feature cosine 0.212  lr 4.93e-05  wd 0.044  40s
+    step   200/1469  loss 0.8117  grad norm 0.351  feature cosine 0.212  lr 4.92e-05  wd 0.044  79s
+    step   300/1469  loss 0.8148  grad norm 0.350  feature cosine 0.212  lr 4.92e-05  wd 0.044  119s
+    step   400/1469  loss 0.8146  grad norm 0.354  feature cosine 0.212  lr 4.92e-05  wd 0.044  158s
+    step   500/1469  loss 0.8155  grad norm 0.351  feature cosine 0.212  lr 4.92e-05  wd 0.044  198s
+    step   600/1469  loss 0.8152  grad norm 0.353  feature cosine 0.212  lr 4.92e-05  wd 0.044  237s
+    step   700/1469  loss 0.8155  grad norm 0.354  feature cosine 0.212  lr 4.92e-05  wd 0.044  277s
+    step   800/1469  loss 0.8153  grad norm 0.352  feature cosine 0.212  lr 4.92e-05  wd 0.044  316s
+    step   900/1469  loss 0.8150  grad norm 0.351  feature cosine 0.212  lr 4.92e-05  wd 0.044  355s
+    step  1000/1469  loss 0.8152  grad norm 0.351  feature cosine 0.212  lr 4.91e-05  wd 0.044  395s
+    step  1100/1469  loss 0.8153  grad norm 0.351  feature cosine 0.212  lr 4.91e-05  wd 0.045  435s
+    step  1200/1469  loss 0.8152  grad norm 0.350  feature cosine 0.212  lr 4.91e-05  wd 0.045  474s
+    step  1300/1469  loss 0.8151  grad norm 0.349  feature cosine 0.212  lr 4.91e-05  wd 0.045  514s
+    step  1400/1469  loss 0.8152  grad norm 0.351  feature cosine 0.212  lr 4.91e-05  wd 0.045  553s
+    step  1469/1469  loss 0.8151  grad norm 0.351  feature cosine 0.212  lr 4.91e-05  wd 0.045  580s
+  epoch  11/100  loss 0.8151  feature_cosine 0.2124  feature_std 0.02204  grad_norm 0.3515  9.7 min, checkpoint saved
+
+SSL epoch 12/100
+    step   100/1469  loss 0.8118  grad norm 0.355  feature cosine 0.211  lr 4.91e-05  wd 0.045  40s
+    step   200/1469  loss 0.8104  grad norm 0.353  feature cosine 0.212  lr 4.90e-05  wd 0.045  79s
+    step   300/1469  loss 0.8121  grad norm 0.352  feature cosine 0.212  lr 4.90e-05  wd 0.045  118s
+    step   400/1469  loss 0.8115  grad norm 0.350  feature cosine 0.212  lr 4.90e-05  wd 0.045  157s
+    step   500/1469  loss 0.8122  grad norm 0.347  feature cosine 0.212  lr 4.90e-05  wd 0.045  196s
+    step   600/1469  loss 0.8121  grad norm 0.342  feature cosine 0.212  lr 4.90e-05  wd 0.045  235s
+    step   700/1469  loss 0.8123  grad norm 0.342  feature cosine 0.212  lr 4.90e-05  wd 0.045  275s
+    step   800/1469  loss 0.8120  grad norm 0.343  feature cosine 0.212  lr 4.89e-05  wd 0.045  314s
+    step   900/1469  loss 0.8126  grad norm 0.343  feature cosine 0.212  lr 4.89e-05  wd 0.045  353s
+    step  1000/1469  loss 0.8124  grad norm 0.342  feature cosine 0.211  lr 4.89e-05  wd 0.045  392s
+    step  1100/1469  loss 0.8125  grad norm 0.342  feature cosine 0.211  lr 4.89e-05  wd 0.045  431s
+    step  1200/1469  loss 0.8128  grad norm 0.342  feature cosine 0.211  lr 4.89e-05  wd 0.045  471s
+    step  1300/1469  loss 0.8131  grad norm 0.341  feature cosine 0.211  lr 4.89e-05  wd 0.046  510s
+    step  1400/1469  loss 0.8130  grad norm 0.341  feature cosine 0.211  lr 4.89e-05  wd 0.046  549s
+    step  1469/1469  loss 0.8130  grad norm 0.341  feature cosine 0.211  lr 4.88e-05  wd 0.046  576s
+  epoch  12/100  loss 0.813  feature_cosine 0.2114  feature_std 0.02202  grad_norm 0.3407  9.6 min, checkpoint saved
+
+SSL epoch 13/100
+    step   100/1469  loss 0.8188  grad norm 0.326  feature cosine 0.211  lr 4.88e-05  wd 0.046  40s
+    step   200/1469  loss 0.8174  grad norm 0.326  feature cosine 0.211  lr 4.88e-05  wd 0.046  79s
+    step   300/1469  loss 0.8156  grad norm 0.325  feature cosine 0.211  lr 4.88e-05  wd 0.046  119s
+    step   400/1469  loss 0.8155  grad norm 0.322  feature cosine 0.211  lr 4.88e-05  wd 0.046  158s
+    step   500/1469  loss 0.8137  grad norm 0.326  feature cosine 0.211  lr 4.88e-05  wd 0.046  198s
+    step   600/1469  loss 0.8128  grad norm 0.328  feature cosine 0.211  lr 4.87e-05  wd 0.046  237s
+    step   700/1469  loss 0.8131  grad norm 0.330  feature cosine 0.211  lr 4.87e-05  wd 0.046  277s
+    step   800/1469  loss 0.8132  grad norm 0.329  feature cosine 0.211  lr 4.87e-05  wd 0.046  316s
+    step   900/1469  loss 0.8134  grad norm 0.330  feature cosine 0.211  lr 4.87e-05  wd 0.046  355s
+    step  1000/1469  loss 0.8136  grad norm 0.330  feature cosine 0.211  lr 4.87e-05  wd 0.046  395s
+    step  1100/1469  loss 0.8131  grad norm 0.330  feature cosine 0.211  lr 4.87e-05  wd 0.046  434s
+    step  1200/1469  loss 0.8126  grad norm 0.330  feature cosine 0.211  lr 4.86e-05  wd 0.046  473s
+    step  1300/1469  loss 0.8126  grad norm 0.331  feature cosine 0.211  lr 4.86e-05  wd 0.046  512s
+    step  1400/1469  loss 0.8119  grad norm 0.331  feature cosine 0.211  lr 4.86e-05  wd 0.047  552s
+    step  1469/1469  loss 0.8120  grad norm 0.332  feature cosine 0.212  lr 4.86e-05  wd 0.047  579s
+  epoch  13/100  loss 0.812  feature_cosine 0.2115  feature_std 0.022  grad_norm 0.332  9.7 min, checkpoint saved
+
+SSL epoch 14/100
+    step   100/1469  loss 0.8107  grad norm 0.352  feature cosine 0.210  lr 4.86e-05  wd 0.047  40s
+    step   200/1469  loss 0.8163  grad norm 0.335  feature cosine 0.211  lr 4.85e-05  wd 0.047  79s
+    step   300/1469  loss 0.8155  grad norm 0.333  feature cosine 0.211  lr 4.85e-05  wd 0.047  119s
+    step   400/1469  loss 0.8152  grad norm 0.330  feature cosine 0.211  lr 4.85e-05  wd 0.047  158s
+    step   500/1469  loss 0.8149  grad norm 0.329  feature cosine 0.211  lr 4.85e-05  wd 0.047  197s
+    step   600/1469  loss 0.8136  grad norm 0.327  feature cosine 0.211  lr 4.85e-05  wd 0.047  237s
+    step   700/1469  loss 0.8129  grad norm 0.327  feature cosine 0.211  lr 4.85e-05  wd 0.047  276s
+    step   800/1469  loss 0.8120  grad norm 0.328  feature cosine 0.211  lr 4.84e-05  wd 0.047  316s
+    step   900/1469  loss 0.8116  grad norm 0.329  feature cosine 0.211  lr 4.84e-05  wd 0.047  355s
+    step  1000/1469  loss 0.8117  grad norm 0.329  feature cosine 0.211  lr 4.84e-05  wd 0.047  395s
+    step  1100/1469  loss 0.8117  grad norm 0.328  feature cosine 0.211  lr 4.84e-05  wd 0.047  434s
+    step  1200/1469  loss 0.8113  grad norm 0.327  feature cosine 0.211  lr 4.84e-05  wd 0.047  473s
+    step  1300/1469  loss 0.8110  grad norm 0.328  feature cosine 0.211  lr 4.83e-05  wd 0.047  513s
+    step  1400/1469  loss 0.8109  grad norm 0.329  feature cosine 0.211  lr 4.83e-05  wd 0.048  552s
+    step  1469/1469  loss 0.8107  grad norm 0.329  feature cosine 0.211  lr 4.83e-05  wd 0.048  579s
+  epoch  14/100  loss 0.8107  feature_cosine 0.2109  feature_std 0.022  grad_norm 0.3291  9.7 min, checkpoint saved
+
+SSL epoch 15/100
+    step   100/1469  loss 0.8123  grad norm 0.316  feature cosine 0.210  lr 4.83e-05  wd 0.048  40s
+    step   200/1469  loss 0.8139  grad norm 0.326  feature cosine 0.210  lr 4.83e-05  wd 0.048  79s
+    step   300/1469  loss 0.8132  grad norm 0.320  feature cosine 0.210  lr 4.82e-05  wd 0.048  118s
+    step   400/1469  loss 0.8127  grad norm 0.324  feature cosine 0.210  lr 4.82e-05  wd 0.048  158s
+    step   500/1469  loss 0.8124  grad norm 0.334  feature cosine 0.210  lr 4.82e-05  wd 0.048  197s
+    step   600/1469  loss 0.8118  grad norm 0.333  feature cosine 0.210  lr 4.82e-05  wd 0.048  237s
+    step   700/1469  loss 0.8114  grad norm 0.333  feature cosine 0.210  lr 4.82e-05  wd 0.048  276s
+    step   800/1469  loss 0.8113  grad norm 0.331  feature cosine 0.210  lr 4.81e-05  wd 0.048  316s
+    step   900/1469  loss 0.8111  grad norm 0.332  feature cosine 0.210  lr 4.81e-05  wd 0.048  355s
+    step  1000/1469  loss 0.8111  grad norm 0.330  feature cosine 0.210  lr 4.81e-05  wd 0.048  395s
+    step  1100/1469  loss 0.8107  grad norm 0.327  feature cosine 0.210  lr 4.81e-05  wd 0.048  434s
+    step  1200/1469  loss 0.8104  grad norm 0.326  feature cosine 0.210  lr 4.81e-05  wd 0.049  474s
+    step  1300/1469  loss 0.8101  grad norm 0.326  feature cosine 0.210  lr 4.80e-05  wd 0.049  513s
+    step  1400/1469  loss 0.8097  grad norm 0.325  feature cosine 0.209  lr 4.80e-05  wd 0.049  552s
+    step  1469/1469  loss 0.8099  grad norm 0.325  feature cosine 0.209  lr 4.80e-05  wd 0.049  579s
+  epoch  15/100  loss 0.8099  feature_cosine 0.2095  feature_std 0.02202  grad_norm 0.3251  9.7 min, checkpoint saved
+
+SSL epoch 16/100
+    step   100/1469  loss 0.8105  grad norm 0.331  feature cosine 0.209  lr 4.80e-05  wd 0.049  40s
+    step   200/1469  loss 0.8078  grad norm 0.320  feature cosine 0.209  lr 4.80e-05  wd 0.049  79s
+    step   300/1469  loss 0.8097  grad norm 0.316  feature cosine 0.210  lr 4.79e-05  wd 0.049  119s
+    step   400/1469  loss 0.8092  grad norm 0.323  feature cosine 0.210  lr 4.79e-05  wd 0.049  158s
+    step   500/1469  loss 0.8097  grad norm 0.322  feature cosine 0.210  lr 4.79e-05  wd 0.049  197s
+    step   600/1469  loss 0.8097  grad norm 0.322  feature cosine 0.209  lr 4.79e-05  wd 0.049  237s
+    step   700/1469  loss 0.8096  grad norm 0.321  feature cosine 0.209  lr 4.78e-05  wd 0.049  276s
+    step   800/1469  loss 0.8087  grad norm 0.322  feature cosine 0.209  lr 4.78e-05  wd 0.049  316s
+    step   900/1469  loss 0.8087  grad norm 0.322  feature cosine 0.209  lr 4.78e-05  wd 0.049  355s
+    step  1000/1469  loss 0.8087  grad norm 0.321  feature cosine 0.209  lr 4.78e-05  wd 0.050  394s
+    step  1100/1469  loss 0.8084  grad norm 0.322  feature cosine 0.209  lr 4.78e-05  wd 0.050  434s
+    step  1200/1469  loss 0.8087  grad norm 0.323  feature cosine 0.209  lr 4.77e-05  wd 0.050  473s
+    step  1300/1469  loss 0.8088  grad norm 0.322  feature cosine 0.209  lr 4.77e-05  wd 0.050  512s
+    step  1400/1469  loss 0.8086  grad norm 0.321  feature cosine 0.209  lr 4.77e-05  wd 0.050  551s
+    step  1469/1469  loss 0.8083  grad norm 0.320  feature cosine 0.209  lr 4.77e-05  wd 0.050  578s
+  epoch  16/100  loss 0.8083  feature_cosine 0.2091  feature_std 0.02198  grad_norm 0.3205  9.6 min, checkpoint saved
+
+SSL epoch 17/100
+    step   100/1469  loss 0.8134  grad norm 0.314  feature cosine 0.208  lr 4.77e-05  wd 0.050  40s
+    step   200/1469  loss 0.8114  grad norm 0.317  feature cosine 0.209  lr 4.76e-05  wd 0.050  79s
+    step   300/1469  loss 0.8080  grad norm 0.316  feature cosine 0.209  lr 4.76e-05  wd 0.050  118s
+    step   400/1469  loss 0.8078  grad norm 0.315  feature cosine 0.209  lr 4.76e-05  wd 0.050  158s
+    step   500/1469  loss 0.8080  grad norm 0.313  feature cosine 0.209  lr 4.76e-05  wd 0.050  197s
+    step   600/1469  loss 0.8078  grad norm 0.311  feature cosine 0.209  lr 4.75e-05  wd 0.050  237s
+    step   700/1469  loss 0.8083  grad norm 0.314  feature cosine 0.209  lr 4.75e-05  wd 0.050  276s
+    step   800/1469  loss 0.8087  grad norm 0.313  feature cosine 0.209  lr 4.75e-05  wd 0.051  315s
+    step   900/1469  loss 0.8087  grad norm 0.312  feature cosine 0.209  lr 4.75e-05  wd 0.051  355s
+    step  1000/1469  loss 0.8086  grad norm 0.312  feature cosine 0.209  lr 4.74e-05  wd 0.051  394s
+    step  1100/1469  loss 0.8082  grad norm 0.315  feature cosine 0.209  lr 4.74e-05  wd 0.051  433s
+    step  1200/1469  loss 0.8084  grad norm 0.315  feature cosine 0.209  lr 4.74e-05  wd 0.051  473s
+    step  1300/1469  loss 0.8082  grad norm 0.315  feature cosine 0.209  lr 4.74e-05  wd 0.051  512s
+    step  1400/1469  loss 0.8082  grad norm 0.314  feature cosine 0.209  lr 4.73e-05  wd 0.051  551s
+    step  1469/1469  loss 0.8081  grad norm 0.314  feature cosine 0.209  lr 4.73e-05  wd 0.051  578s
+  epoch  17/100  loss 0.8081  feature_cosine 0.2089  feature_std 0.02199  grad_norm 0.3141  9.6 min, checkpoint saved
+
+SSL epoch 18/100
+    step   100/1469  loss 0.8047  grad norm 0.301  feature cosine 0.207  lr 4.73e-05  wd 0.051  40s
+    step   200/1469  loss 0.8075  grad norm 0.298  feature cosine 0.207  lr 4.73e-05  wd 0.051  79s
+    step   300/1469  loss 0.8072  grad norm 0.301  feature cosine 0.208  lr 4.72e-05  wd 0.051  118s
+    step   400/1469  loss 0.8071  grad norm 0.298  feature cosine 0.208  lr 4.72e-05  wd 0.051  158s
+    step   500/1469  loss 0.8074  grad norm 0.299  feature cosine 0.208  lr 4.72e-05  wd 0.052  197s
+    step   600/1469  loss 0.8070  grad norm 0.303  feature cosine 0.208  lr 4.72e-05  wd 0.052  236s
+    step   700/1469  loss 0.8077  grad norm 0.305  feature cosine 0.208  lr 4.71e-05  wd 0.052  276s
+    step   800/1469  loss 0.8076  grad norm 0.307  feature cosine 0.208  lr 4.71e-05  wd 0.052  315s
+    step   900/1469  loss 0.8073  grad norm 0.307  feature cosine 0.208  lr 4.71e-05  wd 0.052  354s
+    step  1000/1469  loss 0.8070  grad norm 0.307  feature cosine 0.208  lr 4.71e-05  wd 0.052  394s
+    step  1100/1469  loss 0.8073  grad norm 0.309  feature cosine 0.208  lr 4.70e-05  wd 0.052  433s
+    step  1200/1469  loss 0.8071  grad norm 0.310  feature cosine 0.208  lr 4.70e-05  wd 0.052  472s
+    step  1300/1469  loss 0.8066  grad norm 0.310  feature cosine 0.208  lr 4.70e-05  wd 0.052  512s
+    step  1400/1469  loss 0.8069  grad norm 0.311  feature cosine 0.208  lr 4.70e-05  wd 0.052  551s
+    step  1469/1469  loss 0.8071  grad norm 0.311  feature cosine 0.208  lr 4.69e-05  wd 0.052  578s
+  epoch  18/100  loss 0.8071  feature_cosine 0.2077  feature_std 0.02198  grad_norm 0.3108  9.7 min, checkpoint saved
+
+SSL epoch 19/100
+    step   100/1469  loss 0.8074  grad norm 0.305  feature cosine 0.208  lr 4.69e-05  wd 0.053  40s
+    step   200/1469  loss 0.8071  grad norm 0.312  feature cosine 0.207  lr 4.69e-05  wd 0.053  79s
+    step   300/1469  loss 0.8077  grad norm 0.310  feature cosine 0.207  lr 4.69e-05  wd 0.053  118s
+    step   400/1469  loss 0.8075  grad norm 0.315  feature cosine 0.207  lr 4.68e-05  wd 0.053  158s
+    step   500/1469  loss 0.8078  grad norm 0.314  feature cosine 0.207  lr 4.68e-05  wd 0.053  197s
+    step   600/1469  loss 0.8069  grad norm 0.311  feature cosine 0.207  lr 4.68e-05  wd 0.053  236s
+    step   700/1469  loss 0.8071  grad norm 0.311  feature cosine 0.207  lr 4.68e-05  wd 0.053  276s
+    step   800/1469  loss 0.8067  grad norm 0.311  feature cosine 0.207  lr 4.67e-05  wd 0.053  315s
+    step   900/1469  loss 0.8061  grad norm 0.309  feature cosine 0.207  lr 4.67e-05  wd 0.053  355s
+    step  1000/1469  loss 0.8058  grad norm 0.310  feature cosine 0.207  lr 4.67e-05  wd 0.053  394s
+    step  1100/1469  loss 0.8060  grad norm 0.307  feature cosine 0.207  lr 4.67e-05  wd 0.053  433s
+    step  1200/1469  loss 0.8059  grad norm 0.306  feature cosine 0.207  lr 4.66e-05  wd 0.054  473s
+    step  1300/1469  loss 0.8060  grad norm 0.307  feature cosine 0.206  lr 4.66e-05  wd 0.054  512s
+    step  1400/1469  loss 0.8058  grad norm 0.306  feature cosine 0.206  lr 4.66e-05  wd 0.054  551s
+    step  1469/1469  loss 0.8060  grad norm 0.306  feature cosine 0.206  lr 4.66e-05  wd 0.054  579s
+  epoch  19/100  loss 0.806  feature_cosine 0.2064  feature_std 0.02199  grad_norm 0.3058  9.7 min, checkpoint saved
+
+SSL epoch 20/100
+    step   100/1469  loss 0.8091  grad norm 0.304  feature cosine 0.205  lr 4.65e-05  wd 0.054  40s
+    step   200/1469  loss 0.8062  grad norm 0.306  feature cosine 0.206  lr 4.65e-05  wd 0.054  79s
+    step   300/1469  loss 0.8048  grad norm 0.307  feature cosine 0.206  lr 4.65e-05  wd 0.054  118s
+    step   400/1469  loss 0.8062  grad norm 0.306  feature cosine 0.205  lr 4.64e-05  wd 0.054  158s
+    step   500/1469  loss 0.8052  grad norm 0.307  feature cosine 0.205  lr 4.64e-05  wd 0.054  197s
+    step   600/1469  loss 0.8053  grad norm 0.308  feature cosine 0.205  lr 4.64e-05  wd 0.054  236s
+    step   700/1469  loss 0.8055  grad norm 0.309  feature cosine 0.205  lr 4.64e-05  wd 0.055  276s
+    step   800/1469  loss 0.8044  grad norm 0.309  feature cosine 0.205  lr 4.63e-05  wd 0.055  315s
+    step   900/1469  loss 0.8047  grad norm 0.308  feature cosine 0.205  lr 4.63e-05  wd 0.055  354s
+    step  1000/1469  loss 0.8048  grad norm 0.308  feature cosine 0.205  lr 4.63e-05  wd 0.055  394s
+    step  1100/1469  loss 0.8049  grad norm 0.307  feature cosine 0.205  lr 4.62e-05  wd 0.055  433s
+    step  1200/1469  loss 0.8047  grad norm 0.307  feature cosine 0.205  lr 4.62e-05  wd 0.055  472s
+    step  1300/1469  loss 0.8051  grad norm 0.307  feature cosine 0.205  lr 4.62e-05  wd 0.055  512s
+    step  1400/1469  loss 0.8051  grad norm 0.306  feature cosine 0.205  lr 4.62e-05  wd 0.055  551s
+    step  1469/1469  loss 0.8050  grad norm 0.306  feature cosine 0.205  lr 4.61e-05  wd 0.055  578s
+  epoch  20/100  loss 0.805  feature_cosine 0.205  feature_std 0.02199  grad_norm 0.3057  9.6 min, checkpoint saved
+
+SSL epoch 21/100
+    step   100/1469  loss 0.8062  grad norm 0.304  feature cosine 0.206  lr 4.61e-05  wd 0.055  40s
+    step   200/1469  loss 0.8058  grad norm 0.312  feature cosine 0.205  lr 4.61e-05  wd 0.055  79s
+    step   300/1469  loss 0.8080  grad norm 0.306  feature cosine 0.205  lr 4.60e-05  wd 0.056  118s
+    step   400/1469  loss 0.8079  grad norm 0.305  feature cosine 0.205  lr 4.60e-05  wd 0.056  157s
+    step   500/1469  loss 0.8075  grad norm 0.305  feature cosine 0.204  lr 4.60e-05  wd 0.056  197s
+    step   600/1469  loss 0.8066  grad norm 0.305  feature cosine 0.204  lr 4.60e-05  wd 0.056  236s
+    step   700/1469  loss 0.8064  grad norm 0.306  feature cosine 0.205  lr 4.59e-05  wd 0.056  275s
+    step   800/1469  loss 0.8062  grad norm 0.306  feature cosine 0.204  lr 4.59e-05  wd 0.056  314s
+    step   900/1469  loss 0.8063  grad norm 0.307  feature cosine 0.204  lr 4.59e-05  wd 0.056  354s
+    step  1000/1469  loss 0.8059  grad norm 0.307  feature cosine 0.204  lr 4.58e-05  wd 0.056  393s
+    step  1100/1469  loss 0.8053  grad norm 0.306  feature cosine 0.204  lr 4.58e-05  wd 0.056  432s
+    step  1200/1469  loss 0.8050  grad norm 0.305  feature cosine 0.204  lr 4.58e-05  wd 0.057  472s
+    step  1300/1469  loss 0.8049  grad norm 0.304  feature cosine 0.204  lr 4.57e-05  wd 0.057  511s
+    step  1400/1469  loss 0.8046  grad norm 0.304  feature cosine 0.204  lr 4.57e-05  wd 0.057  551s
+    step  1469/1469  loss 0.8048  grad norm 0.304  feature cosine 0.204  lr 4.57e-05  wd 0.057  578s
+  epoch  21/100  loss 0.8048  feature_cosine 0.2042  feature_std 0.022  grad_norm 0.3043  9.6 min, checkpoint saved
+
+SSL epoch 22/100
+    step   100/1469  loss 0.8080  grad norm 0.301  feature cosine 0.203  lr 4.57e-05  wd 0.057  40s
+    step   200/1469  loss 0.8047  grad norm 0.309  feature cosine 0.203  lr 4.56e-05  wd 0.057  79s
+    step   300/1469  loss 0.8059  grad norm 0.310  feature cosine 0.203  lr 4.56e-05  wd 0.057  118s
+    step   400/1469  loss 0.8053  grad norm 0.305  feature cosine 0.203  lr 4.56e-05  wd 0.057  158s
+    step   500/1469  loss 0.8046  grad norm 0.305  feature cosine 0.203  lr 4.55e-05  wd 0.057  197s
+    step   600/1469  loss 0.8035  grad norm 0.303  feature cosine 0.203  lr 4.55e-05  wd 0.057  236s
+    step   700/1469  loss 0.8037  grad norm 0.301  feature cosine 0.203  lr 4.55e-05  wd 0.058  276s
+    step   800/1469  loss 0.8039  grad norm 0.301  feature cosine 0.203  lr 4.54e-05  wd 0.058  315s
+    step   900/1469  loss 0.8040  grad norm 0.302  feature cosine 0.203  lr 4.54e-05  wd 0.058  355s
+    step  1000/1469  loss 0.8042  grad norm 0.302  feature cosine 0.203  lr 4.54e-05  wd 0.058  394s
+    step  1100/1469  loss 0.8041  grad norm 0.302  feature cosine 0.203  lr 4.53e-05  wd 0.058  433s
+    step  1200/1469  loss 0.8037  grad norm 0.304  feature cosine 0.203  lr 4.53e-05  wd 0.058  472s
+    step  1300/1469  loss 0.8037  grad norm 0.305  feature cosine 0.203  lr 4.53e-05  wd 0.058  512s
+    step  1400/1469  loss 0.8040  grad norm 0.304  feature cosine 0.203  lr 4.53e-05  wd 0.058  551s
+    step  1469/1469  loss 0.8041  grad norm 0.305  feature cosine 0.203  lr 4.52e-05  wd 0.058  578s
+  epoch  22/100  loss 0.8041  feature_cosine 0.2028  feature_std 0.02199  grad_norm 0.3046  9.8 min, checkpoint saved
+
+SSL epoch 23/100
+    step   100/1469  loss 0.8055  grad norm 0.314  feature cosine 0.203  lr 4.52e-05  wd 0.058  39s
+    step   200/1469  loss 0.8031  grad norm 0.314  feature cosine 0.203  lr 4.52e-05  wd 0.059  79s
+    step   300/1469  loss 0.8021  grad norm 0.312  feature cosine 0.203  lr 4.51e-05  wd 0.059  118s
+    step   400/1469  loss 0.8038  grad norm 0.308  feature cosine 0.203  lr 4.51e-05  wd 0.059  157s
+    step   500/1469  loss 0.8053  grad norm 0.306  feature cosine 0.203  lr 4.51e-05  wd 0.059  196s
+    step   600/1469  loss 0.8056  grad norm 0.304  feature cosine 0.203  lr 4.50e-05  wd 0.059  235s
+    step   700/1469  loss 0.8048  grad norm 0.303  feature cosine 0.202  lr 4.50e-05  wd 0.059  275s
+    step   800/1469  loss 0.8036  grad norm 0.304  feature cosine 0.202  lr 4.50e-05  wd 0.059  314s
+    step   900/1469  loss 0.8032  grad norm 0.303  feature cosine 0.202  lr 4.49e-05  wd 0.059  353s
+    step  1000/1469  loss 0.8027  grad norm 0.303  feature cosine 0.202  lr 4.49e-05  wd 0.059  393s
+    step  1100/1469  loss 0.8029  grad norm 0.302  feature cosine 0.202  lr 4.49e-05  wd 0.060  432s
+    step  1200/1469  loss 0.8031  grad norm 0.302  feature cosine 0.202  lr 4.48e-05  wd 0.060  471s
+    step  1300/1469  loss 0.8034  grad norm 0.301  feature cosine 0.202  lr 4.48e-05  wd 0.060  510s
+    step  1400/1469  loss 0.8034  grad norm 0.301  feature cosine 0.202  lr 4.48e-05  wd 0.060  550s
+    step  1469/1469  loss 0.8034  grad norm 0.301  feature cosine 0.202  lr 4.47e-05  wd 0.060  577s
+  epoch  23/100  loss 0.8034  feature_cosine 0.2023  feature_std 0.02198  grad_norm 0.301  9.6 min, checkpoint saved
+
+SSL epoch 24/100
+    step   100/1469  loss 0.8012  grad norm 0.299  feature cosine 0.202  lr 4.47e-05  wd 0.060  40s
+    step   200/1469  loss 0.8002  grad norm 0.303  feature cosine 0.202  lr 4.47e-05  wd 0.060  79s
+    step   300/1469  loss 0.8008  grad norm 0.304  feature cosine 0.202  lr 4.46e-05  wd 0.060  118s
+    step   400/1469  loss 0.8024  grad norm 0.299  feature cosine 0.202  lr 4.46e-05  wd 0.060  157s
+    step   500/1469  loss 0.8017  grad norm 0.299  feature cosine 0.202  lr 4.46e-05  wd 0.061  196s
+    step   600/1469  loss 0.8014  grad norm 0.298  feature cosine 0.201  lr 4.45e-05  wd 0.061  235s
+    step   700/1469  loss 0.8021  grad norm 0.299  feature cosine 0.201  lr 4.45e-05  wd 0.061  275s
+    step   800/1469  loss 0.8024  grad norm 0.300  feature cosine 0.201  lr 4.45e-05  wd 0.061  314s
+    step   900/1469  loss 0.8023  grad norm 0.300  feature cosine 0.201  lr 4.44e-05  wd 0.061  353s
+    step  1000/1469  loss 0.8024  grad norm 0.300  feature cosine 0.201  lr 4.44e-05  wd 0.061  392s
+    step  1100/1469  loss 0.8027  grad norm 0.299  feature cosine 0.201  lr 4.44e-05  wd 0.061  431s
+    step  1200/1469  loss 0.8026  grad norm 0.301  feature cosine 0.201  lr 4.43e-05  wd 0.061  470s
+    step  1300/1469  loss 0.8028  grad norm 0.302  feature cosine 0.201  lr 4.43e-05  wd 0.061  509s
+    step  1400/1469  loss 0.8028  grad norm 0.301  feature cosine 0.201  lr 4.43e-05  wd 0.062  549s
+    step  1469/1469  loss 0.8026  grad norm 0.301  feature cosine 0.201  lr 4.42e-05  wd 0.062  576s
+  epoch  24/100  loss 0.8026  feature_cosine 0.2011  feature_std 0.02197  grad_norm 0.3007  9.6 min, checkpoint saved
+
+SSL epoch 25/100
+    step   100/1469  loss 0.8028  grad norm 0.316  feature cosine 0.201  lr 4.42e-05  wd 0.062  40s
+    step   200/1469  loss 0.8031  grad norm 0.308  feature cosine 0.202  lr 4.42e-05  wd 0.062  79s
+    step   300/1469  loss 0.8033  grad norm 0.305  feature cosine 0.202  lr 4.41e-05  wd 0.062  119s
+    step   400/1469  loss 0.8034  grad norm 0.303  feature cosine 0.201  lr 4.41e-05  wd 0.062  158s
+    step   500/1469  loss 0.8028  grad norm 0.300  feature cosine 0.201  lr 4.41e-05  wd 0.062  197s
+    step   600/1469  loss 0.8030  grad norm 0.302  feature cosine 0.201  lr 4.40e-05  wd 0.062  237s
+    step   700/1469  loss 0.8023  grad norm 0.302  feature cosine 0.201  lr 4.40e-05  wd 0.063  276s
+    step   800/1469  loss 0.8020  grad norm 0.302  feature cosine 0.201  lr 4.40e-05  wd 0.063  316s
+    step   900/1469  loss 0.8024  grad norm 0.302  feature cosine 0.201  lr 4.39e-05  wd 0.063  355s
+    step  1000/1469  loss 0.8027  grad norm 0.302  feature cosine 0.201  lr 4.39e-05  wd 0.063  394s
+    step  1100/1469  loss 0.8026  grad norm 0.301  feature cosine 0.201  lr 4.39e-05  wd 0.063  434s
+    step  1200/1469  loss 0.8028  grad norm 0.301  feature cosine 0.201  lr 4.38e-05  wd 0.063  473s
+    step  1300/1469  loss 0.8028  grad norm 0.302  feature cosine 0.201  lr 4.38e-05  wd 0.063  513s
+    step  1400/1469  loss 0.8029  grad norm 0.302  feature cosine 0.201  lr 4.37e-05  wd 0.063  552s
+    step  1469/1469  loss 0.8027  grad norm 0.301  feature cosine 0.201  lr 4.37e-05  wd 0.063  579s
+  epoch  25/100  loss 0.8027  feature_cosine 0.2008  feature_std 0.02198  grad_norm 0.3014  9.7 min, checkpoint saved
+
+SSL epoch 26/100
+    step   100/1469  loss 0.8001  grad norm 0.300  feature cosine 0.200  lr 4.37e-05  wd 0.064  40s
+    step   200/1469  loss 0.8025  grad norm 0.294  feature cosine 0.200  lr 4.36e-05  wd 0.064  79s
+    step   300/1469  loss 0.8025  grad norm 0.296  feature cosine 0.200  lr 4.36e-05  wd 0.064  119s
+    step   400/1469  loss 0.8019  grad norm 0.298  feature cosine 0.200  lr 4.36e-05  wd 0.064  158s
+    step   500/1469  loss 0.8018  grad norm 0.297  feature cosine 0.200  lr 4.35e-05  wd 0.064  197s
+    step   600/1469  loss 0.8019  grad norm 0.295  feature cosine 0.200  lr 4.35e-05  wd 0.064  237s
+    step   700/1469  loss 0.8023  grad norm 0.296  feature cosine 0.199  lr 4.35e-05  wd 0.064  276s
+    step   800/1469  loss 0.8019  grad norm 0.296  feature cosine 0.199  lr 4.34e-05  wd 0.064  315s
+    step   900/1469  loss 0.8018  grad norm 0.297  feature cosine 0.199  lr 4.34e-05  wd 0.065  355s
+    step  1000/1469  loss 0.8020  grad norm 0.296  feature cosine 0.199  lr 4.34e-05  wd 0.065  394s
+    step  1100/1469  loss 0.8023  grad norm 0.295  feature cosine 0.199  lr 4.33e-05  wd 0.065  433s
+    step  1200/1469  loss 0.8025  grad norm 0.295  feature cosine 0.199  lr 4.33e-05  wd 0.065  472s
+    step  1300/1469  loss 0.8029  grad norm 0.296  feature cosine 0.199  lr 4.32e-05  wd 0.065  511s
+    step  1400/1469  loss 0.8026  grad norm 0.297  feature cosine 0.199  lr 4.32e-05  wd 0.065  550s
+    step  1469/1469  loss 0.8024  grad norm 0.299  feature cosine 0.199  lr 4.32e-05  wd 0.065  577s
+  epoch  26/100  loss 0.8024  feature_cosine 0.1988  feature_std 0.02197  grad_norm 0.2987  9.6 min, checkpoint saved
+
+SSL epoch 27/100
+    step   100/1469  loss 0.8008  grad norm 0.294  feature cosine 0.198  lr 4.31e-05  wd 0.065  40s
+    step   200/1469  loss 0.8033  grad norm 0.294  feature cosine 0.198  lr 4.31e-05  wd 0.065  79s
+    step   300/1469  loss 0.8026  grad norm 0.293  feature cosine 0.198  lr 4.31e-05  wd 0.066  118s
+    step   400/1469  loss 0.8019  grad norm 0.296  feature cosine 0.199  lr 4.30e-05  wd 0.066  157s
+    step   500/1469  loss 0.8023  grad norm 0.300  feature cosine 0.199  lr 4.30e-05  wd 0.066  196s
+    step   600/1469  loss 0.8025  grad norm 0.300  feature cosine 0.199  lr 4.29e-05  wd 0.066  235s
+    step   700/1469  loss 0.8031  grad norm 0.301  feature cosine 0.199  lr 4.29e-05  wd 0.066  274s
+    step   800/1469  loss 0.8030  grad norm 0.302  feature cosine 0.199  lr 4.29e-05  wd 0.066  313s
+    step   900/1469  loss 0.8025  grad norm 0.300  feature cosine 0.199  lr 4.28e-05  wd 0.066  352s
+    step  1000/1469  loss 0.8022  grad norm 0.300  feature cosine 0.199  lr 4.28e-05  wd 0.066  391s
+    step  1100/1469  loss 0.8019  grad norm 0.299  feature cosine 0.199  lr 4.28e-05  wd 0.067  430s
+    step  1200/1469  loss 0.8017  grad norm 0.299  feature cosine 0.199  lr 4.27e-05  wd 0.067  469s
+    step  1300/1469  loss 0.8019  grad norm 0.299  feature cosine 0.199  lr 4.27e-05  wd 0.067  508s
+    step  1400/1469  loss 0.8018  grad norm 0.299  feature cosine 0.199  lr 4.26e-05  wd 0.067  547s
+    step  1469/1469  loss 0.8018  grad norm 0.299  feature cosine 0.199  lr 4.26e-05  wd 0.067  574s
+  epoch  27/100  loss 0.8018  feature_cosine 0.1988  feature_std 0.02197  grad_norm 0.2994  9.7 min, checkpoint saved
+
+SSL epoch 28/100
+    step   100/1469  loss 0.8009  grad norm 0.303  feature cosine 0.200  lr 4.26e-05  wd 0.067  39s
+    step   200/1469  loss 0.8011  grad norm 0.298  feature cosine 0.199  lr 4.25e-05  wd 0.067  78s
+    step   300/1469  loss 0.7999  grad norm 0.300  feature cosine 0.199  lr 4.25e-05  wd 0.067  117s
+    step   400/1469  loss 0.8000  grad norm 0.299  feature cosine 0.199  lr 4.25e-05  wd 0.068  156s
+    step   500/1469  loss 0.8006  grad norm 0.298  feature cosine 0.199  lr 4.24e-05  wd 0.068  195s
+    step   600/1469  loss 0.8002  grad norm 0.298  feature cosine 0.199  lr 4.24e-05  wd 0.068  234s
+    step   700/1469  loss 0.8000  grad norm 0.300  feature cosine 0.199  lr 4.23e-05  wd 0.068  273s
+    step   800/1469  loss 0.8005  grad norm 0.301  feature cosine 0.199  lr 4.23e-05  wd 0.068  312s
+    step   900/1469  loss 0.8007  grad norm 0.300  feature cosine 0.199  lr 4.23e-05  wd 0.068  351s
+    step  1000/1469  loss 0.8007  grad norm 0.299  feature cosine 0.199  lr 4.22e-05  wd 0.068  390s
+    step  1100/1469  loss 0.8009  grad norm 0.300  feature cosine 0.199  lr 4.22e-05  wd 0.069  429s
+    step  1200/1469  loss 0.8007  grad norm 0.299  feature cosine 0.199  lr 4.21e-05  wd 0.069  468s
+    step  1300/1469  loss 0.8012  grad norm 0.299  feature cosine 0.199  lr 4.21e-05  wd 0.069  507s
+    step  1400/1469  loss 0.8011  grad norm 0.299  feature cosine 0.199  lr 4.21e-05  wd 0.069  546s
+    step  1469/1469  loss 0.8011  grad norm 0.299  feature cosine 0.199  lr 4.20e-05  wd 0.069  573s
+  epoch  28/100  loss 0.8011  feature_cosine 0.1986  feature_std 0.02196  grad_norm 0.2985  9.6 min, checkpoint saved
+
+SSL epoch 29/100
+    step   100/1469  loss 0.8021  grad norm 0.285  feature cosine 0.199  lr 4.20e-05  wd 0.069  40s
+    step   200/1469  loss 0.7992  grad norm 0.279  feature cosine 0.199  lr 4.20e-05  wd 0.069  79s
+    step   300/1469  loss 0.8011  grad norm 0.287  feature cosine 0.198  lr 4.19e-05  wd 0.069  118s
+    step   400/1469  loss 0.7994  grad norm 0.287  feature cosine 0.199  lr 4.19e-05  wd 0.070  157s
+    step   500/1469  loss 0.7995  grad norm 0.292  feature cosine 0.198  lr 4.18e-05  wd 0.070  196s
+    step   600/1469  loss 0.8001  grad norm 0.291  feature cosine 0.198  lr 4.18e-05  wd 0.070  235s
+    step   700/1469  loss 0.8005  grad norm 0.292  feature cosine 0.198  lr 4.18e-05  wd 0.070  274s
+    step   800/1469  loss 0.7998  grad norm 0.291  feature cosine 0.198  lr 4.17e-05  wd 0.070  313s
+    step   900/1469  loss 0.8006  grad norm 0.292  feature cosine 0.198  lr 4.17e-05  wd 0.070  353s
+    step  1000/1469  loss 0.8005  grad norm 0.292  feature cosine 0.198  lr 4.16e-05  wd 0.070  392s
+    step  1100/1469  loss 0.8005  grad norm 0.292  feature cosine 0.198  lr 4.16e-05  wd 0.070  431s
+    step  1200/1469  loss 0.8013  grad norm 0.293  feature cosine 0.198  lr 4.15e-05  wd 0.071  471s
+    step  1300/1469  loss 0.8013  grad norm 0.293  feature cosine 0.198  lr 4.15e-05  wd 0.071  510s
+    step  1400/1469  loss 0.8012  grad norm 0.292  feature cosine 0.198  lr 4.15e-05  wd 0.071  549s
+    step  1469/1469  loss 0.8015  grad norm 0.293  feature cosine 0.198  lr 4.14e-05  wd 0.071  576s
+  epoch  29/100  loss 0.8015  feature_cosine 0.1981  feature_std 0.02196  grad_norm 0.2929  9.6 min, checkpoint saved
+
+SSL epoch 30/100
+    step   100/1469  loss 0.7996  grad norm 0.298  feature cosine 0.198  lr 4.14e-05  wd 0.071  39s
+    step   200/1469  loss 0.8004  grad norm 0.300  feature cosine 0.198  lr 4.14e-05  wd 0.071  79s
+    step   300/1469  loss 0.8001  grad norm 0.298  feature cosine 0.198  lr 4.13e-05  wd 0.071  118s
+    step   400/1469  loss 0.8015  grad norm 0.298  feature cosine 0.197  lr 4.13e-05  wd 0.072  157s
+    step   500/1469  loss 0.8014  grad norm 0.298  feature cosine 0.197  lr 4.12e-05  wd 0.072  196s
+    step   600/1469  loss 0.8011  grad norm 0.296  feature cosine 0.197  lr 4.12e-05  wd 0.072  235s
+    step   700/1469  loss 0.8011  grad norm 0.293  feature cosine 0.197  lr 4.11e-05  wd 0.072  274s
+    step   800/1469  loss 0.8011  grad norm 0.296  feature cosine 0.197  lr 4.11e-05  wd 0.072  313s
+    step   900/1469  loss 0.8009  grad norm 0.296  feature cosine 0.197  lr 4.11e-05  wd 0.072  352s
+    step  1000/1469  loss 0.8009  grad norm 0.297  feature cosine 0.197  lr 4.10e-05  wd 0.072  391s
+    step  1100/1469  loss 0.8006  grad norm 0.296  feature cosine 0.197  lr 4.10e-05  wd 0.072  430s
+    step  1200/1469  loss 0.8005  grad norm 0.296  feature cosine 0.197  lr 4.09e-05  wd 0.073  469s
+    step  1300/1469  loss 0.8004  grad norm 0.297  feature cosine 0.197  lr 4.09e-05  wd 0.073  508s
+    step  1400/1469  loss 0.8005  grad norm 0.296  feature cosine 0.197  lr 4.08e-05  wd 0.073  547s
+    step  1469/1469  loss 0.8004  grad norm 0.296  feature cosine 0.197  lr 4.08e-05  wd 0.073  574s
+  epoch  30/100  loss 0.8004  feature_cosine 0.1969  feature_std 0.02195  grad_norm 0.2956  9.6 min, checkpoint saved
+
+SSL epoch 31/100
+    step   100/1469  loss 0.8019  grad norm 0.313  feature cosine 0.196  lr 4.08e-05  wd 0.073  40s
+    step   200/1469  loss 0.8008  grad norm 0.305  feature cosine 0.197  lr 4.07e-05  wd 0.073  79s
+    step   300/1469  loss 0.8022  grad norm 0.304  feature cosine 0.197  lr 4.07e-05  wd 0.073  118s
+    step   400/1469  loss 0.8023  grad norm 0.302  feature cosine 0.197  lr 4.07e-05  wd 0.074  157s
+    step   500/1469  loss 0.8025  grad norm 0.302  feature cosine 0.197  lr 4.06e-05  wd 0.074  195s
+    step   600/1469  loss 0.8014  grad norm 0.302  feature cosine 0.197  lr 4.06e-05  wd 0.074  234s
+    step   700/1469  loss 0.8017  grad norm 0.300  feature cosine 0.197  lr 4.05e-05  wd 0.074  274s
+    step   800/1469  loss 0.8016  grad norm 0.300  feature cosine 0.197  lr 4.05e-05  wd 0.074  313s
+    step   900/1469  loss 0.8012  grad norm 0.299  feature cosine 0.197  lr 4.04e-05  wd 0.074  352s
+    step  1000/1469  loss 0.8007  grad norm 0.300  feature cosine 0.197  lr 4.04e-05  wd 0.074  392s
+    step  1100/1469  loss 0.8002  grad norm 0.298  feature cosine 0.197  lr 4.03e-05  wd 0.075  431s
+    step  1200/1469  loss 0.8003  grad norm 0.297  feature cosine 0.197  lr 4.03e-05  wd 0.075  469s
+    step  1300/1469  loss 0.8002  grad norm 0.297  feature cosine 0.197  lr 4.03e-05  wd 0.075  508s
+    step  1400/1469  loss 0.8003  grad norm 0.297  feature cosine 0.197  lr 4.02e-05  wd 0.075  548s
+    step  1469/1469  loss 0.8003  grad norm 0.298  feature cosine 0.197  lr 4.02e-05  wd 0.075  575s
+  epoch  31/100  loss 0.8003  feature_cosine 0.1967  feature_std 0.02197  grad_norm 0.2979  9.6 min, checkpoint saved
+
+SSL epoch 32/100
+    step   100/1469  loss 0.8028  grad norm 0.284  feature cosine 0.197  lr 4.01e-05  wd 0.075  40s
+    step   200/1469  loss 0.8026  grad norm 0.291  feature cosine 0.196  lr 4.01e-05  wd 0.075  79s
+    step   300/1469  loss 0.8016  grad norm 0.290  feature cosine 0.196  lr 4.01e-05  wd 0.075  118s
+    step   400/1469  loss 0.8003  grad norm 0.295  feature cosine 0.197  lr 4.00e-05  wd 0.076  157s
+    step   500/1469  loss 0.8004  grad norm 0.293  feature cosine 0.197  lr 4.00e-05  wd 0.076  196s
+    step   600/1469  loss 0.8007  grad norm 0.294  feature cosine 0.197  lr 3.99e-05  wd 0.076  235s
+    step   700/1469  loss 0.8008  grad norm 0.295  feature cosine 0.197  lr 3.99e-05  wd 0.076  274s
+    step   800/1469  loss 0.8009  grad norm 0.295  feature cosine 0.197  lr 3.98e-05  wd 0.076  314s
+    step   900/1469  loss 0.8006  grad norm 0.293  feature cosine 0.197  lr 3.98e-05  wd 0.076  353s
+    step  1000/1469  loss 0.7998  grad norm 0.293  feature cosine 0.197  lr 3.98e-05  wd 0.076  392s
+    step  1100/1469  loss 0.7999  grad norm 0.293  feature cosine 0.197  lr 3.97e-05  wd 0.077  431s
+    step  1200/1469  loss 0.7997  grad norm 0.293  feature cosine 0.197  lr 3.97e-05  wd 0.077  470s
+    step  1300/1469  loss 0.7997  grad norm 0.293  feature cosine 0.197  lr 3.96e-05  wd 0.077  510s
+    step  1400/1469  loss 0.7997  grad norm 0.292  feature cosine 0.197  lr 3.96e-05  wd 0.077  549s
+    step  1469/1469  loss 0.7997  grad norm 0.292  feature cosine 0.197  lr 3.95e-05  wd 0.077  576s
+  epoch  32/100  loss 0.7997  feature_cosine 0.1966  feature_std 0.02195  grad_norm 0.2919  9.6 min, checkpoint saved
+
+SSL epoch 33/100
+    step   100/1469  loss 0.7960  grad norm 0.303  feature cosine 0.196  lr 3.95e-05  wd 0.077  39s
+    step   200/1469  loss 0.7987  grad norm 0.299  feature cosine 0.196  lr 3.95e-05  wd 0.077  78s
+    step   300/1469  loss 0.7990  grad norm 0.296  feature cosine 0.196  lr 3.94e-05  wd 0.078  117s
+    step   400/1469  loss 0.7989  grad norm 0.299  feature cosine 0.196  lr 3.94e-05  wd 0.078  156s
+    step   500/1469  loss 0.7985  grad norm 0.298  feature cosine 0.196  lr 3.93e-05  wd 0.078  195s
+    step   600/1469  loss 0.7990  grad norm 0.297  feature cosine 0.196  lr 3.93e-05  wd 0.078  235s
+    step   700/1469  loss 0.7992  grad norm 0.298  feature cosine 0.196  lr 3.92e-05  wd 0.078  274s
+    step   800/1469  loss 0.7990  grad norm 0.297  feature cosine 0.196  lr 3.92e-05  wd 0.078  313s
+    step   900/1469  loss 0.7994  grad norm 0.296  feature cosine 0.196  lr 3.91e-05  wd 0.078  352s
+    step  1000/1469  loss 0.7993  grad norm 0.296  feature cosine 0.196  lr 3.91e-05  wd 0.079  391s
+    step  1100/1469  loss 0.7999  grad norm 0.297  feature cosine 0.196  lr 3.90e-05  wd 0.079  430s
+    step  1200/1469  loss 0.8000  grad norm 0.297  feature cosine 0.196  lr 3.90e-05  wd 0.079  469s
+    step  1300/1469  loss 0.7999  grad norm 0.295  feature cosine 0.196  lr 3.90e-05  wd 0.079  509s
+    step  1400/1469  loss 0.7998  grad norm 0.295  feature cosine 0.196  lr 3.89e-05  wd 0.079  548s
+    step  1469/1469  loss 0.7997  grad norm 0.295  feature cosine 0.196  lr 3.89e-05  wd 0.079  575s
+  epoch  33/100  loss 0.7997  feature_cosine 0.1959  feature_std 0.02196  grad_norm 0.2948  9.6 min, checkpoint saved
+
+SSL epoch 34/100
+    step   100/1469  loss 0.7960  grad norm 0.289  feature cosine 0.196  lr 3.88e-05  wd 0.079  40s
+    step   200/1469  loss 0.7961  grad norm 0.293  feature cosine 0.196  lr 3.88e-05  wd 0.080  79s
+    step   300/1469  loss 0.7957  grad norm 0.291  feature cosine 0.196  lr 3.87e-05  wd 0.080  119s
+    step   400/1469  loss 0.7960  grad norm 0.291  feature cosine 0.196  lr 3.87e-05  wd 0.080  158s
+    step   500/1469  loss 0.7970  grad norm 0.293  feature cosine 0.196  lr 3.87e-05  wd 0.080  197s
+    step   600/1469  loss 0.7973  grad norm 0.295  feature cosine 0.196  lr 3.86e-05  wd 0.080  237s
+    step   700/1469  loss 0.7979  grad norm 0.295  feature cosine 0.196  lr 3.86e-05  wd 0.080  276s
+    step   800/1469  loss 0.7987  grad norm 0.295  feature cosine 0.196  lr 3.85e-05  wd 0.080  316s
+    step   900/1469  loss 0.7988  grad norm 0.294  feature cosine 0.196  lr 3.85e-05  wd 0.081  355s
+    step  1000/1469  loss 0.7992  grad norm 0.294  feature cosine 0.196  lr 3.84e-05  wd 0.081  395s
+    step  1100/1469  loss 0.7995  grad norm 0.296  feature cosine 0.196  lr 3.84e-05  wd 0.081  434s
+    step  1200/1469  loss 0.7995  grad norm 0.295  feature cosine 0.196  lr 3.83e-05  wd 0.081  474s
+    step  1300/1469  loss 0.7996  grad norm 0.295  feature cosine 0.195  lr 3.83e-05  wd 0.081  513s
+    step  1400/1469  loss 0.7996  grad norm 0.295  feature cosine 0.195  lr 3.82e-05  wd 0.081  553s
+    step  1469/1469  loss 0.7992  grad norm 0.296  feature cosine 0.195  lr 3.82e-05  wd 0.081  580s
+  epoch  34/100  loss 0.7992  feature_cosine 0.1954  feature_std 0.02195  grad_norm 0.2956  9.7 min, checkpoint saved
+
+SSL epoch 35/100
+    step   100/1469  loss 0.8014  grad norm 0.293  feature cosine 0.195  lr 3.82e-05  wd 0.082  40s
+    step   200/1469  loss 0.7985  grad norm 0.288  feature cosine 0.195  lr 3.81e-05  wd 0.082  79s
+    step   300/1469  loss 0.7977  grad norm 0.291  feature cosine 0.195  lr 3.81e-05  wd 0.082  119s
+    step   400/1469  loss 0.7976  grad norm 0.292  feature cosine 0.195  lr 3.80e-05  wd 0.082  158s
+    step   500/1469  loss 0.7986  grad norm 0.293  feature cosine 0.195  lr 3.80e-05  wd 0.082  198s
+    step   600/1469  loss 0.7988  grad norm 0.293  feature cosine 0.195  lr 3.79e-05  wd 0.082  237s
+    step   700/1469  loss 0.7995  grad norm 0.293  feature cosine 0.195  lr 3.79e-05  wd 0.083  277s
+    step   800/1469  loss 0.7996  grad norm 0.292  feature cosine 0.195  lr 3.78e-05  wd 0.083  316s
+    step   900/1469  loss 0.7997  grad norm 0.292  feature cosine 0.195  lr 3.78e-05  wd 0.083  356s
+    step  1000/1469  loss 0.7999  grad norm 0.292  feature cosine 0.195  lr 3.77e-05  wd 0.083  395s
+    step  1100/1469  loss 0.8000  grad norm 0.292  feature cosine 0.195  lr 3.77e-05  wd 0.083  435s
+    step  1200/1469  loss 0.7996  grad norm 0.292  feature cosine 0.195  lr 3.76e-05  wd 0.083  474s
+    step  1300/1469  loss 0.7994  grad norm 0.292  feature cosine 0.195  lr 3.76e-05  wd 0.083  514s
+    step  1400/1469  loss 0.7995  grad norm 0.292  feature cosine 0.195  lr 3.75e-05  wd 0.084  554s
+    step  1469/1469  loss 0.7996  grad norm 0.291  feature cosine 0.195  lr 3.75e-05  wd 0.084  581s
+  epoch  35/100  loss 0.7996  feature_cosine 0.1949  feature_std 0.02198  grad_norm 0.2912  9.7 min, checkpoint saved
+
+SSL epoch 36/100
+    step   100/1469  loss 0.7935  grad norm 0.291  feature cosine 0.195  lr 3.75e-05  wd 0.084  40s
+    step   200/1469  loss 0.7957  grad norm 0.294  feature cosine 0.195  lr 3.74e-05  wd 0.084  79s
+    step   300/1469  loss 0.7970  grad norm 0.295  feature cosine 0.194  lr 3.74e-05  wd 0.084  119s
+    step   400/1469  loss 0.7977  grad norm 0.293  feature cosine 0.194  lr 3.73e-05  wd 0.084  158s
+    step   500/1469  loss 0.7979  grad norm 0.294  feature cosine 0.194  lr 3.73e-05  wd 0.084  198s
+    step   600/1469  loss 0.7981  grad norm 0.294  feature cosine 0.194  lr 3.72e-05  wd 0.085  237s
+    step   700/1469  loss 0.7985  grad norm 0.293  feature cosine 0.194  lr 3.72e-05  wd 0.085  277s
+    step   800/1469  loss 0.7983  grad norm 0.293  feature cosine 0.194  lr 3.71e-05  wd 0.085  316s
+    step   900/1469  loss 0.7981  grad norm 0.292  feature cosine 0.195  lr 3.71e-05  wd 0.085  355s
+    step  1000/1469  loss 0.7982  grad norm 0.292  feature cosine 0.195  lr 3.70e-05  wd 0.085  394s
+    step  1100/1469  loss 0.7982  grad norm 0.292  feature cosine 0.195  lr 3.70e-05  wd 0.085  434s
+    step  1200/1469  loss 0.7986  grad norm 0.292  feature cosine 0.195  lr 3.69e-05  wd 0.086  473s
+    step  1300/1469  loss 0.7988  grad norm 0.292  feature cosine 0.195  lr 3.69e-05  wd 0.086  513s
+    step  1400/1469  loss 0.7988  grad norm 0.292  feature cosine 0.195  lr 3.68e-05  wd 0.086  552s
+    step  1469/1469  loss 0.7986  grad norm 0.293  feature cosine 0.195  lr 3.68e-05  wd 0.086  580s
+  epoch  36/100  loss 0.7986  feature_cosine 0.1947  feature_std 0.02197  grad_norm 0.2928  9.7 min, checkpoint saved
+
+SSL epoch 37/100
+    step   100/1469  loss 0.8009  grad norm 0.291  feature cosine 0.196  lr 3.68e-05  wd 0.086  40s
+    step   200/1469  loss 0.7998  grad norm 0.289  feature cosine 0.196  lr 3.67e-05  wd 0.086  79s
+    step   300/1469  loss 0.8003  grad norm 0.292  feature cosine 0.195  lr 3.67e-05  wd 0.086  119s
+    step   400/1469  loss 0.7996  grad norm 0.293  feature cosine 0.195  lr 3.66e-05  wd 0.087  158s
+    step   500/1469  loss 0.7994  grad norm 0.290  feature cosine 0.195  lr 3.66e-05  wd 0.087  197s
+    step   600/1469  loss 0.7991  grad norm 0.289  feature cosine 0.195  lr 3.65e-05  wd 0.087  236s
+    step   700/1469  loss 0.7989  grad norm 0.289  feature cosine 0.195  lr 3.65e-05  wd 0.087  276s
+    step   800/1469  loss 0.7990  grad norm 0.290  feature cosine 0.195  lr 3.64e-05  wd 0.087  315s
+    step   900/1469  loss 0.7988  grad norm 0.291  feature cosine 0.195  lr 3.64e-05  wd 0.087  354s
+    step  1000/1469  loss 0.7991  grad norm 0.292  feature cosine 0.195  lr 3.63e-05  wd 0.087  394s
+    step  1100/1469  loss 0.7989  grad norm 0.292  feature cosine 0.195  lr 3.63e-05  wd 0.088  433s
+    step  1200/1469  loss 0.7989  grad norm 0.293  feature cosine 0.195  lr 3.62e-05  wd 0.088  473s
+    step  1300/1469  loss 0.7987  grad norm 0.294  feature cosine 0.195  lr 3.62e-05  wd 0.088  512s
+    step  1400/1469  loss 0.7986  grad norm 0.293  feature cosine 0.195  lr 3.61e-05  wd 0.088  551s
+    step  1469/1469  loss 0.7987  grad norm 0.294  feature cosine 0.195  lr 3.61e-05  wd 0.088  578s
+  epoch  37/100  loss 0.7987  feature_cosine 0.1947  feature_std 0.02197  grad_norm 0.2939  9.6 min, checkpoint saved
+
+SSL epoch 38/100
+    step   100/1469  loss 0.8042  grad norm 0.276  feature cosine 0.193  lr 3.60e-05  wd 0.088  40s
+    step   200/1469  loss 0.8003  grad norm 0.288  feature cosine 0.193  lr 3.60e-05  wd 0.089  79s
+    step   300/1469  loss 0.7994  grad norm 0.291  feature cosine 0.193  lr 3.59e-05  wd 0.089  119s
+    step   400/1469  loss 0.8000  grad norm 0.294  feature cosine 0.193  lr 3.59e-05  wd 0.089  158s
+    step   500/1469  loss 0.8004  grad norm 0.292  feature cosine 0.193  lr 3.58e-05  wd 0.089  198s
+    step   600/1469  loss 0.8005  grad norm 0.294  feature cosine 0.193  lr 3.58e-05  wd 0.089  237s
+    step   700/1469  loss 0.7996  grad norm 0.294  feature cosine 0.194  lr 3.57e-05  wd 0.089  277s
+    step   800/1469  loss 0.7990  grad norm 0.294  feature cosine 0.194  lr 3.57e-05  wd 0.089  317s
+    step   900/1469  loss 0.7985  grad norm 0.294  feature cosine 0.194  lr 3.56e-05  wd 0.090  356s
+    step  1000/1469  loss 0.7986  grad norm 0.295  feature cosine 0.194  lr 3.56e-05  wd 0.090  396s
+    step  1100/1469  loss 0.7983  grad norm 0.295  feature cosine 0.194  lr 3.56e-05  wd 0.090  435s
+    step  1200/1469  loss 0.7984  grad norm 0.294  feature cosine 0.194  lr 3.55e-05  wd 0.090  475s
+    step  1300/1469  loss 0.7983  grad norm 0.294  feature cosine 0.194  lr 3.55e-05  wd 0.090  515s
+    step  1400/1469  loss 0.7983  grad norm 0.295  feature cosine 0.194  lr 3.54e-05  wd 0.090  554s
+    step  1469/1469  loss 0.7983  grad norm 0.295  feature cosine 0.194  lr 3.54e-05  wd 0.091  582s
+  epoch  38/100  loss 0.7983  feature_cosine 0.194  feature_std 0.02197  grad_norm 0.2952  9.7 min, checkpoint saved
+
+SSL epoch 39/100
+    step   100/1469  loss 0.7976  grad norm 0.298  feature cosine 0.194  lr 3.53e-05  wd 0.091  40s
+    step   200/1469  loss 0.7969  grad norm 0.294  feature cosine 0.194  lr 3.53e-05  wd 0.091  80s
+    step   300/1469  loss 0.7963  grad norm 0.302  feature cosine 0.194  lr 3.52e-05  wd 0.091  119s
+    step   400/1469  loss 0.7955  grad norm 0.299  feature cosine 0.194  lr 3.52e-05  wd 0.091  159s
+    step   500/1469  loss 0.7958  grad norm 0.300  feature cosine 0.194  lr 3.51e-05  wd 0.091  198s
+    step   600/1469  loss 0.7966  grad norm 0.297  feature cosine 0.194  lr 3.51e-05  wd 0.092  238s
+    step   700/1469  loss 0.7964  grad norm 0.296  feature cosine 0.194  lr 3.50e-05  wd 0.092  278s
+    step   800/1469  loss 0.7964  grad norm 0.296  feature cosine 0.194  lr 3.50e-05  wd 0.092  317s
+    step   900/1469  loss 0.7967  grad norm 0.296  feature cosine 0.194  lr 3.49e-05  wd 0.092  357s
+    step  1000/1469  loss 0.7972  grad norm 0.295  feature cosine 0.194  lr 3.49e-05  wd 0.092  397s
+    step  1100/1469  loss 0.7976  grad norm 0.296  feature cosine 0.194  lr 3.48e-05  wd 0.092  436s
+    step  1200/1469  loss 0.7977  grad norm 0.296  feature cosine 0.194  lr 3.48e-05  wd 0.092  476s
+    step  1300/1469  loss 0.7978  grad norm 0.296  feature cosine 0.194  lr 3.47e-05  wd 0.093  515s
+    step  1400/1469  loss 0.7978  grad norm 0.296  feature cosine 0.194  lr 3.47e-05  wd 0.093  555s
+    step  1469/1469  loss 0.7979  grad norm 0.296  feature cosine 0.194  lr 3.46e-05  wd 0.093  582s
+  epoch  39/100  loss 0.7979  feature_cosine 0.194  feature_std 0.02197  grad_norm 0.2958  9.7 min, checkpoint saved
+
+SSL epoch 40/100
+    step   100/1469  loss 0.7949  grad norm 0.312  feature cosine 0.195  lr 3.46e-05  wd 0.093  40s
+    step   200/1469  loss 0.7969  grad norm 0.307  feature cosine 0.195  lr 3.45e-05  wd 0.093  80s
+    step   300/1469  loss 0.7976  grad norm 0.298  feature cosine 0.195  lr 3.45e-05  wd 0.093  119s
+    step   400/1469  loss 0.7985  grad norm 0.299  feature cosine 0.195  lr 3.44e-05  wd 0.094  159s
+    step   500/1469  loss 0.7981  grad norm 0.297  feature cosine 0.195  lr 3.44e-05  wd 0.094  198s
+    step   600/1469  loss 0.7987  grad norm 0.297  feature cosine 0.195  lr 3.43e-05  wd 0.094  238s
+    step   700/1469  loss 0.7984  grad norm 0.297  feature cosine 0.195  lr 3.43e-05  wd 0.094  277s
+    step   800/1469  loss 0.7984  grad norm 0.295  feature cosine 0.195  lr 3.42e-05  wd 0.094  317s
+    step   900/1469  loss 0.7981  grad norm 0.296  feature cosine 0.195  lr 3.42e-05  wd 0.094  356s
+    step  1000/1469  loss 0.7984  grad norm 0.296  feature cosine 0.194  lr 3.41e-05  wd 0.095  396s
+    step  1100/1469  loss 0.7985  grad norm 0.295  feature cosine 0.194  lr 3.41e-05  wd 0.095  435s
+    step  1200/1469  loss 0.7985  grad norm 0.294  feature cosine 0.194  lr 3.40e-05  wd 0.095  475s
+    step  1300/1469  loss 0.7984  grad norm 0.295  feature cosine 0.194  lr 3.40e-05  wd 0.095  514s
+    step  1400/1469  loss 0.7982  grad norm 0.296  feature cosine 0.194  lr 3.39e-05  wd 0.095  554s
+    step  1469/1469  loss 0.7983  grad norm 0.296  feature cosine 0.194  lr 3.39e-05  wd 0.095  581s
+  epoch  40/100  loss 0.7983  feature_cosine 0.1942  feature_std 0.02194  grad_norm 0.2961  9.7 min, checkpoint saved
+
+SSL epoch 41/100
+    step   100/1469  loss 0.7964  grad norm 0.297  feature cosine 0.194  lr 3.38e-05  wd 0.095  40s
+    step   200/1469  loss 0.7979  grad norm 0.297  feature cosine 0.194  lr 3.38e-05  wd 0.096  79s
+    step   300/1469  loss 0.7986  grad norm 0.295  feature cosine 0.194  lr 3.37e-05  wd 0.096  119s
+    step   400/1469  loss 0.7995  grad norm 0.293  feature cosine 0.194  lr 3.37e-05  wd 0.096  159s
+    step   500/1469  loss 0.7995  grad norm 0.294  feature cosine 0.194  lr 3.36e-05  wd 0.096  198s
+    step   600/1469  loss 0.7991  grad norm 0.296  feature cosine 0.193  lr 3.36e-05  wd 0.096  238s
+    step   700/1469  loss 0.7988  grad norm 0.295  feature cosine 0.194  lr 3.35e-05  wd 0.096  277s
+    step   800/1469  loss 0.7981  grad norm 0.295  feature cosine 0.194  lr 3.35e-05  wd 0.097  317s
+    step   900/1469  loss 0.7974  grad norm 0.294  feature cosine 0.194  lr 3.34e-05  wd 0.097  356s
+    step  1000/1469  loss 0.7978  grad norm 0.294  feature cosine 0.194  lr 3.34e-05  wd 0.097  396s
+    step  1100/1469  loss 0.7980  grad norm 0.294  feature cosine 0.194  lr 3.33e-05  wd 0.097  435s
+    step  1200/1469  loss 0.7976  grad norm 0.296  feature cosine 0.194  lr 3.33e-05  wd 0.097  475s
+    step  1300/1469  loss 0.7978  grad norm 0.296  feature cosine 0.194  lr 3.32e-05  wd 0.097  514s
+    step  1400/1469  loss 0.7976  grad norm 0.295  feature cosine 0.194  lr 3.32e-05  wd 0.098  554s
+    step  1469/1469  loss 0.7976  grad norm 0.295  feature cosine 0.194  lr 3.31e-05  wd 0.098  581s
+  epoch  41/100  loss 0.7976  feature_cosine 0.194  feature_std 0.02194  grad_norm 0.295  9.7 min, checkpoint saved
+
+SSL epoch 42/100
+    step   100/1469  loss 0.7970  grad norm 0.278  feature cosine 0.194  lr 3.31e-05  wd 0.098  40s
+    step   200/1469  loss 0.7975  grad norm 0.283  feature cosine 0.194  lr 3.30e-05  wd 0.098  79s
+    step   300/1469  loss 0.7987  grad norm 0.285  feature cosine 0.194  lr 3.30e-05  wd 0.098  118s
+    step   400/1469  loss 0.7980  grad norm 0.287  feature cosine 0.194  lr 3.29e-05  wd 0.098  158s
+    step   500/1469  loss 0.7976  grad norm 0.288  feature cosine 0.194  lr 3.29e-05  wd 0.099  197s
+    step   600/1469  loss 0.7977  grad norm 0.288  feature cosine 0.194  lr 3.28e-05  wd 0.099  237s
+    step   700/1469  loss 0.7973  grad norm 0.288  feature cosine 0.194  lr 3.28e-05  wd 0.099  276s
+    step   800/1469  loss 0.7974  grad norm 0.289  feature cosine 0.194  lr 3.27e-05  wd 0.099  316s
+    step   900/1469  loss 0.7977  grad norm 0.290  feature cosine 0.194  lr 3.27e-05  wd 0.099  355s
+    step  1000/1469  loss 0.7979  grad norm 0.290  feature cosine 0.194  lr 3.26e-05  wd 0.099  395s
+    step  1100/1469  loss 0.7977  grad norm 0.290  feature cosine 0.194  lr 3.26e-05  wd 0.099  434s
+    step  1200/1469  loss 0.7980  grad norm 0.291  feature cosine 0.194  lr 3.25e-05  wd 0.100  474s
+    step  1300/1469  loss 0.7983  grad norm 0.291  feature cosine 0.194  lr 3.24e-05  wd 0.100  513s
+    step  1400/1469  loss 0.7980  grad norm 0.291  feature cosine 0.194  lr 3.24e-05  wd 0.100  552s
+    step  1469/1469  loss 0.7977  grad norm 0.291  feature cosine 0.194  lr 3.24e-05  wd 0.100  580s
+  epoch  42/100  loss 0.7977  feature_cosine 0.1937  feature_std 0.02193  grad_norm 0.2915  9.7 min, checkpoint saved
+
+SSL epoch 43/100
+    step   100/1469  loss 0.7953  grad norm 0.300  feature cosine 0.194  lr 3.23e-05  wd 0.100  40s
+    step   200/1469  loss 0.7952  grad norm 0.297  feature cosine 0.194  lr 3.23e-05  wd 0.100  79s
+    step   300/1469  loss 0.7957  grad norm 0.296  feature cosine 0.194  lr 3.22e-05  wd 0.101  118s
+    step   400/1469  loss 0.7971  grad norm 0.296  feature cosine 0.193  lr 3.21e-05  wd 0.101  158s
+    step   500/1469  loss 0.7964  grad norm 0.298  feature cosine 0.193  lr 3.21e-05  wd 0.101  197s
+    step   600/1469  loss 0.7969  grad norm 0.297  feature cosine 0.193  lr 3.20e-05  wd 0.101  237s
+    step   700/1469  loss 0.7964  grad norm 0.297  feature cosine 0.194  lr 3.20e-05  wd 0.101  276s
+    step   800/1469  loss 0.7969  grad norm 0.297  feature cosine 0.194  lr 3.19e-05  wd 0.101  315s
+    step   900/1469  loss 0.7965  grad norm 0.298  feature cosine 0.194  lr 3.19e-05  wd 0.102  354s
+    step  1000/1469  loss 0.7970  grad norm 0.297  feature cosine 0.193  lr 3.18e-05  wd 0.102  393s
+    step  1100/1469  loss 0.7975  grad norm 0.297  feature cosine 0.193  lr 3.18e-05  wd 0.102  433s
+    step  1200/1469  loss 0.7971  grad norm 0.298  feature cosine 0.193  lr 3.17e-05  wd 0.102  472s
+    step  1300/1469  loss 0.7973  grad norm 0.297  feature cosine 0.193  lr 3.17e-05  wd 0.102  512s
+    step  1400/1469  loss 0.7974  grad norm 0.297  feature cosine 0.193  lr 3.16e-05  wd 0.102  551s
+    step  1469/1469  loss 0.7972  grad norm 0.297  feature cosine 0.193  lr 3.16e-05  wd 0.103  579s
+  epoch  43/100  loss 0.7972  feature_cosine 0.1932  feature_std 0.02193  grad_norm 0.2967  9.7 min, checkpoint saved
+
+SSL epoch 44/100
+    step   100/1469  loss 0.7946  grad norm 0.321  feature cosine 0.194  lr 3.15e-05  wd 0.103  40s
+    step   200/1469  loss 0.7975  grad norm 0.311  feature cosine 0.193  lr 3.15e-05  wd 0.103  80s
+    step   300/1469  loss 0.7957  grad norm 0.307  feature cosine 0.193  lr 3.14e-05  wd 0.103  119s
+    step   400/1469  loss 0.7952  grad norm 0.305  feature cosine 0.193  lr 3.14e-05  wd 0.103  159s
+    step   500/1469  loss 0.7958  grad norm 0.305  feature cosine 0.193  lr 3.13e-05  wd 0.103  198s
+    step   600/1469  loss 0.7961  grad norm 0.301  feature cosine 0.193  lr 3.13e-05  wd 0.104  238s
+    step   700/1469  loss 0.7967  grad norm 0.301  feature cosine 0.192  lr 3.12e-05  wd 0.104  278s
+    step   800/1469  loss 0.7972  grad norm 0.301  feature cosine 0.192  lr 3.12e-05  wd 0.104  317s
+    step   900/1469  loss 0.7970  grad norm 0.301  feature cosine 0.192  lr 3.11e-05  wd 0.104  357s
+    step  1000/1469  loss 0.7971  grad norm 0.299  feature cosine 0.192  lr 3.11e-05  wd 0.104  396s
+    step  1100/1469  loss 0.7966  grad norm 0.300  feature cosine 0.193  lr 3.10e-05  wd 0.104  436s
+    step  1200/1469  loss 0.7967  grad norm 0.299  feature cosine 0.193  lr 3.09e-05  wd 0.105  475s
+    step  1300/1469  loss 0.7970  grad norm 0.299  feature cosine 0.193  lr 3.09e-05  wd 0.105  515s
+    step  1400/1469  loss 0.7970  grad norm 0.300  feature cosine 0.193  lr 3.08e-05  wd 0.105  554s
+    step  1469/1469  loss 0.7971  grad norm 0.300  feature cosine 0.193  lr 3.08e-05  wd 0.105  582s
+  epoch  44/100  loss 0.7971  feature_cosine 0.1926  feature_std 0.02194  grad_norm 0.3002  9.7 min, checkpoint saved
+
+SSL epoch 45/100
+    step   100/1469  loss 0.7995  grad norm 0.287  feature cosine 0.192  lr 3.08e-05  wd 0.105  40s
+    step   200/1469  loss 0.7960  grad norm 0.293  feature cosine 0.193  lr 3.07e-05  wd 0.105  80s
+    step   300/1469  loss 0.7960  grad norm 0.291  feature cosine 0.193  lr 3.06e-05  wd 0.106  119s
+    step   400/1469  loss 0.7958  grad norm 0.293  feature cosine 0.192  lr 3.06e-05  wd 0.106  159s
+    step   500/1469  loss 0.7957  grad norm 0.294  feature cosine 0.193  lr 3.05e-05  wd 0.106  198s
+    step   600/1469  loss 0.7960  grad norm 0.296  feature cosine 0.193  lr 3.05e-05  wd 0.106  238s
+    step   700/1469  loss 0.7960  grad norm 0.295  feature cosine 0.193  lr 3.04e-05  wd 0.106  278s
+    step   800/1469  loss 0.7964  grad norm 0.296  feature cosine 0.193  lr 3.04e-05  wd 0.106  317s
+    step   900/1469  loss 0.7963  grad norm 0.298  feature cosine 0.193  lr 3.03e-05  wd 0.107  357s
+    step  1000/1469  loss 0.7963  grad norm 0.297  feature cosine 0.193  lr 3.03e-05  wd 0.107  396s
+    step  1100/1469  loss 0.7962  grad norm 0.297  feature cosine 0.193  lr 3.02e-05  wd 0.107  436s
+    step  1200/1469  loss 0.7961  grad norm 0.297  feature cosine 0.193  lr 3.02e-05  wd 0.107  475s
+    step  1300/1469  loss 0.7961  grad norm 0.298  feature cosine 0.193  lr 3.01e-05  wd 0.107  515s
+    step  1400/1469  loss 0.7962  grad norm 0.297  feature cosine 0.193  lr 3.01e-05  wd 0.107  554s
+    step  1469/1469  loss 0.7967  grad norm 0.297  feature cosine 0.193  lr 3.00e-05  wd 0.107  581s
+  epoch  45/100  loss 0.7967  feature_cosine 0.1928  feature_std 0.02194  grad_norm 0.2971  9.7 min, checkpoint saved
+
+SSL epoch 46/100
+    step   100/1469  loss 0.7955  grad norm 0.298  feature cosine 0.193  lr 3.00e-05  wd 0.108  40s
+    step   200/1469  loss 0.7960  grad norm 0.295  feature cosine 0.193  lr 2.99e-05  wd 0.108  79s
+    step   300/1469  loss 0.7965  grad norm 0.299  feature cosine 0.193  lr 2.99e-05  wd 0.108  118s
+    step   400/1469  loss 0.7958  grad norm 0.302  feature cosine 0.193  lr 2.98e-05  wd 0.108  158s
+    step   500/1469  loss 0.7960  grad norm 0.300  feature cosine 0.193  lr 2.98e-05  wd 0.108  197s
+    step   600/1469  loss 0.7959  grad norm 0.298  feature cosine 0.193  lr 2.97e-05  wd 0.108  237s
+    step   700/1469  loss 0.7962  grad norm 0.297  feature cosine 0.193  lr 2.96e-05  wd 0.109  276s
+    step   800/1469  loss 0.7958  grad norm 0.298  feature cosine 0.193  lr 2.96e-05  wd 0.109  316s
+    step   900/1469  loss 0.7963  grad norm 0.298  feature cosine 0.193  lr 2.95e-05  wd 0.109  355s
+    step  1000/1469  loss 0.7968  grad norm 0.297  feature cosine 0.193  lr 2.95e-05  wd 0.109  395s
+    step  1100/1469  loss 0.7967  grad norm 0.296  feature cosine 0.193  lr 2.94e-05  wd 0.109  434s
+    step  1200/1469  loss 0.7964  grad norm 0.296  feature cosine 0.193  lr 2.94e-05  wd 0.110  474s
+    step  1300/1469  loss 0.7967  grad norm 0.296  feature cosine 0.193  lr 2.93e-05  wd 0.110  513s
+    step  1400/1469  loss 0.7970  grad norm 0.295  feature cosine 0.193  lr 2.93e-05  wd 0.110  553s
+    step  1469/1469  loss 0.7970  grad norm 0.295  feature cosine 0.193  lr 2.92e-05  wd 0.110  580s
+  epoch  46/100  loss 0.797  feature_cosine 0.1926  feature_std 0.02193  grad_norm 0.2951  9.7 min, checkpoint saved
+
+SSL epoch 47/100
+    step   100/1469  loss 0.7964  grad norm 0.295  feature cosine 0.192  lr 2.92e-05  wd 0.110  40s
+    step   200/1469  loss 0.7956  grad norm 0.297  feature cosine 0.193  lr 2.91e-05  wd 0.110  79s
+    step   300/1469  loss 0.7965  grad norm 0.297  feature cosine 0.193  lr 2.91e-05  wd 0.110  119s
+    step   400/1469  loss 0.7960  grad norm 0.297  feature cosine 0.193  lr 2.90e-05  wd 0.111  158s
+    step   500/1469  loss 0.7951  grad norm 0.295  feature cosine 0.192  lr 2.90e-05  wd 0.111  198s
+    step   600/1469  loss 0.7950  grad norm 0.296  feature cosine 0.192  lr 2.89e-05  wd 0.111  237s
+    step   700/1469  loss 0.7954  grad norm 0.296  feature cosine 0.192  lr 2.89e-05  wd 0.111  277s
+    step   800/1469  loss 0.7958  grad norm 0.296  feature cosine 0.192  lr 2.88e-05  wd 0.111  316s
+    step   900/1469  loss 0.7959  grad norm 0.297  feature cosine 0.192  lr 2.87e-05  wd 0.112  356s
+    step  1000/1469  loss 0.7957  grad norm 0.296  feature cosine 0.192  lr 2.87e-05  wd 0.112  395s
+    step  1100/1469  loss 0.7957  grad norm 0.297  feature cosine 0.192  lr 2.86e-05  wd 0.112  435s
+    step  1200/1469  loss 0.7960  grad norm 0.297  feature cosine 0.192  lr 2.86e-05  wd 0.112  474s
+    step  1300/1469  loss 0.7957  grad norm 0.297  feature cosine 0.192  lr 2.85e-05  wd 0.112  514s
+    step  1400/1469  loss 0.7958  grad norm 0.298  feature cosine 0.192  lr 2.85e-05  wd 0.112  553s
+    step  1469/1469  loss 0.7961  grad norm 0.297  feature cosine 0.192  lr 2.84e-05  wd 0.112  581s
+  epoch  47/100  loss 0.7961  feature_cosine 0.1921  feature_std 0.02192  grad_norm 0.2969  9.7 min, checkpoint saved
+
+SSL epoch 48/100
+    step   100/1469  loss 0.7974  grad norm 0.307  feature cosine 0.191  lr 2.84e-05  wd 0.113  40s
+    step   200/1469  loss 0.7975  grad norm 0.307  feature cosine 0.192  lr 2.83e-05  wd 0.113  79s
+    step   300/1469  loss 0.7957  grad norm 0.307  feature cosine 0.192  lr 2.83e-05  wd 0.113  119s
+    step   400/1469  loss 0.7956  grad norm 0.304  feature cosine 0.192  lr 2.82e-05  wd 0.113  158s
+    step   500/1469  loss 0.7966  grad norm 0.301  feature cosine 0.193  lr 2.82e-05  wd 0.113  198s
+    step   600/1469  loss 0.7966  grad norm 0.300  feature cosine 0.193  lr 2.81e-05  wd 0.113  237s
+    step   700/1469  loss 0.7961  grad norm 0.300  feature cosine 0.193  lr 2.81e-05  wd 0.114  277s
+    step   800/1469  loss 0.7964  grad norm 0.299  feature cosine 0.193  lr 2.80e-05  wd 0.114  316s
+    step   900/1469  loss 0.7966  grad norm 0.300  feature cosine 0.192  lr 2.79e-05  wd 0.114  356s
+    step  1000/1469  loss 0.7965  grad norm 0.300  feature cosine 0.193  lr 2.79e-05  wd 0.114  395s
+    step  1100/1469  loss 0.7963  grad norm 0.301  feature cosine 0.192  lr 2.78e-05  wd 0.114  435s
+    step  1200/1469  loss 0.7963  grad norm 0.300  feature cosine 0.193  lr 2.78e-05  wd 0.115  474s
+    step  1300/1469  loss 0.7961  grad norm 0.300  feature cosine 0.193  lr 2.77e-05  wd 0.115  514s
+    step  1400/1469  loss 0.7965  grad norm 0.300  feature cosine 0.192  lr 2.77e-05  wd 0.115  553s
+    step  1469/1469  loss 0.7965  grad norm 0.300  feature cosine 0.192  lr 2.76e-05  wd 0.115  581s
+  epoch  48/100  loss 0.7965  feature_cosine 0.1924  feature_std 0.02192  grad_norm 0.2998  9.7 min, checkpoint saved
+
+SSL epoch 49/100
+    step   100/1469  loss 0.7948  grad norm 0.297  feature cosine 0.192  lr 2.76e-05  wd 0.115  40s
+    step   200/1469  loss 0.7969  grad norm 0.300  feature cosine 0.192  lr 2.75e-05  wd 0.115  79s
+    step   300/1469  loss 0.7962  grad norm 0.301  feature cosine 0.192  lr 2.75e-05  wd 0.115  119s
+    step   400/1469  loss 0.7964  grad norm 0.300  feature cosine 0.192  lr 2.74e-05  wd 0.116  159s
+    step   500/1469  loss 0.7968  grad norm 0.298  feature cosine 0.192  lr 2.74e-05  wd 0.116  198s
+    step   600/1469  loss 0.7959  grad norm 0.298  feature cosine 0.192  lr 2.73e-05  wd 0.116  238s
+    step   700/1469  loss 0.7966  grad norm 0.299  feature cosine 0.192  lr 2.73e-05  wd 0.116  277s
+    step   800/1469  loss 0.7965  grad norm 0.300  feature cosine 0.192  lr 2.72e-05  wd 0.116  317s
+    step   900/1469  loss 0.7963  grad norm 0.300  feature cosine 0.192  lr 2.71e-05  wd 0.117  356s
+    step  1000/1469  loss 0.7968  grad norm 0.300  feature cosine 0.192  lr 2.71e-05  wd 0.117  396s
+    step  1100/1469  loss 0.7967  grad norm 0.300  feature cosine 0.192  lr 2.70e-05  wd 0.117  435s
+    step  1200/1469  loss 0.7967  grad norm 0.300  feature cosine 0.192  lr 2.70e-05  wd 0.117  475s
+    step  1300/1469  loss 0.7965  grad norm 0.300  feature cosine 0.192  lr 2.69e-05  wd 0.117  514s
+    step  1400/1469  loss 0.7964  grad norm 0.300  feature cosine 0.192  lr 2.69e-05  wd 0.117  554s
+    step  1469/1469  loss 0.7966  grad norm 0.301  feature cosine 0.192  lr 2.68e-05  wd 0.117  581s
+  epoch  49/100  loss 0.7966  feature_cosine 0.1921  feature_std 0.02192  grad_norm 0.3011  9.7 min, checkpoint saved
+
+SSL epoch 50/100
+    step   100/1469  loss 0.7972  grad norm 0.306  feature cosine 0.192  lr 2.68e-05  wd 0.118  40s
+    step   200/1469  loss 0.7975  grad norm 0.300  feature cosine 0.191  lr 2.67e-05  wd 0.118  79s
+    step   300/1469  loss 0.7972  grad norm 0.299  feature cosine 0.191  lr 2.67e-05  wd 0.118  119s
+    step   400/1469  loss 0.7964  grad norm 0.299  feature cosine 0.192  lr 2.66e-05  wd 0.118  158s
+    step   500/1469  loss 0.7960  grad norm 0.300  feature cosine 0.191  lr 2.66e-05  wd 0.118  198s
+    step   600/1469  loss 0.7961  grad norm 0.299  feature cosine 0.192  lr 2.65e-05  wd 0.119  237s
+    step   700/1469  loss 0.7968  grad norm 0.298  feature cosine 0.192  lr 2.65e-05  wd 0.119  277s
+    step   800/1469  loss 0.7966  grad norm 0.298  feature cosine 0.192  lr 2.64e-05  wd 0.119  316s
+    step   900/1469  loss 0.7960  grad norm 0.298  feature cosine 0.192  lr 2.63e-05  wd 0.119  356s
+    step  1000/1469  loss 0.7963  grad norm 0.297  feature cosine 0.192  lr 2.63e-05  wd 0.119  395s
+    step  1100/1469  loss 0.7963  grad norm 0.297  feature cosine 0.192  lr 2.62e-05  wd 0.119  435s
+    step  1200/1469  loss 0.7961  grad norm 0.299  feature cosine 0.192  lr 2.62e-05  wd 0.120  474s
+    step  1300/1469  loss 0.7965  grad norm 0.299  feature cosine 0.192  lr 2.61e-05  wd 0.120  514s
+    step  1400/1469  loss 0.7964  grad norm 0.300  feature cosine 0.192  lr 2.61e-05  wd 0.120  553s
+    step  1469/1469  loss 0.7961  grad norm 0.300  feature cosine 0.192  lr 2.60e-05  wd 0.120  581s
+  epoch  50/100  loss 0.7961  feature_cosine 0.1919  feature_std 0.02193  grad_norm 0.2996  9.7 min, checkpoint saved
+
+SSL epoch 51/100
+    step   100/1469  loss 0.7987  grad norm 0.296  feature cosine 0.193  lr 2.60e-05  wd 0.120  40s
+    step   200/1469  loss 0.7970  grad norm 0.294  feature cosine 0.193  lr 2.59e-05  wd 0.120  79s
+    step   300/1469  loss 0.7962  grad norm 0.295  feature cosine 0.193  lr 2.59e-05  wd 0.121  119s
+    step   400/1469  loss 0.7965  grad norm 0.298  feature cosine 0.193  lr 2.58e-05  wd 0.121  158s
+    step   500/1469  loss 0.7959  grad norm 0.298  feature cosine 0.193  lr 2.58e-05  wd 0.121  198s
+    step   600/1469  loss 0.7957  grad norm 0.300  feature cosine 0.193  lr 2.57e-05  wd 0.121  237s
+    step   700/1469  loss 0.7951  grad norm 0.300  feature cosine 0.193  lr 2.56e-05  wd 0.121  277s
+    step   800/1469  loss 0.7963  grad norm 0.300  feature cosine 0.193  lr 2.56e-05  wd 0.121  316s
+    step   900/1469  loss 0.7964  grad norm 0.301  feature cosine 0.192  lr 2.55e-05  wd 0.122  356s
+    step  1000/1469  loss 0.7961  grad norm 0.302  feature cosine 0.192  lr 2.55e-05  wd 0.122  395s
+    step  1100/1469  loss 0.7961  grad norm 0.302  feature cosine 0.193  lr 2.54e-05  wd 0.122  435s
+    step  1200/1469  loss 0.7965  grad norm 0.301  feature cosine 0.193  lr 2.54e-05  wd 0.122  474s
+    step  1300/1469  loss 0.7964  grad norm 0.299  feature cosine 0.192  lr 2.53e-05  wd 0.122  514s
+    step  1400/1469  loss 0.7964  grad norm 0.300  feature cosine 0.192  lr 2.53e-05  wd 0.122  553s
+    step  1469/1469  loss 0.7961  grad norm 0.300  feature cosine 0.192  lr 2.52e-05  wd 0.123  580s
+  epoch  51/100  loss 0.7961  feature_cosine 0.1924  feature_std 0.02192  grad_norm 0.3  9.7 min, checkpoint saved
+
+SSL epoch 52/100
+    step   100/1469  loss 0.7948  grad norm 0.305  feature cosine 0.192  lr 2.52e-05  wd 0.123  40s
+    step   200/1469  loss 0.7949  grad norm 0.296  feature cosine 0.192  lr 2.51e-05  wd 0.123  79s
+    step   300/1469  loss 0.7947  grad norm 0.300  feature cosine 0.192  lr 2.51e-05  wd 0.123  119s
+    step   400/1469  loss 0.7955  grad norm 0.300  feature cosine 0.192  lr 2.50e-05  wd 0.123  158s
+    step   500/1469  loss 0.7954  grad norm 0.301  feature cosine 0.192  lr 2.50e-05  wd 0.123  198s
+    step   600/1469  loss 0.7957  grad norm 0.300  feature cosine 0.192  lr 2.49e-05  wd 0.124  237s
+    step   700/1469  loss 0.7955  grad norm 0.301  feature cosine 0.192  lr 2.48e-05  wd 0.124  277s
+    step   800/1469  loss 0.7959  grad norm 0.300  feature cosine 0.192  lr 2.48e-05  wd 0.124  316s
+    step   900/1469  loss 0.7960  grad norm 0.302  feature cosine 0.192  lr 2.47e-05  wd 0.124  356s
+    step  1000/1469  loss 0.7966  grad norm 0.302  feature cosine 0.192  lr 2.47e-05  wd 0.124  395s
+    step  1100/1469  loss 0.7961  grad norm 0.302  feature cosine 0.192  lr 2.46e-05  wd 0.124  435s
+    step  1200/1469  loss 0.7960  grad norm 0.303  feature cosine 0.192  lr 2.46e-05  wd 0.125  474s
+    step  1300/1469  loss 0.7958  grad norm 0.304  feature cosine 0.192  lr 2.45e-05  wd 0.125  514s
+    step  1400/1469  loss 0.7959  grad norm 0.305  feature cosine 0.192  lr 2.45e-05  wd 0.125  553s
+    step  1469/1469  loss 0.7959  grad norm 0.304  feature cosine 0.192  lr 2.44e-05  wd 0.125  581s
+  epoch  52/100  loss 0.7959  feature_cosine 0.1919  feature_std 0.02192  grad_norm 0.3043  9.7 min, checkpoint saved
+
+SSL epoch 53/100
+    step   100/1469  loss 0.8010  grad norm 0.291  feature cosine 0.191  lr 2.44e-05  wd 0.125  40s
+    step   200/1469  loss 0.7975  grad norm 0.295  feature cosine 0.191  lr 2.43e-05  wd 0.125  79s
+    step   300/1469  loss 0.7952  grad norm 0.298  feature cosine 0.191  lr 2.43e-05  wd 0.126  119s
+    step   400/1469  loss 0.7951  grad norm 0.303  feature cosine 0.191  lr 2.42e-05  wd 0.126  159s
+    step   500/1469  loss 0.7963  grad norm 0.302  feature cosine 0.191  lr 2.41e-05  wd 0.126  198s
+    step   600/1469  loss 0.7958  grad norm 0.304  feature cosine 0.192  lr 2.41e-05  wd 0.126  238s
+    step   700/1469  loss 0.7951  grad norm 0.303  feature cosine 0.192  lr 2.40e-05  wd 0.126  277s
+    step   800/1469  loss 0.7960  grad norm 0.302  feature cosine 0.192  lr 2.40e-05  wd 0.126  317s
+    step   900/1469  loss 0.7961  grad norm 0.301  feature cosine 0.192  lr 2.39e-05  wd 0.127  356s
+    step  1000/1469  loss 0.7966  grad norm 0.302  feature cosine 0.192  lr 2.39e-05  wd 0.127  396s
+    step  1100/1469  loss 0.7967  grad norm 0.301  feature cosine 0.192  lr 2.38e-05  wd 0.127  435s
+    step  1200/1469  loss 0.7964  grad norm 0.302  feature cosine 0.192  lr 2.38e-05  wd 0.127  475s
+    step  1300/1469  loss 0.7965  grad norm 0.303  feature cosine 0.192  lr 2.37e-05  wd 0.127  514s
+    step  1400/1469  loss 0.7965  grad norm 0.303  feature cosine 0.192  lr 2.37e-05  wd 0.127  554s
+    step  1469/1469  loss 0.7963  grad norm 0.303  feature cosine 0.192  lr 2.36e-05  wd 0.128  581s
+  epoch  53/100  loss 0.7963  feature_cosine 0.192  feature_std 0.02191  grad_norm 0.3025  9.7 min, checkpoint saved
+
+SSL epoch 54/100
+    step   100/1469  loss 0.8004  grad norm 0.296  feature cosine 0.192  lr 2.36e-05  wd 0.128  40s
+    step   200/1469  loss 0.7977  grad norm 0.301  feature cosine 0.191  lr 2.35e-05  wd 0.128  79s
+    step   300/1469  loss 0.7953  grad norm 0.305  feature cosine 0.192  lr 2.35e-05  wd 0.128  119s
+    step   400/1469  loss 0.7960  grad norm 0.305  feature cosine 0.192  lr 2.34e-05  wd 0.128  158s
+    step   500/1469  loss 0.7951  grad norm 0.305  feature cosine 0.192  lr 2.33e-05  wd 0.128  198s
+    step   600/1469  loss 0.7948  grad norm 0.305  feature cosine 0.192  lr 2.33e-05  wd 0.129  237s
+    step   700/1469  loss 0.7956  grad norm 0.305  feature cosine 0.192  lr 2.32e-05  wd 0.129  277s
+    step   800/1469  loss 0.7958  grad norm 0.305  feature cosine 0.192  lr 2.32e-05  wd 0.129  316s
+    step   900/1469  loss 0.7954  grad norm 0.305  feature cosine 0.192  lr 2.31e-05  wd 0.129  356s
+    step  1000/1469  loss 0.7956  grad norm 0.303  feature cosine 0.192  lr 2.31e-05  wd 0.129  395s
+    step  1100/1469  loss 0.7957  grad norm 0.302  feature cosine 0.192  lr 2.30e-05  wd 0.129  435s
+    step  1200/1469  loss 0.7958  grad norm 0.304  feature cosine 0.192  lr 2.30e-05  wd 0.130  474s
+    step  1300/1469  loss 0.7960  grad norm 0.304  feature cosine 0.192  lr 2.29e-05  wd 0.130  514s
+    step  1400/1469  loss 0.7960  grad norm 0.305  feature cosine 0.192  lr 2.29e-05  wd 0.130  553s
+    step  1469/1469  loss 0.7957  grad norm 0.305  feature cosine 0.192  lr 2.28e-05  wd 0.130  581s
+  epoch  54/100  loss 0.7957  feature_cosine 0.1918  feature_std 0.02191  grad_norm 0.305  9.8 min, checkpoint saved
+
+SSL epoch 55/100
+    step   100/1469  loss 0.7931  grad norm 0.304  feature cosine 0.192  lr 2.28e-05  wd 0.130  40s
+    step   200/1469  loss 0.7975  grad norm 0.304  feature cosine 0.192  lr 2.27e-05  wd 0.130  79s
+    step   300/1469  loss 0.7975  grad norm 0.306  feature cosine 0.192  lr 2.27e-05  wd 0.131  118s
+    step   400/1469  loss 0.7973  grad norm 0.308  feature cosine 0.192  lr 2.26e-05  wd 0.131  158s
+    step   500/1469  loss 0.7968  grad norm 0.310  feature cosine 0.192  lr 2.25e-05  wd 0.131  197s
+    step   600/1469  loss 0.7972  grad norm 0.310  feature cosine 0.192  lr 2.25e-05  wd 0.131  237s
+    step   700/1469  loss 0.7968  grad norm 0.311  feature cosine 0.192  lr 2.24e-05  wd 0.131  276s
+    step   800/1469  loss 0.7966  grad norm 0.312  feature cosine 0.192  lr 2.24e-05  wd 0.131  316s
+    step   900/1469  loss 0.7969  grad norm 0.310  feature cosine 0.192  lr 2.23e-05  wd 0.132  355s
+    step  1000/1469  loss 0.7963  grad norm 0.310  feature cosine 0.192  lr 2.23e-05  wd 0.132  394s
+    step  1100/1469  loss 0.7964  grad norm 0.309  feature cosine 0.192  lr 2.22e-05  wd 0.132  434s
+    step  1200/1469  loss 0.7961  grad norm 0.308  feature cosine 0.192  lr 2.22e-05  wd 0.132  473s
+    step  1300/1469  loss 0.7960  grad norm 0.307  feature cosine 0.192  lr 2.21e-05  wd 0.132  513s
+    step  1400/1469  loss 0.7960  grad norm 0.307  feature cosine 0.192  lr 2.21e-05  wd 0.132  552s
+    step  1469/1469  loss 0.7958  grad norm 0.307  feature cosine 0.192  lr 2.20e-05  wd 0.133  580s
+  epoch  55/100  loss 0.7958  feature_cosine 0.1918  feature_std 0.02192  grad_norm 0.3069  9.7 min, checkpoint saved
+
+SSL epoch 56/100
+    step   100/1469  loss 0.7971  grad norm 0.299  feature cosine 0.191  lr 2.20e-05  wd 0.133  42s
+    step   200/1469  loss 0.7953  grad norm 0.315  feature cosine 0.192  lr 2.19e-05  wd 0.133  81s
+    step   300/1469  loss 0.7949  grad norm 0.314  feature cosine 0.192  lr 2.19e-05  wd 0.133  120s
+    step   400/1469  loss 0.7944  grad norm 0.312  feature cosine 0.192  lr 2.18e-05  wd 0.133  160s
+    step   500/1469  loss 0.7933  grad norm 0.312  feature cosine 0.192  lr 2.17e-05  wd 0.133  199s
+    step   600/1469  loss 0.7937  grad norm 0.310  feature cosine 0.192  lr 2.17e-05  wd 0.134  239s
+    step   700/1469  loss 0.7936  grad norm 0.309  feature cosine 0.192  lr 2.16e-05  wd 0.134  278s
+    step   800/1469  loss 0.7941  grad norm 0.308  feature cosine 0.192  lr 2.16e-05  wd 0.134  317s
+    step   900/1469  loss 0.7948  grad norm 0.307  feature cosine 0.192  lr 2.15e-05  wd 0.134  357s
+    step  1000/1469  loss 0.7946  grad norm 0.305  feature cosine 0.192  lr 2.15e-05  wd 0.134  396s
+    step  1100/1469  loss 0.7943  grad norm 0.305  feature cosine 0.192  lr 2.14e-05  wd 0.134  435s
+    step  1200/1469  loss 0.7945  grad norm 0.304  feature cosine 0.192  lr 2.14e-05  wd 0.135  475s
+    step  1300/1469  loss 0.7946  grad norm 0.305  feature cosine 0.192  lr 2.13e-05  wd 0.135  514s
+    step  1400/1469  loss 0.7948  grad norm 0.305  feature cosine 0.192  lr 2.13e-05  wd 0.135  554s
+    step  1469/1469  loss 0.7950  grad norm 0.305  feature cosine 0.192  lr 2.12e-05  wd 0.135  581s
+  epoch  56/100  loss 0.795  feature_cosine 0.1922  feature_std 0.02191  grad_norm 0.3045  9.7 min, checkpoint saved
+
+SSL epoch 57/100
+    step   100/1469  loss 0.7904  grad norm 0.293  feature cosine 0.193  lr 2.12e-05  wd 0.135  40s
+    step   200/1469  loss 0.7957  grad norm 0.298  feature cosine 0.193  lr 2.11e-05  wd 0.135  80s
+    step   300/1469  loss 0.7961  grad norm 0.299  feature cosine 0.193  lr 2.11e-05  wd 0.135  119s
+    step   400/1469  loss 0.7946  grad norm 0.302  feature cosine 0.192  lr 2.10e-05  wd 0.136  159s
+    step   500/1469  loss 0.7939  grad norm 0.299  feature cosine 0.192  lr 2.09e-05  wd 0.136  198s
+    step   600/1469  loss 0.7942  grad norm 0.299  feature cosine 0.192  lr 2.09e-05  wd 0.136  238s
+    step   700/1469  loss 0.7944  grad norm 0.300  feature cosine 0.192  lr 2.08e-05  wd 0.136  277s
+    step   800/1469  loss 0.7946  grad norm 0.299  feature cosine 0.192  lr 2.08e-05  wd 0.136  317s
+    step   900/1469  loss 0.7945  grad norm 0.298  feature cosine 0.192  lr 2.07e-05  wd 0.136  357s
+    step  1000/1469  loss 0.7946  grad norm 0.298  feature cosine 0.192  lr 2.07e-05  wd 0.137  396s
+    step  1100/1469  loss 0.7945  grad norm 0.300  feature cosine 0.192  lr 2.06e-05  wd 0.137  436s
+    step  1200/1469  loss 0.7950  grad norm 0.300  feature cosine 0.192  lr 2.06e-05  wd 0.137  475s
+    step  1300/1469  loss 0.7948  grad norm 0.300  feature cosine 0.192  lr 2.05e-05  wd 0.137  515s
+    step  1400/1469  loss 0.7946  grad norm 0.302  feature cosine 0.192  lr 2.05e-05  wd 0.137  554s
+    step  1469/1469  loss 0.7947  grad norm 0.302  feature cosine 0.192  lr 2.04e-05  wd 0.137  581s
+  epoch  57/100  loss 0.7947  feature_cosine 0.1919  feature_std 0.0219  grad_norm 0.3021  9.7 min, checkpoint saved
+
+SSL epoch 58/100
+    step   100/1469  loss 0.7928  grad norm 0.298  feature cosine 0.192  lr 2.04e-05  wd 0.138  40s
+    step   200/1469  loss 0.7946  grad norm 0.300  feature cosine 0.192  lr 2.03e-05  wd 0.138  79s
+    step   300/1469  loss 0.7950  grad norm 0.302  feature cosine 0.192  lr 2.03e-05  wd 0.138  119s
+    step   400/1469  loss 0.7950  grad norm 0.301  feature cosine 0.192  lr 2.02e-05  wd 0.138  158s
+    step   500/1469  loss 0.7963  grad norm 0.300  feature cosine 0.192  lr 2.02e-05  wd 0.138  197s
+    step   600/1469  loss 0.7964  grad norm 0.300  feature cosine 0.192  lr 2.01e-05  wd 0.138  237s
+    step   700/1469  loss 0.7967  grad norm 0.300  feature cosine 0.192  lr 2.00e-05  wd 0.139  275s
+    step   800/1469  loss 0.7961  grad norm 0.301  feature cosine 0.192  lr 2.00e-05  wd 0.139  314s
+    step   900/1469  loss 0.7958  grad norm 0.302  feature cosine 0.192  lr 1.99e-05  wd 0.139  354s
+    step  1000/1469  loss 0.7955  grad norm 0.303  feature cosine 0.192  lr 1.99e-05  wd 0.139  393s
+    step  1100/1469  loss 0.7956  grad norm 0.303  feature cosine 0.192  lr 1.98e-05  wd 0.139  432s
+    step  1200/1469  loss 0.7957  grad norm 0.304  feature cosine 0.192  lr 1.98e-05  wd 0.139  472s
+    step  1300/1469  loss 0.7958  grad norm 0.304  feature cosine 0.192  lr 1.97e-05  wd 0.140  511s
+    step  1400/1469  loss 0.7958  grad norm 0.304  feature cosine 0.192  lr 1.97e-05  wd 0.140  550s
+    step  1469/1469  loss 0.7956  grad norm 0.306  feature cosine 0.192  lr 1.96e-05  wd 0.140  577s
+  epoch  58/100  loss 0.7956  feature_cosine 0.1916  feature_std 0.02191  grad_norm 0.3059  9.8 min, checkpoint saved
+
+SSL epoch 59/100
+    step   100/1469  loss 0.7913  grad norm 0.297  feature cosine 0.192  lr 1.96e-05  wd 0.140  39s
+    step   200/1469  loss 0.7930  grad norm 0.300  feature cosine 0.192  lr 1.95e-05  wd 0.140  78s
+    step   300/1469  loss 0.7943  grad norm 0.298  feature cosine 0.192  lr 1.95e-05  wd 0.140  117s
+    step   400/1469  loss 0.7957  grad norm 0.300  feature cosine 0.191  lr 1.94e-05  wd 0.141  157s
+    step   500/1469  loss 0.7956  grad norm 0.300  feature cosine 0.191  lr 1.94e-05  wd 0.141  196s
+    step   600/1469  loss 0.7959  grad norm 0.299  feature cosine 0.191  lr 1.93e-05  wd 0.141  236s
+    step   700/1469  loss 0.7961  grad norm 0.301  feature cosine 0.191  lr 1.93e-05  wd 0.141  275s
+    step   800/1469  loss 0.7956  grad norm 0.302  feature cosine 0.191  lr 1.92e-05  wd 0.141  315s
+    step   900/1469  loss 0.7952  grad norm 0.304  feature cosine 0.191  lr 1.92e-05  wd 0.141  354s
+    step  1000/1469  loss 0.7950  grad norm 0.305  feature cosine 0.191  lr 1.91e-05  wd 0.142  394s
+    step  1100/1469  loss 0.7945  grad norm 0.306  feature cosine 0.191  lr 1.90e-05  wd 0.142  433s
+    step  1200/1469  loss 0.7944  grad norm 0.307  feature cosine 0.191  lr 1.90e-05  wd 0.142  473s
+    step  1300/1469  loss 0.7944  grad norm 0.307  feature cosine 0.191  lr 1.89e-05  wd 0.142  512s
+    step  1400/1469  loss 0.7944  grad norm 0.307  feature cosine 0.191  lr 1.89e-05  wd 0.142  552s
+    step  1469/1469  loss 0.7946  grad norm 0.307  feature cosine 0.191  lr 1.89e-05  wd 0.142  579s
+  epoch  59/100  loss 0.7946  feature_cosine 0.1914  feature_std 0.0219  grad_norm 0.3074  9.7 min, checkpoint saved
+
+SSL epoch 60/100
+    step   100/1469  loss 0.7949  grad norm 0.316  feature cosine 0.191  lr 1.88e-05  wd 0.142  40s
+    step   200/1469  loss 0.7972  grad norm 0.311  feature cosine 0.192  lr 1.87e-05  wd 0.143  80s
+    step   300/1469  loss 0.7941  grad norm 0.309  feature cosine 0.192  lr 1.87e-05  wd 0.143  119s
+    step   400/1469  loss 0.7942  grad norm 0.311  feature cosine 0.192  lr 1.86e-05  wd 0.143  159s
+    step   500/1469  loss 0.7951  grad norm 0.311  feature cosine 0.192  lr 1.86e-05  wd 0.143  199s
+    step   600/1469  loss 0.7960  grad norm 0.309  feature cosine 0.192  lr 1.85e-05  wd 0.143  238s
+    step   700/1469  loss 0.7956  grad norm 0.307  feature cosine 0.192  lr 1.85e-05  wd 0.143  278s
+    step   800/1469  loss 0.7958  grad norm 0.307  feature cosine 0.192  lr 1.84e-05  wd 0.144  317s
+    step   900/1469  loss 0.7960  grad norm 0.308  feature cosine 0.192  lr 1.84e-05  wd 0.144  357s
+    step  1000/1469  loss 0.7954  grad norm 0.309  feature cosine 0.192  lr 1.83e-05  wd 0.144  396s
+    step  1100/1469  loss 0.7955  grad norm 0.310  feature cosine 0.192  lr 1.83e-05  wd 0.144  436s
+    step  1200/1469  loss 0.7953  grad norm 0.311  feature cosine 0.192  lr 1.82e-05  wd 0.144  475s
+    step  1300/1469  loss 0.7952  grad norm 0.310  feature cosine 0.192  lr 1.82e-05  wd 0.144  514s
+    step  1400/1469  loss 0.7951  grad norm 0.310  feature cosine 0.192  lr 1.81e-05  wd 0.145  553s
+    step  1469/1469  loss 0.7950  grad norm 0.310  feature cosine 0.192  lr 1.81e-05  wd 0.145  580s
+  epoch  60/100  loss 0.795  feature_cosine 0.1917  feature_std 0.0219  grad_norm 0.3095  9.7 min, checkpoint saved
+
+SSL epoch 61/100
+    step   100/1469  loss 0.7945  grad norm 0.309  feature cosine 0.192  lr 1.80e-05  wd 0.145  40s
+    step   200/1469  loss 0.7967  grad norm 0.310  feature cosine 0.191  lr 1.80e-05  wd 0.145  79s
+    step   300/1469  loss 0.7976  grad norm 0.315  feature cosine 0.191  lr 1.79e-05  wd 0.145  119s
+    step   400/1469  loss 0.7967  grad norm 0.313  feature cosine 0.191  lr 1.79e-05  wd 0.145  158s
+    step   500/1469  loss 0.7961  grad norm 0.314  feature cosine 0.191  lr 1.78e-05  wd 0.146  198s
+    step   600/1469  loss 0.7959  grad norm 0.315  feature cosine 0.191  lr 1.78e-05  wd 0.146  237s
+    step   700/1469  loss 0.7958  grad norm 0.314  feature cosine 0.191  lr 1.77e-05  wd 0.146  277s
+    step   800/1469  loss 0.7956  grad norm 0.311  feature cosine 0.191  lr 1.77e-05  wd 0.146  316s
+    step   900/1469  loss 0.7959  grad norm 0.313  feature cosine 0.191  lr 1.76e-05  wd 0.146  356s
+    step  1000/1469  loss 0.7957  grad norm 0.312  feature cosine 0.191  lr 1.76e-05  wd 0.146  395s
+    step  1100/1469  loss 0.7956  grad norm 0.312  feature cosine 0.191  lr 1.75e-05  wd 0.147  435s
+    step  1200/1469  loss 0.7960  grad norm 0.311  feature cosine 0.191  lr 1.74e-05  wd 0.147  474s
+    step  1300/1469  loss 0.7951  grad norm 0.312  feature cosine 0.191  lr 1.74e-05  wd 0.147  514s
+    step  1400/1469  loss 0.7953  grad norm 0.312  feature cosine 0.191  lr 1.73e-05  wd 0.147  553s
+    step  1469/1469  loss 0.7953  grad norm 0.312  feature cosine 0.191  lr 1.73e-05  wd 0.147  581s
+  epoch  61/100  loss 0.7953  feature_cosine 0.1914  feature_std 0.0219  grad_norm 0.3115  9.7 min, checkpoint saved
+
+SSL epoch 62/100
+    step   100/1469  loss 0.7942  grad norm 0.318  feature cosine 0.191  lr 1.73e-05  wd 0.147  40s
+    step   200/1469  loss 0.7930  grad norm 0.315  feature cosine 0.192  lr 1.72e-05  wd 0.147  79s
+    step   300/1469  loss 0.7936  grad norm 0.314  feature cosine 0.191  lr 1.72e-05  wd 0.148  119s
+    step   400/1469  loss 0.7936  grad norm 0.311  feature cosine 0.191  lr 1.71e-05  wd 0.148  158s
+    step   500/1469  loss 0.7937  grad norm 0.308  feature cosine 0.191  lr 1.70e-05  wd 0.148  198s
+    step   600/1469  loss 0.7935  grad norm 0.312  feature cosine 0.191  lr 1.70e-05  wd 0.148  237s
+    step   700/1469  loss 0.7936  grad norm 0.313  feature cosine 0.191  lr 1.69e-05  wd 0.148  277s
+    step   800/1469  loss 0.7939  grad norm 0.311  feature cosine 0.191  lr 1.69e-05  wd 0.148  316s
+    step   900/1469  loss 0.7939  grad norm 0.312  feature cosine 0.191  lr 1.68e-05  wd 0.149  356s
+    step  1000/1469  loss 0.7941  grad norm 0.311  feature cosine 0.191  lr 1.68e-05  wd 0.149  395s
+    step  1100/1469  loss 0.7943  grad norm 0.311  feature cosine 0.191  lr 1.67e-05  wd 0.149  435s
+    step  1200/1469  loss 0.7944  grad norm 0.312  feature cosine 0.191  lr 1.67e-05  wd 0.149  474s
+    step  1300/1469  loss 0.7945  grad norm 0.312  feature cosine 0.191  lr 1.66e-05  wd 0.149  514s
+    step  1400/1469  loss 0.7948  grad norm 0.311  feature cosine 0.191  lr 1.66e-05  wd 0.149  554s
+    step  1469/1469  loss 0.7950  grad norm 0.311  feature cosine 0.191  lr 1.65e-05  wd 0.149  581s
+  epoch  62/100  loss 0.795  feature_cosine 0.1914  feature_std 0.0219  grad_norm 0.3114  9.7 min, checkpoint saved
+
+SSL epoch 63/100
+    step   100/1469  loss 0.7915  grad norm 0.307  feature cosine 0.191  lr 1.65e-05  wd 0.150  40s
+    step   200/1469  loss 0.7931  grad norm 0.308  feature cosine 0.191  lr 1.64e-05  wd 0.150  80s
+    step   300/1469  loss 0.7947  grad norm 0.304  feature cosine 0.191  lr 1.64e-05  wd 0.150  119s
+    step   400/1469  loss 0.7938  grad norm 0.304  feature cosine 0.191  lr 1.63e-05  wd 0.150  159s
+    step   500/1469  loss 0.7941  grad norm 0.303  feature cosine 0.192  lr 1.63e-05  wd 0.150  198s
+    step   600/1469  loss 0.7944  grad norm 0.306  feature cosine 0.192  lr 1.62e-05  wd 0.150  238s
+    step   700/1469  loss 0.7943  grad norm 0.306  feature cosine 0.192  lr 1.62e-05  wd 0.151  277s
+    step   800/1469  loss 0.7946  grad norm 0.308  feature cosine 0.191  lr 1.61e-05  wd 0.151  317s
+    step   900/1469  loss 0.7947  grad norm 0.307  feature cosine 0.191  lr 1.61e-05  wd 0.151  356s
+    step  1000/1469  loss 0.7946  grad norm 0.309  feature cosine 0.191  lr 1.60e-05  wd 0.151  396s
+    step  1100/1469  loss 0.7946  grad norm 0.310  feature cosine 0.191  lr 1.60e-05  wd 0.151  435s
+    step  1200/1469  loss 0.7945  grad norm 0.310  feature cosine 0.191  lr 1.59e-05  wd 0.151  475s
+    step  1300/1469  loss 0.7943  grad norm 0.309  feature cosine 0.191  lr 1.59e-05  wd 0.152  515s
+    step  1400/1469  loss 0.7942  grad norm 0.309  feature cosine 0.191  lr 1.58e-05  wd 0.152  554s
+    step  1469/1469  loss 0.7942  grad norm 0.308  feature cosine 0.191  lr 1.58e-05  wd 0.152  581s
+  epoch  63/100  loss 0.7942  feature_cosine 0.1913  feature_std 0.02189  grad_norm 0.3081  9.7 min, checkpoint saved
+
+SSL epoch 64/100
+    step   100/1469  loss 0.8001  grad norm 0.306  feature cosine 0.191  lr 1.57e-05  wd 0.152  40s
+    step   200/1469  loss 0.7991  grad norm 0.304  feature cosine 0.192  lr 1.57e-05  wd 0.152  80s
+    step   300/1469  loss 0.7984  grad norm 0.311  feature cosine 0.191  lr 1.56e-05  wd 0.152  119s
+    step   400/1469  loss 0.7976  grad norm 0.312  feature cosine 0.191  lr 1.56e-05  wd 0.152  159s
+    step   500/1469  loss 0.7960  grad norm 0.310  feature cosine 0.191  lr 1.55e-05  wd 0.153  198s
+    step   600/1469  loss 0.7964  grad norm 0.310  feature cosine 0.191  lr 1.55e-05  wd 0.153  238s
+    step   700/1469  loss 0.7958  grad norm 0.313  feature cosine 0.191  lr 1.54e-05  wd 0.153  278s
+    step   800/1469  loss 0.7958  grad norm 0.314  feature cosine 0.191  lr 1.54e-05  wd 0.153  317s
+    step   900/1469  loss 0.7960  grad norm 0.314  feature cosine 0.191  lr 1.53e-05  wd 0.153  357s
+    step  1000/1469  loss 0.7958  grad norm 0.314  feature cosine 0.191  lr 1.53e-05  wd 0.153  397s
+    step  1100/1469  loss 0.7953  grad norm 0.314  feature cosine 0.191  lr 1.52e-05  wd 0.153  436s
+    step  1200/1469  loss 0.7951  grad norm 0.314  feature cosine 0.191  lr 1.52e-05  wd 0.154  476s
+    step  1300/1469  loss 0.7950  grad norm 0.314  feature cosine 0.191  lr 1.51e-05  wd 0.154  515s
+    step  1400/1469  loss 0.7949  grad norm 0.314  feature cosine 0.191  lr 1.51e-05  wd 0.154  555s
+    step  1469/1469  loss 0.7950  grad norm 0.315  feature cosine 0.191  lr 1.51e-05  wd 0.154  582s
+  epoch  64/100  loss 0.795  feature_cosine 0.1912  feature_std 0.02191  grad_norm 0.3147  9.7 min, checkpoint saved
+
+SSL epoch 65/100
+    step   100/1469  loss 0.7970  grad norm 0.322  feature cosine 0.192  lr 1.50e-05  wd 0.154  40s
+    step   200/1469  loss 0.7956  grad norm 0.321  feature cosine 0.191  lr 1.50e-05  wd 0.154  79s
+    step   300/1469  loss 0.7947  grad norm 0.319  feature cosine 0.192  lr 1.49e-05  wd 0.155  119s
+    step   400/1469  loss 0.7947  grad norm 0.318  feature cosine 0.192  lr 1.49e-05  wd 0.155  158s
+    step   500/1469  loss 0.7945  grad norm 0.319  feature cosine 0.192  lr 1.48e-05  wd 0.155  198s
+    step   600/1469  loss 0.7947  grad norm 0.318  feature cosine 0.192  lr 1.48e-05  wd 0.155  237s
+    step   700/1469  loss 0.7960  grad norm 0.316  feature cosine 0.192  lr 1.47e-05  wd 0.155  277s
+    step   800/1469  loss 0.7954  grad norm 0.315  feature cosine 0.192  lr 1.47e-05  wd 0.155  317s
+    step   900/1469  loss 0.7956  grad norm 0.315  feature cosine 0.192  lr 1.46e-05  wd 0.155  356s
+    step  1000/1469  loss 0.7952  grad norm 0.314  feature cosine 0.192  lr 1.46e-05  wd 0.156  396s
+    step  1100/1469  loss 0.7953  grad norm 0.314  feature cosine 0.192  lr 1.45e-05  wd 0.156  435s
+    step  1200/1469  loss 0.7950  grad norm 0.315  feature cosine 0.192  lr 1.45e-05  wd 0.156  475s
+    step  1300/1469  loss 0.7950  grad norm 0.314  feature cosine 0.192  lr 1.44e-05  wd 0.156  515s
+    step  1400/1469  loss 0.7949  grad norm 0.314  feature cosine 0.191  lr 1.44e-05  wd 0.156  554s
+    step  1469/1469  loss 0.7947  grad norm 0.314  feature cosine 0.192  lr 1.43e-05  wd 0.156  581s
+  epoch  65/100  loss 0.7947  feature_cosine 0.1916  feature_std 0.0219  grad_norm 0.3142  9.7 min, checkpoint saved
+
+SSL epoch 66/100
+    step   100/1469  loss 0.7902  grad norm 0.308  feature cosine 0.192  lr 1.43e-05  wd 0.156  40s
+    step   200/1469  loss 0.7933  grad norm 0.309  feature cosine 0.191  lr 1.42e-05  wd 0.157  79s
+    step   300/1469  loss 0.7948  grad norm 0.311  feature cosine 0.191  lr 1.42e-05  wd 0.157  119s
+    step   400/1469  loss 0.7954  grad norm 0.313  feature cosine 0.191  lr 1.41e-05  wd 0.157  159s
+    step   500/1469  loss 0.7952  grad norm 0.312  feature cosine 0.191  lr 1.41e-05  wd 0.157  198s
+    step   600/1469  loss 0.7946  grad norm 0.311  feature cosine 0.191  lr 1.40e-05  wd 0.157  238s
+    step   700/1469  loss 0.7940  grad norm 0.311  feature cosine 0.191  lr 1.40e-05  wd 0.157  277s
+    step   800/1469  loss 0.7934  grad norm 0.312  feature cosine 0.191  lr 1.39e-05  wd 0.158  317s
+    step   900/1469  loss 0.7943  grad norm 0.312  feature cosine 0.191  lr 1.39e-05  wd 0.158  357s
+    step  1000/1469  loss 0.7943  grad norm 0.311  feature cosine 0.191  lr 1.38e-05  wd 0.158  396s
+    step  1100/1469  loss 0.7945  grad norm 0.312  feature cosine 0.191  lr 1.38e-05  wd 0.158  436s
+    step  1200/1469  loss 0.7946  grad norm 0.312  feature cosine 0.191  lr 1.37e-05  wd 0.158  475s
+    step  1300/1469  loss 0.7946  grad norm 0.312  feature cosine 0.191  lr 1.37e-05  wd 0.158  515s
+    step  1400/1469  loss 0.7946  grad norm 0.312  feature cosine 0.191  lr 1.36e-05  wd 0.158  555s
+    step  1469/1469  loss 0.7947  grad norm 0.313  feature cosine 0.191  lr 1.36e-05  wd 0.159  582s
+  epoch  66/100  loss 0.7947  feature_cosine 0.1911  feature_std 0.0219  grad_norm 0.3126  9.7 min, checkpoint saved
+
+SSL epoch 67/100
+    step   100/1469  loss 0.7990  grad norm 0.331  feature cosine 0.192  lr 1.35e-05  wd 0.159  40s
+    step   200/1469  loss 0.7961  grad norm 0.327  feature cosine 0.191  lr 1.35e-05  wd 0.159  80s
+    step   300/1469  loss 0.7947  grad norm 0.322  feature cosine 0.192  lr 1.35e-05  wd 0.159  119s
+    step   400/1469  loss 0.7948  grad norm 0.320  feature cosine 0.191  lr 1.34e-05  wd 0.159  159s
+    step   500/1469  loss 0.7955  grad norm 0.319  feature cosine 0.191  lr 1.34e-05  wd 0.159  199s
+    step   600/1469  loss 0.7946  grad norm 0.319  feature cosine 0.191  lr 1.33e-05  wd 0.159  238s
+    step   700/1469  loss 0.7947  grad norm 0.318  feature cosine 0.191  lr 1.33e-05  wd 0.160  278s
+    step   800/1469  loss 0.7943  grad norm 0.319  feature cosine 0.191  lr 1.32e-05  wd 0.160  318s
+    step   900/1469  loss 0.7940  grad norm 0.319  feature cosine 0.191  lr 1.32e-05  wd 0.160  357s
+    step  1000/1469  loss 0.7942  grad norm 0.319  feature cosine 0.191  lr 1.31e-05  wd 0.160  397s
+    step  1100/1469  loss 0.7939  grad norm 0.318  feature cosine 0.191  lr 1.31e-05  wd 0.160  436s
+    step  1200/1469  loss 0.7944  grad norm 0.317  feature cosine 0.191  lr 1.30e-05  wd 0.160  476s
+    step  1300/1469  loss 0.7944  grad norm 0.316  feature cosine 0.191  lr 1.30e-05  wd 0.160  515s
+    step  1400/1469  loss 0.7947  grad norm 0.316  feature cosine 0.191  lr 1.29e-05  wd 0.161  555s
+    step  1469/1469  loss 0.7946  grad norm 0.316  feature cosine 0.191  lr 1.29e-05  wd 0.161  582s
+  epoch  67/100  loss 0.7946  feature_cosine 0.1912  feature_std 0.0219  grad_norm 0.3158  9.7 min, checkpoint saved
+
+SSL epoch 68/100
+    step   100/1469  loss 0.7958  grad norm 0.311  feature cosine 0.191  lr 1.28e-05  wd 0.161  40s
+    step   200/1469  loss 0.7938  grad norm 0.313  feature cosine 0.191  lr 1.28e-05  wd 0.161  79s
+    step   300/1469  loss 0.7932  grad norm 0.311  feature cosine 0.191  lr 1.27e-05  wd 0.161  119s
+    step   400/1469  loss 0.7934  grad norm 0.312  feature cosine 0.192  lr 1.27e-05  wd 0.161  158s
+    step   500/1469  loss 0.7950  grad norm 0.311  feature cosine 0.192  lr 1.26e-05  wd 0.161  198s
+    step   600/1469  loss 0.7948  grad norm 0.312  feature cosine 0.192  lr 1.26e-05  wd 0.162  237s
+    step   700/1469  loss 0.7950  grad norm 0.312  feature cosine 0.191  lr 1.26e-05  wd 0.162  277s
+    step   800/1469  loss 0.7946  grad norm 0.311  feature cosine 0.191  lr 1.25e-05  wd 0.162  316s
+    step   900/1469  loss 0.7953  grad norm 0.310  feature cosine 0.192  lr 1.25e-05  wd 0.162  356s
+    step  1000/1469  loss 0.7948  grad norm 0.311  feature cosine 0.192  lr 1.24e-05  wd 0.162  396s
+    step  1100/1469  loss 0.7947  grad norm 0.311  feature cosine 0.192  lr 1.24e-05  wd 0.162  435s
+    step  1200/1469  loss 0.7948  grad norm 0.312  feature cosine 0.191  lr 1.23e-05  wd 0.162  475s
+    step  1300/1469  loss 0.7944  grad norm 0.313  feature cosine 0.191  lr 1.23e-05  wd 0.163  514s
+    step  1400/1469  loss 0.7944  grad norm 0.312  feature cosine 0.191  lr 1.22e-05  wd 0.163  554s
+    step  1469/1469  loss 0.7943  grad norm 0.312  feature cosine 0.191  lr 1.22e-05  wd 0.163  581s
+  epoch  68/100  loss 0.7943  feature_cosine 0.1914  feature_std 0.0219  grad_norm 0.3124  9.7 min, checkpoint saved
+
+SSL epoch 69/100
+    step   100/1469  loss 0.7954  grad norm 0.319  feature cosine 0.191  lr 1.21e-05  wd 0.163  40s
+    step   200/1469  loss 0.7943  grad norm 0.322  feature cosine 0.191  lr 1.21e-05  wd 0.163  79s
+    step   300/1469  loss 0.7944  grad norm 0.322  feature cosine 0.191  lr 1.21e-05  wd 0.163  119s
+    step   400/1469  loss 0.7950  grad norm 0.321  feature cosine 0.191  lr 1.20e-05  wd 0.163  159s
+    step   500/1469  loss 0.7945  grad norm 0.319  feature cosine 0.191  lr 1.20e-05  wd 0.164  198s
+    step   600/1469  loss 0.7945  grad norm 0.317  feature cosine 0.191  lr 1.19e-05  wd 0.164  238s
+    step   700/1469  loss 0.7942  grad norm 0.315  feature cosine 0.191  lr 1.19e-05  wd 0.164  277s
+    step   800/1469  loss 0.7940  grad norm 0.314  feature cosine 0.191  lr 1.18e-05  wd 0.164  317s
+    step   900/1469  loss 0.7945  grad norm 0.314  feature cosine 0.191  lr 1.18e-05  wd 0.164  356s
+    step  1000/1469  loss 0.7947  grad norm 0.315  feature cosine 0.191  lr 1.17e-05  wd 0.164  396s
+    step  1100/1469  loss 0.7943  grad norm 0.315  feature cosine 0.191  lr 1.17e-05  wd 0.164  436s
+    step  1200/1469  loss 0.7945  grad norm 0.315  feature cosine 0.191  lr 1.16e-05  wd 0.165  475s
+    step  1300/1469  loss 0.7943  grad norm 0.316  feature cosine 0.191  lr 1.16e-05  wd 0.165  515s
+    step  1400/1469  loss 0.7945  grad norm 0.315  feature cosine 0.191  lr 1.15e-05  wd 0.165  555s
+    step  1469/1469  loss 0.7944  grad norm 0.314  feature cosine 0.191  lr 1.15e-05  wd 0.165  582s
+  epoch  69/100  loss 0.7944  feature_cosine 0.1907  feature_std 0.0219  grad_norm 0.3144  9.7 min, checkpoint saved
+
+SSL epoch 70/100
+    step   100/1469  loss 0.7986  grad norm 0.310  feature cosine 0.191  lr 1.15e-05  wd 0.165  40s
+    step   200/1469  loss 0.7975  grad norm 0.320  feature cosine 0.191  lr 1.14e-05  wd 0.165  80s
+    step   300/1469  loss 0.7968  grad norm 0.317  feature cosine 0.191  lr 1.14e-05  wd 0.165  119s
+    step   400/1469  loss 0.7963  grad norm 0.318  feature cosine 0.191  lr 1.13e-05  wd 0.166  159s
+    step   500/1469  loss 0.7965  grad norm 0.315  feature cosine 0.191  lr 1.13e-05  wd 0.166  198s
+    step   600/1469  loss 0.7955  grad norm 0.314  feature cosine 0.191  lr 1.12e-05  wd 0.166  238s
+    step   700/1469  loss 0.7950  grad norm 0.313  feature cosine 0.191  lr 1.12e-05  wd 0.166  278s
+    step   800/1469  loss 0.7949  grad norm 0.314  feature cosine 0.191  lr 1.11e-05  wd 0.166  317s
+    step   900/1469  loss 0.7951  grad norm 0.314  feature cosine 0.191  lr 1.11e-05  wd 0.166  357s
+    step  1000/1469  loss 0.7952  grad norm 0.314  feature cosine 0.191  lr 1.10e-05  wd 0.166  397s
+    step  1100/1469  loss 0.7949  grad norm 0.313  feature cosine 0.191  lr 1.10e-05  wd 0.167  436s
+    step  1200/1469  loss 0.7952  grad norm 0.313  feature cosine 0.191  lr 1.10e-05  wd 0.167  476s
+    step  1300/1469  loss 0.7952  grad norm 0.313  feature cosine 0.191  lr 1.09e-05  wd 0.167  516s
+    step  1400/1469  loss 0.7949  grad norm 0.314  feature cosine 0.191  lr 1.09e-05  wd 0.167  555s
+    step  1469/1469  loss 0.7947  grad norm 0.313  feature cosine 0.191  lr 1.08e-05  wd 0.167  582s
+  epoch  70/100  loss 0.7947  feature_cosine 0.1909  feature_std 0.02189  grad_norm 0.3131  9.7 min, checkpoint saved
+
+SSL epoch 71/100
+    step   100/1469  loss 0.7958  grad norm 0.294  feature cosine 0.190  lr 1.08e-05  wd 0.167  40s
+    step   200/1469  loss 0.7961  grad norm 0.299  feature cosine 0.190  lr 1.07e-05  wd 0.167  79s
+    step   300/1469  loss 0.7955  grad norm 0.303  feature cosine 0.190  lr 1.07e-05  wd 0.167  119s
+    step   400/1469  loss 0.7954  grad norm 0.304  feature cosine 0.190  lr 1.07e-05  wd 0.168  158s
+    step   500/1469  loss 0.7956  grad norm 0.310  feature cosine 0.190  lr 1.06e-05  wd 0.168  198s
+    step   600/1469  loss 0.7953  grad norm 0.310  feature cosine 0.190  lr 1.06e-05  wd 0.168  237s
+    step   700/1469  loss 0.7947  grad norm 0.311  feature cosine 0.190  lr 1.05e-05  wd 0.168  277s
+    step   800/1469  loss 0.7947  grad norm 0.314  feature cosine 0.190  lr 1.05e-05  wd 0.168  316s
+    step   900/1469  loss 0.7949  grad norm 0.314  feature cosine 0.190  lr 1.04e-05  wd 0.168  356s
+    step  1000/1469  loss 0.7951  grad norm 0.315  feature cosine 0.190  lr 1.04e-05  wd 0.168  395s
+    step  1100/1469  loss 0.7949  grad norm 0.315  feature cosine 0.191  lr 1.03e-05  wd 0.169  435s
+    step  1200/1469  loss 0.7947  grad norm 0.316  feature cosine 0.190  lr 1.03e-05  wd 0.169  474s
+    step  1300/1469  loss 0.7947  grad norm 0.317  feature cosine 0.191  lr 1.03e-05  wd 0.169  513s
+    step  1400/1469  loss 0.7946  grad norm 0.317  feature cosine 0.191  lr 1.02e-05  wd 0.169  552s
+    step  1469/1469  loss 0.7945  grad norm 0.317  feature cosine 0.191  lr 1.02e-05  wd 0.169  580s
+  epoch  71/100  loss 0.7945  feature_cosine 0.1906  feature_std 0.0219  grad_norm 0.3171  9.7 min, checkpoint saved
+
+SSL epoch 72/100
+    step   100/1469  loss 0.7911  grad norm 0.315  feature cosine 0.189  lr 1.01e-05  wd 0.169  40s
+    step   200/1469  loss 0.7952  grad norm 0.317  feature cosine 0.190  lr 1.01e-05  wd 0.169  79s
+    step   300/1469  loss 0.7956  grad norm 0.319  feature cosine 0.190  lr 1.01e-05  wd 0.169  119s
+    step   400/1469  loss 0.7950  grad norm 0.317  feature cosine 0.191  lr 1.00e-05  wd 0.170  158s
+    step   500/1469  loss 0.7952  grad norm 0.317  feature cosine 0.190  lr 9.96e-06  wd 0.170  198s
+    step   600/1469  loss 0.7958  grad norm 0.318  feature cosine 0.191  lr 9.92e-06  wd 0.170  237s
+    step   700/1469  loss 0.7954  grad norm 0.317  feature cosine 0.191  lr 9.88e-06  wd 0.170  277s
+    step   800/1469  loss 0.7947  grad norm 0.317  feature cosine 0.191  lr 9.83e-06  wd 0.170  316s
+    step   900/1469  loss 0.7940  grad norm 0.317  feature cosine 0.191  lr 9.79e-06  wd 0.170  356s
+    step  1000/1469  loss 0.7943  grad norm 0.317  feature cosine 0.191  lr 9.75e-06  wd 0.170  395s
+    step  1100/1469  loss 0.7940  grad norm 0.317  feature cosine 0.191  lr 9.70e-06  wd 0.171  435s
+    step  1200/1469  loss 0.7939  grad norm 0.316  feature cosine 0.191  lr 9.66e-06  wd 0.171  474s
+    step  1300/1469  loss 0.7939  grad norm 0.315  feature cosine 0.191  lr 9.62e-06  wd 0.171  514s
+    step  1400/1469  loss 0.7939  grad norm 0.316  feature cosine 0.191  lr 9.57e-06  wd 0.171  553s
+    step  1469/1469  loss 0.7941  grad norm 0.315  feature cosine 0.191  lr 9.54e-06  wd 0.171  580s
+  epoch  72/100  loss 0.7941  feature_cosine 0.1906  feature_std 0.0219  grad_norm 0.3149  9.7 min, checkpoint saved
+
+SSL epoch 73/100
+    step   100/1469  loss 0.7945  grad norm 0.307  feature cosine 0.190  lr 9.50e-06  wd 0.171  40s
+    step   200/1469  loss 0.7943  grad norm 0.310  feature cosine 0.190  lr 9.46e-06  wd 0.171  80s
+    step   300/1469  loss 0.7925  grad norm 0.315  feature cosine 0.190  lr 9.41e-06  wd 0.171  119s
+    step   400/1469  loss 0.7943  grad norm 0.314  feature cosine 0.190  lr 9.37e-06  wd 0.172  159s
+    step   500/1469  loss 0.7941  grad norm 0.316  feature cosine 0.191  lr 9.33e-06  wd 0.172  198s
+    step   600/1469  loss 0.7934  grad norm 0.316  feature cosine 0.191  lr 9.29e-06  wd 0.172  238s
+    step   700/1469  loss 0.7933  grad norm 0.317  feature cosine 0.191  lr 9.24e-06  wd 0.172  277s
+    step   800/1469  loss 0.7931  grad norm 0.317  feature cosine 0.191  lr 9.20e-06  wd 0.172  317s
+    step   900/1469  loss 0.7932  grad norm 0.319  feature cosine 0.191  lr 9.16e-06  wd 0.172  356s
+    step  1000/1469  loss 0.7937  grad norm 0.317  feature cosine 0.191  lr 9.12e-06  wd 0.172  396s
+    step  1100/1469  loss 0.7936  grad norm 0.317  feature cosine 0.191  lr 9.08e-06  wd 0.172  435s
+    step  1200/1469  loss 0.7936  grad norm 0.315  feature cosine 0.191  lr 9.03e-06  wd 0.173  475s
+    step  1300/1469  loss 0.7936  grad norm 0.315  feature cosine 0.191  lr 8.99e-06  wd 0.173  514s
+    step  1400/1469  loss 0.7939  grad norm 0.315  feature cosine 0.191  lr 8.95e-06  wd 0.173  554s
+    step  1469/1469  loss 0.7936  grad norm 0.315  feature cosine 0.191  lr 8.92e-06  wd 0.173  581s
+  epoch  73/100  loss 0.7936  feature_cosine 0.1906  feature_std 0.02189  grad_norm 0.3155  9.7 min, checkpoint saved
+
+SSL epoch 74/100
+    step   100/1469  loss 0.7948  grad norm 0.314  feature cosine 0.190  lr 8.88e-06  wd 0.173  40s
+    step   200/1469  loss 0.7948  grad norm 0.313  feature cosine 0.190  lr 8.84e-06  wd 0.173  79s
+    step   300/1469  loss 0.7934  grad norm 0.313  feature cosine 0.190  lr 8.79e-06  wd 0.173  119s
+    step   400/1469  loss 0.7929  grad norm 0.314  feature cosine 0.190  lr 8.75e-06  wd 0.173  158s
+    step   500/1469  loss 0.7938  grad norm 0.316  feature cosine 0.191  lr 8.71e-06  wd 0.174  198s
+    step   600/1469  loss 0.7939  grad norm 0.316  feature cosine 0.191  lr 8.67e-06  wd 0.174  237s
+    step   700/1469  loss 0.7940  grad norm 0.317  feature cosine 0.191  lr 8.63e-06  wd 0.174  277s
+    step   800/1469  loss 0.7941  grad norm 0.318  feature cosine 0.191  lr 8.59e-06  wd 0.174  316s
+    step   900/1469  loss 0.7934  grad norm 0.317  feature cosine 0.191  lr 8.55e-06  wd 0.174  356s
+    step  1000/1469  loss 0.7937  grad norm 0.318  feature cosine 0.191  lr 8.51e-06  wd 0.174  395s
+    step  1100/1469  loss 0.7941  grad norm 0.317  feature cosine 0.191  lr 8.46e-06  wd 0.174  435s
+    step  1200/1469  loss 0.7938  grad norm 0.316  feature cosine 0.191  lr 8.42e-06  wd 0.174  474s
+    step  1300/1469  loss 0.7940  grad norm 0.315  feature cosine 0.191  lr 8.38e-06  wd 0.175  514s
+    step  1400/1469  loss 0.7939  grad norm 0.315  feature cosine 0.191  lr 8.34e-06  wd 0.175  553s
+    step  1469/1469  loss 0.7937  grad norm 0.315  feature cosine 0.191  lr 8.31e-06  wd 0.175  580s
+  epoch  74/100  loss 0.7937  feature_cosine 0.1908  feature_std 0.02189  grad_norm 0.3154  9.7 min, checkpoint saved
+
+SSL epoch 75/100
+    step   100/1469  loss 0.7968  grad norm 0.316  feature cosine 0.190  lr 8.27e-06  wd 0.175  40s
+    step   200/1469  loss 0.7943  grad norm 0.319  feature cosine 0.191  lr 8.23e-06  wd 0.175  79s
+    step   300/1469  loss 0.7959  grad norm 0.316  feature cosine 0.191  lr 8.19e-06  wd 0.175  119s
+    step   400/1469  loss 0.7962  grad norm 0.315  feature cosine 0.191  lr 8.15e-06  wd 0.175  158s
+    step   500/1469  loss 0.7951  grad norm 0.313  feature cosine 0.191  lr 8.11e-06  wd 0.175  198s
+    step   600/1469  loss 0.7942  grad norm 0.314  feature cosine 0.191  lr 8.07e-06  wd 0.176  237s
+    step   700/1469  loss 0.7940  grad norm 0.314  feature cosine 0.191  lr 8.03e-06  wd 0.176  277s
+    step   800/1469  loss 0.7936  grad norm 0.314  feature cosine 0.191  lr 7.99e-06  wd 0.176  316s
+    step   900/1469  loss 0.7940  grad norm 0.314  feature cosine 0.191  lr 7.95e-06  wd 0.176  356s
+    step  1000/1469  loss 0.7937  grad norm 0.314  feature cosine 0.191  lr 7.91e-06  wd 0.176  395s
+    step  1100/1469  loss 0.7936  grad norm 0.316  feature cosine 0.191  lr 7.87e-06  wd 0.176  435s
+    step  1200/1469  loss 0.7940  grad norm 0.316  feature cosine 0.191  lr 7.83e-06  wd 0.176  475s
+    step  1300/1469  loss 0.7940  grad norm 0.317  feature cosine 0.191  lr 7.79e-06  wd 0.176  514s
+    step  1400/1469  loss 0.7942  grad norm 0.316  feature cosine 0.191  lr 7.75e-06  wd 0.176  554s
+    step  1469/1469  loss 0.7942  grad norm 0.317  feature cosine 0.191  lr 7.72e-06  wd 0.177  581s
+  epoch  75/100  loss 0.7942  feature_cosine 0.1909  feature_std 0.0219  grad_norm 0.3166  9.7 min, checkpoint saved
+
+SSL epoch 76/100
+    step   100/1469  loss 0.7981  grad norm 0.331  feature cosine 0.191  lr 7.68e-06  wd 0.177  40s
+    step   200/1469  loss 0.7971  grad norm 0.325  feature cosine 0.190  lr 7.65e-06  wd 0.177  79s
+    step   300/1469  loss 0.7952  grad norm 0.320  feature cosine 0.191  lr 7.61e-06  wd 0.177  118s
+    step   400/1469  loss 0.7951  grad norm 0.320  feature cosine 0.191  lr 7.57e-06  wd 0.177  158s
+    step   500/1469  loss 0.7951  grad norm 0.321  feature cosine 0.191  lr 7.53e-06  wd 0.177  197s
+    step   600/1469  loss 0.7947  grad norm 0.323  feature cosine 0.191  lr 7.49e-06  wd 0.177  237s
+    step   700/1469  loss 0.7952  grad norm 0.320  feature cosine 0.191  lr 7.45e-06  wd 0.177  276s
+    step   800/1469  loss 0.7945  grad norm 0.321  feature cosine 0.191  lr 7.41e-06  wd 0.178  316s
+    step   900/1469  loss 0.7947  grad norm 0.320  feature cosine 0.191  lr 7.37e-06  wd 0.178  355s
+    step  1000/1469  loss 0.7946  grad norm 0.320  feature cosine 0.191  lr 7.33e-06  wd 0.178  395s
+    step  1100/1469  loss 0.7944  grad norm 0.319  feature cosine 0.191  lr 7.29e-06  wd 0.178  434s
+    step  1200/1469  loss 0.7944  grad norm 0.318  feature cosine 0.191  lr 7.26e-06  wd 0.178  474s
+    step  1300/1469  loss 0.7942  grad norm 0.317  feature cosine 0.191  lr 7.22e-06  wd 0.178  514s
+    step  1400/1469  loss 0.7944  grad norm 0.317  feature cosine 0.191  lr 7.18e-06  wd 0.178  553s
+    step  1469/1469  loss 0.7940  grad norm 0.317  feature cosine 0.191  lr 7.15e-06  wd 0.178  580s
+  epoch  76/100  loss 0.794  feature_cosine 0.191  feature_std 0.02189  grad_norm 0.3173  9.7 min, checkpoint saved
+
+SSL epoch 77/100
+    step   100/1469  loss 0.7967  grad norm 0.320  feature cosine 0.191  lr 7.11e-06  wd 0.178  40s
+    step   200/1469  loss 0.7968  grad norm 0.312  feature cosine 0.190  lr 7.08e-06  wd 0.179  80s
+    step   300/1469  loss 0.7955  grad norm 0.313  feature cosine 0.190  lr 7.04e-06  wd 0.179  120s
+    step   400/1469  loss 0.7938  grad norm 0.315  feature cosine 0.191  lr 7.00e-06  wd 0.179  159s
+    step   500/1469  loss 0.7941  grad norm 0.317  feature cosine 0.191  lr 6.96e-06  wd 0.179  199s
+    step   600/1469  loss 0.7941  grad norm 0.317  feature cosine 0.190  lr 6.92e-06  wd 0.179  239s
+    step   700/1469  loss 0.7937  grad norm 0.318  feature cosine 0.191  lr 6.89e-06  wd 0.179  278s
+    step   800/1469  loss 0.7939  grad norm 0.316  feature cosine 0.191  lr 6.85e-06  wd 0.179  318s
+    step   900/1469  loss 0.7939  grad norm 0.317  feature cosine 0.191  lr 6.81e-06  wd 0.179  358s
+    step  1000/1469  loss 0.7938  grad norm 0.317  feature cosine 0.191  lr 6.77e-06  wd 0.179  398s
+    step  1100/1469  loss 0.7935  grad norm 0.317  feature cosine 0.191  lr 6.74e-06  wd 0.180  437s
+    step  1200/1469  loss 0.7938  grad norm 0.317  feature cosine 0.191  lr 6.70e-06  wd 0.180  477s
+    step  1300/1469  loss 0.7940  grad norm 0.318  feature cosine 0.191  lr 6.66e-06  wd 0.180  516s
+    step  1400/1469  loss 0.7940  grad norm 0.318  feature cosine 0.191  lr 6.63e-06  wd 0.180  556s
+    step  1469/1469  loss 0.7943  grad norm 0.317  feature cosine 0.191  lr 6.60e-06  wd 0.180  583s
+  epoch  77/100  loss 0.7943  feature_cosine 0.1909  feature_std 0.0219  grad_norm 0.3174  9.7 min, checkpoint saved
+
+SSL epoch 78/100
+    step   100/1469  loss 0.7957  grad norm 0.313  feature cosine 0.191  lr 6.56e-06  wd 0.180  40s
+    step   200/1469  loss 0.7956  grad norm 0.316  feature cosine 0.191  lr 6.53e-06  wd 0.180  79s
+    step   300/1469  loss 0.7954  grad norm 0.314  feature cosine 0.191  lr 6.49e-06  wd 0.180  118s
+    step   400/1469  loss 0.7939  grad norm 0.316  feature cosine 0.191  lr 6.45e-06  wd 0.180  157s
+    step   500/1469  loss 0.7936  grad norm 0.313  feature cosine 0.191  lr 6.42e-06  wd 0.181  197s
+    step   600/1469  loss 0.7935  grad norm 0.313  feature cosine 0.191  lr 6.38e-06  wd 0.181  236s
+    step   700/1469  loss 0.7927  grad norm 0.314  feature cosine 0.191  lr 6.34e-06  wd 0.181  276s
+    step   800/1469  loss 0.7938  grad norm 0.315  feature cosine 0.191  lr 6.31e-06  wd 0.181  315s
+    step   900/1469  loss 0.7941  grad norm 0.314  feature cosine 0.191  lr 6.27e-06  wd 0.181  355s
+    step  1000/1469  loss 0.7940  grad norm 0.313  feature cosine 0.191  lr 6.23e-06  wd 0.181  394s
+    step  1100/1469  loss 0.7940  grad norm 0.314  feature cosine 0.191  lr 6.20e-06  wd 0.181  434s
+    step  1200/1469  loss 0.7941  grad norm 0.314  feature cosine 0.191  lr 6.16e-06  wd 0.181  473s
+    step  1300/1469  loss 0.7940  grad norm 0.314  feature cosine 0.191  lr 6.13e-06  wd 0.181  513s
+    step  1400/1469  loss 0.7939  grad norm 0.315  feature cosine 0.191  lr 6.09e-06  wd 0.182  552s
+    step  1469/1469  loss 0.7938  grad norm 0.314  feature cosine 0.191  lr 6.07e-06  wd 0.182  580s
+  epoch  78/100  loss 0.7938  feature_cosine 0.1908  feature_std 0.02189  grad_norm 0.3144  9.7 min, checkpoint saved
+
+SSL epoch 79/100
+    step   100/1469  loss 0.7947  grad norm 0.317  feature cosine 0.190  lr 6.03e-06  wd 0.182  40s
+    step   200/1469  loss 0.7921  grad norm 0.319  feature cosine 0.190  lr 6.00e-06  wd 0.182  79s
+    step   300/1469  loss 0.7930  grad norm 0.321  feature cosine 0.190  lr 5.96e-06  wd 0.182  119s
+    step   400/1469  loss 0.7926  grad norm 0.320  feature cosine 0.190  lr 5.92e-06  wd 0.182  159s
+    step   500/1469  loss 0.7931  grad norm 0.317  feature cosine 0.190  lr 5.89e-06  wd 0.182  198s
+    step   600/1469  loss 0.7917  grad norm 0.317  feature cosine 0.190  lr 5.85e-06  wd 0.182  238s
+    step   700/1469  loss 0.7915  grad norm 0.319  feature cosine 0.190  lr 5.82e-06  wd 0.182  278s
+    step   800/1469  loss 0.7916  grad norm 0.319  feature cosine 0.190  lr 5.78e-06  wd 0.183  318s
+    step   900/1469  loss 0.7921  grad norm 0.318  feature cosine 0.190  lr 5.75e-06  wd 0.183  357s
+    step  1000/1469  loss 0.7924  grad norm 0.318  feature cosine 0.190  lr 5.71e-06  wd 0.183  397s
+    step  1100/1469  loss 0.7928  grad norm 0.317  feature cosine 0.190  lr 5.68e-06  wd 0.183  436s
+    step  1200/1469  loss 0.7926  grad norm 0.316  feature cosine 0.190  lr 5.65e-06  wd 0.183  476s
+    step  1300/1469  loss 0.7934  grad norm 0.315  feature cosine 0.190  lr 5.61e-06  wd 0.183  516s
+    step  1400/1469  loss 0.7935  grad norm 0.316  feature cosine 0.190  lr 5.58e-06  wd 0.183  555s
+    step  1469/1469  loss 0.7935  grad norm 0.316  feature cosine 0.190  lr 5.55e-06  wd 0.183  583s
+  epoch  79/100  loss 0.7935  feature_cosine 0.1905  feature_std 0.02189  grad_norm 0.3161  9.7 min, checkpoint saved
+
+SSL epoch 80/100
+    step   100/1469  loss 0.7915  grad norm 0.312  feature cosine 0.191  lr 5.52e-06  wd 0.183  40s
+    step   200/1469  loss 0.7924  grad norm 0.321  feature cosine 0.191  lr 5.48e-06  wd 0.183  80s
+    step   300/1469  loss 0.7925  grad norm 0.316  feature cosine 0.191  lr 5.45e-06  wd 0.184  119s
+    step   400/1469  loss 0.7935  grad norm 0.315  feature cosine 0.191  lr 5.42e-06  wd 0.184  158s
+    step   500/1469  loss 0.7935  grad norm 0.317  feature cosine 0.191  lr 5.38e-06  wd 0.184  198s
+    step   600/1469  loss 0.7928  grad norm 0.317  feature cosine 0.191  lr 5.35e-06  wd 0.184  237s
+    step   700/1469  loss 0.7934  grad norm 0.317  feature cosine 0.191  lr 5.31e-06  wd 0.184  277s
+    step   800/1469  loss 0.7932  grad norm 0.318  feature cosine 0.191  lr 5.28e-06  wd 0.184  317s
+    step   900/1469  loss 0.7933  grad norm 0.317  feature cosine 0.191  lr 5.25e-06  wd 0.184  356s
+    step  1000/1469  loss 0.7939  grad norm 0.317  feature cosine 0.191  lr 5.21e-06  wd 0.184  396s
+    step  1100/1469  loss 0.7939  grad norm 0.316  feature cosine 0.191  lr 5.18e-06  wd 0.184  435s
+    step  1200/1469  loss 0.7936  grad norm 0.315  feature cosine 0.191  lr 5.15e-06  wd 0.184  475s
+    step  1300/1469  loss 0.7937  grad norm 0.316  feature cosine 0.191  lr 5.11e-06  wd 0.185  514s
+    step  1400/1469  loss 0.7941  grad norm 0.316  feature cosine 0.191  lr 5.08e-06  wd 0.185  554s
+    step  1469/1469  loss 0.7939  grad norm 0.317  feature cosine 0.191  lr 5.06e-06  wd 0.185  581s
+  epoch  80/100  loss 0.7939  feature_cosine 0.1906  feature_std 0.0219  grad_norm 0.3168  9.7 min, checkpoint saved
+
+SSL epoch 81/100
+    step   100/1469  loss 0.7901  grad norm 0.304  feature cosine 0.192  lr 5.03e-06  wd 0.185  40s
+    step   200/1469  loss 0.7935  grad norm 0.312  feature cosine 0.191  lr 4.99e-06  wd 0.185  80s
+    step   300/1469  loss 0.7946  grad norm 0.316  feature cosine 0.191  lr 4.96e-06  wd 0.185  119s
+    step   400/1469  loss 0.7948  grad norm 0.317  feature cosine 0.191  lr 4.93e-06  wd 0.185  159s
+    step   500/1469  loss 0.7949  grad norm 0.314  feature cosine 0.191  lr 4.90e-06  wd 0.185  198s
+    step   600/1469  loss 0.7949  grad norm 0.314  feature cosine 0.191  lr 4.86e-06  wd 0.185  238s
+    step   700/1469  loss 0.7947  grad norm 0.316  feature cosine 0.191  lr 4.83e-06  wd 0.185  277s
+    step   800/1469  loss 0.7941  grad norm 0.317  feature cosine 0.191  lr 4.80e-06  wd 0.186  317s
+    step   900/1469  loss 0.7940  grad norm 0.316  feature cosine 0.191  lr 4.77e-06  wd 0.186  357s
+    step  1000/1469  loss 0.7945  grad norm 0.316  feature cosine 0.191  lr 4.73e-06  wd 0.186  396s
+    step  1100/1469  loss 0.7944  grad norm 0.317  feature cosine 0.191  lr 4.70e-06  wd 0.186  436s
+    step  1200/1469  loss 0.7946  grad norm 0.316  feature cosine 0.191  lr 4.67e-06  wd 0.186  475s
+    step  1300/1469  loss 0.7942  grad norm 0.316  feature cosine 0.191  lr 4.64e-06  wd 0.186  515s
+    step  1400/1469  loss 0.7940  grad norm 0.316  feature cosine 0.191  lr 4.61e-06  wd 0.186  554s
+    step  1469/1469  loss 0.7941  grad norm 0.316  feature cosine 0.191  lr 4.59e-06  wd 0.186  582s
+  epoch  81/100  loss 0.7941  feature_cosine 0.1907  feature_std 0.0219  grad_norm 0.3157  9.7 min, checkpoint saved
+
+SSL epoch 82/100
+    step   100/1469  loss 0.7989  grad norm 0.316  feature cosine 0.191  lr 4.55e-06  wd 0.186  40s
+    step   200/1469  loss 0.7966  grad norm 0.314  feature cosine 0.191  lr 4.52e-06  wd 0.186  80s
+    step   300/1469  loss 0.7966  grad norm 0.314  feature cosine 0.191  lr 4.49e-06  wd 0.186  119s
+    step   400/1469  loss 0.7950  grad norm 0.313  feature cosine 0.191  lr 4.46e-06  wd 0.187  158s
+    step   500/1469  loss 0.7945  grad norm 0.317  feature cosine 0.191  lr 4.43e-06  wd 0.187  197s
+    step   600/1469  loss 0.7945  grad norm 0.318  feature cosine 0.191  lr 4.40e-06  wd 0.187  236s
+    step   700/1469  loss 0.7947  grad norm 0.318  feature cosine 0.191  lr 4.37e-06  wd 0.187  275s
+    step   800/1469  loss 0.7946  grad norm 0.319  feature cosine 0.191  lr 4.34e-06  wd 0.187  315s
+    step   900/1469  loss 0.7945  grad norm 0.317  feature cosine 0.191  lr 4.31e-06  wd 0.187  354s
+    step  1000/1469  loss 0.7947  grad norm 0.318  feature cosine 0.191  lr 4.28e-06  wd 0.187  393s
+    step  1100/1469  loss 0.7944  grad norm 0.317  feature cosine 0.191  lr 4.25e-06  wd 0.187  433s
+    step  1200/1469  loss 0.7942  grad norm 0.317  feature cosine 0.191  lr 4.22e-06  wd 0.187  472s
+    step  1300/1469  loss 0.7938  grad norm 0.316  feature cosine 0.191  lr 4.19e-06  wd 0.187  511s
+    step  1400/1469  loss 0.7938  grad norm 0.315  feature cosine 0.191  lr 4.15e-06  wd 0.187  551s
+    step  1469/1469  loss 0.7938  grad norm 0.315  feature cosine 0.191  lr 4.13e-06  wd 0.188  578s
+  epoch  82/100  loss 0.7938  feature_cosine 0.1908  feature_std 0.02189  grad_norm 0.3146  9.6 min, checkpoint saved
+
+SSL epoch 83/100
+    step   100/1469  loss 0.7894  grad norm 0.317  feature cosine 0.192  lr 4.10e-06  wd 0.188  40s
+    step   200/1469  loss 0.7917  grad norm 0.313  feature cosine 0.192  lr 4.07e-06  wd 0.188  79s
+    step   300/1469  loss 0.7932  grad norm 0.312  feature cosine 0.191  lr 4.04e-06  wd 0.188  119s
+    step   400/1469  loss 0.7922  grad norm 0.313  feature cosine 0.191  lr 4.01e-06  wd 0.188  158s
+    step   500/1469  loss 0.7930  grad norm 0.313  feature cosine 0.191  lr 3.99e-06  wd 0.188  197s
+    step   600/1469  loss 0.7936  grad norm 0.315  feature cosine 0.191  lr 3.96e-06  wd 0.188  237s
+    step   700/1469  loss 0.7932  grad norm 0.315  feature cosine 0.191  lr 3.93e-06  wd 0.188  276s
+    step   800/1469  loss 0.7936  grad norm 0.315  feature cosine 0.191  lr 3.90e-06  wd 0.188  315s
+    step   900/1469  loss 0.7935  grad norm 0.316  feature cosine 0.191  lr 3.87e-06  wd 0.188  355s
+    step  1000/1469  loss 0.7933  grad norm 0.315  feature cosine 0.191  lr 3.84e-06  wd 0.188  394s
+    step  1100/1469  loss 0.7930  grad norm 0.315  feature cosine 0.191  lr 3.81e-06  wd 0.189  433s
+    step  1200/1469  loss 0.7934  grad norm 0.316  feature cosine 0.191  lr 3.78e-06  wd 0.189  473s
+    step  1300/1469  loss 0.7932  grad norm 0.318  feature cosine 0.191  lr 3.75e-06  wd 0.189  512s
+    step  1400/1469  loss 0.7935  grad norm 0.318  feature cosine 0.191  lr 3.72e-06  wd 0.189  552s
+    step  1469/1469  loss 0.7935  grad norm 0.318  feature cosine 0.191  lr 3.70e-06  wd 0.189  579s
+  epoch  83/100  loss 0.7935  feature_cosine 0.1906  feature_std 0.0219  grad_norm 0.3178  9.7 min, checkpoint saved
+
+SSL epoch 84/100
+    step   100/1469  loss 0.7932  grad norm 0.314  feature cosine 0.192  lr 3.68e-06  wd 0.189  40s
+    step   200/1469  loss 0.7932  grad norm 0.316  feature cosine 0.192  lr 3.65e-06  wd 0.189  79s
+    step   300/1469  loss 0.7935  grad norm 0.317  feature cosine 0.191  lr 3.62e-06  wd 0.189  119s
+    step   400/1469  loss 0.7927  grad norm 0.317  feature cosine 0.191  lr 3.59e-06  wd 0.189  158s
+    step   500/1469  loss 0.7932  grad norm 0.318  feature cosine 0.191  lr 3.56e-06  wd 0.189  197s
+    step   600/1469  loss 0.7932  grad norm 0.318  feature cosine 0.191  lr 3.53e-06  wd 0.189  237s
+    step   700/1469  loss 0.7932  grad norm 0.316  feature cosine 0.191  lr 3.51e-06  wd 0.189  276s
+    step   800/1469  loss 0.7937  grad norm 0.315  feature cosine 0.191  lr 3.48e-06  wd 0.190  315s
+    step   900/1469  loss 0.7937  grad norm 0.316  feature cosine 0.191  lr 3.45e-06  wd 0.190  355s
+    step  1000/1469  loss 0.7939  grad norm 0.315  feature cosine 0.191  lr 3.42e-06  wd 0.190  394s
+    step  1100/1469  loss 0.7937  grad norm 0.313  feature cosine 0.191  lr 3.40e-06  wd 0.190  433s
+    step  1200/1469  loss 0.7934  grad norm 0.313  feature cosine 0.191  lr 3.37e-06  wd 0.190  473s
+    step  1300/1469  loss 0.7936  grad norm 0.314  feature cosine 0.191  lr 3.34e-06  wd 0.190  512s
+    step  1400/1469  loss 0.7935  grad norm 0.314  feature cosine 0.191  lr 3.31e-06  wd 0.190  551s
+    step  1469/1469  loss 0.7935  grad norm 0.315  feature cosine 0.191  lr 3.30e-06  wd 0.190  578s
+  epoch  84/100  loss 0.7935  feature_cosine 0.1909  feature_std 0.0219  grad_norm 0.3146  9.6 min, checkpoint saved
+
+SSL epoch 85/100
+    step   100/1469  loss 0.7977  grad norm 0.308  feature cosine 0.192  lr 3.27e-06  wd 0.190  40s
+    step   200/1469  loss 0.7957  grad norm 0.320  feature cosine 0.191  lr 3.24e-06  wd 0.190  79s
+    step   300/1469  loss 0.7951  grad norm 0.315  feature cosine 0.191  lr 3.22e-06  wd 0.190  118s
+    step   400/1469  loss 0.7954  grad norm 0.316  feature cosine 0.191  lr 3.19e-06  wd 0.190  158s
+    step   500/1469  loss 0.7954  grad norm 0.315  feature cosine 0.191  lr 3.16e-06  wd 0.191  197s
+    step   600/1469  loss 0.7954  grad norm 0.316  feature cosine 0.191  lr 3.14e-06  wd 0.191  237s
+    step   700/1469  loss 0.7955  grad norm 0.318  feature cosine 0.191  lr 3.11e-06  wd 0.191  276s
+    step   800/1469  loss 0.7948  grad norm 0.317  feature cosine 0.191  lr 3.08e-06  wd 0.191  316s
+    step   900/1469  loss 0.7949  grad norm 0.317  feature cosine 0.191  lr 3.06e-06  wd 0.191  355s
+    step  1000/1469  loss 0.7952  grad norm 0.317  feature cosine 0.191  lr 3.03e-06  wd 0.191  395s
+    step  1100/1469  loss 0.7946  grad norm 0.315  feature cosine 0.191  lr 3.01e-06  wd 0.191  434s
+    step  1200/1469  loss 0.7945  grad norm 0.316  feature cosine 0.191  lr 2.98e-06  wd 0.191  474s
+    step  1300/1469  loss 0.7944  grad norm 0.315  feature cosine 0.191  lr 2.95e-06  wd 0.191  513s
+    step  1400/1469  loss 0.7938  grad norm 0.315  feature cosine 0.191  lr 2.93e-06  wd 0.191  552s
+    step  1469/1469  loss 0.7938  grad norm 0.315  feature cosine 0.191  lr 2.91e-06  wd 0.191  580s
+  epoch  85/100  loss 0.7938  feature_cosine 0.1909  feature_std 0.0219  grad_norm 0.3153  9.7 min, checkpoint saved
+
+SSL epoch 86/100
+    step   100/1469  loss 0.7968  grad norm 0.328  feature cosine 0.191  lr 2.89e-06  wd 0.191  40s
+    step   200/1469  loss 0.7977  grad norm 0.318  feature cosine 0.191  lr 2.86e-06  wd 0.191  79s
+    step   300/1469  loss 0.7955  grad norm 0.316  feature cosine 0.191  lr 2.83e-06  wd 0.192  118s
+    step   400/1469  loss 0.7940  grad norm 0.316  feature cosine 0.191  lr 2.81e-06  wd 0.192  158s
+    step   500/1469  loss 0.7948  grad norm 0.315  feature cosine 0.191  lr 2.78e-06  wd 0.192  197s
+    step   600/1469  loss 0.7944  grad norm 0.315  feature cosine 0.191  lr 2.76e-06  wd 0.192  236s
+    step   700/1469  loss 0.7944  grad norm 0.315  feature cosine 0.191  lr 2.74e-06  wd 0.192  276s
+    step   800/1469  loss 0.7945  grad norm 0.317  feature cosine 0.191  lr 2.71e-06  wd 0.192  315s
+    step   900/1469  loss 0.7947  grad norm 0.315  feature cosine 0.191  lr 2.69e-06  wd 0.192  354s
+    step  1000/1469  loss 0.7947  grad norm 0.316  feature cosine 0.191  lr 2.66e-06  wd 0.192  393s
+    step  1100/1469  loss 0.7941  grad norm 0.315  feature cosine 0.191  lr 2.64e-06  wd 0.192  433s
+    step  1200/1469  loss 0.7938  grad norm 0.316  feature cosine 0.191  lr 2.61e-06  wd 0.192  472s
+    step  1300/1469  loss 0.7938  grad norm 0.316  feature cosine 0.191  lr 2.59e-06  wd 0.192  511s
+    step  1400/1469  loss 0.7940  grad norm 0.317  feature cosine 0.191  lr 2.56e-06  wd 0.192  551s
+    step  1469/1469  loss 0.7938  grad norm 0.317  feature cosine 0.191  lr 2.55e-06  wd 0.192  578s
+  epoch  86/100  loss 0.7938  feature_cosine 0.1908  feature_std 0.0219  grad_norm 0.3168  9.6 min, checkpoint saved
+
+SSL epoch 87/100
+    step   100/1469  loss 0.7890  grad norm 0.315  feature cosine 0.191  lr 2.52e-06  wd 0.192  40s
+    step   200/1469  loss 0.7922  grad norm 0.312  feature cosine 0.191  lr 2.50e-06  wd 0.193  79s
+    step   300/1469  loss 0.7930  grad norm 0.312  feature cosine 0.191  lr 2.48e-06  wd 0.193  119s
+    step   400/1469  loss 0.7927  grad norm 0.313  feature cosine 0.191  lr 2.45e-06  wd 0.193  158s
+    step   500/1469  loss 0.7916  grad norm 0.314  feature cosine 0.191  lr 2.43e-06  wd 0.193  198s
+    step   600/1469  loss 0.7924  grad norm 0.315  feature cosine 0.191  lr 2.41e-06  wd 0.193  237s
+    step   700/1469  loss 0.7925  grad norm 0.316  feature cosine 0.191  lr 2.38e-06  wd 0.193  276s
+    step   800/1469  loss 0.7922  grad norm 0.316  feature cosine 0.191  lr 2.36e-06  wd 0.193  316s
+    step   900/1469  loss 0.7925  grad norm 0.316  feature cosine 0.191  lr 2.34e-06  wd 0.193  355s
+    step  1000/1469  loss 0.7931  grad norm 0.315  feature cosine 0.191  lr 2.31e-06  wd 0.193  394s
+    step  1100/1469  loss 0.7934  grad norm 0.317  feature cosine 0.191  lr 2.29e-06  wd 0.193  434s
+    step  1200/1469  loss 0.7938  grad norm 0.317  feature cosine 0.191  lr 2.27e-06  wd 0.193  473s
+    step  1300/1469  loss 0.7940  grad norm 0.317  feature cosine 0.191  lr 2.25e-06  wd 0.193  512s
+    step  1400/1469  loss 0.7942  grad norm 0.317  feature cosine 0.191  lr 2.22e-06  wd 0.193  552s
+    step  1469/1469  loss 0.7942  grad norm 0.317  feature cosine 0.191  lr 2.21e-06  wd 0.193  579s
+  epoch  87/100  loss 0.7942  feature_cosine 0.1909  feature_std 0.0219  grad_norm 0.3173  9.7 min, checkpoint saved
+
+SSL epoch 88/100
+    step   100/1469  loss 0.7983  grad norm 0.318  feature cosine 0.191  lr 2.19e-06  wd 0.193  40s
+    step   200/1469  loss 0.7940  grad norm 0.323  feature cosine 0.191  lr 2.16e-06  wd 0.194  79s
+    step   300/1469  loss 0.7936  grad norm 0.317  feature cosine 0.191  lr 2.14e-06  wd 0.194  118s
+    step   400/1469  loss 0.7931  grad norm 0.313  feature cosine 0.191  lr 2.12e-06  wd 0.194  158s
+    step   500/1469  loss 0.7927  grad norm 0.314  feature cosine 0.191  lr 2.10e-06  wd 0.194  197s
+    step   600/1469  loss 0.7927  grad norm 0.314  feature cosine 0.191  lr 2.08e-06  wd 0.194  236s
+    step   700/1469  loss 0.7919  grad norm 0.312  feature cosine 0.191  lr 2.06e-06  wd 0.194  276s
+    step   800/1469  loss 0.7917  grad norm 0.311  feature cosine 0.191  lr 2.03e-06  wd 0.194  315s
+    step   900/1469  loss 0.7928  grad norm 0.311  feature cosine 0.191  lr 2.01e-06  wd 0.194  355s
+    step  1000/1469  loss 0.7930  grad norm 0.311  feature cosine 0.191  lr 1.99e-06  wd 0.194  394s
+    step  1100/1469  loss 0.7932  grad norm 0.311  feature cosine 0.191  lr 1.97e-06  wd 0.194  434s
+    step  1200/1469  loss 0.7933  grad norm 0.313  feature cosine 0.191  lr 1.95e-06  wd 0.194  473s
+    step  1300/1469  loss 0.7932  grad norm 0.313  feature cosine 0.191  lr 1.93e-06  wd 0.194  513s
+    step  1400/1469  loss 0.7935  grad norm 0.313  feature cosine 0.191  lr 1.91e-06  wd 0.194  552s
+    step  1469/1469  loss 0.7934  grad norm 0.314  feature cosine 0.191  lr 1.89e-06  wd 0.194  579s
+  epoch  88/100  loss 0.7934  feature_cosine 0.1909  feature_std 0.0219  grad_norm 0.3136  9.7 min, checkpoint saved
+
+SSL epoch 89/100
+    step   100/1469  loss 0.7961  grad norm 0.323  feature cosine 0.191  lr 1.87e-06  wd 0.194  40s
+    step   200/1469  loss 0.7970  grad norm 0.320  feature cosine 0.190  lr 1.85e-06  wd 0.195  79s
+    step   300/1469  loss 0.7967  grad norm 0.318  feature cosine 0.190  lr 1.83e-06  wd 0.195  119s
+    step   400/1469  loss 0.7957  grad norm 0.317  feature cosine 0.190  lr 1.81e-06  wd 0.195  158s
+    step   500/1469  loss 0.7967  grad norm 0.316  feature cosine 0.190  lr 1.79e-06  wd 0.195  197s
+    step   600/1469  loss 0.7956  grad norm 0.316  feature cosine 0.190  lr 1.77e-06  wd 0.195  237s
+    step   700/1469  loss 0.7945  grad norm 0.315  feature cosine 0.190  lr 1.75e-06  wd 0.195  276s
+    step   800/1469  loss 0.7940  grad norm 0.315  feature cosine 0.190  lr 1.73e-06  wd 0.195  315s
+    step   900/1469  loss 0.7941  grad norm 0.315  feature cosine 0.190  lr 1.71e-06  wd 0.195  354s
+    step  1000/1469  loss 0.7943  grad norm 0.314  feature cosine 0.190  lr 1.69e-06  wd 0.195  394s
+    step  1100/1469  loss 0.7948  grad norm 0.314  feature cosine 0.190  lr 1.67e-06  wd 0.195  433s
+    step  1200/1469  loss 0.7943  grad norm 0.313  feature cosine 0.191  lr 1.65e-06  wd 0.195  472s
+    step  1300/1469  loss 0.7939  grad norm 0.313  feature cosine 0.191  lr 1.63e-06  wd 0.195  511s
+    step  1400/1469  loss 0.7936  grad norm 0.314  feature cosine 0.191  lr 1.62e-06  wd 0.195  551s
+    step  1469/1469  loss 0.7936  grad norm 0.314  feature cosine 0.191  lr 1.60e-06  wd 0.195  578s
+  epoch  89/100  loss 0.7936  feature_cosine 0.1907  feature_std 0.0219  grad_norm 0.3136  9.6 min, checkpoint saved
+
+SSL epoch 90/100
+    step   100/1469  loss 0.7962  grad norm 0.321  feature cosine 0.191  lr 1.58e-06  wd 0.195  40s
+    step   200/1469  loss 0.7934  grad norm 0.312  feature cosine 0.191  lr 1.56e-06  wd 0.195  79s
+    step   300/1469  loss 0.7928  grad norm 0.314  feature cosine 0.191  lr 1.55e-06  wd 0.195  118s
+    step   400/1469  loss 0.7922  grad norm 0.317  feature cosine 0.192  lr 1.53e-06  wd 0.195  158s
+    step   500/1469  loss 0.7929  grad norm 0.316  feature cosine 0.191  lr 1.51e-06  wd 0.196  197s
+    step   600/1469  loss 0.7934  grad norm 0.315  feature cosine 0.191  lr 1.49e-06  wd 0.196  237s
+    step   700/1469  loss 0.7936  grad norm 0.316  feature cosine 0.191  lr 1.47e-06  wd 0.196  276s
+    step   800/1469  loss 0.7932  grad norm 0.315  feature cosine 0.191  lr 1.45e-06  wd 0.196  315s
+    step   900/1469  loss 0.7934  grad norm 0.315  feature cosine 0.191  lr 1.44e-06  wd 0.196  354s
+    step  1000/1469  loss 0.7931  grad norm 0.315  feature cosine 0.191  lr 1.42e-06  wd 0.196  394s
+    step  1100/1469  loss 0.7932  grad norm 0.314  feature cosine 0.191  lr 1.40e-06  wd 0.196  433s
+    step  1200/1469  loss 0.7934  grad norm 0.313  feature cosine 0.191  lr 1.38e-06  wd 0.196  472s
+    step  1300/1469  loss 0.7934  grad norm 0.312  feature cosine 0.191  lr 1.36e-06  wd 0.196  511s
+    step  1400/1469  loss 0.7931  grad norm 0.312  feature cosine 0.191  lr 1.35e-06  wd 0.196  551s
+    step  1469/1469  loss 0.7934  grad norm 0.312  feature cosine 0.191  lr 1.34e-06  wd 0.196  578s
+  epoch  90/100  loss 0.7934  feature_cosine 0.1908  feature_std 0.02191  grad_norm 0.3117  9.6 min, checkpoint saved
+
+SSL epoch 91/100
+    step   100/1469  loss 0.7949  grad norm 0.304  feature cosine 0.190  lr 1.32e-06  wd 0.196  40s
+    step   200/1469  loss 0.7944  grad norm 0.302  feature cosine 0.191  lr 1.30e-06  wd 0.196  79s
+    step   300/1469  loss 0.7960  grad norm 0.302  feature cosine 0.191  lr 1.28e-06  wd 0.196  118s
+    step   400/1469  loss 0.7955  grad norm 0.304  feature cosine 0.191  lr 1.27e-06  wd 0.196  157s
+    step   500/1469  loss 0.7940  grad norm 0.306  feature cosine 0.191  lr 1.25e-06  wd 0.196  197s
+    step   600/1469  loss 0.7942  grad norm 0.308  feature cosine 0.191  lr 1.23e-06  wd 0.196  236s
+    step   700/1469  loss 0.7937  grad norm 0.311  feature cosine 0.191  lr 1.22e-06  wd 0.196  275s
+    step   800/1469  loss 0.7934  grad norm 0.311  feature cosine 0.191  lr 1.20e-06  wd 0.196  314s
+    step   900/1469  loss 0.7932  grad norm 0.312  feature cosine 0.191  lr 1.18e-06  wd 0.197  354s
+    step  1000/1469  loss 0.7934  grad norm 0.312  feature cosine 0.191  lr 1.17e-06  wd 0.197  393s
+    step  1100/1469  loss 0.7937  grad norm 0.313  feature cosine 0.191  lr 1.15e-06  wd 0.197  432s
+    step  1200/1469  loss 0.7934  grad norm 0.313  feature cosine 0.191  lr 1.14e-06  wd 0.197  471s
+    step  1300/1469  loss 0.7933  grad norm 0.313  feature cosine 0.191  lr 1.12e-06  wd 0.197  511s
+    step  1400/1469  loss 0.7934  grad norm 0.313  feature cosine 0.191  lr 1.10e-06  wd 0.197  550s
+    step  1469/1469  loss 0.7937  grad norm 0.314  feature cosine 0.191  lr 1.09e-06  wd 0.197  577s
+  epoch  91/100  loss 0.7937  feature_cosine 0.1909  feature_std 0.0219  grad_norm 0.3136  9.6 min, checkpoint saved
+
+SSL epoch 92/100
+    step   100/1469  loss 0.7948  grad norm 0.309  feature cosine 0.191  lr 1.08e-06  wd 0.197  40s
+    step   200/1469  loss 0.7952  grad norm 0.312  feature cosine 0.191  lr 1.06e-06  wd 0.197  79s
+    step   300/1469  loss 0.7929  grad norm 0.311  feature cosine 0.191  lr 1.05e-06  wd 0.197  119s
+    step   400/1469  loss 0.7926  grad norm 0.314  feature cosine 0.191  lr 1.03e-06  wd 0.197  158s
+    step   500/1469  loss 0.7941  grad norm 0.313  feature cosine 0.191  lr 1.02e-06  wd 0.197  197s
+    step   600/1469  loss 0.7942  grad norm 0.314  feature cosine 0.191  lr 1.00e-06  wd 0.197  236s
+    step   700/1469  loss 0.7937  grad norm 0.313  feature cosine 0.191  lr 9.86e-07  wd 0.197  275s
+    step   800/1469  loss 0.7939  grad norm 0.314  feature cosine 0.191  lr 9.71e-07  wd 0.197  315s
+    step   900/1469  loss 0.7940  grad norm 0.313  feature cosine 0.191  lr 9.57e-07  wd 0.197  354s
+    step  1000/1469  loss 0.7940  grad norm 0.313  feature cosine 0.191  lr 9.42e-07  wd 0.197  393s
+    step  1100/1469  loss 0.7938  grad norm 0.312  feature cosine 0.191  lr 9.27e-07  wd 0.197  433s
+    step  1200/1469  loss 0.7937  grad norm 0.313  feature cosine 0.191  lr 9.13e-07  wd 0.197  472s
+    step  1300/1469  loss 0.7937  grad norm 0.313  feature cosine 0.191  lr 8.99e-07  wd 0.197  511s
+    step  1400/1469  loss 0.7936  grad norm 0.314  feature cosine 0.191  lr 8.85e-07  wd 0.197  550s
+    step  1469/1469  loss 0.7934  grad norm 0.315  feature cosine 0.191  lr 8.75e-07  wd 0.197  578s
+  epoch  92/100  loss 0.7934  feature_cosine 0.1908  feature_std 0.0219  grad_norm 0.3146  9.6 min, checkpoint saved
+
+SSL epoch 93/100
+    step   100/1469  loss 0.7943  grad norm 0.320  feature cosine 0.190  lr 8.61e-07  wd 0.198  40s
+    step   200/1469  loss 0.7945  grad norm 0.319  feature cosine 0.190  lr 8.47e-07  wd 0.198  79s
+    step   300/1469  loss 0.7950  grad norm 0.317  feature cosine 0.190  lr 8.34e-07  wd 0.198  119s
+    step   400/1469  loss 0.7941  grad norm 0.316  feature cosine 0.190  lr 8.20e-07  wd 0.198  159s
+    step   500/1469  loss 0.7941  grad norm 0.315  feature cosine 0.190  lr 8.07e-07  wd 0.198  198s
+    step   600/1469  loss 0.7937  grad norm 0.317  feature cosine 0.190  lr 7.93e-07  wd 0.198  238s
+    step   700/1469  loss 0.7937  grad norm 0.317  feature cosine 0.191  lr 7.80e-07  wd 0.198  277s
+    step   800/1469  loss 0.7933  grad norm 0.316  feature cosine 0.191  lr 7.67e-07  wd 0.198  316s
+    step   900/1469  loss 0.7936  grad norm 0.315  feature cosine 0.191  lr 7.54e-07  wd 0.198  356s
+    step  1000/1469  loss 0.7933  grad norm 0.316  feature cosine 0.191  lr 7.41e-07  wd 0.198  395s
+    step  1100/1469  loss 0.7936  grad norm 0.316  feature cosine 0.191  lr 7.29e-07  wd 0.198  435s
+    step  1200/1469  loss 0.7936  grad norm 0.316  feature cosine 0.191  lr 7.16e-07  wd 0.198  474s
+    step  1300/1469  loss 0.7937  grad norm 0.315  feature cosine 0.191  lr 7.03e-07  wd 0.198  514s
+    step  1400/1469  loss 0.7938  grad norm 0.316  feature cosine 0.191  lr 6.91e-07  wd 0.198  553s
+    step  1469/1469  loss 0.7938  grad norm 0.316  feature cosine 0.191  lr 6.83e-07  wd 0.198  581s
+  epoch  93/100  loss 0.7938  feature_cosine 0.1905  feature_std 0.0219  grad_norm 0.316  9.7 min, checkpoint saved
+
+SSL epoch 94/100
+    step   100/1469  loss 0.7969  grad norm 0.312  feature cosine 0.190  lr 6.70e-07  wd 0.198  40s
+    step   200/1469  loss 0.7962  grad norm 0.318  feature cosine 0.190  lr 6.58e-07  wd 0.198  79s
+    step   300/1469  loss 0.7971  grad norm 0.314  feature cosine 0.190  lr 6.46e-07  wd 0.198  119s
+    step   400/1469  loss 0.7961  grad norm 0.315  feature cosine 0.190  lr 6.35e-07  wd 0.198  158s
+    step   500/1469  loss 0.7952  grad norm 0.317  feature cosine 0.190  lr 6.23e-07  wd 0.198  198s
+    step   600/1469  loss 0.7943  grad norm 0.316  feature cosine 0.190  lr 6.11e-07  wd 0.198  237s
+    step   700/1469  loss 0.7941  grad norm 0.317  feature cosine 0.191  lr 6.00e-07  wd 0.198  277s
+    step   800/1469  loss 0.7935  grad norm 0.317  feature cosine 0.190  lr 5.88e-07  wd 0.198  317s
+    step   900/1469  loss 0.7936  grad norm 0.316  feature cosine 0.191  lr 5.77e-07  wd 0.198  356s
+    step  1000/1469  loss 0.7932  grad norm 0.316  feature cosine 0.191  lr 5.66e-07  wd 0.198  396s
+    step  1100/1469  loss 0.7933  grad norm 0.317  feature cosine 0.191  lr 5.55e-07  wd 0.198  436s
+    step  1200/1469  loss 0.7932  grad norm 0.317  feature cosine 0.191  lr 5.44e-07  wd 0.198  475s
+    step  1300/1469  loss 0.7930  grad norm 0.316  feature cosine 0.191  lr 5.33e-07  wd 0.199  515s
+    step  1400/1469  loss 0.7932  grad norm 0.315  feature cosine 0.191  lr 5.23e-07  wd 0.199  554s
+    step  1469/1469  loss 0.7934  grad norm 0.315  feature cosine 0.191  lr 5.15e-07  wd 0.199  582s
+  epoch  94/100  loss 0.7934  feature_cosine 0.1907  feature_std 0.02189  grad_norm 0.315  9.7 min, checkpoint saved
+
+SSL epoch 95/100
+    step   100/1469  loss 0.7935  grad norm 0.313  feature cosine 0.191  lr 5.05e-07  wd 0.199  40s
+    step   200/1469  loss 0.7904  grad norm 0.317  feature cosine 0.191  lr 4.94e-07  wd 0.199  79s
+    step   300/1469  loss 0.7922  grad norm 0.313  feature cosine 0.191  lr 4.84e-07  wd 0.199  119s
+    step   400/1469  loss 0.7926  grad norm 0.314  feature cosine 0.191  lr 4.74e-07  wd 0.199  158s
+    step   500/1469  loss 0.7928  grad norm 0.313  feature cosine 0.191  lr 4.64e-07  wd 0.199  198s
+    step   600/1469  loss 0.7925  grad norm 0.314  feature cosine 0.191  lr 4.54e-07  wd 0.199  238s
+    step   700/1469  loss 0.7930  grad norm 0.314  feature cosine 0.191  lr 4.45e-07  wd 0.199  277s
+    step   800/1469  loss 0.7935  grad norm 0.312  feature cosine 0.191  lr 4.35e-07  wd 0.199  317s
+    step   900/1469  loss 0.7938  grad norm 0.311  feature cosine 0.191  lr 4.25e-07  wd 0.199  357s
+    step  1000/1469  loss 0.7936  grad norm 0.311  feature cosine 0.191  lr 4.16e-07  wd 0.199  397s
+    step  1100/1469  loss 0.7934  grad norm 0.312  feature cosine 0.191  lr 4.07e-07  wd 0.199  436s
+    step  1200/1469  loss 0.7932  grad norm 0.313  feature cosine 0.191  lr 3.97e-07  wd 0.199  476s
+    step  1300/1469  loss 0.7932  grad norm 0.314  feature cosine 0.191  lr 3.88e-07  wd 0.199  516s
+    step  1400/1469  loss 0.7933  grad norm 0.314  feature cosine 0.191  lr 3.80e-07  wd 0.199  555s
+    step  1469/1469  loss 0.7934  grad norm 0.314  feature cosine 0.191  lr 3.73e-07  wd 0.199  583s
+  epoch  95/100  loss 0.7934  feature_cosine 0.1906  feature_std 0.0219  grad_norm 0.3144  9.7 min, checkpoint saved
+
+SSL epoch 96/100
+    step   100/1469  loss 0.7937  grad norm 0.307  feature cosine 0.191  lr 3.65e-07  wd 0.199  40s
+    step   200/1469  loss 0.7957  grad norm 0.312  feature cosine 0.191  lr 3.56e-07  wd 0.199  80s
+    step   300/1469  loss 0.7958  grad norm 0.311  feature cosine 0.191  lr 3.48e-07  wd 0.199  120s
+    step   400/1469  loss 0.7968  grad norm 0.313  feature cosine 0.191  lr 3.39e-07  wd 0.199  159s
+    step   500/1469  loss 0.7963  grad norm 0.312  feature cosine 0.190  lr 3.31e-07  wd 0.199  199s
+    step   600/1469  loss 0.7954  grad norm 0.311  feature cosine 0.190  lr 3.23e-07  wd 0.199  239s
+    step   700/1469  loss 0.7955  grad norm 0.314  feature cosine 0.191  lr 3.15e-07  wd 0.199  278s
+    step   800/1469  loss 0.7953  grad norm 0.314  feature cosine 0.190  lr 3.07e-07  wd 0.199  318s
+    step   900/1469  loss 0.7943  grad norm 0.315  feature cosine 0.191  lr 2.99e-07  wd 0.199  358s
+    step  1000/1469  loss 0.7939  grad norm 0.316  feature cosine 0.191  lr 2.91e-07  wd 0.199  398s
+    step  1100/1469  loss 0.7939  grad norm 0.316  feature cosine 0.191  lr 2.84e-07  wd 0.199  437s
+    step  1200/1469  loss 0.7939  grad norm 0.316  feature cosine 0.191  lr 2.77e-07  wd 0.199  477s
+    step  1300/1469  loss 0.7942  grad norm 0.316  feature cosine 0.191  lr 2.69e-07  wd 0.199  517s
+    step  1400/1469  loss 0.7939  grad norm 0.316  feature cosine 0.191  lr 2.62e-07  wd 0.199  556s
+    step  1469/1469  loss 0.7941  grad norm 0.316  feature cosine 0.191  lr 2.57e-07  wd 0.199  583s
+  epoch  96/100  loss 0.7941  feature_cosine 0.1906  feature_std 0.0219  grad_norm 0.3158  9.7 min, checkpoint saved
+
+SSL epoch 97/100
+    step   100/1469  loss 0.7988  grad norm 0.306  feature cosine 0.191  lr 2.50e-07  wd 0.199  40s
+    step   200/1469  loss 0.7945  grad norm 0.309  feature cosine 0.191  lr 2.43e-07  wd 0.199  80s
+    step   300/1469  loss 0.7940  grad norm 0.310  feature cosine 0.191  lr 2.37e-07  wd 0.199  119s
+    step   400/1469  loss 0.7937  grad norm 0.313  feature cosine 0.191  lr 2.30e-07  wd 0.199  159s
+    step   500/1469  loss 0.7931  grad norm 0.311  feature cosine 0.191  lr 2.23e-07  wd 0.199  198s
+    step   600/1469  loss 0.7937  grad norm 0.310  feature cosine 0.191  lr 2.17e-07  wd 0.199  238s
+    step   700/1469  loss 0.7935  grad norm 0.311  feature cosine 0.191  lr 2.11e-07  wd 0.200  278s
+    step   800/1469  loss 0.7931  grad norm 0.312  feature cosine 0.191  lr 2.05e-07  wd 0.200  317s
+    step   900/1469  loss 0.7933  grad norm 0.313  feature cosine 0.191  lr 1.99e-07  wd 0.200  357s
+    step  1000/1469  loss 0.7935  grad norm 0.314  feature cosine 0.191  lr 1.93e-07  wd 0.200  397s
+    step  1100/1469  loss 0.7937  grad norm 0.314  feature cosine 0.191  lr 1.87e-07  wd 0.200  436s
+    step  1200/1469  loss 0.7940  grad norm 0.314  feature cosine 0.191  lr 1.81e-07  wd 0.200  476s
+    step  1300/1469  loss 0.7939  grad norm 0.315  feature cosine 0.191  lr 1.76e-07  wd 0.200  515s
+    step  1400/1469  loss 0.7939  grad norm 0.314  feature cosine 0.191  lr 1.70e-07  wd 0.200  555s
+    step  1469/1469  loss 0.7937  grad norm 0.315  feature cosine 0.191  lr 1.67e-07  wd 0.200  582s
+  epoch  97/100  loss 0.7937  feature_cosine 0.1908  feature_std 0.02191  grad_norm 0.315  10.3 min, checkpoint saved
+
+SSL epoch 98/100
+    step   100/1469  loss 0.7914  grad norm 0.328  feature cosine 0.191  lr 1.61e-07  wd 0.200  154s
+    step   200/1469  loss 0.7927  grad norm 0.320  feature cosine 0.191  lr 1.56e-07  wd 0.200  193s
+    step   300/1469  loss 0.7924  grad norm 0.319  feature cosine 0.191  lr 1.51e-07  wd 0.200  231s
+    step   400/1469  loss 0.7911  grad norm 0.321  feature cosine 0.191  lr 1.46e-07  wd 0.200  270s
+    step   500/1469  loss 0.7910  grad norm 0.318  feature cosine 0.191  lr 1.42e-07  wd 0.200  309s
+    step   600/1469  loss 0.7922  grad norm 0.316  feature cosine 0.191  lr 1.37e-07  wd 0.200  349s
+    step   700/1469  loss 0.7929  grad norm 0.317  feature cosine 0.191  lr 1.33e-07  wd 0.200  388s
+    step   800/1469  loss 0.7929  grad norm 0.316  feature cosine 0.191  lr 1.28e-07  wd 0.200  428s
+    step   900/1469  loss 0.7929  grad norm 0.316  feature cosine 0.191  lr 1.24e-07  wd 0.200  467s
+    step  1000/1469  loss 0.7930  grad norm 0.316  feature cosine 0.191  lr 1.20e-07  wd 0.200  507s
+    step  1100/1469  loss 0.7929  grad norm 0.316  feature cosine 0.191  lr 1.16e-07  wd 0.200  546s
+    step  1200/1469  loss 0.7930  grad norm 0.316  feature cosine 0.191  lr 1.12e-07  wd 0.200  586s
+    step  1300/1469  loss 0.7935  grad norm 0.315  feature cosine 0.191  lr 1.08e-07  wd 0.200  626s
+    step  1400/1469  loss 0.7934  grad norm 0.314  feature cosine 0.191  lr 1.04e-07  wd 0.200  665s
+    step  1469/1469  loss 0.7935  grad norm 0.314  feature cosine 0.191  lr 1.02e-07  wd 0.200  693s
+  epoch  98/100  loss 0.7935  feature_cosine 0.1907  feature_std 0.0219  grad_norm 0.3136  11.6 min, checkpoint saved
+
+SSL epoch 99/100
+    step   100/1469  loss 0.7954  grad norm 0.314  feature cosine 0.190  lr 9.84e-08  wd 0.200  40s
+    step   200/1469  loss 0.7922  grad norm 0.311  feature cosine 0.190  lr 9.50e-08  wd 0.200  80s
+    step   300/1469  loss 0.7925  grad norm 0.315  feature cosine 0.190  lr 9.18e-08  wd 0.200  120s
+    step   400/1469  loss 0.7929  grad norm 0.313  feature cosine 0.190  lr 8.87e-08  wd 0.200  159s
+    step   500/1469  loss 0.7928  grad norm 0.312  feature cosine 0.191  lr 8.57e-08  wd 0.200  199s
+    step   600/1469  loss 0.7934  grad norm 0.314  feature cosine 0.191  lr 8.28e-08  wd 0.200  239s
+    step   700/1469  loss 0.7932  grad norm 0.314  feature cosine 0.191  lr 8.01e-08  wd 0.200  279s
+    step   800/1469  loss 0.7932  grad norm 0.314  feature cosine 0.191  lr 7.75e-08  wd 0.200  318s
+    step   900/1469  loss 0.7931  grad norm 0.314  feature cosine 0.191  lr 7.49e-08  wd 0.200  358s
+    step  1000/1469  loss 0.7932  grad norm 0.314  feature cosine 0.191  lr 7.26e-08  wd 0.200  398s
+    step  1100/1469  loss 0.7934  grad norm 0.313  feature cosine 0.191  lr 7.03e-08  wd 0.200  437s
+    step  1200/1469  loss 0.7937  grad norm 0.314  feature cosine 0.191  lr 6.81e-08  wd 0.200  477s
+    step  1300/1469  loss 0.7934  grad norm 0.314  feature cosine 0.191  lr 6.61e-08  wd 0.200  517s
+    step  1400/1469  loss 0.7937  grad norm 0.314  feature cosine 0.191  lr 6.42e-08  wd 0.200  556s
+    step  1469/1469  loss 0.7937  grad norm 0.315  feature cosine 0.191  lr 6.30e-08  wd 0.200  584s
+  epoch  99/100  loss 0.7937  feature_cosine 0.1908  feature_std 0.0219  grad_norm 0.3145  9.9 min, checkpoint saved
+
+SSL epoch 100/100
+    step   100/1469  loss 0.7950  grad norm 0.313  feature cosine 0.191  lr 6.13e-08  wd 0.200  40s
+    step   200/1469  loss 0.7946  grad norm 0.310  feature cosine 0.191  lr 5.97e-08  wd 0.200  79s
+    step   300/1469  loss 0.7952  grad norm 0.311  feature cosine 0.191  lr 5.82e-08  wd 0.200  118s
+    step   400/1469  loss 0.7943  grad norm 0.315  feature cosine 0.191  lr 5.69e-08  wd 0.200  158s
+    step   500/1469  loss 0.7937  grad norm 0.317  feature cosine 0.190  lr 5.56e-08  wd 0.200  197s
+    step   600/1469  loss 0.7936  grad norm 0.315  feature cosine 0.191  lr 5.45e-08  wd 0.200  237s
+    step   700/1469  loss 0.7934  grad norm 0.315  feature cosine 0.191  lr 5.36e-08  wd 0.200  277s
+    step   800/1469  loss 0.7941  grad norm 0.316  feature cosine 0.190  lr 5.27e-08  wd 0.200  316s
+    step   900/1469  loss 0.7943  grad norm 0.316  feature cosine 0.191  lr 5.19e-08  wd 0.200  356s
+    step  1000/1469  loss 0.7942  grad norm 0.316  feature cosine 0.191  lr 5.13e-08  wd 0.200  396s
+    step  1100/1469  loss 0.7943  grad norm 0.315  feature cosine 0.191  lr 5.08e-08  wd 0.200  435s
+    step  1200/1469  loss 0.7945  grad norm 0.314  feature cosine 0.191  lr 5.04e-08  wd 0.200  475s
+    step  1300/1469  loss 0.7942  grad norm 0.315  feature cosine 0.191  lr 5.02e-08  wd 0.200  514s
+    step  1400/1469  loss 0.7942  grad norm 0.315  feature cosine 0.191  lr 5.00e-08  wd 0.200  554s
+    step  1469/1469  loss 0.7940  grad norm 0.316  feature cosine 0.191  lr 5.00e-08  wd 0.200  581s
+  epoch 100/100  loss 0.794  feature_cosine 0.1905  feature_std 0.0219  grad_norm 0.3159  9.9 min, checkpoint saved
+
+done: 971.32 min, 9,401,600 images, 146,900 steps; exported /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/SparK_SARDet/outputs/ssl/20261114-161903_spark_ssl_mobilenetv2_split2_seed1/backbone_epoch100.pth
+==============================================================================
+                                JOB STATISTICS                                
+==============================================================================
+
+           JobId: 4735549
+      SubmitTime: 2026-11-14T15:11:35
+         EndTime: 2026-11-15T15:46:59
+         RunTime: 16:15:31
+       AllocTRES: cpu=10,mem=64G,node=1,billing=8,gres/gpu=1
+       Partition: a100
+        NodeList: gpu-n45
+         Command: /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/crc/ssl.sbatch
+
+==============================================================================
+ For more information use the command:
+   - `sacct -M gpu -j 4735549 -S 2026-11-14T15:11:35 -E 2026-11-15T15:46:59`
+
+ To control the output of the above command:
+   - Add `--format=<field1,field2,etc>` with fields of interest
+   - See the list of all possible fields by running: `sacct --helpformat`
+==============================================================================

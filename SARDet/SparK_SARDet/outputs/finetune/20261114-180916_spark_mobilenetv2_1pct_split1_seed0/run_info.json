@@ -1,0 +1,338 @@
+{
+  "kind": "finetune",
+  "status": "completed",
+  "started": "2026-11-14T18:09:16",
+  "run_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/SparK_SARDet/outputs/finetune/20261114-180916_spark_mobilenetv2_1pct_split1_seed0",
+  "config": {
+    "shared_finetune_config": {
+      "_lr_decision": "DECIDED 2026-11-13 from crc/lr_check.sbatch (CRC job 4727010; baseline, 10 %, split 1, val_select mAP@[.5:.95]; no SSL backbone involved): lr 1e-4 -> 0.3192, 2e-4 -> 0.3138, 5e-4 -> 0.3100. train.lr = 1e-4 for every method from here on. Run folders: baseline_SARDet/outputs/finetune/2026111*_lrcheck_baseline_lr0.000{1,2,5}_10pct_split1_seed0 (protocol_deviation runs, excluded by compare.py).",
+      "detector": {
+        "input_size": 512,
+        "fpn_return_layers": {
+          "3": 24,
+          "6": 32,
+          "13": 96,
+          "18": 1280
+        },
+        "fpn_channels": 128,
+        "anchor_sizes": [
+          [
+            8,
+            16
+          ],
+          [
+            16,
+            32
+          ],
+          [
+            32,
+            64
+          ],
+          [
+            64,
+            128
+          ],
+          [
+            128,
+            256
+          ]
+        ],
+        "aspect_ratios": [
+          0.5,
+          1.0,
+          2.0
+        ],
+        "image_mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "image_std": [
+          0.229,
+          0.224,
+          0.225
+        ],
+        "box_score_thresh": 0.05,
+        "box_nms_thresh": 0.5,
+        "box_detections_per_img": 100,
+        "rpn_pre_nms_top_n_train": 2000,
+        "rpn_post_nms_top_n_train": 2000,
+        "rpn_pre_nms_top_n_test": 1000,
+        "rpn_post_nms_top_n_test": 1000,
+        "backbone_bn": "train"
+      },
+      "train": {
+        "seed": 0,
+        "batch_size": 8,
+        "lr": 0.0001,
+        "weight_decay": 0.05,
+        "warmup_epochs": 1,
+        "min_lr_factor": 0.01,
+        "epochs_by_budget": {
+          "1pct": 60,
+          "3pct": 40,
+          "10pct": 24
+        },
+        "hflip_p": 0.5,
+        "num_workers": 8,
+        "precision": "fp32",
+        "grad_clip_norm": null,
+        "eval_every": 2,
+        "selection_metric": "map",
+        "selection_subset": "val_select"
+      }
+    },
+    "budget": "1pct",
+    "epochs": 60,
+    "lr": 0.0001,
+    "seed": 0,
+    "backbone_arg": "SparK_SARDet/outputs/ssl/20261112-200842_spark_ssl_mobilenetv2_split1_seed0/backbone_epoch100.pth",
+    "run_name": "spark_mobilenetv2",
+    "experiment_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/SparK_SARDet"
+  },
+  "git": {
+    "commit": "09e06e3987a00a3fde61e3d90f02a0d81b08de3d",
+    "branch": "SmokeTest_Mobilenet_with_DINO",
+    "uncommitted_changes": true
+  },
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.10.0+cu128",
+    "platform": "Linux-5.14.0-503.22.1.el9_5.x86_64-x86_64-with-glibc2.34",
+    "hostname": "gpu-n51.crc.pitt.edu",
+    "cpu_count": 64,
+    "slurm_job_id": "4735543",
+    "cuda_available": true,
+    "torchvision": "0.25.0+cu128",
+    "gpu": "NVIDIA A100-PCIE-40GB",
+    "gpu_memory_gb": 39.5
+  },
+  "dataset_root": "/scratch/slurm-4735543/SARDet_100K",
+  "split": 1,
+  "command": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/shared/finetune.py --experiment-dir SparK_SARDet --run-name spark_mobilenetv2 --budget 1pct --backbone SparK_SARDet/outputs/ssl/20261112-200842_spark_ssl_mobilenetv2_split1_seed0/backbone_epoch100.pth",
+  "audit": {
+    "split": 1,
+    "manifest_sha256": {
+      "ssl_pool.csv": "6b72e480e6888bf81b19ef9660aaaaca6304232db2ed0984a2c1ee6a0fcb34f3",
+      "val_select.csv": "e0c8c3cc990e6f3bf17d98665cf74b8ac77963953d223eec499d256ceced709c",
+      "eval_subsets.json": "22fba97e80a49a5461b3e00165dc60c70da5defd957c67cbbaa60ea0bd8144b9",
+      "image_metadata.csv": "8ee0b986a3d73e5334ac035733cf56686ad3081769961084debfc0daa6f552a9",
+      "split1/labeled_1pct.csv": "2bc21c78c0ffd44c3a09684b6d5c2da760cf0f2fde140e83b30b48eaf31532da",
+      "split1/labeled_3pct.csv": "2a8b6e40b3606dd2425a9779ba8dfa779418e50345c7f2daa8e55408f3190395",
+      "split1/labeled_10pct.csv": "17f37087fdfce265c06541431a6cec1d88d1ffa5194c1115ff4d97be6b1ef7db"
+    },
+    "counts": {
+      "ssl_pool": 94034,
+      "labeled_1pct": 962,
+      "labeled_3pct": 2841,
+      "labeled_10pct": 9460,
+      "val_select": 2000,
+      "val": 10492,
+      "test": 11613,
+      "test_clean": 11563,
+      "val_clean": 10208
+    }
+  },
+  "backbone": {
+    "kind": "ssl",
+    "ssl_method": "spark",
+    "ssl_run_dir": "SparK_SARDet/outputs/ssl/20261112-200842_spark_ssl_mobilenetv2_split1_seed0",
+    "ssl_epoch": 100,
+    "ssl_epochs_planned": 100,
+    "ssl_seed": 0,
+    "split": 1,
+    "ssl_config": {
+      "run_name": "spark_ssl_mobilenetv2",
+      "method": "spark",
+      "common": {
+        "epochs": 100,
+        "batch_size": 64,
+        "seed_rule": "split - 1",
+        "num_workers": 8,
+        "export_rule": "final epoch, no selection",
+        "seed": 0
+      },
+      "views": {
+        "resize_rule": "detector_512",
+        "global_size": 224,
+        "local_size": 96,
+        "zoom_range": [
+          0.75,
+          1.33
+        ],
+        "hflip_p": 0.5,
+        "brightness": 0.4,
+        "contrast": 0.4,
+        "color_jitter_p": 0.8,
+        "blur_sigma": [
+          0.1,
+          2.0
+        ],
+        "solarization_p": 0.0
+      },
+      "spark_views": {
+        "blur_p": 0.0,
+        "_blur_note": "one 224 px global view per image from the shared recipe; the authors use crop + flip only ('minimal augmentation'), so no blur"
+      },
+      "spark": {
+        "mask_ratio": 0.6,
+        "densify_norm": "bn",
+        "_densify_note": "set explicitly: the authors' arg_util.py leaves it EMPTY (no normalisation) for any model name without 'resnet'/'convnext'",
+        "decoder_width": 768,
+        "recon_channels": 1,
+        "_recon_note": "1 = reconstruct the single SAR channel (A3 change); 3 = the authors' literal target, which here would include the per-channel ImageNet offsets (CHANGES.md)",
+        "precision": "fp32",
+        "_precision_note": "true float32: TF32 is switched OFF for cudnn and matmul in SparKMethod.build (flags recorded in run output and the export)"
+      },
+      "optim": {
+        "optimizer": "lamb",
+        "base_lr": 0.0002,
+        "_lr_note": "peak lr = base_lr x batch_size / 256 = 5e-5 at the shared batch 64 (the authors' rule, arg_util.py L132; paper Section 4.1)",
+        "beta2": 0.95,
+        "_beta2_note": "set explicitly: arg_util.py leaves beta2 = 0.0 for any model name without 'resnet'/'convnext'",
+        "weight_decay": 0.04,
+        "weight_decay_end": 0.2,
+        "max_grad_norm": 5.0,
+        "warmup_epochs": 2.5,
+        "_warmup_note": "the authors' 40 of 1,600 epochs = the first 2.5% of training; here 2.5 of the shared 100 epochs (linear from 0.005 x peak, then cosine to 0.001 x peak)"
+      },
+      "smoke": false
+    },
+    "ssl_manifest": {
+      "ssl_pool_csv": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/data/ssl_pool.csv",
+      "csv_sha256": "6b72e480e6888bf81b19ef9660aaaaca6304232db2ed0984a2c1ee6a0fcb34f3",
+      "used_file_list_sha256": "4c52cb0df91eb906155cc08c1c853727386acf2f98eace9ca389154d770665d5",
+      "num_images": 94034,
+      "columns_available_to_the_method": [
+        "file_name",
+        "official_split",
+        "image_id",
+        "width",
+        "height",
+        "source",
+        "satellite",
+        "polarization",
+        "band",
+        "group"
+      ],
+      "labels_used": "none",
+      "labels_read_for_diagnostic_only": "view_box_coverage: GT boxes of up to 300 pool images, logged in run_info, never seen by training"
+    },
+    "ssl_cost": {
+      "epochs_done": 100,
+      "optimizer_steps": 146900,
+      "images_seen": 9401600,
+      "view_forwards": 9401600,
+      "train_minutes": 1493.84,
+      "gpu_hours": 24.897,
+      "peak_gpu_memory_gb": 12.64
+    },
+    "initialization_before_ssl": {
+      "kind": "imagenet",
+      "file": "/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth",
+      "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35"
+    },
+    "exported": {
+      "which": "encoder (sparse_encoder.sp_cnn.features, prefix stripped)",
+      "excluded_from_export": [
+        "dense_decoder",
+        "densify_norms",
+        "densify_projs",
+        "imn_m",
+        "imn_s",
+        "mask_tokens",
+        "norm_black"
+      ],
+      "precision": {
+        "autocast": null,
+        "dtype": "float32",
+        "cudnn_allow_tf32": false,
+        "matmul_allow_tf32": false
+      },
+      "parameters": {
+        "encoder (MobileNetV2 features, exported)": 2223872,
+        "decoder (LightDecoder)": 23183065,
+        "densify norms + projections": 1395152,
+        "mask tokens": 1432,
+        "total": 26803521
+      },
+      "visible_patches_per_image": 20,
+      "schedule": {
+        "steps_per_epoch": 1469,
+        "total_iters": 146900,
+        "warmup_iters": 3672.5,
+        "peak_lr": 5e-05,
+        "warmup_start_lr": 2.5000000000000004e-07,
+        "final_lr": 5.0000000000000004e-08,
+        "weight_decay_start": 0.04,
+        "weight_decay_end": 0.2
+      }
+    },
+    "num_tensors": 312,
+    "state_sha256": "291e0f62d46673f0ce122b2407315032cce4a2e293207cbbae951258cfddb89f",
+    "file": "SparK_SARDet/outputs/ssl/20261112-200842_spark_ssl_mobilenetv2_split1_seed0/backbone_epoch100.pth",
+    "file_sha256": "32273f43f3e42f9fed49e9ae3c18f4a97fa082b0a3dd89ce09768d20e2f26361"
+  },
+  "head_fingerprint_sha256": "6287b3460b729d57fd14e8c0f92753bf108c36a78953b08eec3157b386c86998",
+  "parameters": {
+    "total": 10658497,
+    "backbone": 2223872,
+    "fpn_and_heads": 8434625
+  },
+  "protocol_deviation": null,
+  "precision": {
+    "cudnn_allow_tf32": true,
+    "matmul_allow_tf32": false
+  },
+  "pycocotools": "unknown",
+  "n_train_images": 962,
+  "n_val_select": 2000,
+  "train_minutes": 23.49,
+  "best_epoch": 56,
+  "best_val_select_map": 0.1650266378523847,
+  "checkpoints": {
+    "best.pt": "b572a8bd3b38f148c5429fd1d6211ce74dbd113393ddad25d643942c74856ca3",
+    "last.pt": "51370580d40f0bbf24ad3da4e9557e85f859a8919492a7b875dfdfd5bacb5b2e"
+  },
+  "final_metrics": {
+    "best_val": {
+      "map": 0.15885464116137316,
+      "map50": 0.36926761070443137,
+      "map75": 0.1087134319586096,
+      "map_small": 0.15032493581252734,
+      "map_medium": 0.20150690414733524,
+      "map_large": 0.0926336610915804,
+      "n_images": 10492
+    },
+    "best_test": {
+      "map": 0.1598962052629552,
+      "map50": 0.37208090827441936,
+      "map75": 0.10736828229650518,
+      "map_small": 0.13862458794687368,
+      "map_medium": 0.2272390696571381,
+      "map_large": 0.10276546448006595,
+      "n_images": 11613
+    },
+    "best_test_clean": {
+      "map": 0.15980138590322707,
+      "map50": 0.37217440510477234,
+      "map75": 0.10721231819179401,
+      "map_small": 0.13873608224362063,
+      "map_medium": 0.2271040852618548,
+      "map_large": 0.1024506337389023,
+      "n_images": 11563
+    },
+    "last_test": {
+      "map": 0.1592956214483122,
+      "map50": 0.3724115603950504,
+      "map75": 0.10498338724431164,
+      "map_small": 0.13959108712421406,
+      "map_medium": 0.22367929370011427,
+      "map_large": 0.10309698768131068,
+      "n_images": 11613
+    }
+  },
+  "finished": "2026-11-14T18:39:12",
+  "wall_minutes": 29.95,
+  "peak_gpu_memory_gb": 4.14
+}
