@@ -1,4 +1,4 @@
-# SSL on SARDet-100K scenes, tested on ATRNet-STAR SOC-40 (official test accuracy, %)
+# SSL on SARDet-100K scenes (XA) or on the ATRNet pool (A1-A3, P4, XI), tested on ATRNet-STAR SOC-40 (official test accuracy, %)
 
 | method | 1 % (s1 / s2 / s3) | mean (sd) | 3 % | mean (sd) | 10 % | mean (sd) |
 |---|---|---|---|---|---|---|
@@ -17,7 +17,7 @@
 
 ## Paired differences per split (test accuracy points): SARDet-SSL minus its reference, and minus A0
 
-Reference = the same method's ATRNet-SSL row (A1/A2/A3) for DINO/LeJEPA/SparK; = XA DINO on SARDet for the RegionDINO rows.
+Reference = the same method's ATRNet-SSL row (A1/A2/A3) for DINO/LeJEPA/SparK; = XA DINO on SARDet for the XA RegionDINO rows; = A1 for XI DINO (suite recipe) and = XI DINO for the XI RegionDINO rows (same engine, same pool, only the object views differ).
 
 | method | budget | vs reference (s1 / s2 / s3) | mean | vs A0 (s1 / s2 / s3) | mean |
 |---|---|---|---|---|---|

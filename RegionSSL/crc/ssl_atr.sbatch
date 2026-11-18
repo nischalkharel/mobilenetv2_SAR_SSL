@@ -1,7 +1,8 @@
 #!/bin/bash
 # One SSL run of the RegionSSL engine on the ATRNet-STAR pool (arm I), one split, self-resuming across the time limit.
 # Same chain logic as the suite's crc/ssl.sbatch; differences: both env files are sourced (SARDet paths for the suite
-# modules, ATRNet paths for the pool), nothing is staged to the node disk (the chips are small and read from /ix).
+# modules, ATRNet paths for the pool), and the SOC-40 chips are staged to the node disk by stage_atrnet (repository
+# crc/env.sh) instead of the SARDet images (STAGE_DATA=0 turns the suite's staging off).
 # Submit from the suite root, like every other job (the region file regions_atrnet.npz must exist first):
 #   cd /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet
 #   sbatch --job-name=adino_s1 ../RegionSSL/crc/ssl_atr.sbatch ../RegionSSL/DINO_reference 1 config_ssl_atr.json
@@ -51,6 +52,11 @@ if [ -n "$SLURM_JOB_ID" ] && [ -z "$NO_CHAIN" ]; then
     fi
 fi
 mkdir -p crc/logs
+stage_atrnet                   # copy the SOC-40 chips to the node disk (crc/env.sh of the repository)
+if [ -n "$UNFINISHED" ] && [ ! -f "$UNFINISHED/checkpoint.pth" ]; then
+    echo "$UNFINISHED has no checkpoint (killed before its first epoch ended); setting it aside and starting fresh"
+    mv "$UNFINISHED" "${UNFINISHED}_nockpt"; UNFINISHED=""
+fi
 if [ -n "$UNFINISHED" ]; then
     echo "resuming $UNFINISHED"
     python $DIR/train_ssl.py --resume "$UNFINISHED"

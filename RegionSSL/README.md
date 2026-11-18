@@ -20,7 +20,7 @@ detection suite (`SARDet/`) and the ATRNet experiment folders are imported read-
 | `*/config_ssl_atr.json`, `*/config_ssl_atr_random.json` | arm I: the same two methods and controls on the ATRNet pool (in-domain), run names `*_atr_*` |
 | `DINO_reference/` | plain DINO of this engine (scene views only) on the ATRNet pool: the paired reference for the `*_atr` rows; its gap to A1 measures the crop-recipe difference |
 | `chip_lab.py` | the region rule on ATRNet chips against the vehicle box (lab check, labels for scoring only) |
-| `crc/ssl_atr.sbatch`, `crc/make_regions_atr.sbatch` | the CRC jobs for arm I (both env files sourced, nothing staged) |
+| `crc/ssl_atr.sbatch`, `crc/make_regions_atr.sbatch` | the CRC jobs for arm I (both env files sourced; the SOC-40 chips are staged to the node disk by `stage_atrnet` in the repository's `crc/env.sh`) |
 
 Each method folder has the same four entry points as the suite's methods: `train_ssl.py`, `smoke_test.py`,
 `run_finetune.py` (SARDet detection fine-tune), `config_finetune.json`. The exported backbone has the suite's

@@ -20,6 +20,7 @@ METHOD=${1:?dino | lejepa | spark}
 export SAR_SPLIT=${2:?split 1, 2 or 3}
 source crc/env.sh
 mkdir -p crc/logs
+stage_atrnet                   # copy the SOC-40 chips to the node disk: the test pass reads them per batch
 BACKBONE=$(python SARDet_to_ATR/find_backbone.py "$METHOD" "$SAR_SPLIT")
 echo "backbone: $BACKBONE  sha256 $(sha256sum "$BACKBONE" | cut -d' ' -f1)"
 TAG=""; [ "$SAR_SPLIT" = 1 ] || TAG="_split$SAR_SPLIT"
