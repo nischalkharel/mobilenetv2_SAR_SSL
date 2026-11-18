@@ -1,7 +1,7 @@
 #!/bin/bash
 # Propose the label-free region boxes for the whole SSL pool on a CPU node (once; the file is reused by every
 # RegionDINO run of every split). Submit from the SARDet suite root, like every other job:
-#   cd /ix/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet && sbatch --job-name=regions ../RegionSSL/crc/make_regions.sbatch
+#   cd /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet && sbatch --job-name=regions ../RegionSSL/crc/make_regions.sbatch
 # Writes $REGIONSSL_REGIONS_DIR/regions.npz (default RegionSSL/regions/) + regions_summary.json (commit the json).
 #SBATCH --cluster=smp
 #SBATCH --partition=smp

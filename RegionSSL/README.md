@@ -42,7 +42,7 @@ SARDet\.venv\Scripts\python.exe RegionSSL\RegionDINO_object\smoke_test.py
 SARDet\.venv\Scripts\python.exe RegionSSL\make_regions.py                  # all 94,034 pool images, about 1 h on 8 cores
 ```
 
-CRC, from the suite root `/ix/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet` (the suite's job scripts take the
+CRC, from the suite root `/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet` (the suite's job scripts take the
 RegionSSL folders as their first argument; nothing else changes):
 ```
 sbatch --job-name=regions ../RegionSSL/crc/make_regions.sbatch                       # once, CPU, ~1 h
