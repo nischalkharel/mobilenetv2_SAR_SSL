@@ -136,3 +136,23 @@ both method folders, `crc/make_regions.sbatch`. The suite's `crc/ssl.sbatch` and
 the new folders unchanged (first argument `../RegionSSL/<folder>`); `SARDet_to_ATR` got four additive method
 names. Nothing under `SARDet/` changed except two additive lines in `compare/compare.py` (collect the new
 folders). Status of every row: see README.md.
+
+## 8. Arm I: the same methods on the ATRNet pool (added 2026-11-18)
+
+Why: on SARDet scenes the object views turned a cross-dataset loss into a gain (object-only +9.4 / +7.1 / +1.4 over
+plain DINO on ATRNet 1 / 3 / 10 %), but the in-domain A1 row (DINO on ATRNet chips, 35.1 / 55.9 / 77.6) is still far
+ahead. Nischal's question: does the region focus also beat plain DINO when both train on ATRNet's own pool?
+
+Rows (3 splits, 100 epochs, the split's `ssl_training_data.csv`, i.e. exactly A1's pool and seeds):
+`XI DINO (suite recipe)` = this engine with scene views only (`DINO_reference/`), the paired reference;
+`XI RegionDINO object-only`, `XI RegionDINO scene+object`, and their random-window controls. A1 stays in the table:
+XI DINO minus A1 measures the crop-recipe difference (window-and-zoom at 224 vs A1's area-scale crops), the RegionDINO
+rows minus XI DINO measure the object views with everything else equal.
+
+Pool handling (`rssl/pools.py`): chips are 128 px; the views are cut from the chip resized to 224 (the fine-tune input
+size and A1's global crop size), so a global view covers 56 to 100 % of the chip area (A1: 40 to 100 %) and a local view
+10 to 33 % (A1: 15 to 40 %). Regions are proposed at the native 128 (fewer, larger regions than at 224: median 4 per
+chip, extent 22 px; `chip_lab.py`) and scaled by 1.75 when read. The rule paints part of the vehicle on 99 % of chips
+but ATRNet's boxes are generous (whole footprint), so the strict hit rate is 36 %: object views (window = 1.4 to 2.2 x
+the region) still include most of the vehicle, and clutter regions (roads, vegetation edges) are sampled too, as on
+SARDet. The control is the guard against "any small crop helps".

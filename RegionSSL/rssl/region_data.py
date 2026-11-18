@@ -30,7 +30,7 @@ import torch
 from PIL import Image, ImageEnhance, ImageFilter
 from torch.utils.data import DataLoader, Dataset
 
-from shared.ssl_data import load_common_config, load_resized_gray, make_view  # read-only
+from shared.ssl_data import load_common_config, make_view  # read-only
 
 from .regions import RegionStore
 
@@ -68,17 +68,23 @@ def object_window(box, zoom_range, out, max_magnification, W, H, rng, centre_mod
 
 
 class RegionViewDataset(Dataset):
-    def __init__(self, rows, scene_plan, store: RegionStore, opts: dict, seed: int = 0, input_size: int = 512):
+    def __init__(self, rows, scene_plan, store, opts: dict, seed: int = 0, pool=None):
+        """pool: an rssl.pools pool (loads the images at its working size); default the SARDet pool.
+        store None + objects_per_image 0 = scene views only (the plain-DINO reference of the same engine)."""
+        from . import pools as P
         self.rows = rows
         self.scene_plan = scene_plan                 # [] for the object-only method
         self.store = store
         self.o = opts
+        self.pool = pool or P.get("sardet")
         self.cfg = load_common_config()["views"]
-        self.seed, self.epoch, self.input_size = seed, 0, input_size
+        self.seed, self.epoch, self.input_size = seed, 0, self.pool.input_size
         self.K = int(opts["objects_per_image"])
-        self.obj_slots = [("obj_global", 1, opts["obj_blur_p"][0]), ("obj_global", 1, opts["obj_blur_p"][1]),
-                          ("obj_local", int(opts["obj_local_number"]), opts["obj_blur_p"][2])]
+        self.obj_slots = [] if self.K == 0 else [("obj_global", 1, opts["obj_blur_p"][0]), ("obj_global", 1, opts["obj_blur_p"][1]),
+                                                 ("obj_local", int(opts["obj_local_number"]), opts["obj_blur_p"][2])]
         self.views_per_image = sum(c for _, c, _ in scene_plan) + self.K * sum(c for _, c, _ in self.obj_slots)
+        if self.K == 0:
+            return
         # pooled size distribution for the control / fallback windows, resampled ONCE with the same weights the
         # real draw uses (sqrt of box area when region_sampling is sqrt_area), so the control's window sizes
         # follow the sizes the felz runs actually train on (weighted with replacement; exact per-image
@@ -99,8 +105,9 @@ class RegionViewDataset(Dataset):
         self.epoch = epoch
 
     def plan_description(self):
-        return {"scene": self.scene_plan, "object": [(s, c * self.K, b) for s, c, b in self.obj_slots],
-                "objects_per_image": self.K, "obj_global_size": self.o["obj_global_size"], "obj_local_size": self.o["obj_local_size"]}
+        return {"pool": self.pool.name, "input_size": self.input_size, "scene": self.scene_plan,
+                "object": [(s, c * self.K, b) for s, c, b in self.obj_slots], "objects_per_image": self.K,
+                "obj_global_size": self.o.get("obj_global_size"), "obj_local_size": self.o.get("obj_local_size")}
 
     # ---- region choice -------------------------------------------------------------------------------------
     def usable_boxes(self, file_name):
@@ -158,11 +165,13 @@ class RegionViewDataset(Dataset):
     def __getitem__(self, i):
         r = self.rows[i]
         rng = random.Random(f"{self.seed}-{self.epoch}-{i}")
-        im = load_resized_gray(r["official_split"], r["file_name"], self.input_size)
+        im = self.pool.load(r)
         scene = []
         for size_key, count, blur_p in self.scene_plan:
             for _ in range(count):
                 scene.append(make_view(im, self.cfg[f"{size_key}_size"], self.cfg, blur_p, rng))
+        if self.K == 0:
+            return (scene, [], torch.zeros(2, dtype=torch.long)), i
         boxes, n_real, fallback = self.choose_boxes(r["file_name"], im.size[0], im.size[1], rng)
         per_object = [self.object_views(im, b, rng) for b in boxes]         # K lists of (2 + m) tensors
         n_slots = len(per_object[0])
@@ -190,20 +199,18 @@ def build_region_loader(dataset, batch_size, num_workers, seed, epoch, drop_last
 
 
 # ---- diagnostics (labels read here ONLY to describe the regions; never seen by training) --------------------
-def region_box_diagnostic(rows, store: RegionStore, min_object_px: int, n_images=300, seed=0, input_size=512) -> dict:
-    """How the proposed regions relate to the GT boxes of up to n_images pool images (at the 512 scale):
+def region_box_diagnostic(rows, store: RegionStore, min_object_px: int, n_images=300, seed=0, pool=None) -> dict:
+    """How the proposed regions relate to the GT boxes of up to n_images pool images (at the working scale):
     region_centre_in_a_box     share of usable regions whose centre lies inside some GT box
     gt_boxes_with_a_region     share of GT boxes that contain at least one usable region centre
     usable_regions_per_image   mean count after the min_object_px filter; images_without_regions share."""
-    from shared.coco_data import boxes_and_labels
+    from . import pools as P
+    pool = pool or P.get("sardet")
     rng = random.Random(seed)
     sample = rows if len(rows) <= n_images else rng.sample(rows, n_images)
     reg_in, reg_total, box_hit, box_total, counts, empty = 0, 0, 0, 0, [], 0
     for r in sample:
-        gt, _, _ = boxes_and_labels(r["official_split"], r["file_name"])
-        w, h = r["width"], r["height"]
-        s = min(input_size / min(w, h), input_size / max(w, h))
-        gt = gt.numpy() * s
+        gt = pool.gt_boxes(r)
         b = store.get(r["file_name"])
         if len(b):
             ext = np.maximum(b[:, 2] - b[:, 0], b[:, 3] - b[:, 1])
@@ -232,8 +239,8 @@ def preview_panel(dataset: RegionViewDataset, out_png, n=4):
     import matplotlib.pyplot as plt
     n = min(n, len(dataset))
     has_scene = bool(dataset.scene_plan)
-    rows_per = 2 if has_scene else 1
-    cols = max(sum(c for _, c, _ in dataset.scene_plan) if has_scene else 1, dataset.K * sum(c for _, c, _ in dataset.obj_slots))
+    rows_per = 2 if has_scene and dataset.K else 1
+    cols = max(sum(c for _, c, _ in dataset.scene_plan) if has_scene else 1, dataset.K * sum(c for _, c, _ in dataset.obj_slots), 1)
     fig, axes = plt.subplots(rows_per * n, cols, figsize=(1.6 * cols, 1.9 * rows_per * n), squeeze=False)
     for i in range(n):
         (scene, objects, meta), _ = dataset[i]

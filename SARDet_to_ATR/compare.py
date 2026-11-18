@@ -45,6 +45,11 @@ def row_key(folder: Path):
               "XA_regiondino_so_random_sardetssl_mobilenetv2": "XA RegionDINO scene+object, random windows (control)",
               "XA_regiondino_o_sardetssl_mobilenetv2": "XA RegionDINO object-only on SARDet",
               "XA_regiondino_o_random_sardetssl_mobilenetv2": "XA RegionDINO object-only, random windows (control)",
+              "XI_dino_atrssl_mobilenetv2": "XI DINO (suite recipe) on ATRNet",
+              "XI_regiondino_so_atrssl_mobilenetv2": "XI RegionDINO scene+object on ATRNet",
+              "XI_regiondino_so_random_atrssl_mobilenetv2": "XI RegionDINO scene+object on ATRNet, random windows (control)",
+              "XI_regiondino_o_atrssl_mobilenetv2": "XI RegionDINO object-only on ATRNet",
+              "XI_regiondino_o_random_atrssl_mobilenetv2": "XI RegionDINO object-only on ATRNet, random windows (control)",
               "XC_dino_mixed_mobilenetv2": "XC DINO on mixed pool", "XC_lejepa_mixed_mobilenetv2": "XC LeJEPA on mixed pool",
               "XC_spark_mixed_mobilenetv2": "XC SparK on mixed pool"}.get(name)
     if method is None:
@@ -78,9 +83,10 @@ def main():
         if m not in methods:
             methods.append(m)
     order = ["A0", "A1", "A2", "A3", "P4 C", "P4 s", "P4 3", "XA D", "XA L", "XA S", "XA RegionDINO scene+object on", "XA RegionDINO scene+object,",
-             "XA RegionDINO object-only on", "XA RegionDINO object-only,", "XC"]
+             "XA RegionDINO object-only on", "XA RegionDINO object-only,", "XI DINO", "XI RegionDINO scene+object on ATRNet,",
+             "XI RegionDINO scene+object on", "XI RegionDINO object-only on ATRNet,", "XI RegionDINO object-only on", "XC"]
     methods.sort(key=lambda m: next((i for i, o in enumerate(order) if m.startswith(o)), 99))
-    lines = ["# SSL on SARDet-100K scenes, tested on ATRNet-STAR SOC-40 (official test accuracy, %)", "",
+    lines = ["# SSL on SARDet-100K scenes (XA) or on the ATRNet pool (A1-A3, P4, XI), tested on ATRNet-STAR SOC-40 (official test accuracy, %)", "",
              "| method | 1 % (s1 / s2 / s3) | mean (sd) | 3 % | mean (sd) | 10 % | mean (sd) |", "|---|---|---|---|---|---|---|"]
     rows_csv = []
     for m in methods:
@@ -95,11 +101,17 @@ def main():
                     rows_csv.append({"method": m, "budget": b, "split": s, "test_accuracy": round(v, 2)})
         lines.append(line)
     lines += ["", "## Paired differences per split (test accuracy points): SARDet-SSL minus its reference, and minus A0", "",
-              "Reference = the same method's ATRNet-SSL row (A1/A2/A3) for DINO/LeJEPA/SparK; = XA DINO on SARDet for the RegionDINO rows.", "",
+              "Reference = the same method's ATRNet-SSL row (A1/A2/A3) for DINO/LeJEPA/SparK; = XA DINO on SARDet for the XA RegionDINO rows; "
+              "= A1 for XI DINO (suite recipe) and = XI DINO for the XI RegionDINO rows (same engine, same pool, only the object views differ).", "",
               "| method | budget | vs reference (s1 / s2 / s3) | mean | vs A0 (s1 / s2 / s3) | mean |", "|---|---|---|---|---|---|"]
     pairs = {"XA DINO on SARDet": "A1 DINO on ATRNet", "XA LeJEPA on SARDet": "A2 LeJEPA on ATRNet", "XA SparK on SARDet": "A3 SparK on ATRNet",
              "XA RegionDINO scene+object on SARDet": "XA DINO on SARDet", "XA RegionDINO scene+object, random windows (control)": "XA DINO on SARDet",
              "XA RegionDINO object-only on SARDet": "XA DINO on SARDet", "XA RegionDINO object-only, random windows (control)": "XA DINO on SARDet",
+             "XI DINO (suite recipe) on ATRNet": "A1 DINO on ATRNet",
+             "XI RegionDINO scene+object on ATRNet": "XI DINO (suite recipe) on ATRNet",
+             "XI RegionDINO scene+object on ATRNet, random windows (control)": "XI DINO (suite recipe) on ATRNet",
+             "XI RegionDINO object-only on ATRNet": "XI DINO (suite recipe) on ATRNet",
+             "XI RegionDINO object-only on ATRNet, random windows (control)": "XI DINO (suite recipe) on ATRNet",
              "XC DINO on mixed pool": "A1 DINO on ATRNet", "XC LeJEPA on mixed pool": "A2 LeJEPA on ATRNet", "XC SparK on mixed pool": "A3 SparK on ATRNet"}
     for m, ref in pairs.items():
         if m not in methods:

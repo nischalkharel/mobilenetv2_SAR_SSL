@@ -20,7 +20,9 @@ DINO_DIR = REPO / "Experiments" / "mobileNetv2_DINO"
 sys.path.insert(0, str(DINO_DIR))          # train_supervised imports its neighbours (paths, data, model, engine)
 import train_supervised  # noqa: E402
 
-METHODS = ("dino", "lejepa", "spark", "regiondino_so", "regiondino_so_random", "regiondino_o", "regiondino_o_random")
+METHODS = ("dino", "lejepa", "spark", "regiondino_so", "regiondino_so_random", "regiondino_o", "regiondino_o_random",
+           # arm I: SSL on the ATRNet pool with the RegionSSL engine (run names XI_<method>_atrssl_...)
+           "atr_dino", "atr_regiondino_so", "atr_regiondino_so_random", "atr_regiondino_o", "atr_regiondino_o_random")
 
 
 def main():
@@ -36,8 +38,13 @@ def main():
     cfg = json.loads((HERE / "config_finetune.json").read_text(encoding="utf-8"))
     cfg["run_name"] = cfg["run_name"].replace("METHOD", args.method)
     cfg["init"] = {"type": "backbone_checkpoint", "backbone_checkpoint": str(args.backbone.resolve())}
-    cfg["cross_dataset"] = {"ssl_dataset": "SARDet-100K", "downstream_dataset": "ATRNet-STAR SOC-40", "arm": "A (SARDet SSL as run)",
-                            "ssl_method": args.method}
+    if args.method.startswith("atr_"):       # arm I: the SSL pool is ATRNet's own (in-domain), run names XI_<method>_atrssl_...
+        cfg["run_name"] = cfg["run_name"].replace("XA_atr_", "XI_").replace("_sardetssl_", "_atrssl_")
+        cfg["cross_dataset"] = {"ssl_dataset": "ATRNet-STAR SOC-40 train (the split's SSL pool)", "downstream_dataset": "ATRNet-STAR SOC-40",
+                                "arm": "I (in-domain: RegionSSL engine on the ATRNet pool)", "ssl_method": args.method}
+    else:
+        cfg["cross_dataset"] = {"ssl_dataset": "SARDet-100K", "downstream_dataset": "ATRNet-STAR SOC-40", "arm": "A (SARDet SSL as run)",
+                                "ssl_method": args.method}
     if args.device:
         cfg["train"]["device"] = args.device
     if args.train_csv:

@@ -39,14 +39,16 @@ class RegionDINOMethod:
     export_rule = "teacher backbone, final epoch"
 
     def __init__(self, args):
-        if self.mode not in ("scene_object", "object"):
+        if self.mode not in ("scene_object", "object", "scene"):
             raise ValueError(self.mode)
-        if self.mode == "scene_object" and len(args.blur_p) != 3:
+        if self.mode in ("scene_object", "scene") and len(args.blur_p) != 3:
             raise ValueError("blur_p needs 3 values: global view 1, global view 2, local views")
-        if len(args.obj_blur_p) != 3:
-            raise ValueError("obj_blur_p needs 3 values: object-global 1, object-global 2, object-local views")
-        if args.region_source not in ("felz", "random"):
-            raise ValueError("region_source must be felz (the proposer) or random (the control)")
+        if self.mode != "scene":
+            if len(args.obj_blur_p) != 3:
+                raise ValueError("obj_blur_p needs 3 values: object-global 1, object-global 2, object-local views")
+            if args.region_source not in ("felz", "random"):
+                raise ValueError("region_source must be felz (the proposer) or random (the control)")
+        self.pool_name = getattr(args, "pool", "sardet")
         self.history_columns = ["loss", "scene_loss", "object_loss", "teacher_entropy", "teacher_marginal_entropy", "feature_cosine",
                                 "feature_std", "fallback_rate", "lr", "wd", "momentum", "teacher_temp", "center_norm", "object_center_norm"]
 
@@ -57,9 +59,17 @@ class RegionDINOMethod:
         return [("global", 1, args.blur_p[0]), ("global", 1, args.blur_p[1]), ("local", args.local_crops_number, args.blur_p[2])]
 
     def make_dataset(self, rows, args, smoke):
-        self.store = R.RegionStore(R.regions_file(smoke))
+        from . import pools as P
+        pool = P.get(self.pool_name)
+        if self.mode == "scene":                   # plain DINO of this engine: scene views only, no region file
+            self.store = None
+            ds = RegionViewDataset(rows, self.scene_plan(args), None, {"objects_per_image": 0}, seed=args.seed, pool=pool)
+            self.n_scene, self.n_obj_slots, self.K = sum(c for _, c, _ in ds.scene_plan), 0, 0
+            ds.manifest_info = {"pool": pool.name, "sha256": None, "region_source": "none", "object_views": None}
+            return ds
+        self.store = R.RegionStore(pool.regions_file(smoke), scale=pool.region_scale)
         opts = {k: getattr(args, k) for k in OBJECT_KEYS}
-        ds = RegionViewDataset(rows, self.scene_plan(args), self.store, opts, seed=args.seed)
+        ds = RegionViewDataset(rows, self.scene_plan(args), self.store, opts, seed=args.seed, pool=pool)
         self.n_scene = len(ds.scene_plan) and sum(c for _, c, _ in ds.scene_plan)
         self.n_obj_slots = sum(c for _, c, _ in ds.obj_slots)
         self.K = ds.K
@@ -67,17 +77,22 @@ class RegionDINOMethod:
         if coverage["pool_images_missing"] and not smoke:
             raise FileNotFoundError(f"{coverage['pool_images_missing']} of {len(rows)} pool images have no entry in {self.store.path}; "
                                     "run RegionSSL/make_regions.py over the whole pool (a partial file would silently turn this run into the random control)")
-        diag = region_box_diagnostic(rows, self.store, args.min_object_px, n_images=min(300, len(rows)))
+        diag = region_box_diagnostic(rows, self.store, args.min_object_px, n_images=min(300, len(rows)), pool=pool)
         # plain data on the dataset (no closures: the dataset is pickled to the loader workers)
-        ds.manifest_info = {**coverage, "summary_file": str(self.store.path.with_name(self.store.path.stem + "_summary.json")),
+        ds.manifest_info = {**coverage, "pool": pool.name, "box_scale_from_proposal_frame": pool.region_scale,
+                            "summary_file": str(self.store.path.with_name(self.store.path.stem + "_summary.json")),
                             "region_source": args.region_source, "diagnostic_with_labels": diag, "object_views": opts}
         return ds
 
     def describe(self, args):
-        return (f"  RegionDINO    : mode {self.mode}; {self.K} objects per image, each 2 object-global ({args.obj_global_size}px, zoom "
-                f"{args.obj_global_zoom}) + {args.obj_local_number} object-local ({args.obj_local_size}px, zoom {args.obj_local_zoom}); "
-                f"regions: {args.region_source}, min {args.min_object_px}px, sampling {args.region_sampling}; object loss weight "
-                f"{args.object_weight if self.mode == 'scene_object' else 'only term'}\n"
+        if self.mode == "scene":
+            region = f"  RegionDINO    : mode scene (plain DINO of this engine, no object views); pool {self.pool_name}\n"
+        else:
+            region = (f"  RegionDINO    : mode {self.mode}; pool {self.pool_name}; {self.K} objects per image, each 2 object-global ({args.obj_global_size}px, zoom "
+                      f"{args.obj_global_zoom}) + {args.obj_local_number} object-local ({args.obj_local_size}px, zoom {args.obj_local_zoom}); "
+                      f"regions: {args.region_source}, min {args.min_object_px}px, sampling {args.region_sampling}; object loss weight "
+                      f"{args.object_weight if self.mode == 'scene_object' else 'only term'}\n")
+        return (region +
                 f"  DINO          : out_dim {args.out_dim}, teacher momentum {args.momentum_teacher} -> 1, teacher temp {args.teacher_temp}, "
                 f"student temp {args.student_temp}, center momentum {args.center_momentum}\n"
                 f"  optimizer     : AdamW peak lr {self.peak_lr:.3g} (= {args.lr} x {args.batch_size}/256), warm-up {args.warmup_epochs} epochs, "
@@ -98,8 +113,9 @@ class RegionDINOMethod:
         common = dict(warmup_teacher_temp=args.warmup_teacher_temp, teacher_temp=args.teacher_temp,
                       warmup_teacher_temp_epochs=args.warmup_teacher_temp_epochs, nepochs=args.epochs,
                       student_temp=args.student_temp, center_momentum=args.center_momentum)
-        self.scene_loss = DINOLoss(args.out_dim, self.n_scene, **common).to(device) if self.mode == "scene_object" else None
-        self.object_loss = DINOLoss(args.out_dim, self.n_obj_slots, **common).to(device)
+        self.scene_loss = DINOLoss(args.out_dim, self.n_scene, **common).to(device) if self.mode in ("scene_object", "scene") else None
+        self.object_loss = DINOLoss(args.out_dim, self.n_obj_slots, **common).to(device) if self.mode != "scene" else None
+        self.any_loss = self.object_loss if self.object_loss is not None else self.scene_loss
         groups = get_params_groups(self.student)
         self.optimizer = torch.optim.AdamW(groups) if args.optimizer == "adamw" else torch.optim.SGD(groups, lr=0, momentum=0.9)
         self.scaler = torch.amp.GradScaler("cuda") if (args.use_fp16 and device.type == "cuda") else None
@@ -113,7 +129,7 @@ class RegionDINOMethod:
 
     def schedule_fingerprint(self):
         return sha256_of_text(json.dumps([self.lr_schedule.tolist(), self.wd_schedule.tolist(), self.momentum_schedule.tolist(),
-                                          self.object_loss.teacher_temp_schedule.tolist()]))
+                                          self.any_loss.teacher_temp_schedule.tolist()]))
 
     # ---- one epoch -----------------------------------------------------------------------------------------
     def train_epoch(self, loader, epoch, device, log_every, timing):
@@ -134,7 +150,7 @@ class RegionDINOMethod:
             B = scene_in[0].shape[0] if scene_in else obj_in[0].shape[0] // self.K
             n_scene_rows = self.n_scene * B
             center_s = self.scene_loss.center.clone() if self.scene_loss is not None else None
-            center_o = self.object_loss.center.clone()
+            center_o = self.object_loss.center.clone() if self.object_loss is not None else None
             with torch.autocast(device.type, dtype=torch.float16, enabled=self.scaler is not None):
                 # teacher: scene globals (2 x B rows) then object globals (2 x B*K rows); student: everything
                 t_out = self.teacher(scene_in[:2] + obj_in[:2])
@@ -142,10 +158,10 @@ class RegionDINOMethod:
                 n_teacher_scene = 2 * B if scene_in else 0
                 t_scene, t_obj = t_out[:n_teacher_scene], t_out[n_teacher_scene:]
                 s_scene, s_obj = s_out[:n_scene_rows], s_out[n_scene_rows:]
-                obj_loss = self.object_loss(s_obj, t_obj, epoch)
+                obj_loss = self.object_loss(s_obj, t_obj, epoch) if self.object_loss is not None else torch.zeros((), device=device)
                 if self.scene_loss is not None:
                     sc_loss = self.scene_loss(s_scene, t_scene, epoch)
-                    loss = sc_loss + args.object_weight * obj_loss
+                    loss = sc_loss + args.object_weight * obj_loss if self.object_loss is not None else sc_loss
                 else:
                     sc_loss = torch.zeros((), device=device)
                     loss = obj_loss
@@ -187,25 +203,27 @@ class RegionDINOMethod:
                       f"{sums['teacher_entropy'] / step:.3f}  {time.time() - t0:.0f}s", flush=True)
         return {k: v / n for k, v in sums.items()} | {
             "lr": self.optimizer.param_groups[0]["lr"], "wd": self.optimizer.param_groups[0]["weight_decay"], "momentum": float(m),
-            "teacher_temp": float(self.object_loss.teacher_temp_schedule[epoch]),
+            "teacher_temp": float(self.any_loss.teacher_temp_schedule[epoch]),
             "center_norm": self.scene_loss.center.norm().item() if self.scene_loss is not None else 0.0,
-            "object_center_norm": self.object_loss.center.norm().item()}
+            "object_center_norm": self.object_loss.center.norm().item() if self.object_loss is not None else 0.0}
 
     # ---- resume / export -----------------------------------------------------------------------------------
     def state_dict(self):
         return {"student": self.student.state_dict(), "teacher": self.teacher.state_dict(), "optimizer": self.optimizer.state_dict(),
                 "scene_loss": self.scene_loss.state_dict() if self.scene_loss is not None else None,
-                "object_loss": self.object_loss.state_dict(), "scaler": self.scaler.state_dict() if self.scaler else None}
+                "object_loss": self.object_loss.state_dict() if self.object_loss is not None else None,
+                "scaler": self.scaler.state_dict() if self.scaler else None}
 
     def load_state_dict(self, d):
         self.student.load_state_dict(d["student"], strict=True)
         self.teacher.load_state_dict(d["teacher"], strict=True)
         self.optimizer.load_state_dict(d["optimizer"])
-        if (d["scene_loss"] is None) != (self.scene_loss is None):
-            raise ValueError("cannot resume: the checkpoint is from the other RegionDINO mode")
+        if (d["scene_loss"] is None) != (self.scene_loss is None) or (d["object_loss"] is None) != (self.object_loss is None):
+            raise ValueError("cannot resume: the checkpoint is from another RegionDINO mode")
         if self.scene_loss is not None:
             self.scene_loss.load_state_dict(d["scene_loss"], strict=True)
-        self.object_loss.load_state_dict(d["object_loss"], strict=True)
+        if self.object_loss is not None:
+            self.object_loss.load_state_dict(d["object_loss"], strict=True)
         if (d["scaler"] is None) != (self.scaler is None):
             raise ValueError("cannot resume: mixed precision on/off differs (device changed?)")
         if self.scaler:

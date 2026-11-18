@@ -49,7 +49,11 @@ from utils import resolve_device, set_seed  # noqa: E402
 # table order; label -> find_backbone method key
 SARDET_METHODS = [("XA DINO on SARDet", "dino"), ("XA LeJEPA on SARDet", "lejepa"), ("XA SparK on SARDet", "spark"),
                   ("RegionDINO scene+object", "regiondino_so"), ("RegionDINO scene+object, random windows", "regiondino_so_random"),
-                  ("RegionDINO object-only", "regiondino_o"), ("RegionDINO object-only, random windows", "regiondino_o_random")]
+                  ("RegionDINO object-only", "regiondino_o"), ("RegionDINO object-only, random windows", "regiondino_o_random"),
+                  # arm I: the same engine on the ATRNet pool (in-domain)
+                  ("XI DINO (suite recipe) on ATRNet", "atr_dino"),
+                  ("XI RegionDINO scene+object on ATRNet", "atr_regiondino_so"), ("XI RegionDINO scene+object on ATRNet, random", "atr_regiondino_so_random"),
+                  ("XI RegionDINO object-only on ATRNet", "atr_regiondino_o"), ("XI RegionDINO object-only on ATRNet, random", "atr_regiondino_o_random")]
 REFERENCE = "XA DINO on SARDet"
 IMAGENET = "ImageNet start (no SSL)"
 A1 = "A1 DINO on ATRNet (in-domain, split 1)"

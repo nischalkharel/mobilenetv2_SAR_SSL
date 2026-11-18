@@ -16,6 +16,11 @@ detection suite (`SARDet/`) and the ATRNet experiment folders are imported read-
 | `RegionDINO_object/` | method 2: DINO on object views **only** (the network never sees a whole-image crop) |
 | `*/config_ssl_random.json` | the control for each method: same everything, object views cut around random windows of matched size |
 | `crc/make_regions.sbatch` | the one CPU job that makes the region file on CRC |
+| `rssl/pools.py` | the two unlabeled pools the engine can train on: `sardet` (SARDet-100K scenes, shorter side 512) and `atrnet` (ATRNet-STAR train chips, views from the chip at 224, regions proposed at the native 128) |
+| `*/config_ssl_atr.json`, `*/config_ssl_atr_random.json` | arm I: the same two methods and controls on the ATRNet pool (in-domain), run names `*_atr_*` |
+| `DINO_reference/` | plain DINO of this engine (scene views only) on the ATRNet pool: the paired reference for the `*_atr` rows; its gap to A1 measures the crop-recipe difference |
+| `chip_lab.py` | the region rule on ATRNet chips against the vehicle box (lab check, labels for scoring only) |
+| `crc/ssl_atr.sbatch`, `crc/make_regions_atr.sbatch` | the CRC jobs for arm I (both env files sourced, nothing staged) |
 
 Each method folder has the same four entry points as the suite's methods: `train_ssl.py`, `smoke_test.py`,
 `run_finetune.py` (SARDet detection fine-tune), `config_finetune.json`. The exported backbone has the suite's
@@ -40,6 +45,9 @@ SARDet\.venv\Scripts\python.exe RegionSSL\make_regions.py --smoke          # reg
 SARDet\.venv\Scripts\python.exe RegionSSL\RegionDINO_scene_object\smoke_test.py
 SARDet\.venv\Scripts\python.exe RegionSSL\RegionDINO_object\smoke_test.py
 SARDet\.venv\Scripts\python.exe RegionSSL\make_regions.py                  # all 94,034 pool images, about 1 h on 8 cores
+SARDet\.venv\Scripts\python.exe RegionSSL\make_regions.py --pool atrnet --smoke                        # arm I smoke region file
+SARDet\.venv\Scripts\python.exe RegionSSL\RegionDINO_object\smoke_test.py --config config_ssl_atr.json  # arm I smoke (either method)
+SARDet\.venv\Scripts\python.exe RegionSSL\chip_lab.py --n 300 --sizes 128,224                        # the rule on ATRNet chips
 ```
 
 CRC, from the suite root `/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet` (the suite's job scripts take the
@@ -54,6 +62,17 @@ for s in 1 2 3; do
   sbatch --job-name=ro_s$s   crc/ssl.sbatch ../RegionSSL/RegionDINO_object $s
   sbatch --job-name=ror_s$s  crc/ssl.sbatch ../RegionSSL/RegionDINO_object $s config_ssl_random.json
 done
+
+# Arm I (in-domain): the region file for the ATRNet pool (CPU, ~20 min), then 5 configs x 3 splits = 15 chains:
+sbatch --job-name=regions_atr ../RegionSSL/crc/make_regions_atr.sbatch
+for s in 1 2 3; do
+  sbatch --job-name=adino_s$s ../RegionSSL/crc/ssl_atr.sbatch ../RegionSSL/DINO_reference $s config_ssl_atr.json
+  sbatch --job-name=aro_s$s   ../RegionSSL/crc/ssl_atr.sbatch ../RegionSSL/RegionDINO_object $s config_ssl_atr.json
+  sbatch --job-name=aror_s$s  ../RegionSSL/crc/ssl_atr.sbatch ../RegionSSL/RegionDINO_object $s config_ssl_atr_random.json
+  sbatch --job-name=arso_s$s  ../RegionSSL/crc/ssl_atr.sbatch ../RegionSSL/RegionDINO_scene_object $s config_ssl_atr.json
+  sbatch --job-name=arsor_s$s ../RegionSSL/crc/ssl_atr.sbatch ../RegionSSL/RegionDINO_scene_object $s config_ssl_atr_random.json
+done
+# their ATRNet fine-tunes: SARDet_to_ATR/crc.sbatch with methods atr_dino atr_regiondino_o atr_regiondino_o_random atr_regiondino_so atr_regiondino_so_random
 
 # ATRNet-STAR fine-tunes (1 / 3 / 10 %), from the repository root, after the SSL chains finish:
 cd .. && for s in 1 2 3; do for m in regiondino_so regiondino_so_random regiondino_o regiondino_o_random; do
@@ -73,6 +92,7 @@ history.csv, charts, eval_*; never `*.pth`/`*.pt`), push, pull on the PC, then
 |---|---|---|
 | A0 | none (ImageNet) | done |
 | XA DINO / LeJEPA / SparK | plain SSL on SARDet scenes | CRC jobs submitted 2026-11-17 |
-| XA RegionDINO scene+object | this folder | smoke-tested, not run |
-| XA RegionDINO object-only | this folder | smoke-tested, not run |
-| the two random-window controls | this folder | smoke-tested, not run |
+| XA RegionDINO scene+object | this folder | SSL chains running on CRC (2026-11-18) |
+| XA RegionDINO object-only | this folder | done: 27.2 / 49.0 / 73.7 (+9.4 / +7.1 / +1.4 vs XA DINO) |
+| the two random-window controls | this folder | object-only control done; scene+object control running |
+| XI DINO (suite recipe) / RegionDINO scene+object / object-only / controls, SSL on the ATRNet pool | arm I, this folder | built 2026-11-18, smoke-tested on the PC, not run |

@@ -1,4 +1,4 @@
-"""Print the path of the SARDet-100K SSL backbone to use for one method and one ATRNet split.
+"""Print the path of the SSL backbone (SARDet pool, or the ATRNet pool for the atr_* methods) to use for one method and one ATRNet split.
 
     python SARDet_to_ATR/find_backbone.py dino 2      ->  SARDet/DINO_SARDet/outputs/ssl/<run>_split2_seed1/backbone_epoch100.pth
 
@@ -18,7 +18,13 @@ FOLDERS = {"dino": ("SARDet/DINO_SARDet", "dino_ssl_mobilenetv2"), "lejepa": ("S
            "regiondino_so": ("RegionSSL/RegionDINO_scene_object", "regiondino_so_ssl_mobilenetv2"),
            "regiondino_so_random": ("RegionSSL/RegionDINO_scene_object", "regiondino_so_random_ssl_mobilenetv2"),
            "regiondino_o": ("RegionSSL/RegionDINO_object", "regiondino_o_ssl_mobilenetv2"),
-           "regiondino_o_random": ("RegionSSL/RegionDINO_object", "regiondino_o_random_ssl_mobilenetv2")}
+           "regiondino_o_random": ("RegionSSL/RegionDINO_object", "regiondino_o_random_ssl_mobilenetv2"),
+           # arm I: the same engine on the ATRNet-STAR SSL pool (in-domain); atr_dino = plain DINO of that engine, the paired reference
+           "atr_dino": ("RegionSSL/DINO_reference", "dino_suite_atr_ssl_mobilenetv2"),
+           "atr_regiondino_so": ("RegionSSL/RegionDINO_scene_object", "regiondino_so_atr_ssl_mobilenetv2"),
+           "atr_regiondino_so_random": ("RegionSSL/RegionDINO_scene_object", "regiondino_so_atr_random_ssl_mobilenetv2"),
+           "atr_regiondino_o": ("RegionSSL/RegionDINO_object", "regiondino_o_atr_ssl_mobilenetv2"),
+           "atr_regiondino_o_random": ("RegionSSL/RegionDINO_object", "regiondino_o_atr_random_ssl_mobilenetv2")}
 
 
 def find(method: str, split: int) -> Path:

@@ -48,8 +48,9 @@ from shared import manifests, paths  # SARDet suite, read-only
 from shared.backbone import export_backbone, imagenet_weights_record
 from shared.plots import ssl_curves
 from shared.run_record import RunRecord, make_run_dir, read_json, sha256_of_text, write_json
-from shared.ssl_data import load_common_config, load_pool_rows, view_box_coverage
+from shared.ssl_data import load_common_config
 
+from . import pools
 from .region_data import build_region_loader
 
 SMOKE_IMAGES = 48
@@ -148,14 +149,12 @@ def run(method_cls, experiment_dir, config_path=None, resume_dir=None, smoke=Fal
     method = method_cls(args)
 
     # ---- data (audited, no labels) --------------------------------------------------------------------------
-    audit = manifests.quick_audit()
-    rows = load_pool_rows()
+    pool = pools.get(getattr(args, "pool", "sardet"))
+    rows = pool.rows()
     if smoke:
         rows = rows[:: max(1, len(rows) // SMOKE_IMAGES)][:SMOKE_IMAGES]
     used_hash = sha256_of_text("\n".join(r["file_name"] for r in rows))
-    manifest = {"ssl_pool_csv": str(manifests.ssl_pool_csv()), "csv_sha256": audit["manifest_sha256"]["ssl_pool.csv"],
-                "used_file_list_sha256": used_hash, "num_images": len(rows), "split_audit": audit,
-                "columns_available_to_the_method": manifests.MANIFEST_COLUMNS, "labels_used": "none",
+    manifest = {**pool.manifest(rows), "pool_dataset": pool.dataset, "used_file_list_sha256": used_hash, "num_images": len(rows), "labels_used": "none",
                 "labels_read_for_diagnostic_only": "view_box_coverage and region_box_diagnostic: GT boxes of up to 300 pool images, logged in run_info / manifests.json, never seen by training"}
     dataset = method.make_dataset(rows, args, smoke)
     plan = dataset.plan_description()
@@ -171,7 +170,7 @@ def run(method_cls, experiment_dir, config_path=None, resume_dir=None, smoke=Fal
         run_dir = make_run_dir(root, f"{cfg['run_name']}{paths.RUN_TAG}_seed{args.seed}{'_SMOKE' if smoke else ''}")
         write_json(run_dir / "config.json", cfg)
         (run_dir / "manifests").mkdir()
-        shutil.copy(manifests.ssl_pool_csv(), run_dir / "manifests" / "ssl_pool.csv")
+        shutil.copy(pool.csv_path(), run_dir / "manifests" / "ssl_pool.csv")
         write_json(run_dir / "manifests.json", manifest)
         record = RunRecord(run_dir, "ssl", cfg, extra={
             "method": method.name, "initialization": {"kind": "imagenet", **imagenet_weights_record()},
@@ -179,7 +178,7 @@ def run(method_cls, experiment_dir, config_path=None, resume_dir=None, smoke=Fal
             "export_rule": getattr(method, "export_rule", "final epoch"), "views_per_image": n_views,
             "view_plan": plan, "cost": {}}).start()
         with preserved_rng():
-            record.update(view_box_coverage=view_box_coverage(rows, n_images=min(300, len(rows))))
+            record.update(view_box_coverage=pool.view_coverage(rows))
         with open(run_dir / "history.csv", "w", newline="", encoding="utf-8") as f:
             csv.writer(f).writerow(["epoch"] + method.history_columns + ["seconds"])
     else:
@@ -316,7 +315,7 @@ def _export_and_finish(method, run_dir, args, cfg, manifest, cost, record):
 
 def cli(method_cls, experiment_dir, argv=None):
     """Standard command line for every method's train_ssl.py."""
-    p = argparse.ArgumentParser(description=f"{method_cls.name} SSL on the SARDet-100K pool (RegionSSL engine)")
+    p = argparse.ArgumentParser(description=f"{method_cls.name} SSL on an unlabeled pool (RegionSSL engine; the config's 'pool' key picks sardet or atrnet)")
     p.add_argument("--config", type=Path, help="method config (default: <experiment>/config_ssl.json)")
     p.add_argument("--resume", type=Path, help="run folder to continue from its checkpoint.pth")
     p.add_argument("--stop-after-epoch", type=int)

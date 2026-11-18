@@ -69,8 +69,9 @@ def sha256_of_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def save(path: Path, per_image: dict, extra: dict):
-    """per_image: {file_name: (boxes, areas)} -> regions.npz + regions_summary.json next to it."""
+def save(path: Path, per_image: dict, extra: dict, input_size: int = INPUT_SIZE):
+    """per_image: {file_name: (boxes, areas)} -> regions.npz + regions_summary.json next to it.
+    input_size: the frame the boxes are in (the size the rule ran at; a pool's propose_size)."""
     names = sorted(per_image)
     offsets = np.zeros(len(names) + 1, dtype=np.int64)
     boxes, areas = [], []
@@ -88,7 +89,7 @@ def save(path: Path, per_image: dict, extra: dict):
     os.replace(tmp, path)
     counts = np.diff(offsets)
     ext = np.maximum(boxes[:, 2] - boxes[:, 0], boxes[:, 3] - boxes[:, 1]).astype(np.float64) if len(boxes) else np.zeros(0)
-    summary = {"file": path.name, "sha256": sha256_of_file(path), "proposer": PROPOSER_NAME, "input_size": INPUT_SIZE,
+    summary = {"file": path.name, "sha256": sha256_of_file(path), "proposer": PROPOSER_NAME, "input_size": input_size,
                "proposer_parameters": proposer_parameters(), "images": len(names),
                "images_with_regions": int((counts > 0).sum()), "regions_total": int(len(boxes)),
                "regions_per_image": {"mean": float(counts.mean()) if len(counts) else 0, "median": float(np.median(counts)) if len(counts) else 0,
@@ -103,7 +104,8 @@ def save(path: Path, per_image: dict, extra: dict):
 class RegionStore:
     """Fast lookup of the region boxes of one image by file name (loaded once, kept in memory)."""
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, scale: float = 1.0):
+        """scale: multiply the stored boxes (proposal frame) into the frame the views are cut from (pool.region_scale)."""
         self.path = Path(path)
         if not self.path.exists():
             raise FileNotFoundError(f"region file missing: {self.path}  (run RegionSSL/make_regions.py first)")
@@ -112,6 +114,10 @@ class RegionStore:
             self.offsets = z["offsets"]
             self.boxes = z["boxes"]
             self.areas = z["areas"]
+        self.scale = float(scale)
+        if self.scale != 1.0:
+            self.boxes = np.round(self.boxes.astype(np.float64) * self.scale).astype(np.int16)
+            self.areas = np.round(self.areas.astype(np.float64) * self.scale * self.scale).astype(np.int32)
         self.index = {n: i for i, n in enumerate(self.names.tolist())}
         self.sha256 = sha256_of_file(self.path)
         ext = np.maximum(self.boxes[:, 2] - self.boxes[:, 0], self.boxes[:, 3] - self.boxes[:, 1])
