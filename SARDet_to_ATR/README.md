@@ -34,6 +34,10 @@ same contract the ATRNet fine-tune code loads strictly.
 - `find_backbone.py`: the SARDet backbone for a method and split, with the pairing rule above.
 - `crc.sbatch <method> <split>`: fine-tunes 1 / 3 / 10 % and scores validation + test; skips budgets already scored.
 - `compare.py`: table of all rows (A0, A1 to A3, P4, XA, later XC) with per-split paired differences.
+- `response_maps.py` (+ `crc_response_maps.sbatch`): frozen-backbone response maps on the official ATRNet test chips for
+  every SARDet-trained backbone, before any fine-tuning: share of the map's mass inside the vehicle box, concentration,
+  peak-in-box, paired per chip against the ImageNet start and against XA DINO. Shows whether a backbone (RegionDINO in
+  particular) responds on the vehicle rather than the background. Outputs: `outputs/compare/response_maps.{md,png}` + CSVs.
 
 ## Commands
 
