@@ -12,6 +12,8 @@
 | XA DINO on SARDet | 17.1 / 18.0 / 18.1 | 17.8 (0.5) | 41.4 / 41.8 / 42.3 | 41.8 (0.4) | 71.3 / 72.8 / 72.7 | 72.3 (0.8) |
 | XA LeJEPA on SARDet | 12.3 / 13.4 / 11.1 | 12.3 (1.2) | 31.6 / 34.4 / 32.4 | 32.8 (1.4) | 64.0 / 65.4 / 64.2 | 64.6 (0.8) |
 | XA SparK on SARDet | 21.5 / 23.3 / 23.2 | 22.7 (1.0) | 47.4 / 48.5 / 48.2 | 48.0 (0.6) | 74.0 / 73.9 / 73.9 | 73.9 (0.1) |
+| XA RegionDINO object-only on SARDet | 27.6 / 27.3 / 26.6 | 27.2 (0.5) | 48.8 / 49.3 / 48.8 | 49.0 (0.3) | 73.5 / 73.8 / 73.8 | 73.7 (0.2) |
+| XA RegionDINO object-only, random windows (control) | 20.3 / 21.3 / 21.2 | 20.9 (0.6) | 45.5 / 46.2 / 44.6 | 45.4 (0.8) | 72.6 / 73.0 / 72.6 | 72.7 (0.2) |
 
 ## Paired differences per split (test accuracy points): SARDet-SSL minus its reference, and minus A0
 
@@ -28,5 +30,11 @@ Reference = the same method's ATRNet-SSL row (A1/A2/A3) for DINO/LeJEPA/SparK; =
 | XA SparK on SARDet | 1pct | -3.1 / -1.1 / -1.7 | -2.0 | +0.7 / +2.5 / +2.5 | +1.9 |
 | XA SparK on SARDet | 3pct | -3.3 / -2.1 / -1.4 | -2.3 | +4.6 / +5.6 / +3.7 | +4.6 |
 | XA SparK on SARDet | 10pct | -0.3 / -0.6 / -1.0 | -0.6 | +2.8 / +2.3 / +1.6 | +2.2 |
+| XA RegionDINO object-only on SARDet | 1pct | +10.5 / +9.3 / +8.5 | +9.4 | +6.9 / +6.5 / +5.9 | +6.4 |
+| XA RegionDINO object-only on SARDet | 3pct | +7.3 / +7.5 / +6.5 | +7.1 | +6.0 / +6.3 / +4.3 | +5.5 |
+| XA RegionDINO object-only on SARDet | 10pct | +2.1 / +1.0 / +1.1 | +1.4 | +2.3 / +2.2 / +1.5 | +2.0 |
+| XA RegionDINO object-only, random windows (control) | 1pct | +3.2 / +3.2 / +3.1 | +3.2 | -0.4 / +0.5 / +0.5 | +0.2 |
+| XA RegionDINO object-only, random windows (control) | 3pct | +4.1 / +4.4 / +2.3 | +3.6 | +2.7 / +3.3 / +0.0 | +2.0 |
+| XA RegionDINO object-only, random windows (control) | 10pct | +1.2 / +0.2 / -0.0 | +0.5 | +1.3 / +1.4 / +0.3 | +1.0 |
 
 Duplicate cells (newest used): ('A0 ImageNet (no SSL)', '3pct', 1): 20261013-150506_A0_imagenet_mobilenetv2_seed0 vs 20261018-190525_A0_imagenet_mobilenetv2_seed0; ('A1 DINO on ATRNet', '3pct', 1): 20261015-113640_A1_dino_mobilenetv2_seed0 vs 20261019-032810_A1_dino_mobilenetv2_seed0
