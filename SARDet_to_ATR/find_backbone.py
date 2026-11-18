@@ -12,14 +12,19 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-FOLDERS = {"dino": ("DINO_SARDet", "dino_ssl_mobilenetv2"), "lejepa": ("LeJEPA_SARDet", "lejepa_ssl_mobilenetv2"),
-           "spark": ("SparK_SARDet", "spark_ssl_mobilenetv2")}
+FOLDERS = {"dino": ("SARDet/DINO_SARDet", "dino_ssl_mobilenetv2"), "lejepa": ("SARDet/LeJEPA_SARDet", "lejepa_ssl_mobilenetv2"),
+           "spark": ("SARDet/SparK_SARDet", "spark_ssl_mobilenetv2"),
+           # RegionDINO (RegionSSL study): scene + object, object only, and their random-window controls
+           "regiondino_so": ("RegionSSL/RegionDINO_scene_object", "regiondino_so_ssl_mobilenetv2"),
+           "regiondino_so_random": ("RegionSSL/RegionDINO_scene_object", "regiondino_so_random_ssl_mobilenetv2"),
+           "regiondino_o": ("RegionSSL/RegionDINO_object", "regiondino_o_ssl_mobilenetv2"),
+           "regiondino_o_random": ("RegionSSL/RegionDINO_object", "regiondino_o_random_ssl_mobilenetv2")}
 
 
 def find(method: str, split: int) -> Path:
     folder, run_name = FOLDERS[method]
     pattern = f"*_{run_name}_split{split}_seed{split - 1}"
-    runs = sorted((REPO / "SARDet" / folder / "outputs" / "ssl").glob(pattern), reverse=True)
+    runs = sorted((REPO / folder / "outputs" / "ssl").glob(pattern), reverse=True)
     for run in runs:
         info = json.loads((run / "run_info.json").read_text(encoding="utf-8"))
         file = run / f"backbone_epoch{info['config']['common']['epochs']}.pth"
@@ -30,5 +35,5 @@ def find(method: str, split: int) -> Path:
 
 if __name__ == "__main__":
     if len(sys.argv) != 3 or sys.argv[1] not in FOLDERS or sys.argv[2] not in ("1", "2", "3"):
-        raise SystemExit("usage: find_backbone.py dino|lejepa|spark 1|2|3")
+        raise SystemExit(f"usage: find_backbone.py {'|'.join(FOLDERS)} 1|2|3")
     print(find(sys.argv[1], int(sys.argv[2])))

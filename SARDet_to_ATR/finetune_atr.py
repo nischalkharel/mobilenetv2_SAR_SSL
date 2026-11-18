@@ -20,7 +20,7 @@ DINO_DIR = REPO / "Experiments" / "mobileNetv2_DINO"
 sys.path.insert(0, str(DINO_DIR))          # train_supervised imports its neighbours (paths, data, model, engine)
 import train_supervised  # noqa: E402
 
-METHODS = ("dino", "lejepa", "spark")
+METHODS = ("dino", "lejepa", "spark", "regiondino_so", "regiondino_so_random", "regiondino_o", "regiondino_o_random")
 
 
 def main():

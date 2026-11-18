@@ -23,7 +23,10 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from shared import paths  # noqa: E402
 
-EXPERIMENTS = ["baseline_SARDet", "DINO_SARDet", "LeJEPA_SARDet", "SparK_SARDet", "CondDINO_SARDet"]
+EXPERIMENTS = ["baseline_SARDet", "DINO_SARDet", "LeJEPA_SARDet", "SparK_SARDet", "CondDINO_SARDet",
+               # RegionSSL study (separate folder; its fine-tunes use the same protocol); rows named by their SSL run_name
+               "../RegionSSL/RegionDINO_scene_object", "../RegionSSL/RegionDINO_object"]
+VARIANT_EXPERIMENTS = {"CondDINO_SARDet", "RegionDINO_scene_object", "RegionDINO_object"}   # several SSL configs per folder
 BUDGETS = ["1pct", "3pct", "10pct"]
 BASELINE = "baseline_SARDet"
 
@@ -44,10 +47,11 @@ def collect(include_deviations=False, subfolder="finetune"):
             if info.get("protocol_deviation") and not include_deviations:
                 continue
             cfg = info["config"]
+            exp = Path(exp).name
             method = exp
             bb = info.get("backbone", {})
             variant = ""
-            if exp == "CondDINO_SARDet":
+            if exp in VARIANT_EXPERIMENTS:
                 variant = (bb.get("ssl_config") or {}).get("run_name", "") if isinstance(bb.get("ssl_config"), dict) else ""
                 variant = variant or Path(str(bb.get("ssl_run_dir", ""))).name.split("_split")[0].split("_", 1)[-1]
                 method = f"{exp}:{variant}" if variant else exp

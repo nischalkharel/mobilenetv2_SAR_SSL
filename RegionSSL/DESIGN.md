@@ -117,3 +117,22 @@ can be added to the proposer later without touching the learning code, because m
   A0 baseline (no SSL; exists, 3 splits), XA_dino, XA_lejepa, XA_spark (9 CRC jobs submitted), and the new
   XR_regiondino. First comparison: A0 vs XA_dino vs XR_regiondino; LeJEPA and SparK rows are reported
   when the full table is assembled.
+
+## 7. Decision and implementation (2026-11-17, evening)
+
+Decided: option (b), separate crops. Each region becomes its own DINO sample (2 object-global views for the
+teacher, 4 object-local views for the student, same head, own centering buffer). Reason: the final feature grid
+of a 224 px view is 7 x 7, so a small target would get a pooled vector made mostly of its surroundings; a crop
+sized from the region's own extent does not have that problem. Two methods, each with a random-window control:
+
+| folder | views per image | loss |
+|---|---|---|
+| `RegionDINO_scene_object` | DINO's 2 global + 8 local scene crops AND 2 regions x (2 + 4) object views | scene DINO + 1.0 x object DINO |
+| `RegionDINO_object` | 3 regions x (2 + 4) object views only | object DINO only |
+
+Implemented and smoke-tested on the PC (2 epochs, 48 images, exact resume, export, detection fine-tune,
+probes, ATRNet fine-tune wrapper): `rssl/` (regions, region_data, regiondino, region_engine), `make_regions.py`,
+both method folders, `crc/make_regions.sbatch`. The suite's `crc/ssl.sbatch` and `crc/finetune.sbatch` run
+the new folders unchanged (first argument `../RegionSSL/<folder>`); `SARDet_to_ATR` got four additive method
+names. Nothing under `SARDet/` changed except two additive lines in `compare/compare.py` (collect the new
+folders). Status of every row: see README.md.
