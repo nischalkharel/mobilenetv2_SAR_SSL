@@ -72,10 +72,14 @@ the image it is cut from, so there is nothing new to leak.
 | test | the 11,613 official test images | 24,200 chips |
 | test_clean | test minus the 50 straddling images, minus other-class chips | about 24,000 chips |
 
-Chips are cut once for every annotated image (train + val + test, about 245,000 chips, 4 GB of PNG) under
-`SARDET_CHIPS_ROOT` (environment variable, default next to the dataset), layout `<official split>/<class>/<chip id>.png`,
-with one `chips.csv` manifest (chip id, image file, official split, source, class, box, window side, flags, group)
-whose SHA-256 is recorded in every run. On CRC the chip folder is staged to node disk from one tar, like the ATRNet chips.
+Chips are cut once for every annotated image (train + val + test, about 245,000 chips) and stored as **one array
+file**, `chips_u8.npy` of shape (N, 128, 128) uint8 (4 GB), plus one `chips.csv` manifest (row index, image file,
+official split, source, class, box, window side, flags, group) whose SHA-256 is recorded in every run. Not as
+245,000 PNG files: that is the small-file pattern that made last week's runs 3 to 10 times slower on /ix. A run
+memory-maps the array and reads only its rows (a 10 % labeled set is 400 MB, the test set 400 MB), so a fine-tune
+job touches two files, and on CRC the array is one sequential copy to node disk. A few hundred PNG previews per
+class are written next to it for looking at chips, nothing more.
+Chip cutting on the PC reads each of the 117,000 images once with a process pool (about 10 to 20 minutes).
 
 Class balance is poor (test: ship 10,741, aircraft 6,779, bridge 3,281, tank 1,773, car 1,230, harbor 399) and
 each class comes from only one to five source datasets (car only from SIVED, harbor only from OGSOD). Two
@@ -98,9 +102,14 @@ training chips, 24,000 test chips).
 
 A tile is one quarter of the scene as the SSL pipeline already sees it: the scene resized to shorter side 512
 (what every scene SSL run used), cut into a 2 x 2 grid of 256 x 256 tiles (non-square images get an extra column
-or row with the last tile shifted to fit). Stored as PNG; 94,034 scenes give about 376,000 tiles. The SSL loader
-takes a tile as the whole image with no further resize, so views have the same pixel scale as in the scene run and
-simply cannot extend past the tile. No object knowledge enters: every scene gives the same four tiles.
+or row with the last tile shifted to fit). 94,034 scenes give about 376,000 tiles. **No tile is written to disk**:
+`tiles.csv` lists (image, official split, tile column, tile row) and the SSL loader crops the quarter from the
+scene right after the resize it already does. So the tile runs stage exactly the same dataset tar as the scene
+runs, decode one image per sample exactly as the scene runs do, and the per-step cost is the same; the only change
+is that a sample is a quarter of a scene. The loader takes the tile as the whole image with no further resize, so
+views have the same pixel scale as in the scene run and simply cannot extend past the tile. No object knowledge
+enters: every scene gives the same four tiles. The RegionDINO proposer runs on each tile the same way (crop, then
+propose) and writes one regions file for the tile pool, as for the scene and ATRNet pools.
 
 Compute rule: **equal optimizer steps**. The scene runs did 100 epochs x 1,469 steps = 146,900 steps (23 GPU-h for
 DINO); the tile runs do the same number of steps, which is 25 epochs over the 4x larger pool. Same views, same
@@ -115,9 +124,9 @@ at roughly 15 to 25 GPU-h each, about 450 GPU-h in total, plus 72 short fine-tun
 | file | job |
 |---|---|
 | `paths.py` | SARDET_CHIPS_ROOT (env var, PC default), tile root, manifests; nothing hard-coded elsewhere |
-| `make_chips.py` | cuts every chip, writes chips.csv and a per-class / per-source summary; `--dry-run` prints the table above |
-| `make_tiles.py` | cuts the 2 x 2 tiles into the tile root, writes tiles.csv (the S2 SSL pool manifest) |
-| `data.py` | chip manifest -> (chip, label) records for a labeled set / selection / test / test_clean |
+| `make_chips.py` | cuts every chip into chips_u8.npy + chips.csv (process pool), a per-class / per-source summary and PNG previews; `--dry-run` prints the table above |
+| `make_tiles.py` | writes tiles.csv (the S2 SSL pool manifest: one row per quarter of each pool image); no image files |
+| `data.py` | chip manifest -> memory-mapped (chip, label) records for a labeled set / selection / test / test_clean |
 | `finetune_chips.py` | the ATRNet fine-tune recipe on chip records (reuses the model and training loop code; own data loading) |
 | `compare.py` | tables: accuracy per method x budget x split, paired differences, per-source, per-class |
 | `crc/` | finetune.sbatch (3 budgets per job, chips staged from one tar), tile-pool SSL jobs (one per method and split) |
@@ -125,7 +134,20 @@ at roughly 15 to 25 GPU-h each, about 450 GPU-h in total, plus 72 short fine-tun
 
 Nothing under SARDet/ or RegionSSL/ changes except the added pool definition; nothing under Experiments/ changes.
 
-## 7. Decisions taken here (say if any should change)
+## 7. Speed rules (so the runs are not slow for silly reasons)
+
+- No folders of small files. Chips live in one array file, tiles are not written at all. A CRC job reads at most
+  two new files sequentially (the chip array and the manifest) besides the dataset tar it already stages.
+- Fine-tunes keep the labeled chips and the test chips in memory (hundreds of MB); the test set is scored once per
+  run; selection uses the 5,000 val_select chips, not the 22,000 full-validation chips.
+- Three budgets per CRC job (as the ATRNet fine-tunes do), chips staged once per job.
+- Tile SSL runs do the same number of steps and the same decode work per step as the scene runs; "4 x more images"
+  costs nothing extra because the epoch count drops to 25.
+- The region proposer for tiles runs once as a CPU job (as for the other pools), not inside the GPU job.
+- Measure before scaling: the first chip fine-tune and the first tile SSL job print seconds per step, and are
+  compared with the scene runs (0.2 s/step SSL, 0.1 to 0.25 s/step fine-tune) before the rest is submitted.
+
+## 8. Decisions taken here (say if any should change)
 
 1. Chip rule: square, side = max(64, 1.5 x longer box side), native pixels, resized to 128.
 2. Test = all test-image chips; clean test additionally drops other-class chips and the 50 straddling images.
