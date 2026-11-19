@@ -46,11 +46,11 @@ CLASSIFICATION = {
     "XI DINO (suite recipe) on ATRNet": dict(id="xi_dino", label="DINO, RegionSSL engine", family="dino", ssl="atr", ref="a1",
                                              note="Plain DINO run by the RegionDINO engine on the ATRNet chips: the paired reference for the XI RegionDINO rows, and a check against A1."),
     "XI RegionDINO scene+object on ATRNet": dict(id="xi_rso", label="RegionDINO scene+object", family="region", ssl="atr", ref="xi_dino",
-                                                 note="Scene+object views on the ATRNet chips (arm I)."),
+                                                 note="Scene+object views with SSL on the ATRNet chips themselves (XI rows, also called arm I)."),
     "XI RegionDINO scene+object on ATRNet, random windows (control)": dict(id="xi_rsor", label="scene+object, random windows", family="region", ssl="atr", ref="xi_dino", control=True,
                                                                            note="Its random-window control."),
     "XI RegionDINO object-only on ATRNet": dict(id="xi_ro", label="RegionDINO object-only", family="region", ssl="atr", ref="xi_dino",
-                                                note="Object-only views on the ATRNet chips (arm I)."),
+                                                note="Object-only views with SSL on the ATRNet chips themselves (XI rows, also called arm I)."),
     "XI RegionDINO object-only on ATRNet, random windows (control)": dict(id="xi_ror", label="object-only, random windows", family="region", ssl="atr", ref="xi_dino", control=True,
                                                                           note="Its random-window control."),
 }

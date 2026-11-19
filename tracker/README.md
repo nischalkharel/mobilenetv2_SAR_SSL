@@ -24,6 +24,7 @@ Standard library only; nothing to install.
 | `serve.py` | serves `web/`, `data/`, repository images under `/file/`, and the idea-box API |
 | `web/app.js`, `web/app.css` | shared chart code (plain SVG), tables, tooltip, theme |
 | `web/*.html` | the pages; each has its own short script at the bottom |
+| `web/glossary.js` | every label and abbreviation in plain words (the Glossary page); add a line when a new label appears |
 | `ideas.json` | the idea box, committed with the repository so it travels with the code |
 
 ## Where the numbers come from

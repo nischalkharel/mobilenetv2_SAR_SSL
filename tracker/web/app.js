@@ -21,7 +21,7 @@ async function load(name) {
 
 // ---- shell: nav + meta line ----
 async function shell(active) {
-  const pages = [["index.html", "Overview"], ["classification.html", "Classification"], ["detection.html", "Detection"], ["maps.html", "Response maps"], ["runs.html", "Runs"], ["ideas.html", "Ideas"]];
+  const pages = [["index.html", "Overview"], ["classification.html", "Classification"], ["detection.html", "Detection"], ["maps.html", "Response maps"], ["runs.html", "Runs"], ["ideas.html", "Ideas"], ["glossary.html", "Glossary"]];
   const nav = $("nav");
   nav.innerHTML = pages.map(([h, t]) => `<a href="${h}" class="${h === active ? "active" : ""}">${t}</a>`).join("");
   try {

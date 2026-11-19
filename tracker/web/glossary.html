@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Glossary · SAR SSL tracker</title>
+<link rel="stylesheet" href="app.css">
+<style>
+  .gl { display: grid; grid-template-columns: 180px 1fr; gap: 0; }
+  .gl .t { font-weight: 600; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--line); }
+  .gl .t small { display: block; font-weight: 400; color: var(--fg3); font-size: 12px; }
+  .gl .d { padding: 9px 0; border-bottom: 1px solid var(--line); color: var(--fg2); max-width: 820px; }
+  .gl .d b { color: var(--fg); }
+  .gl .t:target, .gl .t:target + .d { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+  .quick { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+  .quick a { font-size: 12.5px; padding: 3px 9px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--fg2); }
+  @media (max-width: 640px) { .gl { grid-template-columns: 1fr; } .gl .t { border-bottom: 0; padding-bottom: 0; } }
+</style>
+</head>
+<body>
+<div class="top"><div class="in"><span class="brand">SAR SSL tracker</span><nav id="nav"></nav><span class="meta" id="meta"></span></div></div>
+<main>
+  <div class="eyebrow">Glossary</div>
+  <h1>Every label and abbreviation, in plain words</h1>
+  <p class="sub">The study has grown its own shorthand (A1, XA, XI, arm I, P4, SOC-40 ...). This page is the place to check it. Search, or jump to a group. Each term has a link you can paste elsewhere.</p>
+  <div class="controls"><input id="q" placeholder="search a term or a word in its meaning" style="min-width:320px"><span class="seg" id="groups"></span><span id="count" class="sub" style="font-size:12.5px"></span></div>
+  <div class="quick" id="quick"></div>
+  <section class="card" style="padding:4px 18px 8px">
+    <div class="gl" id="list"></div>
+  </section>
+  <p class="sub" style="margin-top:14px">Missing a term? Add a line to <code>tracker/web/glossary.js</code>, or drop it in the <a href="ideas.html">idea box</a> and it gets added.</p>
+</main>
+<script src="app.js"></script>
+<script src="glossary.js"></script>
+<script>
+(async () => {
+  await shell("glossary.html");
+  const groups = [...new Set(GLOSSARY.map(e => e.g))]; let cur = "";
+  const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  $("groups").innerHTML = `<button class="on" data-g="">all</button>` + groups.map(g => `<button data-g="${esc(g)}">${esc(g)}</button>`).join("");
+  $("quick").innerHTML = ["A0", "A1, A2, A3", "P4", "XA", "XI", "arm A / arm I / arm C", "random windows", "object-only", "mAP", "peak in box", "split", "cell"].map(t => `<a href="#${slug(t)}">${esc(t)}</a>`).join("");
+  function draw() {
+    const q = $("q").value.toLowerCase();
+    const rows = GLOSSARY.filter(e => (!cur || e.g === cur) && (!q || `${e.t} ${e.a || ""} ${e.d}`.toLowerCase().includes(q)));
+    $("count").textContent = `${rows.length} of ${GLOSSARY.length}`;
+    let h = "", last = null;
+    rows.forEach(e => { if (e.g !== last && !cur) { h += `<div class="t" style="grid-column:1/-1;padding-top:16px"><span class="eyebrow">${esc(e.g)}</span></div>`; last = e.g; }
+      h += `<div class="t" id="${slug(e.t)}"><a href="#${slug(e.t)}" style="color:inherit">${esc(e.t)}</a>${e.a ? `<small>also: ${esc(e.a)}</small>` : ""}</div><div class="d">${esc(e.d)}</div>`; });
+    $("list").innerHTML = h || `<p class="empty">no match</p>`;
+    if (location.hash) { const el = document.querySelector(location.hash); if (el) el.scrollIntoView({block: "center"}); }
+  }
+  $("groups").querySelectorAll("button").forEach(b => b.onclick = () => { $("groups").querySelectorAll("button").forEach(x => x.classList.remove("on")); b.classList.add("on"); cur = b.dataset.g; draw(); });
+  $("q").oninput = draw; window.addEventListener("hashchange", draw); draw();
+})();
+</script>
+</body>
+</html>
