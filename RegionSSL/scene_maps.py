@@ -224,8 +224,7 @@ def main():
                         ax.add_patch(Rectangle((x1, y1), x2 - x1, y2 - y1, fill=False, edgecolor="white", linewidth=0.8))
                     ax.set_xticks([])
                     ax.set_yticks([])
-            fig.suptitle(f"Frozen backbone response maps on SARDet-100K test scenes (split {split} backbones, no fine-tuning); "
-                         "white boxes = object annotations", fontsize=9)
+            fig.suptitle(f"Frozen backbones on SARDet-100K test scenes, split {split}, no fine-tuning; white boxes = annotations", fontsize=8.5)
             fig.tight_layout()
             fig.savefig(out / f"scene_maps_split{split}.png", dpi=170)
             fig.savefig(out / f"scene_maps_split{split}.pdf")
