@@ -26,7 +26,7 @@ accuracy table is still the result.
 Per-split numbers: response_maps_per_model.csv and cross_dataset.csv in this folder. Figure with the maps on six
 chips: response_maps_split1.png (full size) / response_maps_split1_web.jpg.
 
-## Added 2026-11-20: the same backbones on full SARDet-100K scenes, and the arm-I check
+## Added 2026-11-19 evening: the same backbones on full SARDet-100K scenes, and the arm-I check
 
 Scene maps (RegionSSL/outputs/scene_maps/scene_maps.md, 1500 test scenes, boxes 3.4 % of a scene): peak in an annotated box, % of scenes,
 three splits: ImageNet start 36; plain DINO 8-11; LeJEPA 8-9; SparK 27-33; scene+object 17-21 (control 8-14);

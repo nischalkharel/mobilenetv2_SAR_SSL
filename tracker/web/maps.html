@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Response maps · SAR SSL tracker</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="top"><div class="in"><span class="brand">SAR SSL tracker</span><nav id="nav"></nav><span class="meta" id="meta"></span></div></div>
+<main>
+  <div class="eyebrow">Response maps</div>
+  <h1>Where each frozen backbone responds, before any fine-tuning</h1>
+  <p class="sub">Response map = activity (channel norm) of the last feature map of the frozen SSL backbone, upsampled to the image. No labels and no fine-tuning are involved; the annotation boxes are used only to measure the map. <b>Mass in box</b> = share of the map's total inside the boxes (a map with no preference scores the box area). <b>Peak in box</b> = share of images whose strongest pixel lies inside a box. Bars = mean of the split backbones, dots = splits.</p>
+
+  <section>
+    <h2 id="chips_t"></h2>
+    <div class="chart" id="chips"></div>
+    <div class="caption">On target-centred chips the in-domain backbones (A1, XI plain DINO) already look at the vehicle. Among the SARDet-trained backbones only RegionDINO object-only is above the ImageNet start; scene+object and every control sit at the plain-DINO level.</div>
+  </section>
+
+  <section>
+    <h2 id="scenes_t"></h2>
+    <div class="chart" id="scenes"></div>
+    <div class="caption">On full scenes the ImageNet start is the most object-focused backbone and plain DINO on SARDet spreads its response over the scene. Object-only brings the peak back onto an object three times as often as plain DINO; SparK is the other focused backbone. Mass barely moves because the boxes are small and the map is at stride 32.</div>
+  </section>
+
+  <section>
+    <h2>Scenes, per source dataset</h2>
+    <p class="sub">Peak in box, % of scenes (mass in box, %), all splits pooled. The sources differ in target size: OGSOD's targets are tiny, SIVED's large.</p>
+    <div class="tw" id="src"></div>
+  </section>
+
+  <section>
+    <h2>The maps themselves, split-1 backbones</h2>
+    <p class="sub">Full-resolution figures from the run outputs; click to open the file.</p>
+    <div class="row figs" id="figs"></div>
+  </section>
+</main>
+<script src="app.js"></script>
+<script>
+(async () => {
+  await shell("maps.html");
+  const M = await load("maps");
+  const fam = n => /RegionDINO/.test(n) ? "region" : /DINO/.test(n) ? "dino" : /LeJEPA/.test(n) ? "lejepa" : /SparK/.test(n) ? "spark" : "base";
+  const pool = n => /ImageNet/.test(n) ? "none" : /^(A1|XI)/.test(n) ? "atr" : "sardet";
+  const short = n => n.replace("XA ", "").replace(" on SARDet", "").replace(" on ATRNet", "").replace("A1 DINO (in-domain, split 1)", "A1 DINO (split 1 only)").replace(" (in-domain, split 1)", " (split 1 only)").replace("XI DINO (suite recipe)", "DINO, RegionSSL engine").replace("XI ", "").replace("ImageNet start (no SSL)", "ImageNet start").replace(", random", ", random windows");
+
+  function build(section, host, titleId, panels, pools) {
+    const models = []; section.rows.forEach(r => { if (!models.includes(r.model)) models.push(r.model); });
+    const rows = models.map(n => { const rs = section.rows.filter(r => r.model === n); return {name: n, label: short(n), family: fam(n), control: /random/.test(n), pool: pool(n), v: {mass: rs.map(r => r.mass), peak: rs.map(r => r.peak)}}; });
+    const groups = Object.keys(pools).map(p => ({title: pools[p], rows: rows.filter(r => r.pool === p)})).filter(g => g.rows.length);
+    $(titleId).textContent = section.what;
+    hbars(host, groups, panels, {labelW: 262, panelW: 240});
+  }
+  build(M.chips, $("chips"), "chips_t", [{key: "mass", title: "mass inside vehicle box, %", xmax: 40, ticks: [0, 10, 20, 30], ref: M.chips.box_area, refLabel: `uniform ${M.chips.box_area} %`}, {key: "peak", title: "peak inside box, % of chips", xmax: 100, ticks: [0, 25, 50, 75, 100]}], POOL);
+  build(M.scenes, $("scenes"), "scenes_t", [{key: "mass", title: "mass inside annotated boxes, %", xmax: 10, ticks: [0, 2, 4, 6, 8], ref: M.scenes.box_area, refLabel: `uniform ${M.scenes.box_area} %`}, {key: "peak", title: "peak inside a box, % of scenes", xmax: 50, ticks: [0, 10, 20, 30, 40, 50]}], {none: "ImageNet start, no SSL", sardet: "SSL on SARDet-100K scenes"});
+
+  // per-source table
+  const ps = M.scenes.per_source || [];
+  if (ps.length) { const models = Object.keys(ps[0].models);
+    let h = `<table><thead><tr><th>source</th><th class="num">scenes</th><th class="num">box area %</th>${models.map(m => `<th>${esc(short(m))}</th>`).join("")}</tr></thead><tbody>`;
+    ps.forEach(r => { h += `<tr><td>${esc(r.source)}</td><td class="num">${r.n}</td><td class="num">${fx(r.box_area)}</td>${models.map(m => { const x = r.models[m] || {}; const best = Math.max(...models.map(q => (r.models[q] || {}).peak || 0)); return `<td class="v" style="${x.peak === best ? "font-weight:700" : ""}">${fx(x.peak, 0)} <span style="color:var(--fg3)">(${fx(x.mass)})</span></td>`; }).join("")}</tr>`; });
+    $("src").innerHTML = h + `</tbody></table>`; } else $("src").innerHTML = `<p class="empty" style="padding:10px">no per-source table yet</p>`;
+
+  // figures
+  const F = M.figures || {};
+  $("figs").innerHTML = Object.entries(F).map(([k, p]) => `<div class="card" style="flex:1 1 480px;min-width:0"><h3>${k === "chips" ? "ATRNet-STAR test chips" : "SARDet-100K test scenes"}</h3><a href="/file/${esc(p)}" target="_blank"><img src="/file/${esc(p)}" alt="${k} response maps"></a><p class="sub" style="font-size:12px;margin-top:6px"><code>${esc(p)}</code></p></div>`).join("") || `<p class="empty">no figures found</p>`;
+})();
+</script>
+</body>
+</html>

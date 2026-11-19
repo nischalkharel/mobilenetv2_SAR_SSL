@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SAR SSL tracker</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="top"><div class="in"><span class="brand">SAR SSL tracker</span><nav id="nav"></nav><span class="meta" id="meta"></span></div></div>
+<main>
+  <div class="eyebrow">Overview</div>
+  <h1>What has been run, and what it says</h1>
+  <p class="sub">Every row of this study is one recipe: <b>unlabeled pool</b> for self-supervised learning (SSL) &rarr; <b>labeled set</b> for fine-tuning &rarr; <b>task</b> that is scored. MobileNetV2 from ImageNet weights everywhere, 100 SSL epochs, 1 / 3 / 10 % of the labels, three splits per cell, official test sets. Numbers on this page are read from the run folders; the sentences are the current reading and are updated by hand.</p>
+  <div class="flow" style="margin-top:10px"><b>no SSL</b> or <b>SSL on ATRNet-STAR chips</b> or <b>SSL on SARDet-100K scenes</b> <span class="arrow">&rarr;</span> <b>fine-tune on ATRNet-STAR labels</b> or <b>on SARDet-100K labels</b> <span class="arrow">&rarr;</span> <b>classification accuracy</b> or <b>detection mAP</b></div>
+
+  <section>
+    <div class="eyebrow">Headline answers</div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Experiment map</div>
+    <h2>Three settings, every method, how much of each is done</h2>
+    <p class="sub">"done" counts finished cells out of 9 (3 budgets &times; 3 splits). Means over the splits that exist. The last column is the paired difference against the no-SSL row at 1 % labels, green when every split agrees.</p>
+    <div class="map" id="map"></div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Reading, 2026-11-19</div>
+    <div class="card">
+      <p><b>In-domain (SSL and test both on ATRNet chips):</b> any SSL helps a lot at 1 % labels (21 &rarr; 35 to 41 %). CondDINO is top but uses acquisition metadata, so it sits apart. Plain DINO and LeJEPA tie. SparK is weakest here.</p>
+      <p><b>Cross-dataset (SSL on SARDet scenes, test on ATRNet chips):</b> plain DINO and LeJEPA transfer <em>worse</em> than no SSL. RegionDINO object-only turns that into the best cross-dataset row (+9.4 over plain DINO at 1 %), with SparK second. The random-window control gets a third of the gain, so the regions matter. Cross-dataset is still far below in-domain (27 vs 35 at 1 %).</p>
+      <p><b>RegionDINO on the ATRNet chips themselves (arm I):</b> no gain. Scene+object is level with plain DINO, object-only is 2 points below. A chip is already the object; cutting regions out of it only removes context. So the object views pay off when the SSL images are scenes and the test is a chip, and that is the setting to build the paper on.</p>
+      <p><b>Detection (SSL and test on SARDet):</b> no method moves mAP by more than a point. SparK is the only one positive at every budget. RegionDINO's detection rows are being computed.</p>
+      <p style="margin:0"><b>Next:</b> a classification test where the SSL pool is large scenes and the labeled chips come from the same sensor (Sentinel-1 scenes + OpenSARShip chips, or chips cut from SARDet boxes), and later a non-SARDet scene pool (Umbra / Capella). Ideas and doubts go in the <a href="ideas.html">idea box</a>.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Latest ideas</div>
+    <div id="ideas"></div>
+  </section>
+</main>
+<script src="app.js"></script>
+<script>
+(async () => {
+  await shell("index.html");
+  const C = await load("classification"), D = await load("detection"), meta = await load("meta");
+  let ideas = {ideas: []}; try { ideas = await (await fetch("/api/ideas")).json(); } catch (e) {}
+
+  // paired difference of m against base over the splits both have, for one budget and field
+  function diff(m, base, b, field, scale = 1) {
+    const a = vals(m, b, field), r = vals(base, b, field);
+    return a.map((v, i) => v != null && r[i] != null ? (v - r[i]) * scale : null).filter(v => v != null);
+  }
+  const sign = d => d.length && d.every(v => v > 0) ? "good" : d.length && d.every(v => v < 0) ? "bad" : "";
+
+  // ---- experiment map ----
+  $("map").innerHTML = meta.settings.map(st => {
+    const det = st.table === "detection", T = det ? D : C, field = det ? "map" : "acc", scale = det ? 100 : 1;
+    const base = T.methods.find(m => m.ssl === "none"), rows = T.methods.filter(m => m.ssl === st.ssl);
+    const line = m => {
+      const means = BUDGETS.map(b => mean(present(vals(m, b, field))) * scale);
+      const d = base && m !== base ? diff(m, base, "1pct", field, scale) : [];
+      return `<tr class="${m.control ? "ctrl" : ""}"><td>${label(m)}</td><td>${nDone(m)}/9</td>${means.map(v => `<td class="num">${fx(v)}</td>`).join("")}<td class="num ${sign(d)}">${d.length ? f1(mean(d)) : "–"}</td></tr>`;
+    };
+    return `<div class="card"><h3>${esc(st.title)}</h3><div class="task">${esc(st.task)}${det ? ", shown &times;100" : ""}</div>
+      <table><thead><tr><th>method</th><th>done</th><th class="num">1 %</th><th class="num">3 %</th><th class="num">10 %</th><th class="num">vs no SSL, 1 %</th></tr></thead>
+      <tbody>${base ? line(base) : ""}${rows.map(line).join("")}${rows.length ? "" : `<tr><td colspan="6" class="empty">nothing run yet</td></tr>`}</tbody></table>
+      <p style="margin:8px 0 0"><a href="${det ? "detection.html" : "classification.html"}">open the ${det ? "detection" : "classification"} page &rarr;</a></p></div>`;
+  }).join("");
+
+  // ---- headline cards ----
+  const a0 = C.methods.find(m => m.id === "a0"), byId = Object.fromEntries(C.methods.map(m => [m.id, m]));
+  const best = (pool, b) => C.methods.filter(m => m.ssl === pool && !m.control && m.id !== "p4" && present(vals(m, b)).length).sort((x, y) => mean(present(vals(y, b))) - mean(present(vals(x, b))))[0];
+  const cards = [];
+  const bi = best("atr", "1pct"); if (bi) { const d = diff(bi, a0, "1pct", "acc"); cards.push([f1(mean(d)), "1 % labels, in-domain", `Best in-domain SSL: ${bi.label}`, `${fx(mean(present(vals(bi, "1pct"))))} % against ${fx(mean(present(vals(a0, "1pct"))))} % with no SSL. CondDINO is higher still (${fx(mean(present(vals(byId.p4, "1pct"))))} %) but uses metadata.`, sign(d)]); }
+  const bx = best("sardet", "1pct"); if (bx) { const d = diff(bx, a0, "1pct", "acc"), dd = diff(bx, byId.xa_dino, "1pct", "acc"); cards.push([f1(mean(dd)), "vs plain DINO, 1 % labels", `Best cross-dataset SSL: ${bx.label}`, `${fx(mean(present(vals(bx, "1pct"))))} % after SSL on SARDet scenes; plain DINO gets ${fx(mean(present(vals(byId.xa_dino, "1pct"))))} %, no SSL ${fx(mean(present(vals(a0, "1pct"))))} %. ${f1(mean(d))} over no SSL.`, sign(dd)]); }
+  if (byId.xi_ro && byId.xi_dino) { const d = BUDGETS.map(b => mean(diff(byId.xi_ro, byId.xi_dino, b, "acc"))); cards.push([f1(d[0]), "object-only vs plain DINO on ATRNet chips", "Arm I: object views do not help on chips", `${d.map(f1).join(" / ")} at 1 / 3 / 10 %. Scene+object: ${BUDGETS.map(b => f1(mean(diff(byId.xi_rso, byId.xi_dino, b, "acc")))).join(" / ")}.`, d.every(v => v < 0) ? "bad" : ""]); }
+  const db = D.methods.find(m => m.ssl === "none");
+  if (db) { const scored = D.methods.filter(m => m.ssl !== "none" && !m.control).map(m => { const d = BUDGETS.flatMap(b => diff(m, db, b, "map", 100)); return {m, d}; }).filter(x => x.d.length).sort((x, y) => mean(y.d) - mean(x.d)); if (scored.length) { const s = scored[0]; cards.push([f1(mean(s.d)), "mAP points, all budgets", `Detection: ${s.m.label} is the best SSL`, `Positive on ${s.d.filter(v => v > 0).length} of ${s.d.length} cells. No method moves SARDet detection by more than about a point.`, sign(s.d)]); } }
+  $("cards").innerHTML = cards.map(([n, u, l, p, cls]) => `<div class="card"><div class="num ${cls}">${n}<small>${esc(u)}</small></div><div class="lbl">${esc(l)}</div><p>${esc(p)}</p></div>`).join("");
+
+  // ---- latest ideas ----
+  const open = ideas.ideas.filter(i => i.status === "open").slice(-3).reverse();
+  $("ideas").innerHTML = open.length ? open.map(i => `<div class="idea"><div class="hd">#${i.id} &middot; ${esc(i.who)} &middot; ${esc(i.created.replace("T", " "))} ${i.tags.map(t => `<span class="tag">${esc(t)}</span>`).join(" ")}</div><div class="txt">${esc(i.text)}</div></div>`).join("") + `<a href="ideas.html">all ideas &rarr;</a>`
+    : `<p class="empty">No open ideas yet. <a href="ideas.html">Add one.</a></p>`;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Classification · SAR SSL tracker</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="top"><div class="in"><span class="brand">SAR SSL tracker</span><nav id="nav"></nav><span class="meta" id="meta"></span></div></div>
+<main>
+  <div class="eyebrow">Classification</div>
+  <h1>ATRNet-STAR SOC-40: test accuracy by label budget</h1>
+  <p class="sub" id="task"></p>
+
+  <section>
+    <h2>Accuracy, one block per unlabeled pool</h2>
+    <p class="sub">Bars = mean of the splits, dots = splits. Solid bars: SSL on the ATRNet chips. Hatched bars: SSL on SARDet scenes. Dashed line: no SSL. Controls are drawn lighter.</p>
+    <div class="chart" id="fig1"></div>
+  </section>
+
+  <section>
+    <h2>Paired differences, same split and labeled set</h2>
+    <div class="controls"><label>compare each row against</label><span class="seg"><button class="on" data-ref="base">no SSL</button><button data-ref="own">its own reference</button></span><span id="refnote" class="sub" style="font-size:12.5px"></span></div>
+    <div class="chart" id="fig2"></div>
+    <div class="caption">"~" marks a mean whose splits disagree in sign. The reference of each row is listed in the table below (own reference = the plain-DINO row of the same engine and pool for RegionDINO, A1 for CondDINO and for the arm-I plain DINO, no SSL for the rest).</div>
+  </section>
+
+  <section>
+    <h2>Every cell</h2>
+    <p class="sub">Click a row to see the nine runs behind it (folder, epochs, time, validation curve).</p>
+    <div class="tw"><table id="tab"></table></div>
+    <div class="drawer" id="drawer" hidden></div>
+  </section>
+</main>
+<script src="app.js"></script>
+<script>
+(async () => {
+  await shell("classification.html");
+  const C = await load("classification"), byId = Object.fromEntries(C.methods.map(m => [m.id, m])), a0 = byId.a0;
+  $("task").textContent = C.task + ". 1 / 3 / 10 % of the ATRNet-STAR training labels, fixed labeled sets per split, official test set scored once per run (29,284 chips).";
+
+  const groups = groupsByPool(C.methods).map(g => ({title: g.title, rows: g.rows.map(m => ({label: m.label, family: m.family, control: m.control, hatched: m.ssl === "sardet", v: Object.fromEntries(BUDGETS.map(b => [b, vals(m, b)]))}))}));
+  hbars($("fig1"), groups, BUDGETS.map(b => ({key: b, title: `${bud(b)} of labels`, xmax: 90, ticks: [0, 20, 40, 60, 80], ref: mean(present(vals(a0, b))), refLabel: ""})), {labelW: 262, panelW: 215});
+
+  function drawDiff(mode) {
+    const rows = [];
+    C.methods.filter(m => m.id !== "a0").forEach(m => {
+      const ref = mode === "base" ? a0 : byId[m.ref] || a0;
+      BUDGETS.forEach(b => { const a = vals(m, b), r = vals(ref, b); rows.push({label: m.label + (m.ssl === "sardet" ? " (SARDet)" : m.ssl === "atr" ? " (ATRNet)" : ""), group: m.id, sub: bud(b), family: m.family, d: a.map((v, i) => v != null && r[i] != null ? v - r[i] : null)}); });
+    });
+    const all = rows.flatMap(r => present(r.d)), lo = Math.floor(Math.min(0, ...all) / 5) * 5, hi = Math.ceil(Math.max(0, ...all) / 5) * 5;
+    dotplot($("fig2"), rows, lo, hi, "accuracy points");
+    $("refnote").textContent = mode === "base" ? "every row minus the no-SSL row" : "every row minus its reference row";
+  }
+  drawDiff("base");
+  document.querySelectorAll(".seg button").forEach(b => b.onclick = () => { document.querySelectorAll(".seg button").forEach(x => x.classList.remove("on")); b.classList.add("on"); drawDiff(b.dataset.ref); });
+
+  // table
+  let h = `<thead><tr><th>method</th><th>reference</th><th class="num">1 % (s1 / s2 / s3)</th><th class="num">mean (sd)</th><th class="num">3 %</th><th class="num">mean (sd)</th><th class="num">10 %</th><th class="num">mean (sd)</th></tr></thead><tbody>`;
+  groupsByPool(C.methods).forEach(g => {
+    h += `<tr class="grp"><td colspan="8">${esc(g.title)}</td></tr>`;
+    g.rows.forEach(m => { h += `<tr class="click ${m.control ? "ctrl" : ""}" data-id="${m.id}"><td>${label(m)}</td><td class="sub" style="font-size:12px">${m.ref ? esc(byId[m.ref]?.label || m.ref) + (byId[m.ref] && byId[m.ref].ssl !== m.ssl ? " (" + (byId[m.ref].ssl === "none" ? "no SSL" : byId[m.ref].ssl) + ")" : "") : "–"}</td>`;
+      BUDGETS.forEach(b => { const v = vals(m, b), p = present(v); h += `<td class="num">${v.map(x => fx(x)).join(" / ")}</td><td class="num">${p.length ? `${fx(mean(p))} (${fx(sd(p))})` : "–"}</td>`; });
+      h += `</tr>`; });
+  });
+  $("tab").innerHTML = h + `</tbody>`;
+  $("tab").querySelectorAll("tr.click").forEach(tr => tr.onclick = () => { $("tab").querySelectorAll("tr.sel").forEach(x => x.classList.remove("sel")); tr.classList.add("sel"); $("drawer").hidden = false; drawer($("drawer"), byId[tr.dataset.id], "acc", v => fx(v) + " %", "test accuracy"); });
+})();
+</script>
+</body>
+</html>

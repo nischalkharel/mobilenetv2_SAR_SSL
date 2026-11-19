@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ideas · SAR SSL tracker</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="top"><div class="in"><span class="brand">SAR SSL tracker</span><nav id="nav"></nav><span class="meta" id="meta"></span></div></div>
+<main>
+  <div class="eyebrow">Idea box</div>
+  <h1>Thoughts, doubts, things to try</h1>
+  <p class="sub">Saved to <code>tracker/ideas.json</code> in the repository, so it travels with the code and Claude can read it at the start of a session and leave a reply under an idea. Mark an idea <em>tried</em>, <em>done</em> or <em>dropped</em> when its fate is known.</p>
+
+  <section class="card">
+    <h3>New idea</h3>
+    <textarea id="text" placeholder="e.g. Try SSL on Sentinel-1 full scenes and classify OpenSARShip chips: scenes in, chips out, same sensor."></textarea>
+    <div class="controls" style="margin-top:8px">
+      <input id="tags" placeholder="tags, comma separated (dataset, method, paper, question)" style="min-width:320px">
+      <select id="who"><option>Nischal</option><option>Claude</option></select>
+      <button class="primary" id="add">Add</button>
+      <span id="msg" class="sub" style="font-size:12.5px"></span>
+    </div>
+  </section>
+
+  <section>
+    <div class="controls">
+      <span class="seg" id="st"><button class="on" data-s="">all</button><button data-s="open">open</button><button data-s="tried">tried</button><button data-s="done">done</button><button data-s="dropped">dropped</button></span>
+      <input id="q" placeholder="search" style="min-width:220px">
+      <span id="count" class="sub" style="font-size:12.5px"></span>
+    </div>
+    <div id="list"></div>
+  </section>
+</main>
+<script src="app.js"></script>
+<script>
+(async () => {
+  await shell("ideas.html");
+  let data = {ideas: []}, filterS = "";
+  const api = (method, path, body) => fetch(path, {method, headers: {"Content-Type": "application/json"}, body: body ? JSON.stringify(body) : undefined}).then(r => r.json());
+  async function refresh() { data = await api("GET", "/api/ideas"); draw(); }
+  const pill = s => `<span class="pill ${s === "done" ? "ok" : s === "dropped" ? "bad" : s === "tried" ? "warn" : ""}">${esc(s)}</span>`;
+  function draw() {
+    const q = $("q").value.toLowerCase();
+    const rows = data.ideas.filter(i => (!filterS || i.status === filterS) && (!q || `${i.text} ${i.tags.join(" ")} ${i.replies.map(r => r.text).join(" ")}`.toLowerCase().includes(q))).slice().reverse();
+    $("count").textContent = `${rows.length} of ${data.ideas.length}`;
+    $("list").innerHTML = rows.length ? rows.map(i => `<div class="idea" data-id="${i.id}">
+      <div class="hd"><b>#${i.id}</b> ${esc(i.who)} &middot; ${esc(i.created.replace("T", " "))} ${pill(i.status)} ${i.tags.map(t => `<span class="tag">${esc(t)}</span>`).join(" ")}</div>
+      <div class="txt">${esc(i.text)}</div>
+      ${i.replies.map(r => `<div class="reply"><span class="who">${esc(r.who)}</span><span class="sub" style="font-size:11.5px">${esc(r.when.replace("T", " "))}</span><div style="white-space:pre-wrap">${esc(r.text)}</div></div>`).join("")}
+      <div class="actions">${["open", "tried", "done", "dropped"].filter(s => s !== i.status).map(s => `<button data-act="status" data-v="${s}">mark ${s}</button>`).join("")}<button data-act="reply">reply</button><button data-act="edit">edit</button><button data-act="del">delete</button></div>
+      <div class="replybox" hidden style="margin-top:8px"><textarea placeholder="reply"></textarea><div class="controls" style="margin-top:6px"><select class="rwho"><option>Nischal</option><option>Claude</option></select><button class="primary" data-act="send">Save reply</button></div></div>
+    </div>`).join("") : `<p class="empty">nothing here</p>`;
+    $("list").querySelectorAll("button").forEach(b => b.onclick = async () => {
+      const box = b.closest(".idea"), id = box.dataset.id, act = b.dataset.act;
+      if (act === "status") await api("PUT", `/api/ideas/${id}`, {status: b.dataset.v});
+      else if (act === "reply") { box.querySelector(".replybox").hidden = false; box.querySelector(".replybox textarea").focus(); return; }
+      else if (act === "send") { const t = box.querySelector(".replybox textarea").value.trim(); if (!t) return; await api("PUT", `/api/ideas/${id}`, {reply: t, who: box.querySelector(".rwho").value}); }
+      else if (act === "edit") { const i = data.ideas.find(x => String(x.id) === id); const t = prompt("Edit the idea", i.text); if (t == null) return; await api("PUT", `/api/ideas/${id}`, {text: t}); }
+      else if (act === "del") { if (!confirm(`Delete idea #${id}?`)) return; await api("DELETE", `/api/ideas/${id}`); }
+      refresh();
+    });
+  }
+  $("add").onclick = async () => { const text = $("text").value.trim(); if (!text) { $("msg").textContent = "write something first"; return; }
+    await api("POST", "/api/ideas", {text, tags: $("tags").value.split(",").map(s => s.trim()).filter(Boolean), who: $("who").value});
+    $("text").value = ""; $("tags").value = ""; $("msg").textContent = "saved"; setTimeout(() => $("msg").textContent = "", 1500); refresh(); };
+  $("text").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) $("add").click(); });
+  $("st").querySelectorAll("button").forEach(b => b.onclick = () => { $("st").querySelectorAll("button").forEach(x => x.classList.remove("on")); b.classList.add("on"); filterS = b.dataset.s; draw(); });
+  $("q").oninput = draw;
+  refresh();
+})();
+</script>
+</body>
+</html>

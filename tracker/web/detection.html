@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Detection · SAR SSL tracker</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="top"><div class="in"><span class="brand">SAR SSL tracker</span><nav id="nav"></nav><span class="meta" id="meta"></span></div></div>
+<main>
+  <div class="eyebrow">Detection</div>
+  <h1>SARDet-100K: test mAP by label budget</h1>
+  <p class="sub" id="task"></p>
+
+  <section>
+    <h2>mAP@[.5:.95] (&times;100)</h2>
+    <p class="sub">SSL on the SARDet training scenes, Faster R-CNN fine-tuned on 1 / 3 / 10 % of the SARDet labels, official test set (11,613 scenes). Bars = mean of the splits, dots = splits, dashed line = no SSL.</p>
+    <div class="chart" id="fig1"></div>
+  </section>
+
+  <section>
+    <h2>Paired differences, same split and labeled set</h2>
+    <div class="controls"><label>compare each row against</label><span class="seg"><button class="on" data-ref="base">no SSL</button><button data-ref="own">its own reference</button></span></div>
+    <div class="chart" id="fig2"></div>
+    <div class="caption">mAP points (&times;100). "~" marks a mean whose splits disagree in sign.</div>
+  </section>
+
+  <section>
+    <h2>Gain by source dataset</h2>
+    <div class="controls"><label>label budget</label><span class="seg" id="srcseg"><button class="on" data-b="1pct">1 %</button><button data-b="3pct">3 %</button><button data-b="10pct">10 %</button></span><span class="sub" style="font-size:12.5px">SSL minus no SSL, mAP points, mean of the splits; SARDet-100K is nine source datasets stitched together</span></div>
+    <div class="tw" id="src"></div>
+  </section>
+
+  <section>
+    <h2>Per-class AP at 10 % labels</h2>
+    <div class="tw" id="cls"></div>
+  </section>
+
+  <section>
+    <h2>Every cell</h2>
+    <p class="sub">Click a row to see the nine runs behind it.</p>
+    <div class="tw"><table id="tab"></table></div>
+    <div class="drawer" id="drawer" hidden></div>
+  </section>
+</main>
+<script src="app.js"></script>
+<script>
+(async () => {
+  await shell("detection.html");
+  const D = await load("detection"), byId = Object.fromEntries(D.methods.map(m => [m.id, m])), base = D.methods.find(m => m.ssl === "none");
+  $("task").textContent = (D.task || "") + (D.compare_folder ? ` (tables from ${D.compare_folder})` : "");
+  if (!D.methods.length) { $("fig1").innerHTML = `<p class="empty">${esc(D.note || "no detection results")}</p>`; return; }
+  const v100 = (m, b) => vals(m, b, "map").map(v => v == null ? null : 100 * v);
+
+  const groups = groupsByPool(D.methods, POOL_DET).map(g => ({title: g.title, rows: g.rows.map(m => ({label: m.label, family: m.family, control: m.control, v: Object.fromEntries(BUDGETS.map(b => [b, v100(m, b)]))}))}));
+  hbars($("fig1"), groups, BUDGETS.map(b => ({key: b, title: `${bud(b)} of labels`, xmax: 35, ticks: [0, 10, 20, 30], ref: base ? mean(present(v100(base, b))) : null})), {labelW: 262, panelW: 215});
+
+  function drawDiff(mode) {
+    const rows = [];
+    D.methods.filter(m => m !== base).forEach(m => { const ref = mode === "base" ? base : byId[m.ref] || base;
+      BUDGETS.forEach(b => { const a = v100(m, b), r = v100(ref, b); rows.push({label: m.label, group: m.id, sub: bud(b), family: m.family, d: a.map((v, i) => v != null && r[i] != null ? v - r[i] : null)}); }); });
+    const all = rows.flatMap(r => present(r.d)), lim = Math.max(2, Math.ceil(Math.max(...all.map(Math.abs))));
+    dotplot($("fig2"), rows, -lim, lim, "mAP points, SSL minus reference");
+  }
+  drawDiff("base");
+  document.querySelectorAll(".seg:not(#srcseg) button").forEach(b => b.onclick = () => { b.parentNode.querySelectorAll("button").forEach(x => x.classList.remove("on")); b.classList.add("on"); drawDiff(b.dataset.ref); });
+
+  // per-source heat table
+  const sources = Object.keys(Object.values(D.per_source[base.id] || {})[0] || {});
+  const shade = v => { const a = Math.min(Math.abs(v) / 3.5, 1); return v > 0 ? `color-mix(in srgb, var(--good-bg) ${Math.round(100 * a)}%, var(--surface))` : `color-mix(in srgb, var(--bad-bg) ${Math.round(100 * a)}%, var(--surface))`; };
+  function drawSrc(b) {
+    const ms = D.methods.filter(m => m !== base && D.per_source[m.id]);
+    let h = `<table><thead><tr><th>source</th><th class="num">no SSL mAP</th>${ms.map(m => `<th>${esc(m.label)}</th>`).join("")}</tr></thead><tbody>`;
+    sources.forEach(s => {
+      const bv = [1, 2, 3].map(k => (D.per_source[base.id][`${b}/${k}`] || {})[s]).filter(v => v != null);
+      h += `<tr><td>${esc(s)}</td><td class="num">${bv.length ? fx(mean(bv), 3) : "–"}</td>`;
+      ms.forEach(m => { const d = [1, 2, 3].map(k => { const a = (D.per_source[m.id][`${b}/${k}`] || {})[s], r = (D.per_source[base.id][`${b}/${k}`] || {})[s]; return a != null && r != null ? 100 * (a - r) : null; }).filter(v => v != null);
+        h += d.length ? `<td class="v" style="background:${shade(mean(d))}" title="${d.map(f1).join(" / ")}">${f1(mean(d))}</td>` : `<td class="v">–</td>`; });
+      h += `</tr>`; });
+    $("src").innerHTML = h + `</tbody></table>`;
+  }
+  drawSrc("1pct");
+  $("srcseg").querySelectorAll("button").forEach(b => b.onclick = () => { $("srcseg").querySelectorAll("button").forEach(x => x.classList.remove("on")); b.classList.add("on"); drawSrc(b.dataset.b); });
+
+  // per-class AP at 10 %
+  (() => { const cls = D.classes; let h = `<table><thead><tr><th>method</th>${cls.map(c => `<th class="num">${c}</th>`).join("")}</tr></thead><tbody>`;
+    D.methods.forEach(m => { h += `<tr class="${m.control ? "ctrl" : ""}"><td>${label(m)}</td>`; cls.forEach(c => { const a = [1, 2, 3].map(k => (m.cells[`10pct/${k}`] || {per_class_ap: {}}).per_class_ap[c]).filter(v => v != null); h += `<td class="num">${a.length ? fx(100 * mean(a)) : "–"}</td>`; }); h += `</tr>`; });
+    $("cls").innerHTML = h + `</tbody></table>`; })();
+
+  // table
+  let h = `<thead><tr><th>method</th><th>reference</th><th class="num">1 % (s1 / s2 / s3)</th><th class="num">mean (sd)</th><th class="num">3 %</th><th class="num">mean (sd)</th><th class="num">10 %</th><th class="num">mean (sd)</th><th class="num">AP50 at 10 %</th></tr></thead><tbody>`;
+  groupsByPool(D.methods, POOL_DET).forEach(g => { h += `<tr class="grp"><td colspan="9">${esc(g.title)}</td></tr>`;
+    g.rows.forEach(m => { h += `<tr class="click ${m.control ? "ctrl" : ""}" data-id="${m.id}"><td>${label(m)}</td><td class="sub" style="font-size:12px">${m.ref ? esc(byId[m.ref]?.label || m.ref) : "–"}</td>`;
+      BUDGETS.forEach(b => { const v = vals(m, b, "map"), p = present(v); h += `<td class="num">${v.map(x => fx(x, 3)).join(" / ")}</td><td class="num">${p.length ? `${fx(mean(p), 3)} (${fx(sd(p), 3)})` : "–"}</td>`; });
+      const a50 = present(vals(m, "10pct", "map50")); h += `<td class="num">${a50.length ? fx(mean(a50), 3) : "–"}</td></tr>`; }); });
+  $("tab").innerHTML = h + `</tbody>`;
+  $("tab").querySelectorAll("tr.click").forEach(tr => tr.onclick = () => { $("tab").querySelectorAll("tr.sel").forEach(x => x.classList.remove("sel")); tr.classList.add("sel"); $("drawer").hidden = false; drawer($("drawer"), byId[tr.dataset.id], "map", v => fx(v, 3), "test mAP"); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Runs · SAR SSL tracker</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="top"><div class="in"><span class="brand">SAR SSL tracker</span><nav id="nav"></nav><span class="meta" id="meta"></span></div></div>
+<main>
+  <div class="eyebrow">Runs</div>
+  <h1>Every SSL and fine-tune run folder</h1>
+  <p class="sub">Read from each folder's run_info.json and history.csv. Smoke tests, pilots and killed stubs are left out. Click a name to copy its folder path.</p>
+  <div class="controls">
+    <select id="kind"><option value="">SSL and fine-tune</option><option value="ssl">SSL only</option><option value="finetune">fine-tune only</option></select>
+    <select id="group"><option value="">every folder</option></select>
+    <select id="status"><option value="">any status</option></select>
+    <input id="q" placeholder="filter by name, method, commit" style="min-width:240px">
+    <span id="count" class="sub" style="font-size:12.5px"></span>
+  </div>
+  <div class="tw"><table id="tab"></table></div>
+</main>
+<script src="app.js"></script>
+<script>
+(async () => {
+  await shell("runs.html");
+  const R = (await load("runs")).runs.sort((a, b) => (b.started || "").localeCompare(a.started || ""));
+  const opt = (id, values) => { const s = $(id); [...new Set(values)].sort().forEach(v => { const o = document.createElement("option"); o.value = v; o.textContent = v; s.appendChild(o); }); };
+  opt("group", R.map(r => r.group)); opt("status", R.map(r => r.status));
+  const pill = s => `<span class="pill ${s === "completed" ? "ok" : s === "running" ? "warn" : s === "failed" || s === "cancelled" ? "bad" : ""}">${esc(s)}</span>`;
+  function draw() {
+    const k = $("kind").value, g = $("group").value, st = $("status").value, q = $("q").value.toLowerCase();
+    const rows = R.filter(r => (!k || r.kind === k) && (!g || r.group === g) && (!st || r.status === st) && (!q || `${r.name} ${r.method} ${r.commit} ${r.path}`.toLowerCase().includes(q)));
+    $("count").textContent = `${rows.length} of ${R.length} runs, ${rows.filter(r => r.kind === "ssl").length} SSL, ${rows.filter(r => r.kind === "finetune").length} fine-tune, ${Math.round(rows.reduce((s, r) => s + (r.minutes || 0), 0) / 60)} GPU-hours`;
+    let h = `<thead><tr><th>kind</th><th>folder</th><th>run</th><th>status</th><th class="num">split</th><th>started</th><th class="num">min</th><th class="num">epochs</th><th>gpu</th><th>commit</th><th>curve</th><th>note</th></tr></thead><tbody>`;
+    rows.forEach(r => { h += `<tr><td>${r.kind}</td><td class="sub" style="font-size:12px">${esc(r.group)}</td><td><code class="click" title="${esc(r.path)}" data-p="${esc(r.path)}" style="cursor:copy">${esc(r.name)}</code></td><td>${pill(r.status)}</td><td class="num">${r.split ?? ""}</td><td class="mono">${esc((r.started || "").replace("T", " ").slice(0, 16))}</td><td class="num">${fx(r.minutes, 0)}</td><td class="num">${r.epochs_run}${r.epochs_planned ? "/" + r.epochs_planned : ""}</td><td class="sub" style="font-size:11.5px">${esc((r.gpu || "").replace("NVIDIA ", "").replace("cuda (", "").replace(")", ""))}</td><td class="mono">${esc(r.commit)}</td><td title="${esc(r.curve_name || "")}">${spark(r.curve, 90, 20, FAM[/region/.test(r.path) ? "region" : /lejepa|LeJEPA/i.test(r.path) ? "lejepa" : /spark|SparK/i.test(r.path) ? "spark" : /cond|P4/i.test(r.path) ? "cond" : /dino/i.test(r.path) ? "dino" : "base"])}</td><td class="sub" style="font-size:12px">${esc(r.deviation || (r.kind === "ssl" && r.exported ? "exported " + r.exported : r.backbone ? "from " + r.backbone : ""))}</td></tr>`; });
+    $("tab").innerHTML = h + `</tbody>`;
+    $("tab").querySelectorAll("code.click").forEach(c => c.onclick = () => navigator.clipboard.writeText(c.dataset.p).then(() => { const t = c.textContent; c.textContent = "copied path"; setTimeout(() => c.textContent = t, 900); }));
+  }
+  ["kind", "group", "status"].forEach(id => $(id).onchange = draw); $("q").oninput = draw; draw();
+})();
+</script>
+</body>
+</html>
