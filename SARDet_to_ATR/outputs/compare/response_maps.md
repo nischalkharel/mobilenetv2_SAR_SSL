@@ -15,6 +15,11 @@
 | RegionDINO scene+object, random windows | 14.9 | 0.82 | 11.0 | -10.8, 2 % | -3.6, 8 % |
 | RegionDINO object-only | 28.0 | 1.83 | 62.1 | +2.3, 65 % | +9.5, 94 % |
 | RegionDINO object-only, random windows | 18.3 | 1.09 | 13.1 | -7.4, 7 % | -0.2, 49 % |
+| XI DINO (suite recipe) on ATRNet | 31.6 | 2.06 | 83.7 | +5.9, 92 % | +13.1, 99 % |
+| XI RegionDINO scene+object on ATRNet | 28.6 | 1.82 | 78.0 | +2.8, 77 % | +10.0, 99 % |
+| XI RegionDINO scene+object on ATRNet, random | 29.1 | 1.86 | 78.5 | +3.4, 80 % | +10.6, 99 % |
+| XI RegionDINO object-only on ATRNet | 22.2 | 1.39 | 42.9 | -3.5, 26 % | +3.7, 80 % |
+| XI RegionDINO object-only on ATRNet, random | 21.5 | 1.34 | 28.6 | -4.2, 25 % | +2.9, 74 % |
 
 ## Split 2
 
@@ -28,6 +33,11 @@
 | RegionDINO scene+object, random windows | 16.2 | 0.91 | 12.7 | -9.5, 2 % | -2.9, 8 % |
 | RegionDINO object-only | 25.9 | 1.68 | 56.2 | +0.2, 53 % | +6.8, 88 % |
 | RegionDINO object-only, random windows | 16.4 | 0.96 | 13.8 | -9.4, 6 % | -2.8, 30 % |
+| XI DINO (suite recipe) on ATRNet | 31.8 | 2.07 | 83.2 | +6.0, 93 % | +12.6, 99 % |
+| XI RegionDINO scene+object on ATRNet | 28.9 | 1.84 | 74.3 | +3.1, 78 % | +9.7, 98 % |
+| XI RegionDINO scene+object on ATRNet, random | 29.5 | 1.89 | 78.1 | +3.7, 82 % | +10.3, 98 % |
+| XI RegionDINO object-only on ATRNet | 23.8 | 1.51 | 42.6 | -1.9, 36 % | +4.7, 82 % |
+| XI RegionDINO object-only on ATRNet, random | 20.8 | 1.28 | 27.4 | -5.0, 20 % | +1.7, 64 % |
 
 ## Split 3
 
@@ -41,5 +51,10 @@
 | RegionDINO scene+object, random windows | 16.3 | 0.91 | 10.2 | -9.5, 4 % | -3.5, 7 % |
 | RegionDINO object-only | 26.3 | 1.71 | 59.2 | +0.6, 55 % | +6.5, 86 % |
 | RegionDINO object-only, random windows | 19.4 | 1.17 | 19.1 | -6.3, 9 % | -0.4, 49 % |
+| XI DINO (suite recipe) on ATRNet | 31.8 | 2.07 | 81.0 | +6.0, 94 % | +11.9, 99 % |
+| XI RegionDINO scene+object on ATRNet | 29.2 | 1.86 | 77.5 | +3.5, 82 % | +9.4, 98 % |
+| XI RegionDINO scene+object on ATRNet, random | 29.6 | 1.91 | 79.1 | +3.8, 83 % | +9.8, 98 % |
+| XI RegionDINO object-only on ATRNet | 24.4 | 1.54 | 54.5 | -1.4, 41 % | +4.5, 85 % |
+| XI RegionDINO object-only on ATRNet, random | 20.5 | 1.26 | 26.5 | -5.2, 18 % | +0.7, 58 % |
 
-Written 2026-11-18T13:46:25.
+Written 2026-11-19T11:27:19.

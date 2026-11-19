@@ -1,0 +1,1459 @@
+host gpu-n53.crc.pitt.edu  job 4755084  start Wed Nov 18 08:45:26 PM EST 2026
+repo /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet  commit 7fa726f  branch SmokeTest_Mobilenet_with_DINO  split 3
+NVIDIA A100-PCIE-40GB, 40960 MiB, 595.91.07
+python /ix/ageorge/nik96/envs/sarssl/bin/python 3.13.16 | torch 2.10.0+cu128 | torchvision 0.25.0+cu128 | cuda True
+split 3; output root (inside each experiment folder)
+  ok       SARDET100K_ROOT                /ix/ageorge/nik96/data/SARDet_100K
+  ok       IMAGES_DIR                     /ix/ageorge/nik96/data/SARDet_100K/JPEGImages
+  ok       train.json                     /ix/ageorge/nik96/data/SARDet_100K/Annotations/train.json
+  ok       val.json                       /ix/ageorge/nik96/data/SARDet_100K/Annotations/val.json
+  ok       test.json                      /ix/ageorge/nik96/data/SARDet_100K/test.json
+  ok       mapping.json                   /ix/ageorge/nik96/data/SARDet_100K/mapping.json
+  ok       MOBILENETV2_IMAGENET_WEIGHTS   /ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth
+  ok       METADATA_CSV                   /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/data/image_metadata.csv
+  ok       SPLIT_DIR                      /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/data/split3
+  ok       VAL_SELECT_CSV                 /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/data/val_select.csv
+host gpu-n53.crc.pitt.edu  job 4755084  start Wed Nov 18 08:45:59 PM EST 2026
+repo /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet  commit 7fa726f  branch SmokeTest_Mobilenet_with_DINO
+NVIDIA A100-PCIE-40GB, 40960 MiB, 595.91.07
+python /ix/ageorge/nik96/envs/sarssl/bin/python 3.13.16 | torch 2.10.0+cu128 | torchvision 0.25.0+cu128 | cuda available True
+Submitted batch job 4755774 on cluster gpu
+staging ATRNet SOC-40 from /ix/ageorge/nik96/data/ATRNet-STAR/Ground_Range/../Ground_Range_SOC40.tar -> /scratch/slurm-4755084/ATRNet-STAR/Ground_Range ...
+staged in 5 s: 97375 chips
+ATRNET_GROUND_RANGE=/scratch/slurm-4755084/ATRNet-STAR/Ground_Range
+../RegionSSL/DINO_reference/outputs/ssl/20261118-151517_dino_suite_atr_ssl_mobilenetv2_split3_seed2 has no checkpoint (killed before its first epoch ended); setting it aside and starting fresh
+
+REGIONDINO_SCENE SSL run: dino_suite_atr_ssl_mobilenetv2
+  output folder : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/RegionSSL/DINO_reference/outputs/ssl/20261118-204726_dino_suite_atr_ssl_mobilenetv2_split3_seed2
+  device        : cuda
+  SSL images    : 65400 (no labels)
+  batch         : 64 images x 10 views ({'pool': 'atrnet', 'input_size': 224, 'scene': [('global', 1, 1.0), ('global', 1, 0.1), ('local', 8, 0.5)], 'object': [], 'objects_per_image': 0, 'obj_global_size': None, 'obj_local_size': None})
+  steps         : 1021 per epoch, 100 epochs
+  seed          : 2 (split 3)
+  RegionDINO    : mode scene (plain DINO of this engine, no object views); pool atrnet
+  DINO          : out_dim 4096, teacher momentum 0.9995 -> 1, teacher temp 0.04, student temp 0.1, center momentum 0.9
+  optimizer     : AdamW peak lr 0.000125 (= 0.0005 x 64/256), warm-up 10 epochs, cosine to 1e-06, wd 0.04, clip 3.0, fp16 on
+
+SSL epoch 1/100
+  measured speed: 0.175 s/step -> 3.0 min per epoch, about 4.97 h until epoch 100
+    step   100/1021  loss 8.4349 (scene 8.4349, object 0.0000)  lr 1.21e-06  teacher entropy 7.559  52s
+    step   200/1021  loss 8.4422 (scene 8.4422, object 0.0000)  lr 2.44e-06  teacher entropy 7.571  70s
+    step   300/1021  loss 8.4373 (scene 8.4373, object 0.0000)  lr 3.66e-06  teacher entropy 7.573  87s
+    step   400/1021  loss 8.4286 (scene 8.4286, object 0.0000)  lr 4.89e-06  teacher entropy 7.572  104s
+    step   500/1021  loss 8.4183 (scene 8.4183, object 0.0000)  lr 6.11e-06  teacher entropy 7.569  122s
+    step   600/1021  loss 8.4070 (scene 8.4070, object 0.0000)  lr 7.33e-06  teacher entropy 7.565  139s
+    step   700/1021  loss 8.3944 (scene 8.3944, object 0.0000)  lr 8.56e-06  teacher entropy 7.560  156s
+    step   800/1021  loss 8.3804 (scene 8.3804, object 0.0000)  lr 9.78e-06  teacher entropy 7.553  174s
+    step   900/1021  loss 8.3657 (scene 8.3657, object 0.0000)  lr 1.10e-05  teacher entropy 7.545  191s
+    step  1000/1021  loss 8.3499 (scene 8.3499, object 0.0000)  lr 1.22e-05  teacher entropy 7.536  208s
+    step  1021/1021  loss 8.3467 (scene 8.3467, object 0.0000)  lr 1.25e-05  teacher entropy 7.534  212s
+  epoch   1/100  loss 8.347  scene_loss 8.347  object_loss 0  teacher_entropy 7.534  3.5 min, checkpoint saved
+
+SSL epoch 2/100
+    step   100/1021  loss 8.1608 (scene 8.1608, object 0.0000)  lr 1.37e-05  teacher entropy 7.416  18s
+    step   200/1021  loss 8.1401 (scene 8.1401, object 0.0000)  lr 1.49e-05  teacher entropy 7.402  35s
+    step   300/1021  loss 8.1166 (scene 8.1166, object 0.0000)  lr 1.62e-05  teacher entropy 7.387  53s
+    step   400/1021  loss 8.0913 (scene 8.0913, object 0.0000)  lr 1.74e-05  teacher entropy 7.371  70s
+    step   500/1021  loss 8.0628 (scene 8.0628, object 0.0000)  lr 1.86e-05  teacher entropy 7.353  87s
+    step   600/1021  loss 8.0303 (scene 8.0303, object 0.0000)  lr 1.98e-05  teacher entropy 7.332  105s
+    step   700/1021  loss 7.9961 (scene 7.9961, object 0.0000)  lr 2.11e-05  teacher entropy 7.309  122s
+    step   800/1021  loss 7.9591 (scene 7.9591, object 0.0000)  lr 2.23e-05  teacher entropy 7.283  140s
+    step   900/1021  loss 7.9192 (scene 7.9192, object 0.0000)  lr 2.35e-05  teacher entropy 7.254  157s
+    step  1000/1021  loss 7.8770 (scene 7.8770, object 0.0000)  lr 2.47e-05  teacher entropy 7.220  175s
+    step  1021/1021  loss 7.8675 (scene 7.8675, object 0.0000)  lr 2.50e-05  teacher entropy 7.212  178s
+  epoch   2/100  loss 7.868  scene_loss 7.868  object_loss 0  teacher_entropy 7.212  3.0 min, checkpoint saved
+
+SSL epoch 3/100
+    step   100/1021  loss 7.3436 (scene 7.3436, object 0.0000)  lr 2.62e-05  teacher entropy 6.779  18s
+    step   200/1021  loss 7.2783 (scene 7.2783, object 0.0000)  lr 2.74e-05  teacher entropy 6.714  35s
+    step   300/1021  loss 7.2097 (scene 7.2097, object 0.0000)  lr 2.87e-05  teacher entropy 6.646  53s
+    step   400/1021  loss 7.1469 (scene 7.1469, object 0.0000)  lr 2.99e-05  teacher entropy 6.581  70s
+    step   500/1021  loss 7.0780 (scene 7.0780, object 0.0000)  lr 3.11e-05  teacher entropy 6.511  88s
+    step   600/1021  loss 7.0129 (scene 7.0129, object 0.0000)  lr 3.23e-05  teacher entropy 6.443  105s
+    step   700/1021  loss 6.9463 (scene 6.9463, object 0.0000)  lr 3.36e-05  teacher entropy 6.374  123s
+    step   800/1021  loss 6.8771 (scene 6.8771, object 0.0000)  lr 3.48e-05  teacher entropy 6.300  140s
+    step   900/1021  loss 6.8086 (scene 6.8086, object 0.0000)  lr 3.60e-05  teacher entropy 6.228  157s
+    step  1000/1021  loss 6.7424 (scene 6.7424, object 0.0000)  lr 3.72e-05  teacher entropy 6.157  175s
+    step  1021/1021  loss 6.7304 (scene 6.7304, object 0.0000)  lr 3.75e-05  teacher entropy 6.143  179s
+  epoch   3/100  loss 6.73  scene_loss 6.73  object_loss 0  teacher_entropy 6.143  3.0 min, checkpoint saved
+
+SSL epoch 4/100
+    step   100/1021  loss 6.0220 (scene 6.0220, object 0.0000)  lr 3.87e-05  teacher entropy 5.368  18s
+    step   200/1021  loss 5.9680 (scene 5.9680, object 0.0000)  lr 3.99e-05  teacher entropy 5.308  35s
+    step   300/1021  loss 5.9135 (scene 5.9135, object 0.0000)  lr 4.12e-05  teacher entropy 5.247  53s
+    step   400/1021  loss 5.8598 (scene 5.8598, object 0.0000)  lr 4.24e-05  teacher entropy 5.187  70s
+    step   500/1021  loss 5.8090 (scene 5.8090, object 0.0000)  lr 4.36e-05  teacher entropy 5.128  88s
+    step   600/1021  loss 5.7522 (scene 5.7522, object 0.0000)  lr 4.48e-05  teacher entropy 5.065  105s
+    step   700/1021  loss 5.7004 (scene 5.7004, object 0.0000)  lr 4.61e-05  teacher entropy 5.005  123s
+    step   800/1021  loss 5.6513 (scene 5.6513, object 0.0000)  lr 4.73e-05  teacher entropy 4.948  140s
+    step   900/1021  loss 5.6017 (scene 5.6017, object 0.0000)  lr 4.85e-05  teacher entropy 4.891  157s
+    step  1000/1021  loss 5.5553 (scene 5.5553, object 0.0000)  lr 4.97e-05  teacher entropy 4.837  175s
+    step  1021/1021  loss 5.5470 (scene 5.5470, object 0.0000)  lr 5.00e-05  teacher entropy 4.827  179s
+  epoch   4/100  loss 5.547  scene_loss 5.547  object_loss 0  teacher_entropy 4.827  3.0 min, checkpoint saved
+
+SSL epoch 5/100
+    step   100/1021  loss 5.0371 (scene 5.0371, object 0.0000)  lr 5.12e-05  teacher entropy 4.238  18s
+    step   200/1021  loss 4.9902 (scene 4.9902, object 0.0000)  lr 5.24e-05  teacher entropy 4.182  35s
+    step   300/1021  loss 4.9699 (scene 4.9699, object 0.0000)  lr 5.37e-05  teacher entropy 4.152  53s
+    step   400/1021  loss 4.9464 (scene 4.9464, object 0.0000)  lr 5.49e-05  teacher entropy 4.117  70s
+    step   500/1021  loss 4.9133 (scene 4.9133, object 0.0000)  lr 5.61e-05  teacher entropy 4.076  88s
+    step   600/1021  loss 4.8791 (scene 4.8791, object 0.0000)  lr 5.73e-05  teacher entropy 4.034  105s
+    step   700/1021  loss 4.8417 (scene 4.8417, object 0.0000)  lr 5.86e-05  teacher entropy 3.990  123s
+    step   800/1021  loss 4.8118 (scene 4.8118, object 0.0000)  lr 5.98e-05  teacher entropy 3.952  140s
+    step   900/1021  loss 4.7865 (scene 4.7865, object 0.0000)  lr 6.10e-05  teacher entropy 3.918  158s
+    step  1000/1021  loss 4.7551 (scene 4.7551, object 0.0000)  lr 6.22e-05  teacher entropy 3.880  175s
+    step  1021/1021  loss 4.7478 (scene 4.7478, object 0.0000)  lr 6.25e-05  teacher entropy 3.871  179s
+  epoch   5/100  loss 4.748  scene_loss 4.748  object_loss 0  teacher_entropy 3.871  3.0 min, checkpoint saved
+
+SSL epoch 6/100
+    step   100/1021  loss 4.4259 (scene 4.4259, object 0.0000)  lr 6.37e-05  teacher entropy 3.472  18s
+    step   200/1021  loss 4.4069 (scene 4.4069, object 0.0000)  lr 6.49e-05  teacher entropy 3.445  35s
+    step   300/1021  loss 4.3805 (scene 4.3805, object 0.0000)  lr 6.62e-05  teacher entropy 3.413  53s
+    step   400/1021  loss 4.3607 (scene 4.3607, object 0.0000)  lr 6.74e-05  teacher entropy 3.384  70s
+    step   500/1021  loss 4.3330 (scene 4.3330, object 0.0000)  lr 6.86e-05  teacher entropy 3.352  88s
+    step   600/1021  loss 4.3133 (scene 4.3133, object 0.0000)  lr 6.98e-05  teacher entropy 3.326  105s
+    step   700/1021  loss 4.2907 (scene 4.2907, object 0.0000)  lr 7.11e-05  teacher entropy 3.298  123s
+    step   800/1021  loss 4.2697 (scene 4.2697, object 0.0000)  lr 7.23e-05  teacher entropy 3.271  140s
+    step   900/1021  loss 4.2484 (scene 4.2484, object 0.0000)  lr 7.35e-05  teacher entropy 3.243  158s
+    step  1000/1021  loss 4.2308 (scene 4.2308, object 0.0000)  lr 7.47e-05  teacher entropy 3.219  175s
+    step  1021/1021  loss 4.2275 (scene 4.2275, object 0.0000)  lr 7.50e-05  teacher entropy 3.214  179s
+  epoch   6/100  loss 4.227  scene_loss 4.227  object_loss 0  teacher_entropy 3.214  3.0 min, checkpoint saved
+
+SSL epoch 7/100
+    step   100/1021  loss 4.0082 (scene 4.0082, object 0.0000)  lr 7.62e-05  teacher entropy 2.938  18s
+    step   200/1021  loss 3.9978 (scene 3.9978, object 0.0000)  lr 7.74e-05  teacher entropy 2.920  35s
+    step   300/1021  loss 3.9884 (scene 3.9884, object 0.0000)  lr 7.87e-05  teacher entropy 2.901  53s
+    step   400/1021  loss 3.9754 (scene 3.9754, object 0.0000)  lr 7.99e-05  teacher entropy 2.882  70s
+    step   500/1021  loss 3.9546 (scene 3.9546, object 0.0000)  lr 8.11e-05  teacher entropy 2.857  88s
+    step   600/1021  loss 3.9391 (scene 3.9391, object 0.0000)  lr 8.23e-05  teacher entropy 2.836  105s
+    step   700/1021  loss 3.9268 (scene 3.9268, object 0.0000)  lr 8.36e-05  teacher entropy 2.819  122s
+    step   800/1021  loss 3.9136 (scene 3.9136, object 0.0000)  lr 8.48e-05  teacher entropy 2.800  140s
+    step   900/1021  loss 3.8969 (scene 3.8969, object 0.0000)  lr 8.60e-05  teacher entropy 2.780  157s
+    step  1000/1021  loss 3.8842 (scene 3.8842, object 0.0000)  lr 8.72e-05  teacher entropy 2.762  175s
+    step  1021/1021  loss 3.8820 (scene 3.8820, object 0.0000)  lr 8.75e-05  teacher entropy 2.759  178s
+  epoch   7/100  loss 3.882  scene_loss 3.882  object_loss 0  teacher_entropy 2.759  3.0 min, checkpoint saved
+
+SSL epoch 8/100
+    step   100/1021  loss 3.7467 (scene 3.7467, object 0.0000)  lr 8.87e-05  teacher entropy 2.573  18s
+    step   200/1021  loss 3.7286 (scene 3.7286, object 0.0000)  lr 8.99e-05  teacher entropy 2.546  35s
+    step   300/1021  loss 3.7056 (scene 3.7056, object 0.0000)  lr 9.12e-05  teacher entropy 2.522  53s
+    step   400/1021  loss 3.6943 (scene 3.6943, object 0.0000)  lr 9.24e-05  teacher entropy 2.507  70s
+    step   500/1021  loss 3.6820 (scene 3.6820, object 0.0000)  lr 9.36e-05  teacher entropy 2.492  88s
+    step   600/1021  loss 3.6701 (scene 3.6701, object 0.0000)  lr 9.48e-05  teacher entropy 2.476  105s
+    step   700/1021  loss 3.6562 (scene 3.6562, object 0.0000)  lr 9.61e-05  teacher entropy 2.459  123s
+    step   800/1021  loss 3.6452 (scene 3.6452, object 0.0000)  lr 9.73e-05  teacher entropy 2.444  140s
+    step   900/1021  loss 3.6328 (scene 3.6328, object 0.0000)  lr 9.85e-05  teacher entropy 2.428  157s
+    step  1000/1021  loss 3.6224 (scene 3.6224, object 0.0000)  lr 9.97e-05  teacher entropy 2.414  175s
+    step  1021/1021  loss 3.6205 (scene 3.6205, object 0.0000)  lr 1.00e-04  teacher entropy 2.411  179s
+  epoch   8/100  loss 3.62  scene_loss 3.62  object_loss 0  teacher_entropy 2.411  3.0 min, checkpoint saved
+
+SSL epoch 9/100
+    step   100/1021  loss 3.4893 (scene 3.4893, object 0.0000)  lr 1.01e-04  teacher entropy 2.237  18s
+    step   200/1021  loss 3.4809 (scene 3.4809, object 0.0000)  lr 1.02e-04  teacher entropy 2.228  35s
+    step   300/1021  loss 3.4790 (scene 3.4790, object 0.0000)  lr 1.04e-04  teacher entropy 2.220  53s
+    step   400/1021  loss 3.4603 (scene 3.4603, object 0.0000)  lr 1.05e-04  teacher entropy 2.201  70s
+    step   500/1021  loss 3.4563 (scene 3.4563, object 0.0000)  lr 1.06e-04  teacher entropy 2.189  88s
+    step   600/1021  loss 3.4448 (scene 3.4448, object 0.0000)  lr 1.07e-04  teacher entropy 2.175  105s
+    step   700/1021  loss 3.4357 (scene 3.4357, object 0.0000)  lr 1.09e-04  teacher entropy 2.163  122s
+    step   800/1021  loss 3.4246 (scene 3.4246, object 0.0000)  lr 1.10e-04  teacher entropy 2.149  140s
+    step   900/1021  loss 3.4149 (scene 3.4149, object 0.0000)  lr 1.11e-04  teacher entropy 2.137  157s
+    step  1000/1021  loss 3.4038 (scene 3.4038, object 0.0000)  lr 1.12e-04  teacher entropy 2.123  175s
+    step  1021/1021  loss 3.4020 (scene 3.4020, object 0.0000)  lr 1.12e-04  teacher entropy 2.121  179s
+  epoch   9/100  loss 3.402  scene_loss 3.402  object_loss 0  teacher_entropy 2.121  3.0 min, checkpoint saved
+
+SSL epoch 10/100
+    step   100/1021  loss 3.2680 (scene 3.2680, object 0.0000)  lr 1.14e-04  teacher entropy 1.973  18s
+    step   200/1021  loss 3.2679 (scene 3.2679, object 0.0000)  lr 1.15e-04  teacher entropy 1.967  35s
+    step   300/1021  loss 3.2607 (scene 3.2607, object 0.0000)  lr 1.16e-04  teacher entropy 1.953  53s
+    step   400/1021  loss 3.2516 (scene 3.2516, object 0.0000)  lr 1.17e-04  teacher entropy 1.939  70s
+    step   500/1021  loss 3.2397 (scene 3.2397, object 0.0000)  lr 1.19e-04  teacher entropy 1.924  88s
+    step   600/1021  loss 3.2360 (scene 3.2360, object 0.0000)  lr 1.20e-04  teacher entropy 1.915  105s
+    step   700/1021  loss 3.2309 (scene 3.2309, object 0.0000)  lr 1.21e-04  teacher entropy 1.904  123s
+    step   800/1021  loss 3.2236 (scene 3.2236, object 0.0000)  lr 1.22e-04  teacher entropy 1.894  140s
+    step   900/1021  loss 3.2191 (scene 3.2191, object 0.0000)  lr 1.24e-04  teacher entropy 1.883  158s
+    step  1000/1021  loss 3.2129 (scene 3.2129, object 0.0000)  lr 1.25e-04  teacher entropy 1.874  175s
+    step  1021/1021  loss 3.2115 (scene 3.2115, object 0.0000)  lr 1.25e-04  teacher entropy 1.872  179s
+  epoch  10/100  loss 3.211  scene_loss 3.211  object_loss 0  teacher_entropy 1.872  3.0 min, checkpoint saved
+
+SSL epoch 11/100
+    step   100/1021  loss 3.1148 (scene 3.1148, object 0.0000)  lr 1.25e-04  teacher entropy 1.752  18s
+    step   200/1021  loss 3.1166 (scene 3.1166, object 0.0000)  lr 1.25e-04  teacher entropy 1.745  35s
+    step   300/1021  loss 3.0979 (scene 3.0979, object 0.0000)  lr 1.25e-04  teacher entropy 1.731  53s
+    step   400/1021  loss 3.0874 (scene 3.0874, object 0.0000)  lr 1.25e-04  teacher entropy 1.718  70s
+    step   500/1021  loss 3.0831 (scene 3.0831, object 0.0000)  lr 1.25e-04  teacher entropy 1.709  88s
+    step   600/1021  loss 3.0777 (scene 3.0777, object 0.0000)  lr 1.25e-04  teacher entropy 1.700  105s
+    step   700/1021  loss 3.0698 (scene 3.0698, object 0.0000)  lr 1.25e-04  teacher entropy 1.690  123s
+    step   800/1021  loss 3.0606 (scene 3.0606, object 0.0000)  lr 1.25e-04  teacher entropy 1.679  140s
+    step   900/1021  loss 3.0521 (scene 3.0521, object 0.0000)  lr 1.25e-04  teacher entropy 1.668  158s
+    step  1000/1021  loss 3.0429 (scene 3.0429, object 0.0000)  lr 1.25e-04  teacher entropy 1.657  175s
+    step  1021/1021  loss 3.0417 (scene 3.0417, object 0.0000)  lr 1.25e-04  teacher entropy 1.655  179s
+  epoch  11/100  loss 3.042  scene_loss 3.042  object_loss 0  teacher_entropy 1.655  3.0 min, checkpoint saved
+
+SSL epoch 12/100
+    step   100/1021  loss 2.9474 (scene 2.9474, object 0.0000)  lr 1.25e-04  teacher entropy 1.553  28s
+    step   200/1021  loss 2.9367 (scene 2.9367, object 0.0000)  lr 1.25e-04  teacher entropy 1.543  45s
+    step   300/1021  loss 2.9259 (scene 2.9259, object 0.0000)  lr 1.25e-04  teacher entropy 1.530  62s
+    step   400/1021  loss 2.9263 (scene 2.9263, object 0.0000)  lr 1.25e-04  teacher entropy 1.525  80s
+    step   500/1021  loss 2.9246 (scene 2.9246, object 0.0000)  lr 1.25e-04  teacher entropy 1.519  97s
+    step   600/1021  loss 2.9187 (scene 2.9187, object 0.0000)  lr 1.25e-04  teacher entropy 1.511  114s
+    step   700/1021  loss 2.9132 (scene 2.9132, object 0.0000)  lr 1.25e-04  teacher entropy 1.502  132s
+    step   800/1021  loss 2.9106 (scene 2.9106, object 0.0000)  lr 1.25e-04  teacher entropy 1.495  149s
+    step   900/1021  loss 2.9040 (scene 2.9040, object 0.0000)  lr 1.25e-04  teacher entropy 1.486  166s
+    step  1000/1021  loss 2.8964 (scene 2.8964, object 0.0000)  lr 1.25e-04  teacher entropy 1.478  184s
+    step  1021/1021  loss 2.8967 (scene 2.8967, object 0.0000)  lr 1.25e-04  teacher entropy 1.477  187s
+  epoch  12/100  loss 2.897  scene_loss 2.897  object_loss 0  teacher_entropy 1.477  3.1 min, checkpoint saved
+
+SSL epoch 13/100
+    step   100/1021  loss 2.8259 (scene 2.8259, object 0.0000)  lr 1.25e-04  teacher entropy 1.384  18s
+    step   200/1021  loss 2.8168 (scene 2.8168, object 0.0000)  lr 1.25e-04  teacher entropy 1.383  35s
+    step   300/1021  loss 2.8159 (scene 2.8159, object 0.0000)  lr 1.25e-04  teacher entropy 1.377  53s
+    step   400/1021  loss 2.8103 (scene 2.8103, object 0.0000)  lr 1.25e-04  teacher entropy 1.371  70s
+    step   500/1021  loss 2.8015 (scene 2.8015, object 0.0000)  lr 1.25e-04  teacher entropy 1.362  87s
+    step   600/1021  loss 2.7984 (scene 2.7984, object 0.0000)  lr 1.25e-04  teacher entropy 1.358  105s
+    step   700/1021  loss 2.7903 (scene 2.7903, object 0.0000)  lr 1.25e-04  teacher entropy 1.349  122s
+    step   800/1021  loss 2.7848 (scene 2.7848, object 0.0000)  lr 1.25e-04  teacher entropy 1.341  140s
+    step   900/1021  loss 2.7818 (scene 2.7818, object 0.0000)  lr 1.25e-04  teacher entropy 1.336  157s
+    step  1000/1021  loss 2.7753 (scene 2.7753, object 0.0000)  lr 1.25e-04  teacher entropy 1.330  175s
+    step  1021/1021  loss 2.7744 (scene 2.7744, object 0.0000)  lr 1.25e-04  teacher entropy 1.328  178s
+  epoch  13/100  loss 2.774  scene_loss 2.774  object_loss 0  teacher_entropy 1.328  3.0 min, checkpoint saved
+
+SSL epoch 14/100
+    step   100/1021  loss 2.7278 (scene 2.7278, object 0.0000)  lr 1.25e-04  teacher entropy 1.263  19s
+    step   200/1021  loss 2.7288 (scene 2.7288, object 0.0000)  lr 1.25e-04  teacher entropy 1.263  37s
+    step   300/1021  loss 2.7171 (scene 2.7171, object 0.0000)  lr 1.25e-04  teacher entropy 1.252  54s
+    step   400/1021  loss 2.7096 (scene 2.7096, object 0.0000)  lr 1.25e-04  teacher entropy 1.244  72s
+    step   500/1021  loss 2.7063 (scene 2.7063, object 0.0000)  lr 1.25e-04  teacher entropy 1.239  89s
+    step   600/1021  loss 2.7023 (scene 2.7023, object 0.0000)  lr 1.25e-04  teacher entropy 1.233  107s
+    step   700/1021  loss 2.6927 (scene 2.6927, object 0.0000)  lr 1.24e-04  teacher entropy 1.226  124s
+    step   800/1021  loss 2.6865 (scene 2.6865, object 0.0000)  lr 1.24e-04  teacher entropy 1.219  142s
+    step   900/1021  loss 2.6812 (scene 2.6812, object 0.0000)  lr 1.24e-04  teacher entropy 1.213  159s
+    step  1000/1021  loss 2.6781 (scene 2.6781, object 0.0000)  lr 1.24e-04  teacher entropy 1.208  177s
+    step  1021/1021  loss 2.6759 (scene 2.6759, object 0.0000)  lr 1.24e-04  teacher entropy 1.207  180s
+  epoch  14/100  loss 2.676  scene_loss 2.676  object_loss 0  teacher_entropy 1.207  3.0 min, checkpoint saved
+
+SSL epoch 15/100
+    step   100/1021  loss 2.6148 (scene 2.6148, object 0.0000)  lr 1.24e-04  teacher entropy 1.147  18s
+    step   200/1021  loss 2.6142 (scene 2.6142, object 0.0000)  lr 1.24e-04  teacher entropy 1.146  35s
+    step   300/1021  loss 2.6081 (scene 2.6081, object 0.0000)  lr 1.24e-04  teacher entropy 1.140  53s
+    step   400/1021  loss 2.6031 (scene 2.6031, object 0.0000)  lr 1.24e-04  teacher entropy 1.134  70s
+    step   500/1021  loss 2.6008 (scene 2.6008, object 0.0000)  lr 1.24e-04  teacher entropy 1.131  88s
+    step   600/1021  loss 2.6011 (scene 2.6011, object 0.0000)  lr 1.24e-04  teacher entropy 1.126  105s
+    step   700/1021  loss 2.5970 (scene 2.5970, object 0.0000)  lr 1.24e-04  teacher entropy 1.122  123s
+    step   800/1021  loss 2.5932 (scene 2.5932, object 0.0000)  lr 1.24e-04  teacher entropy 1.116  140s
+    step   900/1021  loss 2.5920 (scene 2.5920, object 0.0000)  lr 1.24e-04  teacher entropy 1.113  158s
+    step  1000/1021  loss 2.5906 (scene 2.5906, object 0.0000)  lr 1.24e-04  teacher entropy 1.109  175s
+    step  1021/1021  loss 2.5898 (scene 2.5898, object 0.0000)  lr 1.24e-04  teacher entropy 1.108  179s
+  epoch  15/100  loss 2.59  scene_loss 2.59  object_loss 0  teacher_entropy 1.108  3.0 min, checkpoint saved
+
+SSL epoch 16/100
+    step   100/1021  loss 2.5269 (scene 2.5269, object 0.0000)  lr 1.24e-04  teacher entropy 1.054  18s
+    step   200/1021  loss 2.5526 (scene 2.5526, object 0.0000)  lr 1.24e-04  teacher entropy 1.061  35s
+    step   300/1021  loss 2.5383 (scene 2.5383, object 0.0000)  lr 1.24e-04  teacher entropy 1.052  53s
+    step   400/1021  loss 2.5325 (scene 2.5325, object 0.0000)  lr 1.24e-04  teacher entropy 1.047  70s
+    step   500/1021  loss 2.5292 (scene 2.5292, object 0.0000)  lr 1.24e-04  teacher entropy 1.042  88s
+    step   600/1021  loss 2.5248 (scene 2.5248, object 0.0000)  lr 1.24e-04  teacher entropy 1.038  105s
+    step   700/1021  loss 2.5259 (scene 2.5259, object 0.0000)  lr 1.24e-04  teacher entropy 1.035  122s
+    step   800/1021  loss 2.5257 (scene 2.5257, object 0.0000)  lr 1.24e-04  teacher entropy 1.032  140s
+    step   900/1021  loss 2.5233 (scene 2.5233, object 0.0000)  lr 1.24e-04  teacher entropy 1.029  157s
+    step  1000/1021  loss 2.5217 (scene 2.5217, object 0.0000)  lr 1.24e-04  teacher entropy 1.026  174s
+    step  1021/1021  loss 2.5205 (scene 2.5205, object 0.0000)  lr 1.24e-04  teacher entropy 1.025  178s
+  epoch  16/100  loss 2.52  scene_loss 2.52  object_loss 0  teacher_entropy 1.025  3.0 min, checkpoint saved
+
+SSL epoch 17/100
+    step   100/1021  loss 2.4915 (scene 2.4915, object 0.0000)  lr 1.24e-04  teacher entropy 0.986  18s
+    step   200/1021  loss 2.4908 (scene 2.4908, object 0.0000)  lr 1.24e-04  teacher entropy 0.984  35s
+    step   300/1021  loss 2.4782 (scene 2.4782, object 0.0000)  lr 1.24e-04  teacher entropy 0.976  53s
+    step   400/1021  loss 2.4718 (scene 2.4718, object 0.0000)  lr 1.23e-04  teacher entropy 0.971  70s
+    step   500/1021  loss 2.4686 (scene 2.4686, object 0.0000)  lr 1.23e-04  teacher entropy 0.968  88s
+    step   600/1021  loss 2.4662 (scene 2.4662, object 0.0000)  lr 1.23e-04  teacher entropy 0.965  105s
+    step   700/1021  loss 2.4629 (scene 2.4629, object 0.0000)  lr 1.23e-04  teacher entropy 0.961  122s
+    step   800/1021  loss 2.4618 (scene 2.4618, object 0.0000)  lr 1.23e-04  teacher entropy 0.959  140s
+    step   900/1021  loss 2.4609 (scene 2.4609, object 0.0000)  lr 1.23e-04  teacher entropy 0.956  157s
+    step  1000/1021  loss 2.4590 (scene 2.4590, object 0.0000)  lr 1.23e-04  teacher entropy 0.953  175s
+    step  1021/1021  loss 2.4577 (scene 2.4577, object 0.0000)  lr 1.23e-04  teacher entropy 0.952  178s
+  epoch  17/100  loss 2.458  scene_loss 2.458  object_loss 0  teacher_entropy 0.9522  3.0 min, checkpoint saved
+
+SSL epoch 18/100
+    step   100/1021  loss 2.4204 (scene 2.4204, object 0.0000)  lr 1.23e-04  teacher entropy 0.923  18s
+    step   200/1021  loss 2.4189 (scene 2.4189, object 0.0000)  lr 1.23e-04  teacher entropy 0.919  35s
+    step   300/1021  loss 2.4083 (scene 2.4083, object 0.0000)  lr 1.23e-04  teacher entropy 0.911  52s
+    step   400/1021  loss 2.4083 (scene 2.4083, object 0.0000)  lr 1.23e-04  teacher entropy 0.909  70s
+    step   500/1021  loss 2.4067 (scene 2.4067, object 0.0000)  lr 1.23e-04  teacher entropy 0.905  87s
+    step   600/1021  loss 2.4070 (scene 2.4070, object 0.0000)  lr 1.23e-04  teacher entropy 0.904  104s
+    step   700/1021  loss 2.4065 (scene 2.4065, object 0.0000)  lr 1.23e-04  teacher entropy 0.900  122s
+    step   800/1021  loss 2.4049 (scene 2.4049, object 0.0000)  lr 1.23e-04  teacher entropy 0.897  139s
+    step   900/1021  loss 2.4018 (scene 2.4018, object 0.0000)  lr 1.23e-04  teacher entropy 0.894  156s
+    step  1000/1021  loss 2.4000 (scene 2.4000, object 0.0000)  lr 1.23e-04  teacher entropy 0.892  174s
+    step  1021/1021  loss 2.4003 (scene 2.4003, object 0.0000)  lr 1.23e-04  teacher entropy 0.892  177s
+  epoch  18/100  loss 2.4  scene_loss 2.4  object_loss 0  teacher_entropy 0.8918  3.0 min, checkpoint saved
+
+SSL epoch 19/100
+    step   100/1021  loss 2.3579 (scene 2.3579, object 0.0000)  lr 1.23e-04  teacher entropy 0.854  18s
+    step   200/1021  loss 2.3576 (scene 2.3576, object 0.0000)  lr 1.22e-04  teacher entropy 0.856  35s
+    step   300/1021  loss 2.3681 (scene 2.3681, object 0.0000)  lr 1.22e-04  teacher entropy 0.855  53s
+    step   400/1021  loss 2.3629 (scene 2.3629, object 0.0000)  lr 1.22e-04  teacher entropy 0.853  70s
+    step   500/1021  loss 2.3622 (scene 2.3622, object 0.0000)  lr 1.22e-04  teacher entropy 0.849  88s
+    step   600/1021  loss 2.3579 (scene 2.3579, object 0.0000)  lr 1.22e-04  teacher entropy 0.847  105s
+    step   700/1021  loss 2.3569 (scene 2.3569, object 0.0000)  lr 1.22e-04  teacher entropy 0.844  123s
+    step   800/1021  loss 2.3562 (scene 2.3562, object 0.0000)  lr 1.22e-04  teacher entropy 0.843  140s
+    step   900/1021  loss 2.3539 (scene 2.3539, object 0.0000)  lr 1.22e-04  teacher entropy 0.841  158s
+    step  1000/1021  loss 2.3540 (scene 2.3540, object 0.0000)  lr 1.22e-04  teacher entropy 0.838  175s
+    step  1021/1021  loss 2.3531 (scene 2.3531, object 0.0000)  lr 1.22e-04  teacher entropy 0.838  179s
+  epoch  19/100  loss 2.353  scene_loss 2.353  object_loss 0  teacher_entropy 0.8377  3.0 min, checkpoint saved
+
+SSL epoch 20/100
+    step   100/1021  loss 2.3256 (scene 2.3256, object 0.0000)  lr 1.22e-04  teacher entropy 0.817  18s
+    step   200/1021  loss 2.3252 (scene 2.3252, object 0.0000)  lr 1.22e-04  teacher entropy 0.815  35s
+    step   300/1021  loss 2.3136 (scene 2.3136, object 0.0000)  lr 1.22e-04  teacher entropy 0.806  53s
+    step   400/1021  loss 2.3133 (scene 2.3133, object 0.0000)  lr 1.22e-04  teacher entropy 0.802  70s
+    step   500/1021  loss 2.3103 (scene 2.3103, object 0.0000)  lr 1.22e-04  teacher entropy 0.799  88s
+    step   600/1021  loss 2.3074 (scene 2.3074, object 0.0000)  lr 1.22e-04  teacher entropy 0.797  105s
+    step   700/1021  loss 2.3049 (scene 2.3049, object 0.0000)  lr 1.21e-04  teacher entropy 0.795  123s
+    step   800/1021  loss 2.3038 (scene 2.3038, object 0.0000)  lr 1.21e-04  teacher entropy 0.792  140s
+    step   900/1021  loss 2.3044 (scene 2.3044, object 0.0000)  lr 1.21e-04  teacher entropy 0.791  157s
+    step  1000/1021  loss 2.3025 (scene 2.3025, object 0.0000)  lr 1.21e-04  teacher entropy 0.789  175s
+    step  1021/1021  loss 2.3028 (scene 2.3028, object 0.0000)  lr 1.21e-04  teacher entropy 0.789  178s
+  epoch  20/100  loss 2.303  scene_loss 2.303  object_loss 0  teacher_entropy 0.7891  3.0 min, checkpoint saved
+
+SSL epoch 21/100
+    step   100/1021  loss 2.2654 (scene 2.2654, object 0.0000)  lr 1.21e-04  teacher entropy 0.766  18s
+    step   200/1021  loss 2.2710 (scene 2.2710, object 0.0000)  lr 1.21e-04  teacher entropy 0.764  35s
+    step   300/1021  loss 2.2760 (scene 2.2760, object 0.0000)  lr 1.21e-04  teacher entropy 0.765  53s
+    step   400/1021  loss 2.2684 (scene 2.2684, object 0.0000)  lr 1.21e-04  teacher entropy 0.760  70s
+    step   500/1021  loss 2.2705 (scene 2.2705, object 0.0000)  lr 1.21e-04  teacher entropy 0.760  88s
+    step   600/1021  loss 2.2704 (scene 2.2704, object 0.0000)  lr 1.21e-04  teacher entropy 0.758  105s
+    step   700/1021  loss 2.2688 (scene 2.2688, object 0.0000)  lr 1.21e-04  teacher entropy 0.756  123s
+    step   800/1021  loss 2.2668 (scene 2.2668, object 0.0000)  lr 1.21e-04  teacher entropy 0.754  140s
+    step   900/1021  loss 2.2679 (scene 2.2679, object 0.0000)  lr 1.21e-04  teacher entropy 0.752  157s
+    step  1000/1021  loss 2.2667 (scene 2.2667, object 0.0000)  lr 1.21e-04  teacher entropy 0.750  175s
+    step  1021/1021  loss 2.2660 (scene 2.2660, object 0.0000)  lr 1.20e-04  teacher entropy 0.750  178s
+  epoch  21/100  loss 2.266  scene_loss 2.266  object_loss 0  teacher_entropy 0.7497  3.0 min, checkpoint saved
+
+SSL epoch 22/100
+    step   100/1021  loss 2.2328 (scene 2.2328, object 0.0000)  lr 1.20e-04  teacher entropy 0.729  18s
+    step   200/1021  loss 2.2197 (scene 2.2197, object 0.0000)  lr 1.20e-04  teacher entropy 0.720  35s
+    step   300/1021  loss 2.2219 (scene 2.2219, object 0.0000)  lr 1.20e-04  teacher entropy 0.720  53s
+    step   400/1021  loss 2.2285 (scene 2.2285, object 0.0000)  lr 1.20e-04  teacher entropy 0.719  70s
+    step   500/1021  loss 2.2224 (scene 2.2224, object 0.0000)  lr 1.20e-04  teacher entropy 0.718  88s
+    step   600/1021  loss 2.2226 (scene 2.2226, object 0.0000)  lr 1.20e-04  teacher entropy 0.716  105s
+    step   700/1021  loss 2.2241 (scene 2.2241, object 0.0000)  lr 1.20e-04  teacher entropy 0.716  123s
+    step   800/1021  loss 2.2223 (scene 2.2223, object 0.0000)  lr 1.20e-04  teacher entropy 0.714  140s
+    step   900/1021  loss 2.2241 (scene 2.2241, object 0.0000)  lr 1.20e-04  teacher entropy 0.714  158s
+    step  1000/1021  loss 2.2263 (scene 2.2263, object 0.0000)  lr 1.20e-04  teacher entropy 0.713  175s
+    step  1021/1021  loss 2.2262 (scene 2.2262, object 0.0000)  lr 1.20e-04  teacher entropy 0.713  179s
+  epoch  22/100  loss 2.226  scene_loss 2.226  object_loss 0  teacher_entropy 0.7127  3.0 min, checkpoint saved
+
+SSL epoch 23/100
+    step   100/1021  loss 2.1892 (scene 2.1892, object 0.0000)  lr 1.20e-04  teacher entropy 0.690  19s
+    step   200/1021  loss 2.1958 (scene 2.1958, object 0.0000)  lr 1.19e-04  teacher entropy 0.694  36s
+    step   300/1021  loss 2.1990 (scene 2.1990, object 0.0000)  lr 1.19e-04  teacher entropy 0.692  54s
+    step   400/1021  loss 2.1992 (scene 2.1992, object 0.0000)  lr 1.19e-04  teacher entropy 0.691  71s
+    step   500/1021  loss 2.1947 (scene 2.1947, object 0.0000)  lr 1.19e-04  teacher entropy 0.688  88s
+    step   600/1021  loss 2.1997 (scene 2.1997, object 0.0000)  lr 1.19e-04  teacher entropy 0.688  106s
+    step   700/1021  loss 2.1983 (scene 2.1983, object 0.0000)  lr 1.19e-04  teacher entropy 0.686  123s
+    step   800/1021  loss 2.1971 (scene 2.1971, object 0.0000)  lr 1.19e-04  teacher entropy 0.684  141s
+    step   900/1021  loss 2.1934 (scene 2.1934, object 0.0000)  lr 1.19e-04  teacher entropy 0.682  158s
+    step  1000/1021  loss 2.1923 (scene 2.1923, object 0.0000)  lr 1.19e-04  teacher entropy 0.681  176s
+    step  1021/1021  loss 2.1914 (scene 2.1914, object 0.0000)  lr 1.19e-04  teacher entropy 0.680  179s
+  epoch  23/100  loss 2.191  scene_loss 2.191  object_loss 0  teacher_entropy 0.6799  3.0 min, checkpoint saved
+
+SSL epoch 24/100
+    step   100/1021  loss 2.1640 (scene 2.1640, object 0.0000)  lr 1.19e-04  teacher entropy 0.668  20s
+    step   200/1021  loss 2.1564 (scene 2.1564, object 0.0000)  lr 1.19e-04  teacher entropy 0.660  37s
+    step   300/1021  loss 2.1567 (scene 2.1567, object 0.0000)  lr 1.18e-04  teacher entropy 0.659  55s
+    step   400/1021  loss 2.1569 (scene 2.1569, object 0.0000)  lr 1.18e-04  teacher entropy 0.656  72s
+    step   500/1021  loss 2.1571 (scene 2.1571, object 0.0000)  lr 1.18e-04  teacher entropy 0.655  90s
+    step   600/1021  loss 2.1575 (scene 2.1575, object 0.0000)  lr 1.18e-04  teacher entropy 0.656  107s
+    step   700/1021  loss 2.1565 (scene 2.1565, object 0.0000)  lr 1.18e-04  teacher entropy 0.654  124s
+    step   800/1021  loss 2.1569 (scene 2.1569, object 0.0000)  lr 1.18e-04  teacher entropy 0.653  142s
+    step   900/1021  loss 2.1579 (scene 2.1579, object 0.0000)  lr 1.18e-04  teacher entropy 0.652  159s
+    step  1000/1021  loss 2.1549 (scene 2.1549, object 0.0000)  lr 1.18e-04  teacher entropy 0.650  177s
+    step  1021/1021  loss 2.1540 (scene 2.1540, object 0.0000)  lr 1.18e-04  teacher entropy 0.650  180s
+  epoch  24/100  loss 2.154  scene_loss 2.154  object_loss 0  teacher_entropy 0.6499  3.0 min, checkpoint saved
+
+SSL epoch 25/100
+    step   100/1021  loss 2.0914 (scene 2.0914, object 0.0000)  lr 1.18e-04  teacher entropy 0.632  18s
+    step   200/1021  loss 2.1246 (scene 2.1246, object 0.0000)  lr 1.18e-04  teacher entropy 0.634  35s
+    step   300/1021  loss 2.1239 (scene 2.1239, object 0.0000)  lr 1.17e-04  teacher entropy 0.631  53s
+    step   400/1021  loss 2.1220 (scene 2.1220, object 0.0000)  lr 1.17e-04  teacher entropy 0.629  70s
+    step   500/1021  loss 2.1221 (scene 2.1221, object 0.0000)  lr 1.17e-04  teacher entropy 0.630  87s
+    step   600/1021  loss 2.1223 (scene 2.1223, object 0.0000)  lr 1.17e-04  teacher entropy 0.627  105s
+    step   700/1021  loss 2.1206 (scene 2.1206, object 0.0000)  lr 1.17e-04  teacher entropy 0.625  122s
+    step   800/1021  loss 2.1223 (scene 2.1223, object 0.0000)  lr 1.17e-04  teacher entropy 0.624  139s
+    step   900/1021  loss 2.1248 (scene 2.1248, object 0.0000)  lr 1.17e-04  teacher entropy 0.624  157s
+    step  1000/1021  loss 2.1257 (scene 2.1257, object 0.0000)  lr 1.17e-04  teacher entropy 0.623  174s
+    step  1021/1021  loss 2.1256 (scene 2.1256, object 0.0000)  lr 1.17e-04  teacher entropy 0.623  178s
+  epoch  25/100  loss 2.126  scene_loss 2.126  object_loss 0  teacher_entropy 0.6228  3.0 min, checkpoint saved
+
+SSL epoch 26/100
+    step   100/1021  loss 2.0909 (scene 2.0909, object 0.0000)  lr 1.17e-04  teacher entropy 0.606  18s
+    step   200/1021  loss 2.0867 (scene 2.0867, object 0.0000)  lr 1.16e-04  teacher entropy 0.603  35s
+    step   300/1021  loss 2.0857 (scene 2.0857, object 0.0000)  lr 1.16e-04  teacher entropy 0.603  53s
+    step   400/1021  loss 2.0832 (scene 2.0832, object 0.0000)  lr 1.16e-04  teacher entropy 0.601  70s
+    step   500/1021  loss 2.0883 (scene 2.0883, object 0.0000)  lr 1.16e-04  teacher entropy 0.602  88s
+    step   600/1021  loss 2.0869 (scene 2.0869, object 0.0000)  lr 1.16e-04  teacher entropy 0.601  105s
+    step   700/1021  loss 2.0905 (scene 2.0905, object 0.0000)  lr 1.16e-04  teacher entropy 0.600  123s
+    step   800/1021  loss 2.0898 (scene 2.0898, object 0.0000)  lr 1.16e-04  teacher entropy 0.600  140s
+    step   900/1021  loss 2.0917 (scene 2.0917, object 0.0000)  lr 1.16e-04  teacher entropy 0.599  158s
+    step  1000/1021  loss 2.0919 (scene 2.0919, object 0.0000)  lr 1.16e-04  teacher entropy 0.598  175s
+    step  1021/1021  loss 2.0925 (scene 2.0925, object 0.0000)  lr 1.16e-04  teacher entropy 0.598  179s
+  epoch  26/100  loss 2.092  scene_loss 2.092  object_loss 0  teacher_entropy 0.5978  3.0 min, checkpoint saved
+
+SSL epoch 27/100
+    step   100/1021  loss 2.0636 (scene 2.0636, object 0.0000)  lr 1.15e-04  teacher entropy 0.582  18s
+    step   200/1021  loss 2.0805 (scene 2.0805, object 0.0000)  lr 1.15e-04  teacher entropy 0.587  35s
+    step   300/1021  loss 2.0780 (scene 2.0780, object 0.0000)  lr 1.15e-04  teacher entropy 0.584  53s
+    step   400/1021  loss 2.0689 (scene 2.0689, object 0.0000)  lr 1.15e-04  teacher entropy 0.581  70s
+    step   500/1021  loss 2.0670 (scene 2.0670, object 0.0000)  lr 1.15e-04  teacher entropy 0.580  88s
+    step   600/1021  loss 2.0691 (scene 2.0691, object 0.0000)  lr 1.15e-04  teacher entropy 0.579  105s
+    step   700/1021  loss 2.0721 (scene 2.0721, object 0.0000)  lr 1.15e-04  teacher entropy 0.579  122s
+    step   800/1021  loss 2.0724 (scene 2.0724, object 0.0000)  lr 1.15e-04  teacher entropy 0.579  140s
+    step   900/1021  loss 2.0695 (scene 2.0695, object 0.0000)  lr 1.15e-04  teacher entropy 0.578  157s
+    step  1000/1021  loss 2.0682 (scene 2.0682, object 0.0000)  lr 1.14e-04  teacher entropy 0.577  175s
+    step  1021/1021  loss 2.0683 (scene 2.0683, object 0.0000)  lr 1.14e-04  teacher entropy 0.577  178s
+  epoch  27/100  loss 2.068  scene_loss 2.068  object_loss 0  teacher_entropy 0.5768  3.0 min, checkpoint saved
+
+SSL epoch 28/100
+    step   100/1021  loss 2.0377 (scene 2.0377, object 0.0000)  lr 1.14e-04  teacher entropy 0.558  18s
+    step   200/1021  loss 2.0345 (scene 2.0345, object 0.0000)  lr 1.14e-04  teacher entropy 0.560  35s
+    step   300/1021  loss 2.0344 (scene 2.0344, object 0.0000)  lr 1.14e-04  teacher entropy 0.558  53s
+    step   400/1021  loss 2.0422 (scene 2.0422, object 0.0000)  lr 1.14e-04  teacher entropy 0.559  70s
+    step   500/1021  loss 2.0356 (scene 2.0356, object 0.0000)  lr 1.14e-04  teacher entropy 0.557  88s
+    step   600/1021  loss 2.0380 (scene 2.0380, object 0.0000)  lr 1.14e-04  teacher entropy 0.556  105s
+    step   700/1021  loss 2.0372 (scene 2.0372, object 0.0000)  lr 1.14e-04  teacher entropy 0.554  123s
+    step   800/1021  loss 2.0385 (scene 2.0385, object 0.0000)  lr 1.13e-04  teacher entropy 0.554  140s
+    step   900/1021  loss 2.0402 (scene 2.0402, object 0.0000)  lr 1.13e-04  teacher entropy 0.554  158s
+    step  1000/1021  loss 2.0431 (scene 2.0431, object 0.0000)  lr 1.13e-04  teacher entropy 0.555  175s
+    step  1021/1021  loss 2.0423 (scene 2.0423, object 0.0000)  lr 1.13e-04  teacher entropy 0.555  179s
+  epoch  28/100  loss 2.042  scene_loss 2.042  object_loss 0  teacher_entropy 0.5549  3.0 min, checkpoint saved
+
+SSL epoch 29/100
+    step   100/1021  loss 2.0103 (scene 2.0103, object 0.0000)  lr 1.13e-04  teacher entropy 0.541  19s
+    step   200/1021  loss 2.0147 (scene 2.0147, object 0.0000)  lr 1.13e-04  teacher entropy 0.540  36s
+    step   300/1021  loss 2.0178 (scene 2.0178, object 0.0000)  lr 1.13e-04  teacher entropy 0.539  54s
+    step   400/1021  loss 2.0201 (scene 2.0201, object 0.0000)  lr 1.13e-04  teacher entropy 0.540  71s
+    step   500/1021  loss 2.0192 (scene 2.0192, object 0.0000)  lr 1.13e-04  teacher entropy 0.540  89s
+    step   600/1021  loss 2.0157 (scene 2.0157, object 0.0000)  lr 1.12e-04  teacher entropy 0.538  106s
+    step   700/1021  loss 2.0128 (scene 2.0128, object 0.0000)  lr 1.12e-04  teacher entropy 0.536  124s
+    step   800/1021  loss 2.0129 (scene 2.0129, object 0.0000)  lr 1.12e-04  teacher entropy 0.536  141s
+    step   900/1021  loss 2.0146 (scene 2.0146, object 0.0000)  lr 1.12e-04  teacher entropy 0.536  159s
+    step  1000/1021  loss 2.0161 (scene 2.0161, object 0.0000)  lr 1.12e-04  teacher entropy 0.535  176s
+    step  1021/1021  loss 2.0161 (scene 2.0161, object 0.0000)  lr 1.12e-04  teacher entropy 0.536  180s
+  epoch  29/100  loss 2.016  scene_loss 2.016  object_loss 0  teacher_entropy 0.5355  3.0 min, checkpoint saved
+
+SSL epoch 30/100
+    step   100/1021  loss 1.9577 (scene 1.9577, object 0.0000)  lr 1.12e-04  teacher entropy 0.524  18s
+    step   200/1021  loss 1.9778 (scene 1.9778, object 0.0000)  lr 1.12e-04  teacher entropy 0.527  35s
+    step   300/1021  loss 1.9779 (scene 1.9779, object 0.0000)  lr 1.11e-04  teacher entropy 0.524  53s
+    step   400/1021  loss 1.9831 (scene 1.9831, object 0.0000)  lr 1.11e-04  teacher entropy 0.524  70s
+    step   500/1021  loss 1.9831 (scene 1.9831, object 0.0000)  lr 1.11e-04  teacher entropy 0.523  87s
+    step   600/1021  loss 1.9847 (scene 1.9847, object 0.0000)  lr 1.11e-04  teacher entropy 0.522  105s
+    step   700/1021  loss 1.9871 (scene 1.9871, object 0.0000)  lr 1.11e-04  teacher entropy 0.522  122s
+    step   800/1021  loss 1.9877 (scene 1.9877, object 0.0000)  lr 1.11e-04  teacher entropy 0.521  139s
+    step   900/1021  loss 1.9887 (scene 1.9887, object 0.0000)  lr 1.11e-04  teacher entropy 0.520  157s
+    step  1000/1021  loss 1.9887 (scene 1.9887, object 0.0000)  lr 1.11e-04  teacher entropy 0.519  174s
+    step  1021/1021  loss 1.9887 (scene 1.9887, object 0.0000)  lr 1.10e-04  teacher entropy 0.519  178s
+  epoch  30/100  loss 1.989  scene_loss 1.989  object_loss 0  teacher_entropy 0.5191  3.0 min, checkpoint saved
+
+SSL epoch 31/100
+    step   100/1021  loss 1.9627 (scene 1.9627, object 0.0000)  lr 1.10e-04  teacher entropy 0.506  21s
+    step   200/1021  loss 1.9722 (scene 1.9722, object 0.0000)  lr 1.10e-04  teacher entropy 0.508  38s
+    step   300/1021  loss 1.9726 (scene 1.9726, object 0.0000)  lr 1.10e-04  teacher entropy 0.508  56s
+    step   400/1021  loss 1.9655 (scene 1.9655, object 0.0000)  lr 1.10e-04  teacher entropy 0.505  73s
+    step   500/1021  loss 1.9619 (scene 1.9619, object 0.0000)  lr 1.10e-04  teacher entropy 0.504  91s
+    step   600/1021  loss 1.9659 (scene 1.9659, object 0.0000)  lr 1.10e-04  teacher entropy 0.504  108s
+    step   700/1021  loss 1.9672 (scene 1.9672, object 0.0000)  lr 1.10e-04  teacher entropy 0.504  125s
+    step   800/1021  loss 1.9685 (scene 1.9685, object 0.0000)  lr 1.09e-04  teacher entropy 0.503  143s
+    step   900/1021  loss 1.9687 (scene 1.9687, object 0.0000)  lr 1.09e-04  teacher entropy 0.502  160s
+    step  1000/1021  loss 1.9667 (scene 1.9667, object 0.0000)  lr 1.09e-04  teacher entropy 0.501  178s
+    step  1021/1021  loss 1.9677 (scene 1.9677, object 0.0000)  lr 1.09e-04  teacher entropy 0.502  181s
+  epoch  31/100  loss 1.968  scene_loss 1.968  object_loss 0  teacher_entropy 0.5016  3.0 min, checkpoint saved
+
+SSL epoch 32/100
+    step   100/1021  loss 1.9546 (scene 1.9546, object 0.0000)  lr 1.09e-04  teacher entropy 0.492  18s
+    step   200/1021  loss 1.9492 (scene 1.9492, object 0.0000)  lr 1.09e-04  teacher entropy 0.492  35s
+    step   300/1021  loss 1.9445 (scene 1.9445, object 0.0000)  lr 1.09e-04  teacher entropy 0.490  53s
+    step   400/1021  loss 1.9450 (scene 1.9450, object 0.0000)  lr 1.09e-04  teacher entropy 0.489  70s
+    step   500/1021  loss 1.9430 (scene 1.9430, object 0.0000)  lr 1.08e-04  teacher entropy 0.490  87s
+    step   600/1021  loss 1.9467 (scene 1.9467, object 0.0000)  lr 1.08e-04  teacher entropy 0.489  105s
+    step   700/1021  loss 1.9454 (scene 1.9454, object 0.0000)  lr 1.08e-04  teacher entropy 0.488  122s
+    step   800/1021  loss 1.9458 (scene 1.9458, object 0.0000)  lr 1.08e-04  teacher entropy 0.488  139s
+    step   900/1021  loss 1.9476 (scene 1.9476, object 0.0000)  lr 1.08e-04  teacher entropy 0.487  157s
+    step  1000/1021  loss 1.9459 (scene 1.9459, object 0.0000)  lr 1.08e-04  teacher entropy 0.486  174s
+    step  1021/1021  loss 1.9454 (scene 1.9454, object 0.0000)  lr 1.08e-04  teacher entropy 0.486  178s
+  epoch  32/100  loss 1.945  scene_loss 1.945  object_loss 0  teacher_entropy 0.4856  3.0 min, checkpoint saved
+
+SSL epoch 33/100
+    step   100/1021  loss 1.9201 (scene 1.9201, object 0.0000)  lr 1.07e-04  teacher entropy 0.478  18s
+    step   200/1021  loss 1.9216 (scene 1.9216, object 0.0000)  lr 1.07e-04  teacher entropy 0.474  35s
+    step   300/1021  loss 1.9285 (scene 1.9285, object 0.0000)  lr 1.07e-04  teacher entropy 0.476  53s
+    step   400/1021  loss 1.9193 (scene 1.9193, object 0.0000)  lr 1.07e-04  teacher entropy 0.472  70s
+    step   500/1021  loss 1.9197 (scene 1.9197, object 0.0000)  lr 1.07e-04  teacher entropy 0.472  88s
+    step   600/1021  loss 1.9237 (scene 1.9237, object 0.0000)  lr 1.07e-04  teacher entropy 0.473  105s
+    step   700/1021  loss 1.9261 (scene 1.9261, object 0.0000)  lr 1.07e-04  teacher entropy 0.474  123s
+    step   800/1021  loss 1.9271 (scene 1.9271, object 0.0000)  lr 1.06e-04  teacher entropy 0.474  140s
+    step   900/1021  loss 1.9292 (scene 1.9292, object 0.0000)  lr 1.06e-04  teacher entropy 0.475  158s
+    step  1000/1021  loss 1.9279 (scene 1.9279, object 0.0000)  lr 1.06e-04  teacher entropy 0.473  175s
+    step  1021/1021  loss 1.9270 (scene 1.9270, object 0.0000)  lr 1.06e-04  teacher entropy 0.473  179s
+  epoch  33/100  loss 1.927  scene_loss 1.927  object_loss 0  teacher_entropy 0.4731  3.0 min, checkpoint saved
+
+SSL epoch 34/100
+    step   100/1021  loss 1.8946 (scene 1.8946, object 0.0000)  lr 1.06e-04  teacher entropy 0.459  18s
+    step   200/1021  loss 1.8982 (scene 1.8982, object 0.0000)  lr 1.06e-04  teacher entropy 0.461  36s
+    step   300/1021  loss 1.8985 (scene 1.8985, object 0.0000)  lr 1.06e-04  teacher entropy 0.460  53s
+    step   400/1021  loss 1.8980 (scene 1.8980, object 0.0000)  lr 1.05e-04  teacher entropy 0.460  71s
+    step   500/1021  loss 1.8971 (scene 1.8971, object 0.0000)  lr 1.05e-04  teacher entropy 0.460  88s
+    step   600/1021  loss 1.8955 (scene 1.8955, object 0.0000)  lr 1.05e-04  teacher entropy 0.458  106s
+    step   700/1021  loss 1.8983 (scene 1.8983, object 0.0000)  lr 1.05e-04  teacher entropy 0.459  123s
+    step   800/1021  loss 1.8991 (scene 1.8991, object 0.0000)  lr 1.05e-04  teacher entropy 0.458  140s
+    step   900/1021  loss 1.8987 (scene 1.8987, object 0.0000)  lr 1.05e-04  teacher entropy 0.458  158s
+    step  1000/1021  loss 1.8987 (scene 1.8987, object 0.0000)  lr 1.05e-04  teacher entropy 0.457  175s
+    step  1021/1021  loss 1.8993 (scene 1.8993, object 0.0000)  lr 1.04e-04  teacher entropy 0.457  179s
+  epoch  34/100  loss 1.899  scene_loss 1.899  object_loss 0  teacher_entropy 0.4573  3.0 min, checkpoint saved
+
+SSL epoch 35/100
+    step   100/1021  loss 1.8907 (scene 1.8907, object 0.0000)  lr 1.04e-04  teacher entropy 0.455  18s
+    step   200/1021  loss 1.8736 (scene 1.8736, object 0.0000)  lr 1.04e-04  teacher entropy 0.450  35s
+    step   300/1021  loss 1.8808 (scene 1.8808, object 0.0000)  lr 1.04e-04  teacher entropy 0.451  53s
+    step   400/1021  loss 1.8776 (scene 1.8776, object 0.0000)  lr 1.04e-04  teacher entropy 0.449  70s
+    step   500/1021  loss 1.8821 (scene 1.8821, object 0.0000)  lr 1.04e-04  teacher entropy 0.450  88s
+    step   600/1021  loss 1.8857 (scene 1.8857, object 0.0000)  lr 1.04e-04  teacher entropy 0.449  105s
+    step   700/1021  loss 1.8812 (scene 1.8812, object 0.0000)  lr 1.03e-04  teacher entropy 0.447  123s
+    step   800/1021  loss 1.8812 (scene 1.8812, object 0.0000)  lr 1.03e-04  teacher entropy 0.447  140s
+    step   900/1021  loss 1.8814 (scene 1.8814, object 0.0000)  lr 1.03e-04  teacher entropy 0.447  157s
+    step  1000/1021  loss 1.8823 (scene 1.8823, object 0.0000)  lr 1.03e-04  teacher entropy 0.446  175s
+    step  1021/1021  loss 1.8814 (scene 1.8814, object 0.0000)  lr 1.03e-04  teacher entropy 0.445  178s
+  epoch  35/100  loss 1.881  scene_loss 1.881  object_loss 0  teacher_entropy 0.4454  3.0 min, checkpoint saved
+
+SSL epoch 36/100
+    step   100/1021  loss 1.8556 (scene 1.8556, object 0.0000)  lr 1.03e-04  teacher entropy 0.441  18s
+    step   200/1021  loss 1.8637 (scene 1.8637, object 0.0000)  lr 1.03e-04  teacher entropy 0.439  35s
+    step   300/1021  loss 1.8677 (scene 1.8677, object 0.0000)  lr 1.02e-04  teacher entropy 0.441  53s
+    step   400/1021  loss 1.8674 (scene 1.8674, object 0.0000)  lr 1.02e-04  teacher entropy 0.439  70s
+    step   500/1021  loss 1.8711 (scene 1.8711, object 0.0000)  lr 1.02e-04  teacher entropy 0.439  88s
+    step   600/1021  loss 1.8682 (scene 1.8682, object 0.0000)  lr 1.02e-04  teacher entropy 0.437  105s
+    step   700/1021  loss 1.8657 (scene 1.8657, object 0.0000)  lr 1.02e-04  teacher entropy 0.436  123s
+    step   800/1021  loss 1.8643 (scene 1.8643, object 0.0000)  lr 1.02e-04  teacher entropy 0.435  140s
+    step   900/1021  loss 1.8624 (scene 1.8624, object 0.0000)  lr 1.01e-04  teacher entropy 0.433  157s
+    step  1000/1021  loss 1.8606 (scene 1.8606, object 0.0000)  lr 1.01e-04  teacher entropy 0.432  175s
+    step  1021/1021  loss 1.8598 (scene 1.8598, object 0.0000)  lr 1.01e-04  teacher entropy 0.432  179s
+  epoch  36/100  loss 1.86  scene_loss 1.86  object_loss 0  teacher_entropy 0.4319  3.0 min, checkpoint saved
+
+SSL epoch 37/100
+    step   100/1021  loss 1.8238 (scene 1.8238, object 0.0000)  lr 1.01e-04  teacher entropy 0.422  18s
+    step   200/1021  loss 1.8288 (scene 1.8288, object 0.0000)  lr 1.01e-04  teacher entropy 0.424  35s
+    step   300/1021  loss 1.8315 (scene 1.8315, object 0.0000)  lr 1.01e-04  teacher entropy 0.425  53s
+    step   400/1021  loss 1.8330 (scene 1.8330, object 0.0000)  lr 1.01e-04  teacher entropy 0.423  70s
+    step   500/1021  loss 1.8341 (scene 1.8341, object 0.0000)  lr 1.00e-04  teacher entropy 0.423  88s
+    step   600/1021  loss 1.8357 (scene 1.8357, object 0.0000)  lr 1.00e-04  teacher entropy 0.422  105s
+    step   700/1021  loss 1.8387 (scene 1.8387, object 0.0000)  lr 1.00e-04  teacher entropy 0.423  123s
+    step   800/1021  loss 1.8408 (scene 1.8408, object 0.0000)  lr 9.98e-05  teacher entropy 0.423  140s
+    step   900/1021  loss 1.8406 (scene 1.8406, object 0.0000)  lr 9.97e-05  teacher entropy 0.422  158s
+    step  1000/1021  loss 1.8403 (scene 1.8403, object 0.0000)  lr 9.95e-05  teacher entropy 0.422  175s
+    step  1021/1021  loss 1.8409 (scene 1.8409, object 0.0000)  lr 9.94e-05  teacher entropy 0.422  179s
+  epoch  37/100  loss 1.841  scene_loss 1.841  object_loss 0  teacher_entropy 0.4222  3.0 min, checkpoint saved
+
+SSL epoch 38/100
+    step   100/1021  loss 1.8167 (scene 1.8167, object 0.0000)  lr 9.93e-05  teacher entropy 0.413  18s
+    step   200/1021  loss 1.8083 (scene 1.8083, object 0.0000)  lr 9.91e-05  teacher entropy 0.409  35s
+    step   300/1021  loss 1.8073 (scene 1.8073, object 0.0000)  lr 9.89e-05  teacher entropy 0.410  53s
+    step   400/1021  loss 1.8144 (scene 1.8144, object 0.0000)  lr 9.88e-05  teacher entropy 0.412  70s
+    step   500/1021  loss 1.8165 (scene 1.8165, object 0.0000)  lr 9.86e-05  teacher entropy 0.412  88s
+    step   600/1021  loss 1.8205 (scene 1.8205, object 0.0000)  lr 9.84e-05  teacher entropy 0.413  105s
+    step   700/1021  loss 1.8242 (scene 1.8242, object 0.0000)  lr 9.82e-05  teacher entropy 0.413  123s
+    step   800/1021  loss 1.8243 (scene 1.8243, object 0.0000)  lr 9.81e-05  teacher entropy 0.414  140s
+    step   900/1021  loss 1.8241 (scene 1.8241, object 0.0000)  lr 9.79e-05  teacher entropy 0.413  158s
+    step  1000/1021  loss 1.8229 (scene 1.8229, object 0.0000)  lr 9.77e-05  teacher entropy 0.412  175s
+    step  1021/1021  loss 1.8220 (scene 1.8220, object 0.0000)  lr 9.77e-05  teacher entropy 0.412  179s
+  epoch  38/100  loss 1.822  scene_loss 1.822  object_loss 0  teacher_entropy 0.4118  3.0 min, checkpoint saved
+
+SSL epoch 39/100
+    step   100/1021  loss 1.7586 (scene 1.7586, object 0.0000)  lr 9.75e-05  teacher entropy 0.400  18s
+    step   200/1021  loss 1.7755 (scene 1.7755, object 0.0000)  lr 9.73e-05  teacher entropy 0.400  35s
+    step   300/1021  loss 1.7809 (scene 1.7809, object 0.0000)  lr 9.71e-05  teacher entropy 0.400  53s
+    step   400/1021  loss 1.7922 (scene 1.7922, object 0.0000)  lr 9.70e-05  teacher entropy 0.403  70s
+    step   500/1021  loss 1.7998 (scene 1.7998, object 0.0000)  lr 9.68e-05  teacher entropy 0.404  88s
+    step   600/1021  loss 1.8012 (scene 1.8012, object 0.0000)  lr 9.66e-05  teacher entropy 0.404  105s
+    step   700/1021  loss 1.8021 (scene 1.8021, object 0.0000)  lr 9.64e-05  teacher entropy 0.403  123s
+    step   800/1021  loss 1.7990 (scene 1.7990, object 0.0000)  lr 9.63e-05  teacher entropy 0.402  140s
+    step   900/1021  loss 1.8018 (scene 1.8018, object 0.0000)  lr 9.61e-05  teacher entropy 0.402  158s
+    step  1000/1021  loss 1.8031 (scene 1.8031, object 0.0000)  lr 9.59e-05  teacher entropy 0.401  175s
+    step  1021/1021  loss 1.8027 (scene 1.8027, object 0.0000)  lr 9.59e-05  teacher entropy 0.401  179s
+  epoch  39/100  loss 1.803  scene_loss 1.803  object_loss 0  teacher_entropy 0.401  3.0 min, checkpoint saved
+
+SSL epoch 40/100
+    step   100/1021  loss 1.7806 (scene 1.7806, object 0.0000)  lr 9.57e-05  teacher entropy 0.395  18s
+    step   200/1021  loss 1.7815 (scene 1.7815, object 0.0000)  lr 9.55e-05  teacher entropy 0.390  35s
+    step   300/1021  loss 1.7798 (scene 1.7798, object 0.0000)  lr 9.53e-05  teacher entropy 0.389  53s
+    step   400/1021  loss 1.7775 (scene 1.7775, object 0.0000)  lr 9.51e-05  teacher entropy 0.389  70s
+    step   500/1021  loss 1.7749 (scene 1.7749, object 0.0000)  lr 9.50e-05  teacher entropy 0.389  88s
+    step   600/1021  loss 1.7745 (scene 1.7745, object 0.0000)  lr 9.48e-05  teacher entropy 0.388  105s
+    step   700/1021  loss 1.7818 (scene 1.7818, object 0.0000)  lr 9.46e-05  teacher entropy 0.389  122s
+    step   800/1021  loss 1.7816 (scene 1.7816, object 0.0000)  lr 9.44e-05  teacher entropy 0.389  140s
+    step   900/1021  loss 1.7829 (scene 1.7829, object 0.0000)  lr 9.42e-05  teacher entropy 0.389  157s
+    step  1000/1021  loss 1.7831 (scene 1.7831, object 0.0000)  lr 9.40e-05  teacher entropy 0.389  175s
+    step  1021/1021  loss 1.7841 (scene 1.7841, object 0.0000)  lr 9.40e-05  teacher entropy 0.389  178s
+  epoch  40/100  loss 1.784  scene_loss 1.784  object_loss 0  teacher_entropy 0.389  3.0 min, checkpoint saved
+
+SSL epoch 41/100
+    step   100/1021  loss 1.7367 (scene 1.7367, object 0.0000)  lr 9.38e-05  teacher entropy 0.381  18s
+    step   200/1021  loss 1.7521 (scene 1.7521, object 0.0000)  lr 9.36e-05  teacher entropy 0.384  35s
+    step   300/1021  loss 1.7619 (scene 1.7619, object 0.0000)  lr 9.34e-05  teacher entropy 0.383  53s
+    step   400/1021  loss 1.7607 (scene 1.7607, object 0.0000)  lr 9.33e-05  teacher entropy 0.382  70s
+    step   500/1021  loss 1.7589 (scene 1.7589, object 0.0000)  lr 9.31e-05  teacher entropy 0.382  87s
+    step   600/1021  loss 1.7603 (scene 1.7603, object 0.0000)  lr 9.29e-05  teacher entropy 0.381  105s
+    step   700/1021  loss 1.7630 (scene 1.7630, object 0.0000)  lr 9.27e-05  teacher entropy 0.381  122s
+    step   800/1021  loss 1.7658 (scene 1.7658, object 0.0000)  lr 9.25e-05  teacher entropy 0.381  139s
+    step   900/1021  loss 1.7670 (scene 1.7670, object 0.0000)  lr 9.23e-05  teacher entropy 0.381  157s
+    step  1000/1021  loss 1.7663 (scene 1.7663, object 0.0000)  lr 9.21e-05  teacher entropy 0.380  174s
+    step  1021/1021  loss 1.7671 (scene 1.7671, object 0.0000)  lr 9.21e-05  teacher entropy 0.381  178s
+  epoch  41/100  loss 1.767  scene_loss 1.767  object_loss 0  teacher_entropy 0.3807  3.0 min, checkpoint saved
+
+SSL epoch 42/100
+    step   100/1021  loss 1.7501 (scene 1.7501, object 0.0000)  lr 9.19e-05  teacher entropy 0.375  18s
+    step   200/1021  loss 1.7524 (scene 1.7524, object 0.0000)  lr 9.17e-05  teacher entropy 0.375  35s
+    step   300/1021  loss 1.7474 (scene 1.7474, object 0.0000)  lr 9.15e-05  teacher entropy 0.372  53s
+    step   400/1021  loss 1.7476 (scene 1.7476, object 0.0000)  lr 9.14e-05  teacher entropy 0.373  70s
+    step   500/1021  loss 1.7469 (scene 1.7469, object 0.0000)  lr 9.12e-05  teacher entropy 0.373  88s
+    step   600/1021  loss 1.7465 (scene 1.7465, object 0.0000)  lr 9.10e-05  teacher entropy 0.371  105s
+    step   700/1021  loss 1.7492 (scene 1.7492, object 0.0000)  lr 9.08e-05  teacher entropy 0.372  122s
+    step   800/1021  loss 1.7494 (scene 1.7494, object 0.0000)  lr 9.06e-05  teacher entropy 0.371  140s
+    step   900/1021  loss 1.7493 (scene 1.7493, object 0.0000)  lr 9.04e-05  teacher entropy 0.371  157s
+    step  1000/1021  loss 1.7493 (scene 1.7493, object 0.0000)  lr 9.02e-05  teacher entropy 0.371  174s
+    step  1021/1021  loss 1.7497 (scene 1.7497, object 0.0000)  lr 9.02e-05  teacher entropy 0.371  178s
+  epoch  42/100  loss 1.75  scene_loss 1.75  object_loss 0  teacher_entropy 0.3711  3.0 min, checkpoint saved
+
+SSL epoch 43/100
+    step   100/1021  loss 1.7346 (scene 1.7346, object 0.0000)  lr 9.00e-05  teacher entropy 0.368  18s
+    step   200/1021  loss 1.7244 (scene 1.7244, object 0.0000)  lr 8.98e-05  teacher entropy 0.363  35s
+    step   300/1021  loss 1.7278 (scene 1.7278, object 0.0000)  lr 8.96e-05  teacher entropy 0.362  53s
+    step   400/1021  loss 1.7304 (scene 1.7304, object 0.0000)  lr 8.94e-05  teacher entropy 0.363  70s
+    step   500/1021  loss 1.7355 (scene 1.7355, object 0.0000)  lr 8.92e-05  teacher entropy 0.363  88s
+    step   600/1021  loss 1.7367 (scene 1.7367, object 0.0000)  lr 8.90e-05  teacher entropy 0.364  105s
+    step   700/1021  loss 1.7373 (scene 1.7373, object 0.0000)  lr 8.88e-05  teacher entropy 0.364  123s
+    step   800/1021  loss 1.7358 (scene 1.7358, object 0.0000)  lr 8.86e-05  teacher entropy 0.363  140s
+    step   900/1021  loss 1.7354 (scene 1.7354, object 0.0000)  lr 8.85e-05  teacher entropy 0.363  157s
+    step  1000/1021  loss 1.7344 (scene 1.7344, object 0.0000)  lr 8.83e-05  teacher entropy 0.362  175s
+    step  1021/1021  loss 1.7336 (scene 1.7336, object 0.0000)  lr 8.82e-05  teacher entropy 0.362  178s
+  epoch  43/100  loss 1.734  scene_loss 1.734  object_loss 0  teacher_entropy 0.362  3.0 min, checkpoint saved
+
+SSL epoch 44/100
+    step   100/1021  loss 1.7062 (scene 1.7062, object 0.0000)  lr 8.80e-05  teacher entropy 0.352  18s
+    step   200/1021  loss 1.7133 (scene 1.7133, object 0.0000)  lr 8.78e-05  teacher entropy 0.357  36s
+    step   300/1021  loss 1.7122 (scene 1.7122, object 0.0000)  lr 8.76e-05  teacher entropy 0.357  53s
+    step   400/1021  loss 1.7192 (scene 1.7192, object 0.0000)  lr 8.74e-05  teacher entropy 0.356  70s
+    step   500/1021  loss 1.7195 (scene 1.7195, object 0.0000)  lr 8.72e-05  teacher entropy 0.355  88s
+    step   600/1021  loss 1.7157 (scene 1.7157, object 0.0000)  lr 8.71e-05  teacher entropy 0.353  105s
+    step   700/1021  loss 1.7201 (scene 1.7201, object 0.0000)  lr 8.69e-05  teacher entropy 0.354  123s
+    step   800/1021  loss 1.7198 (scene 1.7198, object 0.0000)  lr 8.67e-05  teacher entropy 0.354  140s
+    step   900/1021  loss 1.7187 (scene 1.7187, object 0.0000)  lr 8.65e-05  teacher entropy 0.354  158s
+    step  1000/1021  loss 1.7206 (scene 1.7206, object 0.0000)  lr 8.63e-05  teacher entropy 0.354  175s
+    step  1021/1021  loss 1.7206 (scene 1.7206, object 0.0000)  lr 8.62e-05  teacher entropy 0.354  179s
+  epoch  44/100  loss 1.721  scene_loss 1.721  object_loss 0  teacher_entropy 0.3541  3.0 min, checkpoint saved
+
+SSL epoch 45/100
+    step   100/1021  loss 1.6796 (scene 1.6796, object 0.0000)  lr 8.60e-05  teacher entropy 0.349  18s
+    step   200/1021  loss 1.6880 (scene 1.6880, object 0.0000)  lr 8.58e-05  teacher entropy 0.350  35s
+    step   300/1021  loss 1.6924 (scene 1.6924, object 0.0000)  lr 8.56e-05  teacher entropy 0.348  53s
+    step   400/1021  loss 1.6940 (scene 1.6940, object 0.0000)  lr 8.54e-05  teacher entropy 0.347  70s
+    step   500/1021  loss 1.6946 (scene 1.6946, object 0.0000)  lr 8.52e-05  teacher entropy 0.347  88s
+    step   600/1021  loss 1.6980 (scene 1.6980, object 0.0000)  lr 8.50e-05  teacher entropy 0.348  105s
+    step   700/1021  loss 1.6966 (scene 1.6966, object 0.0000)  lr 8.48e-05  teacher entropy 0.347  123s
+    step   800/1021  loss 1.6991 (scene 1.6991, object 0.0000)  lr 8.46e-05  teacher entropy 0.346  140s
+    step   900/1021  loss 1.7003 (scene 1.7003, object 0.0000)  lr 8.44e-05  teacher entropy 0.346  157s
+    step  1000/1021  loss 1.7020 (scene 1.7020, object 0.0000)  lr 8.42e-05  teacher entropy 0.347  175s
+    step  1021/1021  loss 1.7026 (scene 1.7026, object 0.0000)  lr 8.42e-05  teacher entropy 0.347  179s
+  epoch  45/100  loss 1.703  scene_loss 1.703  object_loss 0  teacher_entropy 0.3468  3.0 min, checkpoint saved
+
+SSL epoch 46/100
+    step   100/1021  loss 1.6938 (scene 1.6938, object 0.0000)  lr 8.40e-05  teacher entropy 0.345  18s
+    step   200/1021  loss 1.6913 (scene 1.6913, object 0.0000)  lr 8.38e-05  teacher entropy 0.345  36s
+    step   300/1021  loss 1.6948 (scene 1.6948, object 0.0000)  lr 8.36e-05  teacher entropy 0.346  53s
+    step   400/1021  loss 1.6908 (scene 1.6908, object 0.0000)  lr 8.34e-05  teacher entropy 0.344  71s
+    step   500/1021  loss 1.6898 (scene 1.6898, object 0.0000)  lr 8.32e-05  teacher entropy 0.343  88s
+    step   600/1021  loss 1.6830 (scene 1.6830, object 0.0000)  lr 8.30e-05  teacher entropy 0.341  106s
+    step   700/1021  loss 1.6846 (scene 1.6846, object 0.0000)  lr 8.28e-05  teacher entropy 0.340  123s
+    step   800/1021  loss 1.6906 (scene 1.6906, object 0.0000)  lr 8.26e-05  teacher entropy 0.342  141s
+    step   900/1021  loss 1.6917 (scene 1.6917, object 0.0000)  lr 8.24e-05  teacher entropy 0.341  158s
+    step  1000/1021  loss 1.6923 (scene 1.6923, object 0.0000)  lr 8.22e-05  teacher entropy 0.340  176s
+    step  1021/1021  loss 1.6918 (scene 1.6918, object 0.0000)  lr 8.22e-05  teacher entropy 0.340  179s
+  epoch  46/100  loss 1.692  scene_loss 1.692  object_loss 0  teacher_entropy 0.3404  3.0 min, checkpoint saved
+
+SSL epoch 47/100
+    step   100/1021  loss 1.6634 (scene 1.6634, object 0.0000)  lr 8.20e-05  teacher entropy 0.334  18s
+    step   200/1021  loss 1.6651 (scene 1.6651, object 0.0000)  lr 8.18e-05  teacher entropy 0.331  35s
+    step   300/1021  loss 1.6645 (scene 1.6645, object 0.0000)  lr 8.16e-05  teacher entropy 0.330  53s
+    step   400/1021  loss 1.6673 (scene 1.6673, object 0.0000)  lr 8.14e-05  teacher entropy 0.332  70s
+    step   500/1021  loss 1.6713 (scene 1.6713, object 0.0000)  lr 8.12e-05  teacher entropy 0.333  88s
+    step   600/1021  loss 1.6712 (scene 1.6712, object 0.0000)  lr 8.09e-05  teacher entropy 0.333  105s
+    step   700/1021  loss 1.6738 (scene 1.6738, object 0.0000)  lr 8.07e-05  teacher entropy 0.332  123s
+    step   800/1021  loss 1.6761 (scene 1.6761, object 0.0000)  lr 8.05e-05  teacher entropy 0.332  140s
+    step   900/1021  loss 1.6761 (scene 1.6761, object 0.0000)  lr 8.03e-05  teacher entropy 0.332  157s
+    step  1000/1021  loss 1.6771 (scene 1.6771, object 0.0000)  lr 8.01e-05  teacher entropy 0.332  175s
+    step  1021/1021  loss 1.6776 (scene 1.6776, object 0.0000)  lr 8.01e-05  teacher entropy 0.332  178s
+  epoch  47/100  loss 1.678  scene_loss 1.678  object_loss 0  teacher_entropy 0.3319  3.0 min, checkpoint saved
+
+SSL epoch 48/100
+    step   100/1021  loss 1.6296 (scene 1.6296, object 0.0000)  lr 7.99e-05  teacher entropy 0.325  18s
+    step   200/1021  loss 1.6450 (scene 1.6450, object 0.0000)  lr 7.97e-05  teacher entropy 0.326  35s
+    step   300/1021  loss 1.6533 (scene 1.6533, object 0.0000)  lr 7.95e-05  teacher entropy 0.328  53s
+    step   400/1021  loss 1.6541 (scene 1.6541, object 0.0000)  lr 7.93e-05  teacher entropy 0.328  70s
+    step   500/1021  loss 1.6554 (scene 1.6554, object 0.0000)  lr 7.91e-05  teacher entropy 0.328  88s
+    step   600/1021  loss 1.6600 (scene 1.6600, object 0.0000)  lr 7.89e-05  teacher entropy 0.328  105s
+    step   700/1021  loss 1.6616 (scene 1.6616, object 0.0000)  lr 7.87e-05  teacher entropy 0.328  123s
+    step   800/1021  loss 1.6604 (scene 1.6604, object 0.0000)  lr 7.85e-05  teacher entropy 0.327  140s
+    step   900/1021  loss 1.6589 (scene 1.6589, object 0.0000)  lr 7.82e-05  teacher entropy 0.326  157s
+    step  1000/1021  loss 1.6593 (scene 1.6593, object 0.0000)  lr 7.80e-05  teacher entropy 0.326  175s
+    step  1021/1021  loss 1.6598 (scene 1.6598, object 0.0000)  lr 7.80e-05  teacher entropy 0.325  178s
+  epoch  48/100  loss 1.66  scene_loss 1.66  object_loss 0  teacher_entropy 0.3254  3.0 min, checkpoint saved
+
+SSL epoch 49/100
+    step   100/1021  loss 1.6349 (scene 1.6349, object 0.0000)  lr 7.78e-05  teacher entropy 0.316  18s
+    step   200/1021  loss 1.6427 (scene 1.6427, object 0.0000)  lr 7.76e-05  teacher entropy 0.318  35s
+    step   300/1021  loss 1.6471 (scene 1.6471, object 0.0000)  lr 7.74e-05  teacher entropy 0.319  53s
+    step   400/1021  loss 1.6489 (scene 1.6489, object 0.0000)  lr 7.72e-05  teacher entropy 0.318  70s
+    step   500/1021  loss 1.6501 (scene 1.6501, object 0.0000)  lr 7.70e-05  teacher entropy 0.319  88s
+    step   600/1021  loss 1.6519 (scene 1.6519, object 0.0000)  lr 7.68e-05  teacher entropy 0.320  105s
+    step   700/1021  loss 1.6543 (scene 1.6543, object 0.0000)  lr 7.66e-05  teacher entropy 0.320  123s
+    step   800/1021  loss 1.6539 (scene 1.6539, object 0.0000)  lr 7.64e-05  teacher entropy 0.320  140s
+    step   900/1021  loss 1.6528 (scene 1.6528, object 0.0000)  lr 7.61e-05  teacher entropy 0.319  158s
+    step  1000/1021  loss 1.6519 (scene 1.6519, object 0.0000)  lr 7.59e-05  teacher entropy 0.318  175s
+    step  1021/1021  loss 1.6512 (scene 1.6512, object 0.0000)  lr 7.59e-05  teacher entropy 0.318  179s
+  epoch  49/100  loss 1.651  scene_loss 1.651  object_loss 0  teacher_entropy 0.3179  3.0 min, checkpoint saved
+
+SSL epoch 50/100
+    step   100/1021  loss 1.6209 (scene 1.6209, object 0.0000)  lr 7.57e-05  teacher entropy 0.313  18s
+    step   200/1021  loss 1.6284 (scene 1.6284, object 0.0000)  lr 7.55e-05  teacher entropy 0.314  35s
+    step   300/1021  loss 1.6316 (scene 1.6316, object 0.0000)  lr 7.53e-05  teacher entropy 0.315  53s
+    step   400/1021  loss 1.6342 (scene 1.6342, object 0.0000)  lr 7.51e-05  teacher entropy 0.316  70s
+    step   500/1021  loss 1.6299 (scene 1.6299, object 0.0000)  lr 7.49e-05  teacher entropy 0.314  88s
+    step   600/1021  loss 1.6327 (scene 1.6327, object 0.0000)  lr 7.46e-05  teacher entropy 0.314  105s
+    step   700/1021  loss 1.6355 (scene 1.6355, object 0.0000)  lr 7.44e-05  teacher entropy 0.313  123s
+    step   800/1021  loss 1.6379 (scene 1.6379, object 0.0000)  lr 7.42e-05  teacher entropy 0.313  140s
+    step   900/1021  loss 1.6368 (scene 1.6368, object 0.0000)  lr 7.40e-05  teacher entropy 0.313  158s
+    step  1000/1021  loss 1.6350 (scene 1.6350, object 0.0000)  lr 7.38e-05  teacher entropy 0.312  175s
+    step  1021/1021  loss 1.6353 (scene 1.6353, object 0.0000)  lr 7.38e-05  teacher entropy 0.312  179s
+  epoch  50/100  loss 1.635  scene_loss 1.635  object_loss 0  teacher_entropy 0.3123  3.0 min, checkpoint saved
+
+SSL epoch 51/100
+    step   100/1021  loss 1.6128 (scene 1.6128, object 0.0000)  lr 7.36e-05  teacher entropy 0.308  18s
+    step   200/1021  loss 1.6090 (scene 1.6090, object 0.0000)  lr 7.34e-05  teacher entropy 0.309  36s
+    step   300/1021  loss 1.6069 (scene 1.6069, object 0.0000)  lr 7.31e-05  teacher entropy 0.306  53s
+    step   400/1021  loss 1.6119 (scene 1.6119, object 0.0000)  lr 7.29e-05  teacher entropy 0.308  71s
+    step   500/1021  loss 1.6158 (scene 1.6158, object 0.0000)  lr 7.27e-05  teacher entropy 0.309  88s
+    step   600/1021  loss 1.6172 (scene 1.6172, object 0.0000)  lr 7.25e-05  teacher entropy 0.308  106s
+    step   700/1021  loss 1.6221 (scene 1.6221, object 0.0000)  lr 7.23e-05  teacher entropy 0.309  123s
+    step   800/1021  loss 1.6212 (scene 1.6212, object 0.0000)  lr 7.21e-05  teacher entropy 0.309  140s
+    step   900/1021  loss 1.6204 (scene 1.6204, object 0.0000)  lr 7.19e-05  teacher entropy 0.308  158s
+    step  1000/1021  loss 1.6203 (scene 1.6203, object 0.0000)  lr 7.17e-05  teacher entropy 0.307  175s
+    step  1021/1021  loss 1.6209 (scene 1.6209, object 0.0000)  lr 7.16e-05  teacher entropy 0.307  179s
+  epoch  51/100  loss 1.621  scene_loss 1.621  object_loss 0  teacher_entropy 0.3074  3.0 min, checkpoint saved
+
+SSL epoch 52/100
+    step   100/1021  loss 1.6051 (scene 1.6051, object 0.0000)  lr 7.14e-05  teacher entropy 0.304  18s
+    step   200/1021  loss 1.6072 (scene 1.6072, object 0.0000)  lr 7.12e-05  teacher entropy 0.302  36s
+    step   300/1021  loss 1.6106 (scene 1.6106, object 0.0000)  lr 7.10e-05  teacher entropy 0.303  53s
+    step   400/1021  loss 1.6064 (scene 1.6064, object 0.0000)  lr 7.08e-05  teacher entropy 0.301  71s
+    step   500/1021  loss 1.6075 (scene 1.6075, object 0.0000)  lr 7.06e-05  teacher entropy 0.302  88s
+    step   600/1021  loss 1.6102 (scene 1.6102, object 0.0000)  lr 7.04e-05  teacher entropy 0.302  105s
+    step   700/1021  loss 1.6082 (scene 1.6082, object 0.0000)  lr 7.02e-05  teacher entropy 0.301  123s
+    step   800/1021  loss 1.6093 (scene 1.6093, object 0.0000)  lr 6.99e-05  teacher entropy 0.302  140s
+    step   900/1021  loss 1.6100 (scene 1.6100, object 0.0000)  lr 6.97e-05  teacher entropy 0.302  158s
+    step  1000/1021  loss 1.6114 (scene 1.6114, object 0.0000)  lr 6.95e-05  teacher entropy 0.302  175s
+    step  1021/1021  loss 1.6113 (scene 1.6113, object 0.0000)  lr 6.95e-05  teacher entropy 0.301  179s
+  epoch  52/100  loss 1.611  scene_loss 1.611  object_loss 0  teacher_entropy 0.3015  3.0 min, checkpoint saved
+
+SSL epoch 53/100
+    step   100/1021  loss 1.5773 (scene 1.5773, object 0.0000)  lr 6.93e-05  teacher entropy 0.294  18s
+    step   200/1021  loss 1.5817 (scene 1.5817, object 0.0000)  lr 6.91e-05  teacher entropy 0.295  35s
+    step   300/1021  loss 1.5885 (scene 1.5885, object 0.0000)  lr 6.89e-05  teacher entropy 0.298  53s
+    step   400/1021  loss 1.5861 (scene 1.5861, object 0.0000)  lr 6.86e-05  teacher entropy 0.297  70s
+    step   500/1021  loss 1.5857 (scene 1.5857, object 0.0000)  lr 6.84e-05  teacher entropy 0.297  87s
+    step   600/1021  loss 1.5839 (scene 1.5839, object 0.0000)  lr 6.82e-05  teacher entropy 0.296  105s
+    step   700/1021  loss 1.5894 (scene 1.5894, object 0.0000)  lr 6.80e-05  teacher entropy 0.296  122s
+    step   800/1021  loss 1.5937 (scene 1.5937, object 0.0000)  lr 6.78e-05  teacher entropy 0.297  140s
+    step   900/1021  loss 1.5966 (scene 1.5966, object 0.0000)  lr 6.76e-05  teacher entropy 0.297  157s
+    step  1000/1021  loss 1.5999 (scene 1.5999, object 0.0000)  lr 6.74e-05  teacher entropy 0.297  174s
+    step  1021/1021  loss 1.5987 (scene 1.5987, object 0.0000)  lr 6.73e-05  teacher entropy 0.296  178s
+  epoch  53/100  loss 1.599  scene_loss 1.599  object_loss 0  teacher_entropy 0.2962  3.0 min, checkpoint saved
+
+SSL epoch 54/100
+    step   100/1021  loss 1.5650 (scene 1.5650, object 0.0000)  lr 6.71e-05  teacher entropy 0.287  18s
+    step   200/1021  loss 1.5693 (scene 1.5693, object 0.0000)  lr 6.69e-05  teacher entropy 0.290  36s
+    step   300/1021  loss 1.5757 (scene 1.5757, object 0.0000)  lr 6.67e-05  teacher entropy 0.291  53s
+    step   400/1021  loss 1.5719 (scene 1.5719, object 0.0000)  lr 6.65e-05  teacher entropy 0.290  70s
+    step   500/1021  loss 1.5762 (scene 1.5762, object 0.0000)  lr 6.63e-05  teacher entropy 0.291  88s
+    step   600/1021  loss 1.5806 (scene 1.5806, object 0.0000)  lr 6.61e-05  teacher entropy 0.291  105s
+    step   700/1021  loss 1.5836 (scene 1.5836, object 0.0000)  lr 6.58e-05  teacher entropy 0.291  123s
+    step   800/1021  loss 1.5831 (scene 1.5831, object 0.0000)  lr 6.56e-05  teacher entropy 0.292  140s
+    step   900/1021  loss 1.5843 (scene 1.5843, object 0.0000)  lr 6.54e-05  teacher entropy 0.291  158s
+    step  1000/1021  loss 1.5840 (scene 1.5840, object 0.0000)  lr 6.52e-05  teacher entropy 0.291  175s
+    step  1021/1021  loss 1.5838 (scene 1.5838, object 0.0000)  lr 6.52e-05  teacher entropy 0.291  179s
+  epoch  54/100  loss 1.584  scene_loss 1.584  object_loss 0  teacher_entropy 0.291  3.0 min, checkpoint saved
+
+SSL epoch 55/100
+    step   100/1021  loss 1.5723 (scene 1.5723, object 0.0000)  lr 6.50e-05  teacher entropy 0.286  18s
+    step   200/1021  loss 1.5674 (scene 1.5674, object 0.0000)  lr 6.47e-05  teacher entropy 0.286  35s
+    step   300/1021  loss 1.5666 (scene 1.5666, object 0.0000)  lr 6.45e-05  teacher entropy 0.288  53s
+    step   400/1021  loss 1.5704 (scene 1.5704, object 0.0000)  lr 6.43e-05  teacher entropy 0.288  70s
+    step   500/1021  loss 1.5728 (scene 1.5728, object 0.0000)  lr 6.41e-05  teacher entropy 0.288  88s
+    step   600/1021  loss 1.5726 (scene 1.5726, object 0.0000)  lr 6.39e-05  teacher entropy 0.287  105s
+    step   700/1021  loss 1.5719 (scene 1.5719, object 0.0000)  lr 6.37e-05  teacher entropy 0.287  123s
+    step   800/1021  loss 1.5734 (scene 1.5734, object 0.0000)  lr 6.35e-05  teacher entropy 0.287  140s
+    step   900/1021  loss 1.5738 (scene 1.5738, object 0.0000)  lr 6.33e-05  teacher entropy 0.287  157s
+    step  1000/1021  loss 1.5739 (scene 1.5739, object 0.0000)  lr 6.30e-05  teacher entropy 0.287  175s
+    step  1021/1021  loss 1.5742 (scene 1.5742, object 0.0000)  lr 6.30e-05  teacher entropy 0.287  179s
+  epoch  55/100  loss 1.574  scene_loss 1.574  object_loss 0  teacher_entropy 0.2868  3.0 min, checkpoint saved
+
+SSL epoch 56/100
+    step   100/1021  loss 1.5787 (scene 1.5787, object 0.0000)  lr 6.28e-05  teacher entropy 0.285  18s
+    step   200/1021  loss 1.5732 (scene 1.5732, object 0.0000)  lr 6.26e-05  teacher entropy 0.286  35s
+    step   300/1021  loss 1.5753 (scene 1.5753, object 0.0000)  lr 6.24e-05  teacher entropy 0.287  53s
+    step   400/1021  loss 1.5666 (scene 1.5666, object 0.0000)  lr 6.22e-05  teacher entropy 0.284  70s
+    step   500/1021  loss 1.5623 (scene 1.5623, object 0.0000)  lr 6.19e-05  teacher entropy 0.283  87s
+    step   600/1021  loss 1.5598 (scene 1.5598, object 0.0000)  lr 6.17e-05  teacher entropy 0.282  105s
+    step   700/1021  loss 1.5596 (scene 1.5596, object 0.0000)  lr 6.15e-05  teacher entropy 0.281  122s
+    step   800/1021  loss 1.5600 (scene 1.5600, object 0.0000)  lr 6.13e-05  teacher entropy 0.282  140s
+    step   900/1021  loss 1.5576 (scene 1.5576, object 0.0000)  lr 6.11e-05  teacher entropy 0.281  157s
+    step  1000/1021  loss 1.5580 (scene 1.5580, object 0.0000)  lr 6.09e-05  teacher entropy 0.280  174s
+    step  1021/1021  loss 1.5570 (scene 1.5570, object 0.0000)  lr 6.08e-05  teacher entropy 0.280  178s
+  epoch  56/100  loss 1.557  scene_loss 1.557  object_loss 0  teacher_entropy 0.2797  3.0 min, checkpoint saved
+
+SSL epoch 57/100
+    step   100/1021  loss 1.5263 (scene 1.5263, object 0.0000)  lr 6.06e-05  teacher entropy 0.278  18s
+    step   200/1021  loss 1.5455 (scene 1.5455, object 0.0000)  lr 6.04e-05  teacher entropy 0.283  35s
+    step   300/1021  loss 1.5501 (scene 1.5501, object 0.0000)  lr 6.02e-05  teacher entropy 0.282  53s
+    step   400/1021  loss 1.5484 (scene 1.5484, object 0.0000)  lr 6.00e-05  teacher entropy 0.280  70s
+    step   500/1021  loss 1.5476 (scene 1.5476, object 0.0000)  lr 5.98e-05  teacher entropy 0.279  88s
+    step   600/1021  loss 1.5516 (scene 1.5516, object 0.0000)  lr 5.96e-05  teacher entropy 0.279  105s
+    step   700/1021  loss 1.5513 (scene 1.5513, object 0.0000)  lr 5.94e-05  teacher entropy 0.279  122s
+    step   800/1021  loss 1.5513 (scene 1.5513, object 0.0000)  lr 5.91e-05  teacher entropy 0.279  140s
+    step   900/1021  loss 1.5492 (scene 1.5492, object 0.0000)  lr 5.89e-05  teacher entropy 0.278  157s
+    step  1000/1021  loss 1.5498 (scene 1.5498, object 0.0000)  lr 5.87e-05  teacher entropy 0.278  175s
+    step  1021/1021  loss 1.5496 (scene 1.5496, object 0.0000)  lr 5.87e-05  teacher entropy 0.278  178s
+  epoch  57/100  loss 1.55  scene_loss 1.55  object_loss 0  teacher_entropy 0.2777  3.0 min, checkpoint saved
+
+SSL epoch 58/100
+    step   100/1021  loss 1.5254 (scene 1.5254, object 0.0000)  lr 5.85e-05  teacher entropy 0.279  18s
+    step   200/1021  loss 1.5340 (scene 1.5340, object 0.0000)  lr 5.83e-05  teacher entropy 0.281  36s
+    step   300/1021  loss 1.5379 (scene 1.5379, object 0.0000)  lr 5.80e-05  teacher entropy 0.277  53s
+    step   400/1021  loss 1.5390 (scene 1.5390, object 0.0000)  lr 5.78e-05  teacher entropy 0.276  70s
+    step   500/1021  loss 1.5387 (scene 1.5387, object 0.0000)  lr 5.76e-05  teacher entropy 0.276  88s
+    step   600/1021  loss 1.5426 (scene 1.5426, object 0.0000)  lr 5.74e-05  teacher entropy 0.275  105s
+    step   700/1021  loss 1.5448 (scene 1.5448, object 0.0000)  lr 5.72e-05  teacher entropy 0.274  123s
+    step   800/1021  loss 1.5426 (scene 1.5426, object 0.0000)  lr 5.70e-05  teacher entropy 0.274  140s
+    step   900/1021  loss 1.5428 (scene 1.5428, object 0.0000)  lr 5.68e-05  teacher entropy 0.273  158s
+    step  1000/1021  loss 1.5421 (scene 1.5421, object 0.0000)  lr 5.66e-05  teacher entropy 0.273  175s
+    step  1021/1021  loss 1.5406 (scene 1.5406, object 0.0000)  lr 5.65e-05  teacher entropy 0.273  179s
+  epoch  58/100  loss 1.541  scene_loss 1.541  object_loss 0  teacher_entropy 0.2726  3.0 min, checkpoint saved
+
+SSL epoch 59/100
+    step   100/1021  loss 1.5203 (scene 1.5203, object 0.0000)  lr 5.63e-05  teacher entropy 0.272  18s
+    step   200/1021  loss 1.5212 (scene 1.5212, object 0.0000)  lr 5.61e-05  teacher entropy 0.269  35s
+    step   300/1021  loss 1.5232 (scene 1.5232, object 0.0000)  lr 5.59e-05  teacher entropy 0.270  53s
+    step   400/1021  loss 1.5257 (scene 1.5257, object 0.0000)  lr 5.57e-05  teacher entropy 0.270  70s
+    step   500/1021  loss 1.5251 (scene 1.5251, object 0.0000)  lr 5.55e-05  teacher entropy 0.270  88s
+    step   600/1021  loss 1.5239 (scene 1.5239, object 0.0000)  lr 5.53e-05  teacher entropy 0.270  105s
+    step   700/1021  loss 1.5226 (scene 1.5226, object 0.0000)  lr 5.50e-05  teacher entropy 0.269  123s
+    step   800/1021  loss 1.5252 (scene 1.5252, object 0.0000)  lr 5.48e-05  teacher entropy 0.269  140s
+    step   900/1021  loss 1.5270 (scene 1.5270, object 0.0000)  lr 5.46e-05  teacher entropy 0.269  158s
+    step  1000/1021  loss 1.5277 (scene 1.5277, object 0.0000)  lr 5.44e-05  teacher entropy 0.269  175s
+    step  1021/1021  loss 1.5286 (scene 1.5286, object 0.0000)  lr 5.44e-05  teacher entropy 0.269  179s
+  epoch  59/100  loss 1.529  scene_loss 1.529  object_loss 0  teacher_entropy 0.2693  3.0 min, checkpoint saved
+
+SSL epoch 60/100
+    step   100/1021  loss 1.5073 (scene 1.5073, object 0.0000)  lr 5.42e-05  teacher entropy 0.267  18s
+    step   200/1021  loss 1.5140 (scene 1.5140, object 0.0000)  lr 5.40e-05  teacher entropy 0.268  35s
+    step   300/1021  loss 1.5174 (scene 1.5174, object 0.0000)  lr 5.37e-05  teacher entropy 0.268  53s
+    step   400/1021  loss 1.5167 (scene 1.5167, object 0.0000)  lr 5.35e-05  teacher entropy 0.266  70s
+    step   500/1021  loss 1.5118 (scene 1.5118, object 0.0000)  lr 5.33e-05  teacher entropy 0.265  88s
+    step   600/1021  loss 1.5114 (scene 1.5114, object 0.0000)  lr 5.31e-05  teacher entropy 0.265  105s
+    step   700/1021  loss 1.5149 (scene 1.5149, object 0.0000)  lr 5.29e-05  teacher entropy 0.265  123s
+    step   800/1021  loss 1.5162 (scene 1.5162, object 0.0000)  lr 5.27e-05  teacher entropy 0.264  140s
+    step   900/1021  loss 1.5176 (scene 1.5176, object 0.0000)  lr 5.25e-05  teacher entropy 0.264  158s
+    step  1000/1021  loss 1.5177 (scene 1.5177, object 0.0000)  lr 5.23e-05  teacher entropy 0.264  175s
+    step  1021/1021  loss 1.5180 (scene 1.5180, object 0.0000)  lr 5.22e-05  teacher entropy 0.264  179s
+  epoch  60/100  loss 1.518  scene_loss 1.518  object_loss 0  teacher_entropy 0.264  3.0 min, checkpoint saved
+
+SSL epoch 61/100
+    step   100/1021  loss 1.4813 (scene 1.4813, object 0.0000)  lr 5.20e-05  teacher entropy 0.260  18s
+    step   200/1021  loss 1.4896 (scene 1.4896, object 0.0000)  lr 5.18e-05  teacher entropy 0.260  35s
+    step   300/1021  loss 1.4951 (scene 1.4951, object 0.0000)  lr 5.16e-05  teacher entropy 0.261  53s
+    step   400/1021  loss 1.4992 (scene 1.4992, object 0.0000)  lr 5.14e-05  teacher entropy 0.261  70s
+    step   500/1021  loss 1.5010 (scene 1.5010, object 0.0000)  lr 5.12e-05  teacher entropy 0.261  88s
+    step   600/1021  loss 1.5019 (scene 1.5019, object 0.0000)  lr 5.10e-05  teacher entropy 0.260  105s
+    step   700/1021  loss 1.5016 (scene 1.5016, object 0.0000)  lr 5.08e-05  teacher entropy 0.259  123s
+    step   800/1021  loss 1.5035 (scene 1.5035, object 0.0000)  lr 5.06e-05  teacher entropy 0.260  140s
+    step   900/1021  loss 1.5068 (scene 1.5068, object 0.0000)  lr 5.04e-05  teacher entropy 0.261  157s
+    step  1000/1021  loss 1.5062 (scene 1.5062, object 0.0000)  lr 5.02e-05  teacher entropy 0.260  175s
+    step  1021/1021  loss 1.5063 (scene 1.5063, object 0.0000)  lr 5.01e-05  teacher entropy 0.260  179s
+  epoch  61/100  loss 1.506  scene_loss 1.506  object_loss 0  teacher_entropy 0.26  3.0 min, checkpoint saved
+
+SSL epoch 62/100
+    step   100/1021  loss 1.5099 (scene 1.5099, object 0.0000)  lr 4.99e-05  teacher entropy 0.263  18s
+    step   200/1021  loss 1.4931 (scene 1.4931, object 0.0000)  lr 4.97e-05  teacher entropy 0.261  35s
+    step   300/1021  loss 1.4961 (scene 1.4961, object 0.0000)  lr 4.95e-05  teacher entropy 0.260  53s
+    step   400/1021  loss 1.5010 (scene 1.5010, object 0.0000)  lr 4.93e-05  teacher entropy 0.259  70s
+    step   500/1021  loss 1.5025 (scene 1.5025, object 0.0000)  lr 4.91e-05  teacher entropy 0.260  88s
+    step   600/1021  loss 1.5010 (scene 1.5010, object 0.0000)  lr 4.89e-05  teacher entropy 0.260  105s
+    step   700/1021  loss 1.5004 (scene 1.5004, object 0.0000)  lr 4.87e-05  teacher entropy 0.259  123s
+    step   800/1021  loss 1.5004 (scene 1.5004, object 0.0000)  lr 4.85e-05  teacher entropy 0.258  140s
+    step   900/1021  loss 1.5003 (scene 1.5003, object 0.0000)  lr 4.83e-05  teacher entropy 0.258  158s
+    step  1000/1021  loss 1.5002 (scene 1.5002, object 0.0000)  lr 4.80e-05  teacher entropy 0.258  175s
+    step  1021/1021  loss 1.5005 (scene 1.5005, object 0.0000)  lr 4.80e-05  teacher entropy 0.258  179s
+  epoch  62/100  loss 1.501  scene_loss 1.501  object_loss 0  teacher_entropy 0.2577  3.0 min, checkpoint saved
+
+SSL epoch 63/100
+    step   100/1021  loss 1.4731 (scene 1.4731, object 0.0000)  lr 4.78e-05  teacher entropy 0.254  18s
+    step   200/1021  loss 1.4764 (scene 1.4764, object 0.0000)  lr 4.76e-05  teacher entropy 0.252  35s
+    step   300/1021  loss 1.4795 (scene 1.4795, object 0.0000)  lr 4.74e-05  teacher entropy 0.251  53s
+    step   400/1021  loss 1.4869 (scene 1.4869, object 0.0000)  lr 4.72e-05  teacher entropy 0.253  70s
+    step   500/1021  loss 1.4902 (scene 1.4902, object 0.0000)  lr 4.70e-05  teacher entropy 0.254  87s
+    step   600/1021  loss 1.4888 (scene 1.4888, object 0.0000)  lr 4.68e-05  teacher entropy 0.254  105s
+    step   700/1021  loss 1.4913 (scene 1.4913, object 0.0000)  lr 4.66e-05  teacher entropy 0.254  122s
+    step   800/1021  loss 1.4905 (scene 1.4905, object 0.0000)  lr 4.64e-05  teacher entropy 0.254  139s
+    step   900/1021  loss 1.4937 (scene 1.4937, object 0.0000)  lr 4.62e-05  teacher entropy 0.254  157s
+    step  1000/1021  loss 1.4939 (scene 1.4939, object 0.0000)  lr 4.60e-05  teacher entropy 0.254  174s
+    step  1021/1021  loss 1.4945 (scene 1.4945, object 0.0000)  lr 4.59e-05  teacher entropy 0.254  178s
+  epoch  63/100  loss 1.494  scene_loss 1.494  object_loss 0  teacher_entropy 0.2537  3.0 min, checkpoint saved
+
+SSL epoch 64/100
+    step   100/1021  loss 1.4902 (scene 1.4902, object 0.0000)  lr 4.57e-05  teacher entropy 0.251  18s
+    step   200/1021  loss 1.4780 (scene 1.4780, object 0.0000)  lr 4.55e-05  teacher entropy 0.251  35s
+    step   300/1021  loss 1.4839 (scene 1.4839, object 0.0000)  lr 4.53e-05  teacher entropy 0.251  53s
+    step   400/1021  loss 1.4796 (scene 1.4796, object 0.0000)  lr 4.51e-05  teacher entropy 0.250  70s
+    step   500/1021  loss 1.4822 (scene 1.4822, object 0.0000)  lr 4.49e-05  teacher entropy 0.250  88s
+    step   600/1021  loss 1.4802 (scene 1.4802, object 0.0000)  lr 4.47e-05  teacher entropy 0.250  105s
+    step   700/1021  loss 1.4786 (scene 1.4786, object 0.0000)  lr 4.45e-05  teacher entropy 0.249  123s
+    step   800/1021  loss 1.4791 (scene 1.4791, object 0.0000)  lr 4.43e-05  teacher entropy 0.249  140s
+    step   900/1021  loss 1.4815 (scene 1.4815, object 0.0000)  lr 4.41e-05  teacher entropy 0.250  158s
+    step  1000/1021  loss 1.4823 (scene 1.4823, object 0.0000)  lr 4.39e-05  teacher entropy 0.250  175s
+    step  1021/1021  loss 1.4829 (scene 1.4829, object 0.0000)  lr 4.38e-05  teacher entropy 0.250  179s
+  epoch  64/100  loss 1.483  scene_loss 1.483  object_loss 0  teacher_entropy 0.2502  3.0 min, checkpoint saved
+
+SSL epoch 65/100
+    step   100/1021  loss 1.4597 (scene 1.4597, object 0.0000)  lr 4.36e-05  teacher entropy 0.248  18s
+    step   200/1021  loss 1.4701 (scene 1.4701, object 0.0000)  lr 4.34e-05  teacher entropy 0.248  35s
+    step   300/1021  loss 1.4702 (scene 1.4702, object 0.0000)  lr 4.32e-05  teacher entropy 0.249  53s
+    step   400/1021  loss 1.4706 (scene 1.4706, object 0.0000)  lr 4.30e-05  teacher entropy 0.248  70s
+    step   500/1021  loss 1.4740 (scene 1.4740, object 0.0000)  lr 4.28e-05  teacher entropy 0.249  88s
+    step   600/1021  loss 1.4758 (scene 1.4758, object 0.0000)  lr 4.26e-05  teacher entropy 0.250  105s
+    step   700/1021  loss 1.4748 (scene 1.4748, object 0.0000)  lr 4.24e-05  teacher entropy 0.250  123s
+    step   800/1021  loss 1.4769 (scene 1.4769, object 0.0000)  lr 4.22e-05  teacher entropy 0.250  140s
+    step   900/1021  loss 1.4760 (scene 1.4760, object 0.0000)  lr 4.20e-05  teacher entropy 0.249  158s
+    step  1000/1021  loss 1.4757 (scene 1.4757, object 0.0000)  lr 4.18e-05  teacher entropy 0.248  175s
+    step  1021/1021  loss 1.4763 (scene 1.4763, object 0.0000)  lr 4.18e-05  teacher entropy 0.248  179s
+  epoch  65/100  loss 1.476  scene_loss 1.476  object_loss 0  teacher_entropy 0.2483  3.0 min, checkpoint saved
+
+SSL epoch 66/100
+    step   100/1021  loss 1.4659 (scene 1.4659, object 0.0000)  lr 4.16e-05  teacher entropy 0.248  18s
+    step   200/1021  loss 1.4574 (scene 1.4574, object 0.0000)  lr 4.14e-05  teacher entropy 0.244  35s
+    step   300/1021  loss 1.4625 (scene 1.4625, object 0.0000)  lr 4.12e-05  teacher entropy 0.246  53s
+    step   400/1021  loss 1.4624 (scene 1.4624, object 0.0000)  lr 4.10e-05  teacher entropy 0.246  70s
+    step   500/1021  loss 1.4630 (scene 1.4630, object 0.0000)  lr 4.08e-05  teacher entropy 0.246  88s
+    step   600/1021  loss 1.4621 (scene 1.4621, object 0.0000)  lr 4.06e-05  teacher entropy 0.245  105s
+    step   700/1021  loss 1.4646 (scene 1.4646, object 0.0000)  lr 4.04e-05  teacher entropy 0.246  122s
+    step   800/1021  loss 1.4670 (scene 1.4670, object 0.0000)  lr 4.02e-05  teacher entropy 0.246  140s
+    step   900/1021  loss 1.4671 (scene 1.4671, object 0.0000)  lr 4.00e-05  teacher entropy 0.246  157s
+    step  1000/1021  loss 1.4685 (scene 1.4685, object 0.0000)  lr 3.98e-05  teacher entropy 0.246  175s
+    step  1021/1021  loss 1.4684 (scene 1.4684, object 0.0000)  lr 3.98e-05  teacher entropy 0.246  178s
+  epoch  66/100  loss 1.468  scene_loss 1.468  object_loss 0  teacher_entropy 0.246  3.0 min, checkpoint saved
+
+SSL epoch 67/100
+    step   100/1021  loss 1.4522 (scene 1.4522, object 0.0000)  lr 3.96e-05  teacher entropy 0.242  18s
+    step   200/1021  loss 1.4560 (scene 1.4560, object 0.0000)  lr 3.94e-05  teacher entropy 0.242  35s
+    step   300/1021  loss 1.4592 (scene 1.4592, object 0.0000)  lr 3.92e-05  teacher entropy 0.242  53s
+    step   400/1021  loss 1.4566 (scene 1.4566, object 0.0000)  lr 3.90e-05  teacher entropy 0.242  70s
+    step   500/1021  loss 1.4576 (scene 1.4576, object 0.0000)  lr 3.88e-05  teacher entropy 0.242  88s
+    step   600/1021  loss 1.4568 (scene 1.4568, object 0.0000)  lr 3.86e-05  teacher entropy 0.242  105s
+    step   700/1021  loss 1.4569 (scene 1.4569, object 0.0000)  lr 3.84e-05  teacher entropy 0.242  122s
+    step   800/1021  loss 1.4586 (scene 1.4586, object 0.0000)  lr 3.82e-05  teacher entropy 0.242  140s
+    step   900/1021  loss 1.4587 (scene 1.4587, object 0.0000)  lr 3.80e-05  teacher entropy 0.242  157s
+    step  1000/1021  loss 1.4595 (scene 1.4595, object 0.0000)  lr 3.78e-05  teacher entropy 0.242  175s
+    step  1021/1021  loss 1.4594 (scene 1.4594, object 0.0000)  lr 3.78e-05  teacher entropy 0.242  178s
+  epoch  67/100  loss 1.459  scene_loss 1.459  object_loss 0  teacher_entropy 0.2419  3.0 min, checkpoint saved
+
+SSL epoch 68/100
+    step   100/1021  loss 1.4546 (scene 1.4546, object 0.0000)  lr 3.76e-05  teacher entropy 0.243  18s
+    step   200/1021  loss 1.4488 (scene 1.4488, object 0.0000)  lr 3.74e-05  teacher entropy 0.241  35s
+    step   300/1021  loss 1.4518 (scene 1.4518, object 0.0000)  lr 3.72e-05  teacher entropy 0.241  53s
+    step   400/1021  loss 1.4549 (scene 1.4549, object 0.0000)  lr 3.70e-05  teacher entropy 0.241  70s
+    step   500/1021  loss 1.4530 (scene 1.4530, object 0.0000)  lr 3.68e-05  teacher entropy 0.240  88s
+    step   600/1021  loss 1.4557 (scene 1.4557, object 0.0000)  lr 3.66e-05  teacher entropy 0.241  105s
+    step   700/1021  loss 1.4542 (scene 1.4542, object 0.0000)  lr 3.64e-05  teacher entropy 0.240  123s
+    step   800/1021  loss 1.4518 (scene 1.4518, object 0.0000)  lr 3.62e-05  teacher entropy 0.240  140s
+    step   900/1021  loss 1.4544 (scene 1.4544, object 0.0000)  lr 3.61e-05  teacher entropy 0.240  158s
+    step  1000/1021  loss 1.4544 (scene 1.4544, object 0.0000)  lr 3.59e-05  teacher entropy 0.240  175s
+    step  1021/1021  loss 1.4552 (scene 1.4552, object 0.0000)  lr 3.58e-05  teacher entropy 0.240  179s
+  epoch  68/100  loss 1.455  scene_loss 1.455  object_loss 0  teacher_entropy 0.2404  3.0 min, checkpoint saved
+
+SSL epoch 69/100
+    step   100/1021  loss 1.4045 (scene 1.4045, object 0.0000)  lr 3.56e-05  teacher entropy 0.235  18s
+    step   200/1021  loss 1.4221 (scene 1.4221, object 0.0000)  lr 3.54e-05  teacher entropy 0.236  35s
+    step   300/1021  loss 1.4282 (scene 1.4282, object 0.0000)  lr 3.53e-05  teacher entropy 0.235  53s
+    step   400/1021  loss 1.4312 (scene 1.4312, object 0.0000)  lr 3.51e-05  teacher entropy 0.234  70s
+    step   500/1021  loss 1.4344 (scene 1.4344, object 0.0000)  lr 3.49e-05  teacher entropy 0.235  88s
+    step   600/1021  loss 1.4406 (scene 1.4406, object 0.0000)  lr 3.47e-05  teacher entropy 0.236  105s
+    step   700/1021  loss 1.4424 (scene 1.4424, object 0.0000)  lr 3.45e-05  teacher entropy 0.237  123s
+    step   800/1021  loss 1.4430 (scene 1.4430, object 0.0000)  lr 3.43e-05  teacher entropy 0.237  140s
+    step   900/1021  loss 1.4438 (scene 1.4438, object 0.0000)  lr 3.41e-05  teacher entropy 0.237  158s
+    step  1000/1021  loss 1.4456 (scene 1.4456, object 0.0000)  lr 3.39e-05  teacher entropy 0.238  175s
+    step  1021/1021  loss 1.4457 (scene 1.4457, object 0.0000)  lr 3.39e-05  teacher entropy 0.238  179s
+  epoch  69/100  loss 1.446  scene_loss 1.446  object_loss 0  teacher_entropy 0.2375  3.0 min, checkpoint saved
+
+SSL epoch 70/100
+    step   100/1021  loss 1.4261 (scene 1.4261, object 0.0000)  lr 3.37e-05  teacher entropy 0.232  23s
+    step   200/1021  loss 1.4333 (scene 1.4333, object 0.0000)  lr 3.35e-05  teacher entropy 0.232  40s
+    step   300/1021  loss 1.4346 (scene 1.4346, object 0.0000)  lr 3.33e-05  teacher entropy 0.233  57s
+    step   400/1021  loss 1.4356 (scene 1.4356, object 0.0000)  lr 3.31e-05  teacher entropy 0.234  75s
+    step   500/1021  loss 1.4353 (scene 1.4353, object 0.0000)  lr 3.30e-05  teacher entropy 0.235  92s
+    step   600/1021  loss 1.4399 (scene 1.4399, object 0.0000)  lr 3.28e-05  teacher entropy 0.236  110s
+    step   700/1021  loss 1.4387 (scene 1.4387, object 0.0000)  lr 3.26e-05  teacher entropy 0.236  127s
+    step   800/1021  loss 1.4398 (scene 1.4398, object 0.0000)  lr 3.24e-05  teacher entropy 0.236  145s
+    step   900/1021  loss 1.4408 (scene 1.4408, object 0.0000)  lr 3.22e-05  teacher entropy 0.237  162s
+    step  1000/1021  loss 1.4403 (scene 1.4403, object 0.0000)  lr 3.20e-05  teacher entropy 0.236  179s
+    step  1021/1021  loss 1.4397 (scene 1.4397, object 0.0000)  lr 3.20e-05  teacher entropy 0.236  183s
+  epoch  70/100  loss 1.44  scene_loss 1.44  object_loss 0  teacher_entropy 0.2356  3.1 min, checkpoint saved
+
+SSL epoch 71/100
+    step   100/1021  loss 1.4141 (scene 1.4141, object 0.0000)  lr 3.18e-05  teacher entropy 0.231  20s
+    step   200/1021  loss 1.4212 (scene 1.4212, object 0.0000)  lr 3.16e-05  teacher entropy 0.230  37s
+    step   300/1021  loss 1.4285 (scene 1.4285, object 0.0000)  lr 3.15e-05  teacher entropy 0.234  55s
+    step   400/1021  loss 1.4279 (scene 1.4279, object 0.0000)  lr 3.13e-05  teacher entropy 0.233  72s
+    step   500/1021  loss 1.4276 (scene 1.4276, object 0.0000)  lr 3.11e-05  teacher entropy 0.233  90s
+    step   600/1021  loss 1.4281 (scene 1.4281, object 0.0000)  lr 3.09e-05  teacher entropy 0.233  107s
+    step   700/1021  loss 1.4276 (scene 1.4276, object 0.0000)  lr 3.07e-05  teacher entropy 0.233  124s
+    step   800/1021  loss 1.4266 (scene 1.4266, object 0.0000)  lr 3.05e-05  teacher entropy 0.233  142s
+    step   900/1021  loss 1.4294 (scene 1.4294, object 0.0000)  lr 3.04e-05  teacher entropy 0.233  159s
+    step  1000/1021  loss 1.4291 (scene 1.4291, object 0.0000)  lr 3.02e-05  teacher entropy 0.233  177s
+    step  1021/1021  loss 1.4292 (scene 1.4292, object 0.0000)  lr 3.01e-05  teacher entropy 0.233  180s
+  epoch  71/100  loss 1.429  scene_loss 1.429  object_loss 0  teacher_entropy 0.2329  3.0 min, checkpoint saved
+
+SSL epoch 72/100
+    step   100/1021  loss 1.4163 (scene 1.4163, object 0.0000)  lr 3.00e-05  teacher entropy 0.234  18s
+    step   200/1021  loss 1.4268 (scene 1.4268, object 0.0000)  lr 2.98e-05  teacher entropy 0.234  35s
+    step   300/1021  loss 1.4192 (scene 1.4192, object 0.0000)  lr 2.96e-05  teacher entropy 0.233  53s
+    step   400/1021  loss 1.4272 (scene 1.4272, object 0.0000)  lr 2.94e-05  teacher entropy 0.235  70s
+    step   500/1021  loss 1.4238 (scene 1.4238, object 0.0000)  lr 2.93e-05  teacher entropy 0.233  88s
+    step   600/1021  loss 1.4242 (scene 1.4242, object 0.0000)  lr 2.91e-05  teacher entropy 0.233  105s
+    step   700/1021  loss 1.4242 (scene 1.4242, object 0.0000)  lr 2.89e-05  teacher entropy 0.232  123s
+    step   800/1021  loss 1.4251 (scene 1.4251, object 0.0000)  lr 2.87e-05  teacher entropy 0.232  140s
+    step   900/1021  loss 1.4233 (scene 1.4233, object 0.0000)  lr 2.85e-05  teacher entropy 0.231  157s
+    step  1000/1021  loss 1.4241 (scene 1.4241, object 0.0000)  lr 2.84e-05  teacher entropy 0.232  175s
+    step  1021/1021  loss 1.4234 (scene 1.4234, object 0.0000)  lr 2.83e-05  teacher entropy 0.231  179s
+  epoch  72/100  loss 1.423  scene_loss 1.423  object_loss 0  teacher_entropy 0.2313  3.0 min, checkpoint saved
+
+SSL epoch 73/100
+    step   100/1021  loss 1.3836 (scene 1.3836, object 0.0000)  lr 2.82e-05  teacher entropy 0.224  18s
+    step   200/1021  loss 1.4111 (scene 1.4111, object 0.0000)  lr 2.80e-05  teacher entropy 0.228  35s
+    step   300/1021  loss 1.4111 (scene 1.4111, object 0.0000)  lr 2.78e-05  teacher entropy 0.230  53s
+    step   400/1021  loss 1.4114 (scene 1.4114, object 0.0000)  lr 2.76e-05  teacher entropy 0.229  70s
+    step   500/1021  loss 1.4145 (scene 1.4145, object 0.0000)  lr 2.75e-05  teacher entropy 0.228  88s
+    step   600/1021  loss 1.4153 (scene 1.4153, object 0.0000)  lr 2.73e-05  teacher entropy 0.229  105s
+    step   700/1021  loss 1.4161 (scene 1.4161, object 0.0000)  lr 2.71e-05  teacher entropy 0.229  123s
+    step   800/1021  loss 1.4177 (scene 1.4177, object 0.0000)  lr 2.69e-05  teacher entropy 0.229  140s
+    step   900/1021  loss 1.4192 (scene 1.4192, object 0.0000)  lr 2.68e-05  teacher entropy 0.229  158s
+    step  1000/1021  loss 1.4185 (scene 1.4185, object 0.0000)  lr 2.66e-05  teacher entropy 0.229  175s
+    step  1021/1021  loss 1.4191 (scene 1.4191, object 0.0000)  lr 2.66e-05  teacher entropy 0.229  179s
+  epoch  73/100  loss 1.419  scene_loss 1.419  object_loss 0  teacher_entropy 0.2293  3.0 min, checkpoint saved
+
+SSL epoch 74/100
+    step   100/1021  loss 1.4257 (scene 1.4257, object 0.0000)  lr 2.64e-05  teacher entropy 0.233  18s
+    step   200/1021  loss 1.4273 (scene 1.4273, object 0.0000)  lr 2.62e-05  teacher entropy 0.236  35s
+    step   300/1021  loss 1.4248 (scene 1.4248, object 0.0000)  lr 2.60e-05  teacher entropy 0.233  53s
+    step   400/1021  loss 1.4229 (scene 1.4229, object 0.0000)  lr 2.59e-05  teacher entropy 0.232  70s
+    step   500/1021  loss 1.4220 (scene 1.4220, object 0.0000)  lr 2.57e-05  teacher entropy 0.232  88s
+    step   600/1021  loss 1.4179 (scene 1.4179, object 0.0000)  lr 2.55e-05  teacher entropy 0.230  105s
+    step   700/1021  loss 1.4163 (scene 1.4163, object 0.0000)  lr 2.54e-05  teacher entropy 0.229  122s
+    step   800/1021  loss 1.4164 (scene 1.4164, object 0.0000)  lr 2.52e-05  teacher entropy 0.229  140s
+    step   900/1021  loss 1.4142 (scene 1.4142, object 0.0000)  lr 2.50e-05  teacher entropy 0.228  157s
+    step  1000/1021  loss 1.4123 (scene 1.4123, object 0.0000)  lr 2.49e-05  teacher entropy 0.228  175s
+    step  1021/1021  loss 1.4129 (scene 1.4129, object 0.0000)  lr 2.48e-05  teacher entropy 0.227  178s
+  epoch  74/100  loss 1.413  scene_loss 1.413  object_loss 0  teacher_entropy 0.2274  3.0 min, checkpoint saved
+
+SSL epoch 75/100
+    step   100/1021  loss 1.3790 (scene 1.3790, object 0.0000)  lr 2.47e-05  teacher entropy 0.218  18s
+    step   200/1021  loss 1.3930 (scene 1.3930, object 0.0000)  lr 2.45e-05  teacher entropy 0.222  35s
+    step   300/1021  loss 1.4061 (scene 1.4061, object 0.0000)  lr 2.43e-05  teacher entropy 0.225  53s
+    step   400/1021  loss 1.4036 (scene 1.4036, object 0.0000)  lr 2.42e-05  teacher entropy 0.225  70s
+    step   500/1021  loss 1.4049 (scene 1.4049, object 0.0000)  lr 2.40e-05  teacher entropy 0.225  88s
+    step   600/1021  loss 1.4038 (scene 1.4038, object 0.0000)  lr 2.38e-05  teacher entropy 0.224  105s
+    step   700/1021  loss 1.4052 (scene 1.4052, object 0.0000)  lr 2.37e-05  teacher entropy 0.225  122s
+    step   800/1021  loss 1.4095 (scene 1.4095, object 0.0000)  lr 2.35e-05  teacher entropy 0.226  140s
+    step   900/1021  loss 1.4092 (scene 1.4092, object 0.0000)  lr 2.33e-05  teacher entropy 0.226  157s
+    step  1000/1021  loss 1.4077 (scene 1.4077, object 0.0000)  lr 2.32e-05  teacher entropy 0.226  175s
+    step  1021/1021  loss 1.4079 (scene 1.4079, object 0.0000)  lr 2.31e-05  teacher entropy 0.225  178s
+  epoch  75/100  loss 1.408  scene_loss 1.408  object_loss 0  teacher_entropy 0.2255  3.0 min, checkpoint saved
+
+SSL epoch 76/100
+    step   100/1021  loss 1.3787 (scene 1.3787, object 0.0000)  lr 2.30e-05  teacher entropy 0.216  18s
+    step   200/1021  loss 1.3892 (scene 1.3892, object 0.0000)  lr 2.28e-05  teacher entropy 0.221  35s
+    step   300/1021  loss 1.3986 (scene 1.3986, object 0.0000)  lr 2.27e-05  teacher entropy 0.223  53s
+    step   400/1021  loss 1.4002 (scene 1.4002, object 0.0000)  lr 2.25e-05  teacher entropy 0.225  70s
+    step   500/1021  loss 1.4016 (scene 1.4016, object 0.0000)  lr 2.23e-05  teacher entropy 0.225  88s
+    step   600/1021  loss 1.3995 (scene 1.3995, object 0.0000)  lr 2.22e-05  teacher entropy 0.224  105s
+    step   700/1021  loss 1.3980 (scene 1.3980, object 0.0000)  lr 2.20e-05  teacher entropy 0.224  123s
+    step   800/1021  loss 1.3986 (scene 1.3986, object 0.0000)  lr 2.19e-05  teacher entropy 0.224  140s
+    step   900/1021  loss 1.3998 (scene 1.3998, object 0.0000)  lr 2.17e-05  teacher entropy 0.224  158s
+    step  1000/1021  loss 1.4019 (scene 1.4019, object 0.0000)  lr 2.15e-05  teacher entropy 0.224  175s
+    step  1021/1021  loss 1.4023 (scene 1.4023, object 0.0000)  lr 2.15e-05  teacher entropy 0.224  179s
+  epoch  76/100  loss 1.402  scene_loss 1.402  object_loss 0  teacher_entropy 0.224  3.0 min, checkpoint saved
+
+SSL epoch 77/100
+    step   100/1021  loss 1.3912 (scene 1.3912, object 0.0000)  lr 2.14e-05  teacher entropy 0.223  18s
+    step   200/1021  loss 1.3905 (scene 1.3905, object 0.0000)  lr 2.12e-05  teacher entropy 0.221  35s
+    step   300/1021  loss 1.3968 (scene 1.3968, object 0.0000)  lr 2.10e-05  teacher entropy 0.221  53s
+    step   400/1021  loss 1.3929 (scene 1.3929, object 0.0000)  lr 2.09e-05  teacher entropy 0.221  70s
+    step   500/1021  loss 1.3920 (scene 1.3920, object 0.0000)  lr 2.07e-05  teacher entropy 0.221  88s
+    step   600/1021  loss 1.3909 (scene 1.3909, object 0.0000)  lr 2.06e-05  teacher entropy 0.221  105s
+    step   700/1021  loss 1.3901 (scene 1.3901, object 0.0000)  lr 2.04e-05  teacher entropy 0.221  123s
+    step   800/1021  loss 1.3889 (scene 1.3889, object 0.0000)  lr 2.03e-05  teacher entropy 0.221  140s
+    step   900/1021  loss 1.3904 (scene 1.3904, object 0.0000)  lr 2.01e-05  teacher entropy 0.222  158s
+    step  1000/1021  loss 1.3943 (scene 1.3943, object 0.0000)  lr 2.00e-05  teacher entropy 0.223  175s
+    step  1021/1021  loss 1.3942 (scene 1.3942, object 0.0000)  lr 1.99e-05  teacher entropy 0.222  179s
+  epoch  77/100  loss 1.394  scene_loss 1.394  object_loss 0  teacher_entropy 0.2224  3.0 min, checkpoint saved
+
+SSL epoch 78/100
+    step   100/1021  loss 1.3722 (scene 1.3722, object 0.0000)  lr 1.98e-05  teacher entropy 0.216  18s
+    step   200/1021  loss 1.3846 (scene 1.3846, object 0.0000)  lr 1.96e-05  teacher entropy 0.217  35s
+    step   300/1021  loss 1.3842 (scene 1.3842, object 0.0000)  lr 1.95e-05  teacher entropy 0.217  53s
+    step   400/1021  loss 1.3890 (scene 1.3890, object 0.0000)  lr 1.93e-05  teacher entropy 0.218  70s
+    step   500/1021  loss 1.3898 (scene 1.3898, object 0.0000)  lr 1.92e-05  teacher entropy 0.219  87s
+    step   600/1021  loss 1.3939 (scene 1.3939, object 0.0000)  lr 1.90e-05  teacher entropy 0.220  105s
+    step   700/1021  loss 1.3953 (scene 1.3953, object 0.0000)  lr 1.89e-05  teacher entropy 0.221  122s
+    step   800/1021  loss 1.3968 (scene 1.3968, object 0.0000)  lr 1.87e-05  teacher entropy 0.221  140s
+    step   900/1021  loss 1.3944 (scene 1.3944, object 0.0000)  lr 1.86e-05  teacher entropy 0.220  157s
+    step  1000/1021  loss 1.3950 (scene 1.3950, object 0.0000)  lr 1.84e-05  teacher entropy 0.221  175s
+    step  1021/1021  loss 1.3953 (scene 1.3953, object 0.0000)  lr 1.84e-05  teacher entropy 0.221  178s
+  epoch  78/100  loss 1.395  scene_loss 1.395  object_loss 0  teacher_entropy 0.221  3.0 min, checkpoint saved
+
+SSL epoch 79/100
+    step   100/1021  loss 1.3807 (scene 1.3807, object 0.0000)  lr 1.83e-05  teacher entropy 0.224  18s
+    step   200/1021  loss 1.3838 (scene 1.3838, object 0.0000)  lr 1.81e-05  teacher entropy 0.222  35s
+    step   300/1021  loss 1.3895 (scene 1.3895, object 0.0000)  lr 1.80e-05  teacher entropy 0.223  53s
+    step   400/1021  loss 1.3916 (scene 1.3916, object 0.0000)  lr 1.78e-05  teacher entropy 0.221  70s
+    step   500/1021  loss 1.3926 (scene 1.3926, object 0.0000)  lr 1.77e-05  teacher entropy 0.221  88s
+    step   600/1021  loss 1.3921 (scene 1.3921, object 0.0000)  lr 1.75e-05  teacher entropy 0.221  105s
+    step   700/1021  loss 1.3927 (scene 1.3927, object 0.0000)  lr 1.74e-05  teacher entropy 0.222  122s
+    step   800/1021  loss 1.3914 (scene 1.3914, object 0.0000)  lr 1.72e-05  teacher entropy 0.222  140s
+    step   900/1021  loss 1.3910 (scene 1.3910, object 0.0000)  lr 1.71e-05  teacher entropy 0.221  157s
+    step  1000/1021  loss 1.3893 (scene 1.3893, object 0.0000)  lr 1.70e-05  teacher entropy 0.221  175s
+    step  1021/1021  loss 1.3889 (scene 1.3889, object 0.0000)  lr 1.69e-05  teacher entropy 0.221  178s
+  epoch  79/100  loss 1.389  scene_loss 1.389  object_loss 0  teacher_entropy 0.2206  3.0 min, checkpoint saved
+
+SSL epoch 80/100
+    step   100/1021  loss 1.3711 (scene 1.3711, object 0.0000)  lr 1.68e-05  teacher entropy 0.215  18s
+    step   200/1021  loss 1.3804 (scene 1.3804, object 0.0000)  lr 1.66e-05  teacher entropy 0.220  35s
+    step   300/1021  loss 1.3827 (scene 1.3827, object 0.0000)  lr 1.65e-05  teacher entropy 0.221  53s
+    step   400/1021  loss 1.3838 (scene 1.3838, object 0.0000)  lr 1.64e-05  teacher entropy 0.222  70s
+    step   500/1021  loss 1.3822 (scene 1.3822, object 0.0000)  lr 1.62e-05  teacher entropy 0.221  88s
+    step   600/1021  loss 1.3804 (scene 1.3804, object 0.0000)  lr 1.61e-05  teacher entropy 0.220  105s
+    step   700/1021  loss 1.3802 (scene 1.3802, object 0.0000)  lr 1.59e-05  teacher entropy 0.220  123s
+    step   800/1021  loss 1.3822 (scene 1.3822, object 0.0000)  lr 1.58e-05  teacher entropy 0.220  140s
+    step   900/1021  loss 1.3822 (scene 1.3822, object 0.0000)  lr 1.57e-05  teacher entropy 0.220  157s
+    step  1000/1021  loss 1.3826 (scene 1.3826, object 0.0000)  lr 1.55e-05  teacher entropy 0.220  175s
+    step  1021/1021  loss 1.3829 (scene 1.3829, object 0.0000)  lr 1.55e-05  teacher entropy 0.220  178s
+  epoch  80/100  loss 1.383  scene_loss 1.383  object_loss 0  teacher_entropy 0.22  3.0 min, checkpoint saved
+
+SSL epoch 81/100
+    step   100/1021  loss 1.3893 (scene 1.3893, object 0.0000)  lr 1.54e-05  teacher entropy 0.227  18s
+    step   200/1021  loss 1.3880 (scene 1.3880, object 0.0000)  lr 1.52e-05  teacher entropy 0.225  35s
+    step   300/1021  loss 1.3840 (scene 1.3840, object 0.0000)  lr 1.51e-05  teacher entropy 0.223  53s
+    step   400/1021  loss 1.3793 (scene 1.3793, object 0.0000)  lr 1.50e-05  teacher entropy 0.221  70s
+    step   500/1021  loss 1.3772 (scene 1.3772, object 0.0000)  lr 1.48e-05  teacher entropy 0.220  88s
+    step   600/1021  loss 1.3778 (scene 1.3778, object 0.0000)  lr 1.47e-05  teacher entropy 0.220  105s
+    step   700/1021  loss 1.3785 (scene 1.3785, object 0.0000)  lr 1.46e-05  teacher entropy 0.219  122s
+    step   800/1021  loss 1.3798 (scene 1.3798, object 0.0000)  lr 1.44e-05  teacher entropy 0.219  140s
+    step   900/1021  loss 1.3807 (scene 1.3807, object 0.0000)  lr 1.43e-05  teacher entropy 0.219  157s
+    step  1000/1021  loss 1.3808 (scene 1.3808, object 0.0000)  lr 1.42e-05  teacher entropy 0.219  175s
+    step  1021/1021  loss 1.3808 (scene 1.3808, object 0.0000)  lr 1.41e-05  teacher entropy 0.219  178s
+  epoch  81/100  loss 1.381  scene_loss 1.381  object_loss 0  teacher_entropy 0.219  3.0 min, checkpoint saved
+
+SSL epoch 82/100
+    step   100/1021  loss 1.3721 (scene 1.3721, object 0.0000)  lr 1.40e-05  teacher entropy 0.218  18s
+    step   200/1021  loss 1.3696 (scene 1.3696, object 0.0000)  lr 1.39e-05  teacher entropy 0.216  35s
+    step   300/1021  loss 1.3708 (scene 1.3708, object 0.0000)  lr 1.38e-05  teacher entropy 0.217  53s
+    step   400/1021  loss 1.3701 (scene 1.3701, object 0.0000)  lr 1.36e-05  teacher entropy 0.215  70s
+    step   500/1021  loss 1.3701 (scene 1.3701, object 0.0000)  lr 1.35e-05  teacher entropy 0.215  88s
+    step   600/1021  loss 1.3733 (scene 1.3733, object 0.0000)  lr 1.34e-05  teacher entropy 0.216  105s
+    step   700/1021  loss 1.3742 (scene 1.3742, object 0.0000)  lr 1.32e-05  teacher entropy 0.216  122s
+    step   800/1021  loss 1.3738 (scene 1.3738, object 0.0000)  lr 1.31e-05  teacher entropy 0.215  140s
+    step   900/1021  loss 1.3763 (scene 1.3763, object 0.0000)  lr 1.30e-05  teacher entropy 0.216  157s
+    step  1000/1021  loss 1.3784 (scene 1.3784, object 0.0000)  lr 1.29e-05  teacher entropy 0.216  175s
+    step  1021/1021  loss 1.3781 (scene 1.3781, object 0.0000)  lr 1.28e-05  teacher entropy 0.216  178s
+  epoch  82/100  loss 1.378  scene_loss 1.378  object_loss 0  teacher_entropy 0.2159  3.0 min, checkpoint saved
+
+SSL epoch 83/100
+    step   100/1021  loss 1.3780 (scene 1.3780, object 0.0000)  lr 1.27e-05  teacher entropy 0.220  18s
+    step   200/1021  loss 1.3695 (scene 1.3695, object 0.0000)  lr 1.26e-05  teacher entropy 0.218  35s
+    step   300/1021  loss 1.3728 (scene 1.3728, object 0.0000)  lr 1.25e-05  teacher entropy 0.218  53s
+    step   400/1021  loss 1.3770 (scene 1.3770, object 0.0000)  lr 1.23e-05  teacher entropy 0.219  70s
+    step   500/1021  loss 1.3733 (scene 1.3733, object 0.0000)  lr 1.22e-05  teacher entropy 0.217  88s
+    step   600/1021  loss 1.3710 (scene 1.3710, object 0.0000)  lr 1.21e-05  teacher entropy 0.216  105s
+    step   700/1021  loss 1.3736 (scene 1.3736, object 0.0000)  lr 1.20e-05  teacher entropy 0.217  123s
+    step   800/1021  loss 1.3735 (scene 1.3735, object 0.0000)  lr 1.19e-05  teacher entropy 0.217  140s
+    step   900/1021  loss 1.3743 (scene 1.3743, object 0.0000)  lr 1.17e-05  teacher entropy 0.217  157s
+    step  1000/1021  loss 1.3731 (scene 1.3731, object 0.0000)  lr 1.16e-05  teacher entropy 0.217  175s
+    step  1021/1021  loss 1.3727 (scene 1.3727, object 0.0000)  lr 1.16e-05  teacher entropy 0.217  179s
+  epoch  83/100  loss 1.373  scene_loss 1.373  object_loss 0  teacher_entropy 0.2169  3.0 min, checkpoint saved
+
+SSL epoch 84/100
+    step   100/1021  loss 1.3648 (scene 1.3648, object 0.0000)  lr 1.15e-05  teacher entropy 0.214  18s
+    step   200/1021  loss 1.3683 (scene 1.3683, object 0.0000)  lr 1.14e-05  teacher entropy 0.217  35s
+    step   300/1021  loss 1.3698 (scene 1.3698, object 0.0000)  lr 1.12e-05  teacher entropy 0.217  53s
+    step   400/1021  loss 1.3686 (scene 1.3686, object 0.0000)  lr 1.11e-05  teacher entropy 0.216  70s
+    step   500/1021  loss 1.3637 (scene 1.3637, object 0.0000)  lr 1.10e-05  teacher entropy 0.214  87s
+    step   600/1021  loss 1.3629 (scene 1.3629, object 0.0000)  lr 1.09e-05  teacher entropy 0.214  105s
+    step   700/1021  loss 1.3656 (scene 1.3656, object 0.0000)  lr 1.08e-05  teacher entropy 0.215  122s
+    step   800/1021  loss 1.3675 (scene 1.3675, object 0.0000)  lr 1.07e-05  teacher entropy 0.215  140s
+    step   900/1021  loss 1.3695 (scene 1.3695, object 0.0000)  lr 1.06e-05  teacher entropy 0.215  157s
+    step  1000/1021  loss 1.3704 (scene 1.3704, object 0.0000)  lr 1.04e-05  teacher entropy 0.214  174s
+    step  1021/1021  loss 1.3703 (scene 1.3703, object 0.0000)  lr 1.04e-05  teacher entropy 0.215  178s
+  epoch  84/100  loss 1.37  scene_loss 1.37  object_loss 0  teacher_entropy 0.2146  3.0 min, checkpoint saved
+
+SSL epoch 85/100
+    step   100/1021  loss 1.3806 (scene 1.3806, object 0.0000)  lr 1.03e-05  teacher entropy 0.218  19s
+    step   200/1021  loss 1.3747 (scene 1.3747, object 0.0000)  lr 1.02e-05  teacher entropy 0.218  36s
+    step   300/1021  loss 1.3731 (scene 1.3731, object 0.0000)  lr 1.01e-05  teacher entropy 0.217  54s
+    step   400/1021  loss 1.3716 (scene 1.3716, object 0.0000)  lr 9.98e-06  teacher entropy 0.216  71s
+    step   500/1021  loss 1.3701 (scene 1.3701, object 0.0000)  lr 9.87e-06  teacher entropy 0.216  89s
+    step   600/1021  loss 1.3690 (scene 1.3690, object 0.0000)  lr 9.76e-06  teacher entropy 0.216  106s
+    step   700/1021  loss 1.3661 (scene 1.3661, object 0.0000)  lr 9.65e-06  teacher entropy 0.215  123s
+    step   800/1021  loss 1.3665 (scene 1.3665, object 0.0000)  lr 9.54e-06  teacher entropy 0.216  141s
+    step   900/1021  loss 1.3646 (scene 1.3646, object 0.0000)  lr 9.44e-06  teacher entropy 0.216  158s
+    step  1000/1021  loss 1.3663 (scene 1.3663, object 0.0000)  lr 9.33e-06  teacher entropy 0.215  176s
+    step  1021/1021  loss 1.3660 (scene 1.3660, object 0.0000)  lr 9.31e-06  teacher entropy 0.216  179s
+  epoch  85/100  loss 1.366  scene_loss 1.366  object_loss 0  teacher_entropy 0.2156  3.0 min, checkpoint saved
+
+SSL epoch 86/100
+    step   100/1021  loss 1.3876 (scene 1.3876, object 0.0000)  lr 9.20e-06  teacher entropy 0.221  18s
+    step   200/1021  loss 1.3719 (scene 1.3719, object 0.0000)  lr 9.10e-06  teacher entropy 0.218  35s
+    step   300/1021  loss 1.3724 (scene 1.3724, object 0.0000)  lr 8.99e-06  teacher entropy 0.218  53s
+    step   400/1021  loss 1.3751 (scene 1.3751, object 0.0000)  lr 8.89e-06  teacher entropy 0.218  70s
+    step   500/1021  loss 1.3732 (scene 1.3732, object 0.0000)  lr 8.79e-06  teacher entropy 0.217  88s
+    step   600/1021  loss 1.3703 (scene 1.3703, object 0.0000)  lr 8.68e-06  teacher entropy 0.216  105s
+    step   700/1021  loss 1.3708 (scene 1.3708, object 0.0000)  lr 8.58e-06  teacher entropy 0.216  122s
+    step   800/1021  loss 1.3685 (scene 1.3685, object 0.0000)  lr 8.48e-06  teacher entropy 0.216  140s
+    step   900/1021  loss 1.3683 (scene 1.3683, object 0.0000)  lr 8.38e-06  teacher entropy 0.216  157s
+    step  1000/1021  loss 1.3681 (scene 1.3681, object 0.0000)  lr 8.28e-06  teacher entropy 0.215  174s
+    step  1021/1021  loss 1.3680 (scene 1.3680, object 0.0000)  lr 8.26e-06  teacher entropy 0.215  178s
+  epoch  86/100  loss 1.368  scene_loss 1.368  object_loss 0  teacher_entropy 0.2151  3.0 min, checkpoint saved
+
+SSL epoch 87/100
+    step   100/1021  loss 1.3558 (scene 1.3558, object 0.0000)  lr 8.16e-06  teacher entropy 0.213  22s
+    step   200/1021  loss 1.3495 (scene 1.3495, object 0.0000)  lr 8.06e-06  teacher entropy 0.212  39s
+    step   300/1021  loss 1.3586 (scene 1.3586, object 0.0000)  lr 7.96e-06  teacher entropy 0.214  57s
+    step   400/1021  loss 1.3583 (scene 1.3583, object 0.0000)  lr 7.87e-06  teacher entropy 0.214  74s
+    step   500/1021  loss 1.3585 (scene 1.3585, object 0.0000)  lr 7.77e-06  teacher entropy 0.214  92s
+    step   600/1021  loss 1.3585 (scene 1.3585, object 0.0000)  lr 7.67e-06  teacher entropy 0.213  109s
+    step   700/1021  loss 1.3574 (scene 1.3574, object 0.0000)  lr 7.58e-06  teacher entropy 0.213  127s
+    step   800/1021  loss 1.3609 (scene 1.3609, object 0.0000)  lr 7.48e-06  teacher entropy 0.214  144s
+    step   900/1021  loss 1.3611 (scene 1.3611, object 0.0000)  lr 7.39e-06  teacher entropy 0.214  161s
+    step  1000/1021  loss 1.3618 (scene 1.3618, object 0.0000)  lr 7.30e-06  teacher entropy 0.214  179s
+    step  1021/1021  loss 1.3611 (scene 1.3611, object 0.0000)  lr 7.28e-06  teacher entropy 0.214  182s
+  epoch  87/100  loss 1.361  scene_loss 1.361  object_loss 0  teacher_entropy 0.2139  3.0 min, checkpoint saved
+
+SSL epoch 88/100
+    step   100/1021  loss 1.3556 (scene 1.3556, object 0.0000)  lr 7.18e-06  teacher entropy 0.218  18s
+    step   200/1021  loss 1.3534 (scene 1.3534, object 0.0000)  lr 7.09e-06  teacher entropy 0.214  35s
+    step   300/1021  loss 1.3611 (scene 1.3611, object 0.0000)  lr 7.00e-06  teacher entropy 0.216  53s
+    step   400/1021  loss 1.3612 (scene 1.3612, object 0.0000)  lr 6.91e-06  teacher entropy 0.216  70s
+    step   500/1021  loss 1.3582 (scene 1.3582, object 0.0000)  lr 6.82e-06  teacher entropy 0.215  88s
+    step   600/1021  loss 1.3614 (scene 1.3614, object 0.0000)  lr 6.73e-06  teacher entropy 0.216  105s
+    step   700/1021  loss 1.3630 (scene 1.3630, object 0.0000)  lr 6.64e-06  teacher entropy 0.215  123s
+    step   800/1021  loss 1.3629 (scene 1.3629, object 0.0000)  lr 6.55e-06  teacher entropy 0.215  140s
+    step   900/1021  loss 1.3613 (scene 1.3613, object 0.0000)  lr 6.47e-06  teacher entropy 0.214  157s
+    step  1000/1021  loss 1.3618 (scene 1.3618, object 0.0000)  lr 6.38e-06  teacher entropy 0.215  175s
+    step  1021/1021  loss 1.3613 (scene 1.3613, object 0.0000)  lr 6.36e-06  teacher entropy 0.215  178s
+  epoch  88/100  loss 1.361  scene_loss 1.361  object_loss 0  teacher_entropy 0.2146  3.0 min, checkpoint saved
+
+SSL epoch 89/100
+    step   100/1021  loss 1.3594 (scene 1.3594, object 0.0000)  lr 6.28e-06  teacher entropy 0.212  18s
+    step   200/1021  loss 1.3529 (scene 1.3529, object 0.0000)  lr 6.19e-06  teacher entropy 0.212  35s
+    step   300/1021  loss 1.3476 (scene 1.3476, object 0.0000)  lr 6.11e-06  teacher entropy 0.212  53s
+    step   400/1021  loss 1.3479 (scene 1.3479, object 0.0000)  lr 6.02e-06  teacher entropy 0.212  70s
+    step   500/1021  loss 1.3532 (scene 1.3532, object 0.0000)  lr 5.94e-06  teacher entropy 0.213  87s
+    step   600/1021  loss 1.3542 (scene 1.3542, object 0.0000)  lr 5.86e-06  teacher entropy 0.213  105s
+    step   700/1021  loss 1.3567 (scene 1.3567, object 0.0000)  lr 5.77e-06  teacher entropy 0.214  122s
+    step   800/1021  loss 1.3584 (scene 1.3584, object 0.0000)  lr 5.69e-06  teacher entropy 0.214  139s
+    step   900/1021  loss 1.3575 (scene 1.3575, object 0.0000)  lr 5.61e-06  teacher entropy 0.214  157s
+    step  1000/1021  loss 1.3586 (scene 1.3586, object 0.0000)  lr 5.53e-06  teacher entropy 0.214  174s
+    step  1021/1021  loss 1.3580 (scene 1.3580, object 0.0000)  lr 5.52e-06  teacher entropy 0.214  178s
+  epoch  89/100  loss 1.358  scene_loss 1.358  object_loss 0  teacher_entropy 0.214  3.0 min, checkpoint saved
+
+SSL epoch 90/100
+    step   100/1021  loss 1.3371 (scene 1.3371, object 0.0000)  lr 5.44e-06  teacher entropy 0.212  18s
+    step   200/1021  loss 1.3401 (scene 1.3401, object 0.0000)  lr 5.36e-06  teacher entropy 0.209  35s
+    step   300/1021  loss 1.3386 (scene 1.3386, object 0.0000)  lr 5.28e-06  teacher entropy 0.209  53s
+    step   400/1021  loss 1.3422 (scene 1.3422, object 0.0000)  lr 5.20e-06  teacher entropy 0.211  70s
+    step   500/1021  loss 1.3430 (scene 1.3430, object 0.0000)  lr 5.13e-06  teacher entropy 0.211  87s
+    step   600/1021  loss 1.3429 (scene 1.3429, object 0.0000)  lr 5.05e-06  teacher entropy 0.211  105s
+    step   700/1021  loss 1.3471 (scene 1.3471, object 0.0000)  lr 4.98e-06  teacher entropy 0.211  122s
+    step   800/1021  loss 1.3490 (scene 1.3490, object 0.0000)  lr 4.90e-06  teacher entropy 0.212  140s
+    step   900/1021  loss 1.3505 (scene 1.3505, object 0.0000)  lr 4.83e-06  teacher entropy 0.212  157s
+    step  1000/1021  loss 1.3503 (scene 1.3503, object 0.0000)  lr 4.76e-06  teacher entropy 0.212  174s
+    step  1021/1021  loss 1.3509 (scene 1.3509, object 0.0000)  lr 4.74e-06  teacher entropy 0.212  178s
+  epoch  90/100  loss 1.351  scene_loss 1.351  object_loss 0  teacher_entropy 0.2122  3.0 min, checkpoint saved
+
+SSL epoch 91/100
+    step   100/1021  loss 1.3419 (scene 1.3419, object 0.0000)  lr 4.67e-06  teacher entropy 0.211  18s
+    step   200/1021  loss 1.3561 (scene 1.3561, object 0.0000)  lr 4.60e-06  teacher entropy 0.215  35s
+    step   300/1021  loss 1.3546 (scene 1.3546, object 0.0000)  lr 4.53e-06  teacher entropy 0.214  53s
+    step   400/1021  loss 1.3552 (scene 1.3552, object 0.0000)  lr 4.46e-06  teacher entropy 0.214  70s
+    step   500/1021  loss 1.3500 (scene 1.3500, object 0.0000)  lr 4.39e-06  teacher entropy 0.212  88s
+    step   600/1021  loss 1.3509 (scene 1.3509, object 0.0000)  lr 4.32e-06  teacher entropy 0.212  105s
+    step   700/1021  loss 1.3508 (scene 1.3508, object 0.0000)  lr 4.25e-06  teacher entropy 0.212  122s
+    step   800/1021  loss 1.3508 (scene 1.3508, object 0.0000)  lr 4.18e-06  teacher entropy 0.212  140s
+    step   900/1021  loss 1.3527 (scene 1.3527, object 0.0000)  lr 4.11e-06  teacher entropy 0.213  157s
+    step  1000/1021  loss 1.3537 (scene 1.3537, object 0.0000)  lr 4.05e-06  teacher entropy 0.213  175s
+    step  1021/1021  loss 1.3540 (scene 1.3540, object 0.0000)  lr 4.04e-06  teacher entropy 0.213  178s
+  epoch  91/100  loss 1.354  scene_loss 1.354  object_loss 0  teacher_entropy 0.2129  3.0 min, checkpoint saved
+
+SSL epoch 92/100
+    step   100/1021  loss 1.3361 (scene 1.3361, object 0.0000)  lr 3.97e-06  teacher entropy 0.209  18s
+    step   200/1021  loss 1.3492 (scene 1.3492, object 0.0000)  lr 3.91e-06  teacher entropy 0.213  35s
+    step   300/1021  loss 1.3502 (scene 1.3502, object 0.0000)  lr 3.84e-06  teacher entropy 0.212  53s
+    step   400/1021  loss 1.3461 (scene 1.3461, object 0.0000)  lr 3.78e-06  teacher entropy 0.210  70s
+    step   500/1021  loss 1.3480 (scene 1.3480, object 0.0000)  lr 3.72e-06  teacher entropy 0.211  88s
+    step   600/1021  loss 1.3488 (scene 1.3488, object 0.0000)  lr 3.65e-06  teacher entropy 0.212  105s
+    step   700/1021  loss 1.3496 (scene 1.3496, object 0.0000)  lr 3.59e-06  teacher entropy 0.212  123s
+    step   800/1021  loss 1.3480 (scene 1.3480, object 0.0000)  lr 3.53e-06  teacher entropy 0.212  140s
+    step   900/1021  loss 1.3492 (scene 1.3492, object 0.0000)  lr 3.47e-06  teacher entropy 0.212  157s
+    step  1000/1021  loss 1.3499 (scene 1.3499, object 0.0000)  lr 3.41e-06  teacher entropy 0.212  175s
+    step  1021/1021  loss 1.3502 (scene 1.3502, object 0.0000)  lr 3.40e-06  teacher entropy 0.212  179s
+  epoch  92/100  loss 1.35  scene_loss 1.35  object_loss 0  teacher_entropy 0.2124  3.0 min, checkpoint saved
+
+SSL epoch 93/100
+    step   100/1021  loss 1.3665 (scene 1.3665, object 0.0000)  lr 3.34e-06  teacher entropy 0.214  18s
+    step   200/1021  loss 1.3591 (scene 1.3591, object 0.0000)  lr 3.29e-06  teacher entropy 0.212  35s
+    step   300/1021  loss 1.3462 (scene 1.3462, object 0.0000)  lr 3.23e-06  teacher entropy 0.209  53s
+    step   400/1021  loss 1.3498 (scene 1.3498, object 0.0000)  lr 3.17e-06  teacher entropy 0.211  70s
+    step   500/1021  loss 1.3476 (scene 1.3476, object 0.0000)  lr 3.12e-06  teacher entropy 0.211  87s
+    step   600/1021  loss 1.3492 (scene 1.3492, object 0.0000)  lr 3.06e-06  teacher entropy 0.211  105s
+    step   700/1021  loss 1.3490 (scene 1.3490, object 0.0000)  lr 3.01e-06  teacher entropy 0.211  122s
+    step   800/1021  loss 1.3515 (scene 1.3515, object 0.0000)  lr 2.96e-06  teacher entropy 0.212  139s
+    step   900/1021  loss 1.3521 (scene 1.3521, object 0.0000)  lr 2.90e-06  teacher entropy 0.212  157s
+    step  1000/1021  loss 1.3529 (scene 1.3529, object 0.0000)  lr 2.85e-06  teacher entropy 0.213  174s
+    step  1021/1021  loss 1.3534 (scene 1.3534, object 0.0000)  lr 2.84e-06  teacher entropy 0.213  178s
+  epoch  93/100  loss 1.353  scene_loss 1.353  object_loss 0  teacher_entropy 0.2129  3.0 min, checkpoint saved
+
+SSL epoch 94/100
+    step   100/1021  loss 1.3276 (scene 1.3276, object 0.0000)  lr 2.79e-06  teacher entropy 0.212  18s
+    step   200/1021  loss 1.3327 (scene 1.3327, object 0.0000)  lr 2.74e-06  teacher entropy 0.212  35s
+    step   300/1021  loss 1.3438 (scene 1.3438, object 0.0000)  lr 2.69e-06  teacher entropy 0.212  53s
+    step   400/1021  loss 1.3462 (scene 1.3462, object 0.0000)  lr 2.64e-06  teacher entropy 0.211  70s
+    step   500/1021  loss 1.3494 (scene 1.3494, object 0.0000)  lr 2.59e-06  teacher entropy 0.212  88s
+    step   600/1021  loss 1.3489 (scene 1.3489, object 0.0000)  lr 2.55e-06  teacher entropy 0.212  105s
+    step   700/1021  loss 1.3501 (scene 1.3501, object 0.0000)  lr 2.50e-06  teacher entropy 0.212  122s
+    step   800/1021  loss 1.3533 (scene 1.3533, object 0.0000)  lr 2.45e-06  teacher entropy 0.213  140s
+    step   900/1021  loss 1.3543 (scene 1.3543, object 0.0000)  lr 2.41e-06  teacher entropy 0.213  157s
+    step  1000/1021  loss 1.3538 (scene 1.3538, object 0.0000)  lr 2.36e-06  teacher entropy 0.213  175s
+    step  1021/1021  loss 1.3537 (scene 1.3537, object 0.0000)  lr 2.36e-06  teacher entropy 0.213  178s
+  epoch  94/100  loss 1.354  scene_loss 1.354  object_loss 0  teacher_entropy 0.2131  3.0 min, checkpoint saved
+
+SSL epoch 95/100
+    step   100/1021  loss 1.3566 (scene 1.3566, object 0.0000)  lr 2.31e-06  teacher entropy 0.216  18s
+    step   200/1021  loss 1.3594 (scene 1.3594, object 0.0000)  lr 2.27e-06  teacher entropy 0.216  35s
+    step   300/1021  loss 1.3500 (scene 1.3500, object 0.0000)  lr 2.23e-06  teacher entropy 0.214  53s
+    step   400/1021  loss 1.3473 (scene 1.3473, object 0.0000)  lr 2.18e-06  teacher entropy 0.214  70s
+    step   500/1021  loss 1.3481 (scene 1.3481, object 0.0000)  lr 2.14e-06  teacher entropy 0.214  88s
+    step   600/1021  loss 1.3489 (scene 1.3489, object 0.0000)  lr 2.10e-06  teacher entropy 0.214  105s
+    step   700/1021  loss 1.3463 (scene 1.3463, object 0.0000)  lr 2.06e-06  teacher entropy 0.213  123s
+    step   800/1021  loss 1.3470 (scene 1.3470, object 0.0000)  lr 2.03e-06  teacher entropy 0.213  140s
+    step   900/1021  loss 1.3481 (scene 1.3481, object 0.0000)  lr 1.99e-06  teacher entropy 0.213  158s
+    step  1000/1021  loss 1.3489 (scene 1.3489, object 0.0000)  lr 1.95e-06  teacher entropy 0.213  175s
+    step  1021/1021  loss 1.3481 (scene 1.3481, object 0.0000)  lr 1.94e-06  teacher entropy 0.213  179s
+  epoch  95/100  loss 1.348  scene_loss 1.348  object_loss 0  teacher_entropy 0.213  3.0 min, checkpoint saved
+
+SSL epoch 96/100
+    step   100/1021  loss 1.3545 (scene 1.3545, object 0.0000)  lr 1.91e-06  teacher entropy 0.216  18s
+    step   200/1021  loss 1.3611 (scene 1.3611, object 0.0000)  lr 1.87e-06  teacher entropy 0.215  35s
+    step   300/1021  loss 1.3588 (scene 1.3588, object 0.0000)  lr 1.84e-06  teacher entropy 0.215  53s
+    step   400/1021  loss 1.3591 (scene 1.3591, object 0.0000)  lr 1.80e-06  teacher entropy 0.215  70s
+    step   500/1021  loss 1.3557 (scene 1.3557, object 0.0000)  lr 1.77e-06  teacher entropy 0.214  88s
+    step   600/1021  loss 1.3529 (scene 1.3529, object 0.0000)  lr 1.73e-06  teacher entropy 0.213  105s
+    step   700/1021  loss 1.3531 (scene 1.3531, object 0.0000)  lr 1.70e-06  teacher entropy 0.213  123s
+    step   800/1021  loss 1.3534 (scene 1.3534, object 0.0000)  lr 1.67e-06  teacher entropy 0.213  140s
+    step   900/1021  loss 1.3520 (scene 1.3520, object 0.0000)  lr 1.64e-06  teacher entropy 0.213  158s
+    step  1000/1021  loss 1.3530 (scene 1.3530, object 0.0000)  lr 1.61e-06  teacher entropy 0.213  175s
+    step  1021/1021  loss 1.3518 (scene 1.3518, object 0.0000)  lr 1.60e-06  teacher entropy 0.213  179s
+  epoch  96/100  loss 1.352  scene_loss 1.352  object_loss 0  teacher_entropy 0.2128  3.0 min, checkpoint saved
+
+SSL epoch 97/100
+    step   100/1021  loss 1.3763 (scene 1.3763, object 0.0000)  lr 1.57e-06  teacher entropy 0.217  18s
+    step   200/1021  loss 1.3620 (scene 1.3620, object 0.0000)  lr 1.55e-06  teacher entropy 0.215  35s
+    step   300/1021  loss 1.3601 (scene 1.3601, object 0.0000)  lr 1.52e-06  teacher entropy 0.217  53s
+    step   400/1021  loss 1.3579 (scene 1.3579, object 0.0000)  lr 1.49e-06  teacher entropy 0.216  70s
+    step   500/1021  loss 1.3543 (scene 1.3543, object 0.0000)  lr 1.47e-06  teacher entropy 0.215  88s
+    step   600/1021  loss 1.3501 (scene 1.3501, object 0.0000)  lr 1.44e-06  teacher entropy 0.214  105s
+    step   700/1021  loss 1.3469 (scene 1.3469, object 0.0000)  lr 1.41e-06  teacher entropy 0.213  123s
+    step   800/1021  loss 1.3460 (scene 1.3460, object 0.0000)  lr 1.39e-06  teacher entropy 0.213  140s
+    step   900/1021  loss 1.3464 (scene 1.3464, object 0.0000)  lr 1.37e-06  teacher entropy 0.213  158s
+    step  1000/1021  loss 1.3457 (scene 1.3457, object 0.0000)  lr 1.34e-06  teacher entropy 0.213  175s
+    step  1021/1021  loss 1.3461 (scene 1.3461, object 0.0000)  lr 1.34e-06  teacher entropy 0.212  179s
+  epoch  97/100  loss 1.346  scene_loss 1.346  object_loss 0  teacher_entropy 0.2125  3.0 min, checkpoint saved
+
+SSL epoch 98/100
+    step   100/1021  loss 1.3491 (scene 1.3491, object 0.0000)  lr 1.32e-06  teacher entropy 0.212  18s
+    step   200/1021  loss 1.3458 (scene 1.3458, object 0.0000)  lr 1.30e-06  teacher entropy 0.211  35s
+    step   300/1021  loss 1.3444 (scene 1.3444, object 0.0000)  lr 1.28e-06  teacher entropy 0.212  53s
+    step   400/1021  loss 1.3429 (scene 1.3429, object 0.0000)  lr 1.26e-06  teacher entropy 0.212  70s
+    step   500/1021  loss 1.3441 (scene 1.3441, object 0.0000)  lr 1.24e-06  teacher entropy 0.211  88s
+    step   600/1021  loss 1.3466 (scene 1.3466, object 0.0000)  lr 1.22e-06  teacher entropy 0.212  105s
+    step   700/1021  loss 1.3473 (scene 1.3473, object 0.0000)  lr 1.20e-06  teacher entropy 0.211  123s
+    step   800/1021  loss 1.3487 (scene 1.3487, object 0.0000)  lr 1.19e-06  teacher entropy 0.212  140s
+    step   900/1021  loss 1.3472 (scene 1.3472, object 0.0000)  lr 1.17e-06  teacher entropy 0.211  157s
+    step  1000/1021  loss 1.3480 (scene 1.3480, object 0.0000)  lr 1.15e-06  teacher entropy 0.211  175s
+    step  1021/1021  loss 1.3483 (scene 1.3483, object 0.0000)  lr 1.15e-06  teacher entropy 0.211  179s
+  epoch  98/100  loss 1.348  scene_loss 1.348  object_loss 0  teacher_entropy 0.2112  3.0 min, checkpoint saved
+
+SSL epoch 99/100
+    step   100/1021  loss 1.3523 (scene 1.3523, object 0.0000)  lr 1.14e-06  teacher entropy 0.212  18s
+    step   200/1021  loss 1.3583 (scene 1.3583, object 0.0000)  lr 1.12e-06  teacher entropy 0.215  35s
+    step   300/1021  loss 1.3574 (scene 1.3574, object 0.0000)  lr 1.11e-06  teacher entropy 0.215  52s
+    step   400/1021  loss 1.3533 (scene 1.3533, object 0.0000)  lr 1.10e-06  teacher entropy 0.214  70s
+    step   500/1021  loss 1.3482 (scene 1.3482, object 0.0000)  lr 1.09e-06  teacher entropy 0.213  87s
+    step   600/1021  loss 1.3484 (scene 1.3484, object 0.0000)  lr 1.08e-06  teacher entropy 0.212  104s
+    step   700/1021  loss 1.3494 (scene 1.3494, object 0.0000)  lr 1.07e-06  teacher entropy 0.213  122s
+    step   800/1021  loss 1.3477 (scene 1.3477, object 0.0000)  lr 1.06e-06  teacher entropy 0.212  139s
+    step   900/1021  loss 1.3465 (scene 1.3465, object 0.0000)  lr 1.05e-06  teacher entropy 0.212  156s
+    step  1000/1021  loss 1.3445 (scene 1.3445, object 0.0000)  lr 1.04e-06  teacher entropy 0.212  174s
+    step  1021/1021  loss 1.3443 (scene 1.3443, object 0.0000)  lr 1.04e-06  teacher entropy 0.212  177s
+  epoch  99/100  loss 1.344  scene_loss 1.344  object_loss 0  teacher_entropy 0.2117  3.0 min, checkpoint saved
+
+SSL epoch 100/100
+    step   100/1021  loss 1.3406 (scene 1.3406, object 0.0000)  lr 1.03e-06  teacher entropy 0.213  18s
+    step   200/1021  loss 1.3402 (scene 1.3402, object 0.0000)  lr 1.02e-06  teacher entropy 0.211  35s
+    step   300/1021  loss 1.3436 (scene 1.3436, object 0.0000)  lr 1.02e-06  teacher entropy 0.211  53s
+    step   400/1021  loss 1.3424 (scene 1.3424, object 0.0000)  lr 1.01e-06  teacher entropy 0.210  70s
+    step   500/1021  loss 1.3387 (scene 1.3387, object 0.0000)  lr 1.01e-06  teacher entropy 0.210  88s
+    step   600/1021  loss 1.3412 (scene 1.3412, object 0.0000)  lr 1.01e-06  teacher entropy 0.210  105s
+    step   700/1021  loss 1.3451 (scene 1.3451, object 0.0000)  lr 1.00e-06  teacher entropy 0.211  122s
+    step   800/1021  loss 1.3448 (scene 1.3448, object 0.0000)  lr 1.00e-06  teacher entropy 0.211  140s
+    step   900/1021  loss 1.3459 (scene 1.3459, object 0.0000)  lr 1.00e-06  teacher entropy 0.211  157s
+    step  1000/1021  loss 1.3457 (scene 1.3457, object 0.0000)  lr 1.00e-06  teacher entropy 0.211  175s
+    step  1021/1021  loss 1.3458 (scene 1.3458, object 0.0000)  lr 1.00e-06  teacher entropy 0.211  178s
+  epoch 100/100  loss 1.346  scene_loss 1.346  object_loss 0  teacher_entropy 0.2114  3.0 min, checkpoint saved
+
+done: 298.57 min, 6,534,400 images, 102,100 steps; exported /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/RegionSSL/DINO_reference/outputs/ssl/20261118-204726_dino_suite_atr_ssl_mobilenetv2_split3_seed2/backbone_epoch100.pth
+==============================================================================
+                                JOB STATISTICS                                
+==============================================================================
+
+           JobId: 4755084
+      SubmitTime: 2026-11-18T17:51:38
+         EndTime: 2026-11-19T20:15:26
+         RunTime: 05:02:13
+       AllocTRES: cpu=10,mem=64G,node=1,billing=8,gres/gpu=1
+       Partition: a100
+        NodeList: gpu-n53
+         Command: ../RegionSSL/crc/ssl_atr.sbatch
+
+==============================================================================
+ For more information use the command:
+   - `sacct -M gpu -j 4755084 -S 2026-11-18T17:51:38 -E 2026-11-19T20:15:26`
+
+ To control the output of the above command:
+   - Add `--format=<field1,field2,etc>` with fields of interest
+   - See the list of all possible fields by running: `sacct --helpformat`
+==============================================================================

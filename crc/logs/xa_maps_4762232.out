@@ -1,0 +1,142 @@
+host gpu-n44.crc.pitt.edu  job 4762232  start Thu Nov 19 11:23:38 AM EST 2026
+repo /ihome/ageorge/nik96/mobilenetv2_SAR_SSL  commit 0c2d206  branch SmokeTest_Mobilenet_with_DINO
+NVIDIA A100-PCIE-40GB, 40960 MiB, 595.91.07
+python /ix/ageorge/nik96/envs/sarssl/bin/python 3.13.16 | torch 2.10.0+cu128 | torchvision 0.25.0+cu128 | cuda available True
+split 1
+  ImageNet start (no SSL): mass in box 25.7 %
+  A1 DINO on ATRNet (in-domain, split 1): mass in box 34.1 %
+  XA DINO on SARDet: mass in box 18.5 %
+  XA LeJEPA on SARDet: mass in box 21.0 %
+  XA SparK on SARDet: mass in box 18.8 %
+  RegionDINO scene+object: mass in box 18.4 %
+  RegionDINO scene+object, random windows: mass in box 14.9 %
+  RegionDINO object-only: mass in box 28.0 %
+  RegionDINO object-only, random windows: mass in box 18.3 %
+  XI DINO (suite recipe) on ATRNet: mass in box 31.6 %
+  XI RegionDINO scene+object on ATRNet: mass in box 28.6 %
+  XI RegionDINO scene+object on ATRNet, random: mass in box 29.1 %
+  XI RegionDINO object-only on ATRNet: mass in box 22.2 %
+  XI RegionDINO object-only on ATRNet, random: mass in box 21.5 %
+split 2
+  ImageNet start (no SSL): mass in box 25.7 %
+  XA DINO on SARDet: mass in box 19.1 %
+  XA LeJEPA on SARDet: mass in box 19.1 %
+  XA SparK on SARDet: mass in box 18.6 %
+  RegionDINO scene+object: mass in box 18.9 %
+  RegionDINO scene+object, random windows: mass in box 16.2 %
+  RegionDINO object-only: mass in box 25.9 %
+  RegionDINO object-only, random windows: mass in box 16.4 %
+  XI DINO (suite recipe) on ATRNet: mass in box 31.8 %
+  XI RegionDINO scene+object on ATRNet: mass in box 28.9 %
+  XI RegionDINO scene+object on ATRNet, random: mass in box 29.5 %
+  XI RegionDINO object-only on ATRNet: mass in box 23.8 %
+  XI RegionDINO object-only on ATRNet, random: mass in box 20.8 %
+split 3
+  ImageNet start (no SSL): mass in box 25.7 %
+  XA DINO on SARDet: mass in box 19.8 %
+  XA LeJEPA on SARDet: mass in box 23.3 %
+  XA SparK on SARDet: mass in box 18.9 %
+  RegionDINO scene+object: mass in box 18.9 %
+  RegionDINO scene+object, random windows: mass in box 16.3 %
+  RegionDINO object-only: mass in box 26.3 %
+  RegionDINO object-only, random windows: mass in box 19.4 %
+  XI DINO (suite recipe) on ATRNet: mass in box 31.7 %
+  XI RegionDINO scene+object on ATRNet: mass in box 29.2 %
+  XI RegionDINO scene+object on ATRNet, random: mass in box 29.6 %
+  XI RegionDINO object-only on ATRNet: mass in box 24.3 %
+  XI RegionDINO object-only on ATRNet, random: mass in box 20.5 %
+# Frozen backbones on ATRNet-STAR test chips: where the response sits, before fine-tuning
+
+2000 official test chips (seed 0, the same chips for every model and split); box = the dataset's vehicle annotation, mean box area 17.2 % of the chip (what a uniform map scores as mass in box). Response map = channel norm of the last feature map of the frozen backbone, no labels, no fine-tuning. Concentration = mass in box / box area share. Peak in box = share of chips whose strongest pixel lies in the box.
+
+## Split 1
+
+| backbone | mass in box (%) | concentration | peak in box (%) | vs ImageNet start: mean, % chips higher | vs XA DINO on SARDet: mean, % chips higher |
+|---|---|---|---|---|---|
+| ImageNet start (no SSL) | 25.7 | 1.60 | 47.4 | - | +7.2, 93 % |
+| A1 DINO on ATRNet (in-domain, split 1) | 34.1 | 2.25 | 87.4 | +8.4, 97 % | +15.6, 100 % |
+| XA DINO on SARDet | 18.6 | 1.07 | 17.8 | -7.2, 7 % | - |
+| XA LeJEPA on SARDet | 21.0 | 1.26 | 28.6 | -4.8, 17 % | +2.4, 79 % |
+| XA SparK on SARDet | 18.8 | 1.11 | 16.0 | -6.9, 4 % | +0.3, 54 % |
+| RegionDINO scene+object | 18.4 | 1.07 | 11.6 | -7.3, 4 % | -0.1, 49 % |
+| RegionDINO scene+object, random windows | 14.9 | 0.82 | 11.0 | -10.8, 2 % | -3.6, 8 % |
+| RegionDINO object-only | 28.0 | 1.83 | 62.1 | +2.3, 65 % | +9.5, 94 % |
+| RegionDINO object-only, random windows | 18.3 | 1.09 | 13.1 | -7.4, 7 % | -0.2, 49 % |
+| XI DINO (suite recipe) on ATRNet | 31.6 | 2.06 | 83.7 | +5.9, 92 % | +13.1, 99 % |
+| XI RegionDINO scene+object on ATRNet | 28.6 | 1.82 | 78.0 | +2.8, 77 % | +10.0, 99 % |
+| XI RegionDINO scene+object on ATRNet, random | 29.1 | 1.86 | 78.5 | +3.4, 80 % | +10.6, 99 % |
+| XI RegionDINO object-only on ATRNet | 22.2 | 1.39 | 42.9 | -3.5, 26 % | +3.7, 80 % |
+| XI RegionDINO object-only on ATRNet, random | 21.5 | 1.34 | 28.6 | -4.2, 25 % | +2.9, 74 % |
+
+## Split 2
+
+| backbone | mass in box (%) | concentration | peak in box (%) | vs ImageNet start: mean, % chips higher | vs XA DINO on SARDet: mean, % chips higher |
+|---|---|---|---|---|---|
+| ImageNet start (no SSL) | 25.7 | 1.60 | 47.4 | - | +6.6, 91 % |
+| XA DINO on SARDet | 19.1 | 1.11 | 17.2 | -6.6, 9 % | - |
+| XA LeJEPA on SARDet | 19.1 | 1.13 | 21.1 | -6.6, 10 % | +0.0, 54 % |
+| XA SparK on SARDet | 18.6 | 1.11 | 13.9 | -7.1, 4 % | -0.5, 47 % |
+| RegionDINO scene+object | 18.9 | 1.09 | 21.0 | -6.9, 6 % | -0.3, 46 % |
+| RegionDINO scene+object, random windows | 16.2 | 0.91 | 12.7 | -9.5, 2 % | -2.9, 8 % |
+| RegionDINO object-only | 25.9 | 1.68 | 56.2 | +0.2, 53 % | +6.8, 88 % |
+| RegionDINO object-only, random windows | 16.4 | 0.96 | 13.8 | -9.4, 6 % | -2.8, 30 % |
+| XI DINO (suite recipe) on ATRNet | 31.8 | 2.07 | 83.2 | +6.0, 93 % | +12.6, 99 % |
+| XI RegionDINO scene+object on ATRNet | 28.9 | 1.84 | 74.3 | +3.1, 78 % | +9.7, 98 % |
+| XI RegionDINO scene+object on ATRNet, random | 29.5 | 1.89 | 78.1 | +3.7, 82 % | +10.3, 98 % |
+| XI RegionDINO object-only on ATRNet | 23.8 | 1.51 | 42.6 | -1.9, 36 % | +4.7, 82 % |
+| XI RegionDINO object-only on ATRNet, random | 20.8 | 1.28 | 27.4 | -5.0, 20 % | +1.7, 64 % |
+
+## Split 3
+
+| backbone | mass in box (%) | concentration | peak in box (%) | vs ImageNet start: mean, % chips higher | vs XA DINO on SARDet: mean, % chips higher |
+|---|---|---|---|---|---|
+| ImageNet start (no SSL) | 25.7 | 1.60 | 47.4 | - | +5.9, 90 % |
+| XA DINO on SARDet | 19.8 | 1.16 | 19.4 | -5.9, 10 % | - |
+| XA LeJEPA on SARDet | 23.3 | 1.40 | 31.4 | -2.5, 31 % | +3.5, 85 % |
+| XA SparK on SARDet | 18.9 | 1.12 | 15.2 | -6.9, 5 % | -0.9, 40 % |
+| RegionDINO scene+object | 18.9 | 1.10 | 14.1 | -6.8, 7 % | -0.9, 34 % |
+| RegionDINO scene+object, random windows | 16.3 | 0.91 | 10.2 | -9.5, 4 % | -3.5, 7 % |
+| RegionDINO object-only | 26.3 | 1.71 | 59.2 | +0.6, 55 % | +6.5, 86 % |
+| RegionDINO object-only, random windows | 19.4 | 1.17 | 19.1 | -6.3, 9 % | -0.4, 49 % |
+| XI DINO (suite recipe) on ATRNet | 31.8 | 2.07 | 81.0 | +6.0, 94 % | +11.9, 99 % |
+| XI RegionDINO scene+object on ATRNet | 29.2 | 1.86 | 77.5 | +3.5, 82 % | +9.4, 98 % |
+| XI RegionDINO scene+object on ATRNet, random | 29.6 | 1.91 | 79.1 | +3.8, 83 % | +9.8, 98 % |
+| XI RegionDINO object-only on ATRNet | 24.4 | 1.54 | 54.5 | -1.4, 41 % | +4.5, 85 % |
+| XI RegionDINO object-only on ATRNet, random | 20.5 | 1.26 | 26.5 | -5.2, 18 % | +0.7, 58 % |
+
+Written 2026-11-19T11:27:19.
+
+Written to /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet_to_ATR/outputs/compare: response_maps.md, response_maps_per_model.csv, response_maps_per_chip.csv, response_maps_split1.png / .pdf
+total 19234
+drwxr-xr-x 2 nik96 ageorge     4096 Nov 19 11:23 .
+drwxr-xr-x 2 nik96 ageorge     4096 Nov 18 09:24 ..
+-rw-r--r-- 1 nik96 ageorge     4836 Nov 19 11:23 cross_dataset.csv
+-rw-r--r-- 1 nik96 ageorge     4970 Nov 19 11:23 cross_dataset.md
+-rw-r--r-- 1 nik96 ageorge     4328 Nov 19 11:27 response_maps.md
+-rw-r--r-- 1 nik96 ageorge  1030750 Nov 19 11:27 response_maps_per_chip.csv
+-rw-r--r-- 1 nik96 ageorge     2972 Nov 19 11:27 response_maps_per_model.csv
+-rw-r--r-- 1 nik96 ageorge  4572088 Nov 19 11:26 response_maps_split1.pdf
+-rw-r--r-- 1 nik96 ageorge 13620975 Nov 19 11:26 response_maps_split1.png
+-rw-r--r-- 1 nik96 ageorge   415238 Nov 19 11:23 response_maps_split1_web.jpg
+-rw-r--r-- 1 nik96 ageorge    36630 Nov 19 11:23 results_2026-11-17.html
+==============================================================================
+                                JOB STATISTICS                                
+==============================================================================
+
+           JobId: 4762232
+      SubmitTime: 2026-11-19T11:06:12
+         EndTime: 2026-11-19T12:23:38
+         RunTime: 00:03:47
+       AllocTRES: cpu=8,mem=48G,node=1,billing=8,gres/gpu=1
+       Partition: a100
+        NodeList: gpu-n44
+         Command: /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet_to_ATR/crc_response_maps.sbatch
+
+==============================================================================
+ For more information use the command:
+   - `sacct -M gpu -j 4762232 -S 2026-11-19T11:06:12 -E 2026-11-19T12:23:38`
+
+ To control the output of the above command:
+   - Add `--format=<field1,field2,etc>` with fields of interest
+   - See the list of all possible fields by running: `sacct --helpformat`
+==============================================================================

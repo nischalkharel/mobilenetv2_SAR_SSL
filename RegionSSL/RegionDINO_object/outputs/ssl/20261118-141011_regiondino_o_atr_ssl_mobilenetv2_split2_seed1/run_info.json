@@ -1,0 +1,166 @@
+{
+  "kind": "ssl",
+  "status": "completed",
+  "started": "2026-11-18T14:10:11",
+  "run_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/RegionSSL/RegionDINO_object/outputs/ssl/20261118-141011_regiondino_o_atr_ssl_mobilenetv2_split2_seed1",
+  "config": {
+    "run_name": "regiondino_o_atr_ssl_mobilenetv2",
+    "method": "regiondino_object",
+    "common": {
+      "epochs": 100,
+      "batch_size": 64,
+      "seed_rule": "split - 1",
+      "num_workers": 8,
+      "export_rule": "final epoch, no selection",
+      "seed": 1
+    },
+    "views": {
+      "resize_rule": "detector_512",
+      "global_size": 224,
+      "local_size": 96,
+      "zoom_range": [
+        0.75,
+        1.33
+      ],
+      "hflip_p": 0.5,
+      "brightness": 0.4,
+      "contrast": 0.4,
+      "color_jitter_p": 0.8,
+      "blur_sigma": [
+        0.1,
+        2.0
+      ],
+      "solarization_p": 0.0
+    },
+    "object_views": {
+      "objects_per_image": 3,
+      "obj_global_size": 96,
+      "obj_local_size": 64,
+      "obj_local_number": 4,
+      "obj_global_zoom": [
+        1.4,
+        2.2
+      ],
+      "obj_local_zoom": [
+        0.5,
+        1.0
+      ],
+      "min_object_px": 12,
+      "max_magnification": 2.0,
+      "region_source": "felz",
+      "region_sampling": "sqrt_area",
+      "obj_blur_p": [
+        1.0,
+        0.1,
+        0.5
+      ],
+      "_note": "windows are sized from each region's own extent (no fixed pixel size); max_magnification stops tiny blobs being blown up; region_source random = the control with matched-size random windows"
+    },
+    "dino": {
+      "out_dim": 4096,
+      "use_bn_in_head": false,
+      "norm_last_layer": true,
+      "momentum_teacher": 0.9995,
+      "warmup_teacher_temp": 0.04,
+      "teacher_temp": 0.04,
+      "warmup_teacher_temp_epochs": 0,
+      "student_temp": 0.1,
+      "center_momentum": 0.9
+    },
+    "optim": {
+      "optimizer": "adamw",
+      "lr": 0.0005,
+      "min_lr": 1e-06,
+      "warmup_epochs": 10,
+      "weight_decay": 0.04,
+      "weight_decay_end": 0.04,
+      "clip_grad": 3.0,
+      "freeze_last_layer": 1,
+      "use_fp16": true
+    },
+    "pool": "atrnet",
+    "smoke": false
+  },
+  "git": {
+    "commit": "9df67f111a4780f6ce350b6f400774a32f7adab1",
+    "branch": "SmokeTest_Mobilenet_with_DINO",
+    "uncommitted_changes": true
+  },
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.10.0+cu128",
+    "platform": "Linux-5.14.0-503.22.1.el9_5.x86_64-x86_64-with-glibc2.34",
+    "hostname": "gpu-n53.crc.pitt.edu",
+    "cpu_count": 64,
+    "slurm_job_id": "4754169",
+    "cuda_available": true,
+    "torchvision": "0.25.0+cu128",
+    "gpu": "NVIDIA A100-PCIE-40GB",
+    "gpu_memory_gb": 39.5
+  },
+  "dataset_root": "/ix/ageorge/nik96/data/SARDet_100K",
+  "split": 2,
+  "command": "../RegionSSL/RegionDINO_object/train_ssl.py --config ../RegionSSL/RegionDINO_object/config_ssl_atr.json",
+  "method": "regiondino_object",
+  "initialization": {
+    "kind": "imagenet",
+    "file": "/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth",
+    "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35"
+  },
+  "checkpoint_rule": "final epoch, fixed in advance; the SSL loss never selects a checkpoint",
+  "export_rule": "teacher backbone, final epoch",
+  "views_per_image": 18,
+  "view_plan": {
+    "pool": "atrnet",
+    "input_size": 224,
+    "scene": [],
+    "object": [
+      [
+        "obj_global",
+        3,
+        1.0
+      ],
+      [
+        "obj_global",
+        3,
+        0.1
+      ],
+      [
+        "obj_local",
+        12,
+        0.5
+      ]
+    ],
+    "objects_per_image": 3,
+    "obj_global_size": 96,
+    "obj_local_size": 64
+  },
+  "cost": {
+    "epochs_done": 100,
+    "optimizer_steps": 102200,
+    "images_seen": 6540800,
+    "view_forwards": 117734400,
+    "train_minutes": 326.45,
+    "gpu_hours": 5.441,
+    "peak_gpu_memory_gb": 6.35
+  },
+  "view_box_coverage": null,
+  "schedule_fingerprint": "7e920cf8e1c28713939cb016a76ecf69e2e4ade28375f7c54aa354b354994e36",
+  "steps_per_epoch": 1022,
+  "total_steps": 102200,
+  "num_trainable_parameters": 10616832,
+  "measured_seconds_per_step": 0.1328,
+  "estimated_hours_for_all_epochs": 3.77,
+  "resumed": [
+    "2026-11-18T20:42:49"
+  ],
+  "exported_backbone": {
+    "file": "backbone_epoch100.pth",
+    "state_sha256": "96b293ee759a7601fcef555def8d4910d857c83dfea5e58e318aef05e0080e0a",
+    "file_sha256": "d13323acc211e795ae5c67945f3e69175b0abed97fbf9952b6998c02b0d848a9",
+    "num_tensors": 312
+  },
+  "finished": "2026-11-19T00:20:49",
+  "wall_minutes": 218.01,
+  "peak_gpu_memory_gb": 6.35
+}

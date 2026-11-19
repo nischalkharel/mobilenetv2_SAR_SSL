@@ -1,0 +1,89 @@
+{
+  "run_name": "regiondino_so_atr_ssl_mobilenetv2",
+  "method": "regiondino_scene_object",
+  "common": {
+    "epochs": 100,
+    "batch_size": 64,
+    "seed_rule": "split - 1",
+    "num_workers": 8,
+    "export_rule": "final epoch, no selection",
+    "seed": 2
+  },
+  "views": {
+    "resize_rule": "detector_512",
+    "global_size": 224,
+    "local_size": 96,
+    "zoom_range": [
+      0.75,
+      1.33
+    ],
+    "hflip_p": 0.5,
+    "brightness": 0.4,
+    "contrast": 0.4,
+    "color_jitter_p": 0.8,
+    "blur_sigma": [
+      0.1,
+      2.0
+    ],
+    "solarization_p": 0.0
+  },
+  "dino_views": {
+    "local_crops_number": 8,
+    "blur_p": [
+      1.0,
+      0.1,
+      0.5
+    ]
+  },
+  "object_views": {
+    "objects_per_image": 2,
+    "obj_global_size": 96,
+    "obj_local_size": 64,
+    "obj_local_number": 4,
+    "obj_global_zoom": [
+      1.4,
+      2.2
+    ],
+    "obj_local_zoom": [
+      0.5,
+      1.0
+    ],
+    "min_object_px": 12,
+    "max_magnification": 2.0,
+    "region_source": "felz",
+    "region_sampling": "sqrt_area",
+    "obj_blur_p": [
+      1.0,
+      0.1,
+      0.5
+    ],
+    "_note": "windows are sized from each region's own extent (no fixed pixel size); max_magnification stops tiny blobs being blown up; region_source random = the control with matched-size random windows"
+  },
+  "region_loss": {
+    "object_weight": 1.0
+  },
+  "dino": {
+    "out_dim": 4096,
+    "use_bn_in_head": false,
+    "norm_last_layer": true,
+    "momentum_teacher": 0.9995,
+    "warmup_teacher_temp": 0.04,
+    "teacher_temp": 0.04,
+    "warmup_teacher_temp_epochs": 0,
+    "student_temp": 0.1,
+    "center_momentum": 0.9
+  },
+  "optim": {
+    "optimizer": "adamw",
+    "lr": 0.0005,
+    "min_lr": 1e-06,
+    "warmup_epochs": 10,
+    "weight_decay": 0.04,
+    "weight_decay_end": 0.04,
+    "clip_grad": 3.0,
+    "freeze_last_layer": 1,
+    "use_fp16": true
+  },
+  "pool": "atrnet",
+  "smoke": false
+}
