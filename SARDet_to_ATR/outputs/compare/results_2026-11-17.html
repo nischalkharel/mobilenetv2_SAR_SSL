@@ -68,7 +68,7 @@ tr.grp td { text-align: left; font-size: 11.5px; text-transform: uppercase; lett
 
 <main>
 <header>
-  <div class="eyebrow">CRC A100 runs, updated 2026-11-19</div>
+  <div class="eyebrow">CRC A100 runs, updated 2026-11-19 midday</div>
   <h1>Self-supervised learning on SARDet-100K: what transfers</h1>
   <p class="sub">MobileNetV2 from ImageNet weights, then 100 epochs of SSL on 94,034 unlabeled SARDet-100K scenes, then supervised fine-tuning with 1, 3 or 10 % of the labels. Two downstream tests: the same dataset (detection, mAP) and a different one (ATRNet-STAR vehicle chips, 40-class accuracy). Three splits per cell; every difference is paired on the same split and labeled set. RegionDINO adds object views cut around label-free regions; its control cuts the same windows at random places. Every ATRNet figure keeps two blocks apart: <strong>SSL on ATRNet-STAR chips</strong> (in-domain, the earlier A-series and P4) and <strong>SSL on SARDet-100K scenes</strong> (cross-dataset, the XA rows). Compare a row with the rows of its own block; the gap between the blocks is the transfer question itself.</p>
 </header>
@@ -140,9 +140,9 @@ tr.grp td { text-align: left; font-size: 11.5px; text-transform: uppercase; lett
   <div><div class="eyebrow">Figure 5</div><h2>Where the frozen backbones respond on ATRNet test chips, before any fine-tuning</h2>
   <p class="sub">Response map = activity of the last feature map of the frozen backbone (no labels, no fine-tuning), measured against the dataset's vehicle box on 2,000 official test chips, the same chips for every model. Left: share of the map's mass inside the box; a map with no preference scores the box's area, 17.2 %. Right: share of chips whose strongest pixel lies inside the box. Bars are the mean over the three split backbones, dots the splits; the in-domain A1 backbone exists for split 1 only.</p></div>
   <div class="chart" id="fig5"></div>
-  <figcaption>Plain DINO, LeJEPA and SparK on SARDet respond <em>less</em> on the vehicle than the ImageNet start (peak in box 14 to 31 % against 47 %). RegionDINO object-only is the only SARDet backbone above the ImageNet start (peak in box 56 to 62 %), two thirds of the way to the in-domain A1 backbone (87 %). Its random-window control is back at the plain-DINO level, so the focus comes from the regions, not from the small crops. Scene+object responds like plain DINO (peak in box 12 to 21 %) and its control below it: the scene views in the loss pull the backbone back to a scene-level response, which matches its smaller accuracy gain.</figcaption>
+  <figcaption>Plain DINO, LeJEPA and SparK on SARDet respond <em>less</em> on the vehicle than the ImageNet start (peak in box 14 to 31 % against 47 %). RegionDINO object-only is the only SARDet backbone above the ImageNet start (peak in box 56 to 62 %), two thirds of the way to the in-domain A1 backbone (87 %). Its random-window control is back at the plain-DINO level, so the focus comes from the regions, not from the small crops. Scene+object responds like plain DINO (peak in box 12 to 21 %) and its control below it: the scene views in the loss pull the backbone back to a scene-level response, which matches its smaller accuracy gain. <strong>In-domain block (arm I):</strong> on the target-centred ATRNet chips plain DINO with the same recipe already looks at the vehicle (peak in box 81 to 84 %, close to A1&rsquo;s 87). Object views do not add focus there: scene+object and its control both sit at 74 to 79 %, and object-only drops to 43 to 55 % (its control 27 to 29 %). On a 128-px chip the proposed regions are fragments of the vehicle (median extent 16 px), so object-only views trade the whole vehicle for its brightest parts. Whether the features are also worse for classification is what the arm-I fine-tunes will say.</figcaption>
   <div class="chart" style="padding:8px"><img src="response_maps_split1_web.jpg" alt="Six test chips with the vehicle box and the response map of each split-1 backbone" style="width:100%;height:auto;display:block;border-radius:4px"></div>
-  <figcaption>Six test chips (one per scene type, chosen by seed, not by result) with the split-1 backbones, now including the two scene+object rows. The percentage under each map is its mass inside the white box.</figcaption>
+  <figcaption>Six test chips (one per scene type, chosen by seed, not by result) with the split-1 backbones, including the scene+object rows and the five arm-I backbones. The percentage under each map is its mass inside the white box.</figcaption>
 </figure>
 
 <section>
@@ -151,7 +151,8 @@ tr.grp td { text-align: left; font-size: 11.5px; text-transform: uppercase; lett
   <div class="status" style="margin-top:8px">
     <div><span class="pill">done</span> Object-only and its control: 6 SSL runs (5.3 GPU-h each), 18 ATRNet fine-tunes, response maps.</div>
     <div><span class="pill">done</span> Scene+object and its control: 6 SSL runs (about 10 GPU-h each), 18 ATRNet fine-tunes, response maps rerun with them (all above).</div>
-    <div><span class="pill">running</span> Arm I, the in-domain test: the same engine on the ATRNet SSL pool (plain-DINO reference, both RegionDINO modes, both controls, 3 splits = 15 chains), compared against A1. Restarted on 2026-11-18 evening with the chips staged to node-local disk after the first attempt was I/O-bound; completion not yet verified. 15 fine-tunes and a maps rerun follow.</div>
+    <div><span class="pill">done</span> Arm I SSL: the same engine on the ATRNet SSL pool (plain-DINO reference, both RegionDINO modes, both controls, 3 splits = 15 runs, 3.7 to 6 GPU-h each after staging the chips to node disk). Response maps with these backbones are in Figure 5.</div>
+    <div><span class="pill">running</span> Arm I fine-tunes: 15 ATRNet fine-tune jobs (3 budgets each) queued on 2026-11-19 morning; their rows go into the in-domain block of Figure 1 and Table 1, paired against A1 and the plain-DINO reference row.</div>
     <div><span class="pill">reference</span> Region file: 5,620,993 label-free regions over 94,034 images (CRC job 24761191, 48 min, 16 CPUs). The PC rebuild agreed on every count except one region.</div>
   </div>
 </section>
@@ -161,7 +162,7 @@ tr.grp td { text-align: left; font-size: 11.5px; text-transform: uppercase; lett
   <div>ATRNet-STAR table: <code>SARDet_to_ATR/compare.py</code> &rarr; <code>SARDet_to_ATR/outputs/compare/cross_dataset.csv</code>. Model selection: epoch with highest validation accuracy; the official test set is scored once.</div>
   <div>Detection tables: <code>SARDet/compare/compare.py</code> &rarr; <code>SARDet/compare/outputs/20261117-223630/</code> (summary.md, runs.csv, per_source.csv). Model selection: best validation mAP on the 800-image selection set.</div>
   <div>SSL and fine-tune runs: CRC A100 40 GB, repository commits b111bda, 45eb52e and 0c2d206 (results), SSL runs at 7aea6de and earlier. SSL export rule: final epoch, no selection. Fine-tune seeds fixed at 0; splits differ in labeled set and SSL seed.</div>
-  <div>Response maps: <code>SARDet_to_ATR/response_maps.py</code> (CRC job xa_maps 4754162, 2026-11-18, after the scene+object chains finished) &rarr; <code>SARDet_to_ATR/outputs/compare/response_maps.md</code>, per-model and per-chip CSVs, split-1 figure. Same measure as the earlier A1-vs-P4 saliency study.</div>
+  <div>Response maps: <code>SARDet_to_ATR/response_maps.py</code> (CRC job xa_maps 4762232, 2026-11-19, with the scene+object and arm-I backbones) &rarr; <code>SARDet_to_ATR/outputs/compare/response_maps.md</code>, per-model and per-chip CSVs, split-1 figure. Same measure as the earlier A1-vs-P4 saliency study.</div>
   <div>RegionDINO: <code>RegionSSL/</code> (DESIGN.md, README.md); SSL runs 2026-11-18, 100 epochs, same pool, epochs and scene recipe as XA DINO; backbone SHA-256 of each fine-tune recorded in its run_info.json.</div>
   <div>In-domain rows (A1, A2, A3, P4) come from the earlier ATRNet studies and are repeated here for scale.</div>
 </section>
@@ -204,14 +205,20 @@ const MAPS = [
   ["RegionDINO object-only, random windows", "region", [18.3,16.4,19.4], [13.1,13.8,19.1]],
   ["RegionDINO scene+object", "region", [18.4,18.9,18.9], [11.6,21.0,14.1]],
   ["RegionDINO scene+object, random windows", "region", [14.9,16.2,16.3], [11.0,12.7,10.2]],
+  // arm I: the RegionSSL engine on the ATRNet pool (in-domain), all three splits
+  ["XI DINO (suite recipe) on ATRNet", "dino", [31.6,31.8,31.8], [83.7,83.2,81.0]],
+  ["XI RegionDINO scene+object on ATRNet", "region", [28.6,28.9,29.2], [78.0,74.3,77.5]],
+  ["XI RegionDINO scene+object on ATRNet, random", "region", [29.1,29.5,29.6], [78.5,78.1,79.1]],
+  ["XI RegionDINO object-only on ATRNet", "region", [22.2,23.8,24.4], [42.9,42.6,54.5]],
+  ["XI RegionDINO object-only on ATRNet, random", "region", [21.5,20.8,20.5], [28.6,27.4,26.5]],
 ];
 const BOX_AREA = 17.2;
 const MGROUPS = [
   {title:"ImageNet start, no SSL", rows:MAPS.filter(r => r[1]==="base")},
-  {title:"SSL on ATRNet-STAR chips (in-domain)", rows:MAPS.filter(r => r[0].startsWith("A1"))},
-  {title:"SSL on SARDet-100K scenes (cross-dataset)", rows:MAPS.filter(r => r[1]!=="base" && !r[0].startsWith("A1"))},
+  {title:"SSL on ATRNet-STAR chips (in-domain)", rows:MAPS.filter(r => r[0].startsWith("A1") || r[0].startsWith("XI"))},
+  {title:"SSL on SARDet-100K scenes (cross-dataset)", rows:MAPS.filter(r => r[1]!=="base" && !r[0].startsWith("A1") && !r[0].startsWith("XI"))},
 ];
-const mdisp = n => n.replace("XA ","").replace(" on SARDet","").replace("A1 DINO on ATRNet (in-domain, split 1)","A1 DINO (split 1 only)").replace("ImageNet start (no SSL)","ImageNet start");
+const mdisp = n => n.replace("XA ","").replace(" on SARDet","").replace("A1 DINO on ATRNet (in-domain, split 1)","A1 DINO (split 1 only)").replace("ImageNet start (no SSL)","ImageNet start").replace("XI DINO (suite recipe) on ATRNet","DINO, RegionSSL recipe").replace("XI ","").replace(" on ATRNet","").replace(", random", ", random windows");
 function headRow(y, headH, W, title){ return `<rect x="0" y="${y}" width="${W}" height="${headH}" fill="var(--surface)"/><line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="8" y="${y+headH-7}" font-size="11" font-weight="600" letter-spacing="0.06em" fill="var(--fg2)">${esc(title.toUpperCase())}</text>`; }
 // detection: official test mAP per split, and AP50
 const DET = {
