@@ -1,0 +1,46 @@
+{
+  "run_name": "XA_regiondino_so_random_sardetssl_mobilenetv2_labeled_set_1pct",
+  "_note": "Cross-dataset study, arm A: a backbone pretrained by SSL on SARDet-100K scenes, fine-tuned and tested on ATRNet-STAR SOC-40. METHOD is filled in by finetune_atr.py (dino / lejepa / spark). Every other value is byte-for-byte the A1/A2/A3 fine-tune config (Experiments/mobileNetv2_DINO/config_finetune.json), so the numbers are directly comparable with the A0-A3 and P4 tables.",
+  "init": {
+    "type": "backbone_checkpoint",
+    "backbone_checkpoint": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/RegionSSL/RegionDINO_scene_object/outputs/ssl/20261118-020325_regiondino_so_random_ssl_mobilenetv2_split1_seed0/backbone_epoch100.pth"
+  },
+  "data": {
+    "train_csv": "labeled_set_1pct.csv",
+    "val_csv": "validation.csv",
+    "input_size": 224,
+    "normalize_mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "normalize_std": [
+      0.229,
+      0.224,
+      0.225
+    ],
+    "augment_hflip_p": 0.5,
+    "augment_translate_pad": 8,
+    "cache_in_memory": true,
+    "num_workers": 0
+  },
+  "train": {
+    "seed": 0,
+    "epochs": 30,
+    "batch_size": 64,
+    "optimizer": "adamw",
+    "lr": 0.0005,
+    "weight_decay": 0.01,
+    "scheduler": "cosine",
+    "device": "cuda",
+    "log_every_batches": 25,
+    "_note": "Same values as Experiments/Baseline/config.json (A0) and the A1/A2/A3 fine-tunes; only the backbone initialization differs."
+  },
+  "cross_dataset": {
+    "ssl_dataset": "SARDet-100K",
+    "downstream_dataset": "ATRNet-STAR SOC-40",
+    "arm": "A (SARDet SSL as run)",
+    "ssl_method": "regiondino_so_random"
+  },
+  "smoke": false
+}
