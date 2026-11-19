@@ -1,0 +1,201 @@
+{
+  "status": "completed",
+  "started": "2026-11-19T11:43:32",
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.10.0+cu128",
+    "torchvision": "0.25.0+cu128",
+    "platform": "Linux-5.14.0-503.22.1.el9_5.x86_64-x86_64-with-glibc2.34",
+    "device": "cuda",
+    "cpu_threads": 8,
+    "gpu": "NVIDIA A100-PCIE-40GB"
+  },
+  "git": {
+    "commit": "6bb3be95f06dc68ad8b467b050e8e6e5b59c9495",
+    "uncommitted_changes": true
+  },
+  "model_selection": "epoch with highest validation accuracy (earliest on ties)",
+  "initialization": {
+    "type": "backbone_checkpoint",
+    "file": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/RegionSSL/RegionDINO_scene_object/outputs/ssl/20261118-134039_regiondino_so_atr_ssl_mobilenetv2_split1_seed0/backbone_epoch100.pth",
+    "sha256": "e7b8618e16da82b25e2fa6024608a180fb1d99bbebbf5af82e71be94b30ac270",
+    "ssl_record": {
+      "ssl_method": "regiondino_scene_object",
+      "ssl_run_dir": "../RegionSSL/RegionDINO_scene_object/outputs/ssl/20261118-134039_regiondino_so_atr_ssl_mobilenetv2_split1_seed0",
+      "ssl_epoch": 100,
+      "ssl_epochs_planned": 100,
+      "ssl_seed": 0,
+      "split": 1,
+      "ssl_config": {
+        "run_name": "regiondino_so_atr_ssl_mobilenetv2",
+        "method": "regiondino_scene_object",
+        "common": {
+          "epochs": 100,
+          "batch_size": 64,
+          "seed_rule": "split - 1",
+          "num_workers": 8,
+          "export_rule": "final epoch, no selection",
+          "seed": 0
+        },
+        "views": {
+          "resize_rule": "detector_512",
+          "global_size": 224,
+          "local_size": 96,
+          "zoom_range": [
+            0.75,
+            1.33
+          ],
+          "hflip_p": 0.5,
+          "brightness": 0.4,
+          "contrast": 0.4,
+          "color_jitter_p": 0.8,
+          "blur_sigma": [
+            0.1,
+            2.0
+          ],
+          "solarization_p": 0.0
+        },
+        "dino_views": {
+          "local_crops_number": 8,
+          "blur_p": [
+            1.0,
+            0.1,
+            0.5
+          ]
+        },
+        "object_views": {
+          "objects_per_image": 2,
+          "obj_global_size": 96,
+          "obj_local_size": 64,
+          "obj_local_number": 4,
+          "obj_global_zoom": [
+            1.4,
+            2.2
+          ],
+          "obj_local_zoom": [
+            0.5,
+            1.0
+          ],
+          "min_object_px": 12,
+          "max_magnification": 2.0,
+          "region_source": "felz",
+          "region_sampling": "sqrt_area",
+          "obj_blur_p": [
+            1.0,
+            0.1,
+            0.5
+          ],
+          "_note": "windows are sized from each region's own extent (no fixed pixel size); max_magnification stops tiny blobs being blown up; region_source random = the control with matched-size random windows"
+        },
+        "region_loss": {
+          "object_weight": 1.0
+        },
+        "dino": {
+          "out_dim": 4096,
+          "use_bn_in_head": false,
+          "norm_last_layer": true,
+          "momentum_teacher": 0.9995,
+          "warmup_teacher_temp": 0.04,
+          "teacher_temp": 0.04,
+          "warmup_teacher_temp_epochs": 0,
+          "student_temp": 0.1,
+          "center_momentum": 0.9
+        },
+        "optim": {
+          "optimizer": "adamw",
+          "lr": 0.0005,
+          "min_lr": 1e-06,
+          "warmup_epochs": 10,
+          "weight_decay": 0.04,
+          "weight_decay_end": 0.04,
+          "clip_grad": 3.0,
+          "freeze_last_layer": 1,
+          "use_fp16": true
+        },
+        "pool": "atrnet",
+        "smoke": false
+      },
+      "ssl_manifest": {
+        "pool": "atrnet",
+        "ssl_pool_csv": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/preprocessing_dataset/ssl_training_data.csv",
+        "csv_sha256": "67add7e44a7fc142a9c12aa324fff2f1ec0c7b049c27e9bd613703b3096ddbac",
+        "columns_available_to_the_method": [
+          "relative_path"
+        ],
+        "note": "chips of the official train folder only; validation and labeled chips of the split are excluded by the CSV; the test folder is never read by SSL",
+        "pool_dataset": "ATRNet-STAR SOC-40 train chips (the split's ssl_training_data.csv, as used by A1)",
+        "used_file_list_sha256": "6b62bf38b9f2d8a4bd702db1a3e976fe4d3e64f0b91ceaf5213345963594b7f1",
+        "num_images": 65387,
+        "labels_used": "none",
+        "labels_read_for_diagnostic_only": "view_box_coverage and region_box_diagnostic: GT boxes of up to 300 pool images, logged in run_info / manifests.json, never seen by training",
+        "regions": {
+          "file": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/RegionSSL/regions/regions_atrnet.npz",
+          "sha256": "edba1c7121c13efd9e160928205634c5b81492be883e469be5561769cead456a",
+          "images_in_file": 68087,
+          "pool_images_with_entry": 65387,
+          "pool_images_missing": 0,
+          "pool": "atrnet",
+          "box_scale_from_proposal_frame": 1.75,
+          "summary_file": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/RegionSSL/regions/regions_atrnet_summary.json",
+          "region_source": "felz",
+          "diagnostic_with_labels": {
+            "n_images": 300,
+            "region_centre_in_a_box": 0.31037489102005233,
+            "gt_boxes_with_a_region": 0.9233333333333333,
+            "usable_regions_per_image": 3.8233333333333333,
+            "images_without_regions": 0.0
+          },
+          "object_views": {
+            "objects_per_image": 2,
+            "obj_global_size": 96,
+            "obj_local_size": 64,
+            "obj_local_number": 4,
+            "obj_global_zoom": [
+              1.4,
+              2.2
+            ],
+            "obj_local_zoom": [
+              0.5,
+              1.0
+            ],
+            "min_object_px": 12,
+            "max_magnification": 2.0,
+            "region_source": "felz",
+            "region_sampling": "sqrt_area",
+            "obj_blur_p": [
+              1.0,
+              0.1,
+              0.5
+            ]
+          }
+        }
+      },
+      "ssl_cost": {
+        "epochs_done": 100,
+        "optimizer_steps": 102100,
+        "images_seen": 6534400,
+        "view_forwards": 143756800,
+        "train_minutes": 488.3,
+        "gpu_hours": 8.138,
+        "peak_gpu_memory_gb": 12.55
+      },
+      "initialization_before_ssl": {
+        "kind": "imagenet",
+        "file": "/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth",
+        "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35"
+      },
+      "exported": {
+        "which": "teacher",
+        "mode": "scene_object",
+        "excluded_from_export": "DINO head, student, optimizer, centers"
+      },
+      "num_tensors": 312,
+      "state_sha256": "9d6400eed86a69417f53e4fb30256877e2f005df64992c55be60661ee7d65fa7"
+    }
+  },
+  "num_parameters": 2275112,
+  "finished": "2026-11-19T11:46:06",
+  "train_minutes": 2.54,
+  "best_epoch": 17,
+  "best_val_acc": 0.550000011920929
+}
