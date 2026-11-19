@@ -12,6 +12,8 @@
 | XA DINO on SARDet | 17.1 / 18.0 / 18.1 | 17.8 (0.5) | 41.4 / 41.8 / 42.3 | 41.8 (0.4) | 71.3 / 72.8 / 72.7 | 72.3 (0.8) |
 | XA LeJEPA on SARDet | 12.3 / 13.4 / 11.1 | 12.3 (1.2) | 31.6 / 34.4 / 32.4 | 32.8 (1.4) | 64.0 / 65.4 / 64.2 | 64.6 (0.8) |
 | XA SparK on SARDet | 21.5 / 23.3 / 23.2 | 22.7 (1.0) | 47.4 / 48.5 / 48.2 | 48.0 (0.6) | 74.0 / 73.9 / 73.9 | 73.9 (0.1) |
+| XA RegionDINO scene+object on SARDet | 19.7 / 21.0 / 20.1 | 20.2 (0.7) | 45.5 / 46.2 / 45.5 | 45.7 (0.4) | 73.4 / 73.2 / 73.5 | 73.4 (0.2) |
+| XA RegionDINO scene+object, random windows (control) | 17.0 / 17.4 / 17.0 | 17.1 (0.3) | 41.8 / 42.4 / 40.4 | 41.5 (1.0) | 72.3 / 72.5 / 71.0 | 72.0 (0.8) |
 | XA RegionDINO object-only on SARDet | 27.6 / 27.3 / 26.6 | 27.2 (0.5) | 48.8 / 49.3 / 48.8 | 49.0 (0.3) | 73.5 / 73.8 / 73.8 | 73.7 (0.2) |
 | XA RegionDINO object-only, random windows (control) | 20.3 / 21.3 / 21.2 | 20.9 (0.6) | 45.5 / 46.2 / 44.6 | 45.4 (0.8) | 72.6 / 73.0 / 72.6 | 72.7 (0.2) |
 
@@ -30,6 +32,12 @@ Reference = the same method's ATRNet-SSL row (A1/A2/A3) for DINO/LeJEPA/SparK; =
 | XA SparK on SARDet | 1pct | -3.1 / -1.1 / -1.7 | -2.0 | +0.7 / +2.5 / +2.5 | +1.9 |
 | XA SparK on SARDet | 3pct | -3.3 / -2.1 / -1.4 | -2.3 | +4.6 / +5.6 / +3.7 | +4.6 |
 | XA SparK on SARDet | 10pct | -0.3 / -0.6 / -1.0 | -0.6 | +2.8 / +2.3 / +1.6 | +2.2 |
+| XA RegionDINO scene+object on SARDet | 1pct | +2.5 / +2.9 / +2.0 | +2.5 | -1.1 / +0.2 / -0.6 | -0.5 |
+| XA RegionDINO scene+object on SARDet | 3pct | +4.1 / +4.4 / +3.2 | +3.9 | +2.7 / +3.2 / +1.0 | +2.3 |
+| XA RegionDINO scene+object on SARDet | 10pct | +2.1 / +0.4 / +0.9 | +1.1 | +2.2 / +1.6 / +1.2 | +1.7 |
+| XA RegionDINO scene+object, random windows (control) | 1pct | -0.2 / -0.6 / -1.1 | -0.6 | -3.8 / -3.4 / -3.7 | -3.6 |
+| XA RegionDINO scene+object, random windows (control) | 3pct | +0.3 / +0.5 / -1.9 | -0.3 | -1.0 / -0.6 / -4.1 | -1.9 |
+| XA RegionDINO scene+object, random windows (control) | 10pct | +1.0 / -0.3 / -1.6 | -0.3 | +1.1 / +0.9 / -1.3 | +0.2 |
 | XA RegionDINO object-only on SARDet | 1pct | +10.5 / +9.3 / +8.5 | +9.4 | +6.9 / +6.5 / +5.9 | +6.4 |
 | XA RegionDINO object-only on SARDet | 3pct | +7.3 / +7.5 / +6.5 | +7.1 | +6.0 / +6.3 / +4.3 | +5.5 |
 | XA RegionDINO object-only on SARDet | 10pct | +2.1 / +1.0 / +1.1 | +1.4 | +2.3 / +2.2 / +1.5 | +2.0 |
