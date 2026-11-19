@@ -68,9 +68,9 @@ tr.grp td { text-align: left; font-size: 11.5px; text-transform: uppercase; lett
 
 <main>
 <header>
-  <div class="eyebrow">CRC A100 runs, updated 2026-11-19 midday</div>
+  <div class="eyebrow">CRC A100 runs, updated 2026-11-20</div>
   <h1>Self-supervised learning on SARDet-100K: what transfers</h1>
-  <p class="sub">MobileNetV2 from ImageNet weights, then 100 epochs of SSL on 94,034 unlabeled SARDet-100K scenes, then supervised fine-tuning with 1, 3 or 10 % of the labels. Two downstream tests: the same dataset (detection, mAP) and a different one (ATRNet-STAR vehicle chips, 40-class accuracy). Three splits per cell; every difference is paired on the same split and labeled set. RegionDINO adds object views cut around label-free regions; its control cuts the same windows at random places. Every ATRNet figure keeps two blocks apart: <strong>SSL on ATRNet-STAR chips</strong> (in-domain, the earlier A-series and P4) and <strong>SSL on SARDet-100K scenes</strong> (cross-dataset, the XA rows). Compare a row with the rows of its own block; the gap between the blocks is the transfer question itself.</p>
+  <p class="sub">MobileNetV2 from ImageNet weights, then 100 epochs of SSL on 94,034 unlabeled SARDet-100K scenes, then supervised fine-tuning with 1, 3 or 10 % of the labels. Two downstream tests: the same dataset (detection, mAP) and a different one (ATRNet-STAR vehicle chips, 40-class accuracy). Three splits per cell; every difference is paired on the same split and labeled set. RegionDINO adds object views cut around label-free regions; its control cuts the same windows at random places. Every ATRNet figure keeps two blocks apart: <strong>SSL on ATRNet-STAR chips</strong> (in-domain: the earlier A-series, P4, and the arm-I rows that run the RegionDINO engine on the same chips) and <strong>SSL on SARDet-100K scenes</strong> (cross-dataset, the XA rows). Compare a row with the rows of its own block; the gap between the blocks is the transfer question itself.</p>
 </header>
 
 <section class="cards">
@@ -82,6 +82,10 @@ tr.grp td { text-align: left; font-size: 11.5px; text-transform: uppercase; lett
     <div class="num good">+3.9<small>3 % labels</small></div>
     <div class="lbl">Keeping the scene views costs most of the gain</div>
     <p>20.2 / 45.7 / 73.4 % against plain DINO&rsquo;s 17.8 / 41.8 / 72.3: +2.5 / +3.9 / +1.1 points, positive on all nine cells but a third of object-only. Its control sits at the plain-DINO level, and so do its response maps: with scene views in the loss the backbone does not settle on the vehicle.</p></div>
+  <div class="card"><div class="eyebrow">ATRNet-STAR, same engine with SSL on ATRNet chips (arm I)</div>
+    <div class="num bad">&minus;2.0<small>object-only, 1 % labels</small></div>
+    <div class="lbl">On target-centred chips the object views do not help</div>
+    <p>Plain DINO of the same engine 34.0 / 56.2 / 77.3 % (A1: 35.1 / 55.9 / 77.6). Scene+object 33.8 / 55.8 / 77.1, level with it. Object-only 32.0 / 54.5 / 75.7: &minus;2.0 / &minus;1.8 / &minus;1.6, negative on all nine cells. The gain is a cross-dataset effect: it appears when the SSL images are large scenes and the test is a chip.</p></div>
   <div class="card"><div class="eyebrow">ATRNet-STAR, SSL on SARDet vs no SSL</div>
     <div class="num bad">&minus;3.0<small>DINO, 1 % labels</small></div>
     <div class="lbl">Scene-level DINO and LeJEPA transfer worse than plain ImageNet</div>
@@ -101,7 +105,7 @@ tr.grp td { text-align: left; font-size: 11.5px; text-transform: uppercase; lett
   <p class="sub">Bars are the mean of three splits, dots are the splits. Upper block: SSL on ATRNet-STAR chips, in-domain, solid bars. Lower block: SSL on SARDet-100K scenes, cross-dataset, hatched bars. The dashed line is the ImageNet-only start, the same for both blocks.</p></div>
   <div class="legend"><span><i class="sw" style="background:var(--base)"></i>no SSL</span><span><i class="sw" style="background:var(--dino)"></i>DINO</span><span><i class="sw" style="background:var(--lejepa)"></i>LeJEPA</span><span><i class="sw" style="background:var(--spark)"></i>SparK</span><span><i class="sw" style="background:var(--cond)"></i>CondDINO</span><span><i class="sw" style="background:var(--region)"></i>RegionDINO</span><span><i class="sw hatch" style="color:var(--fg2)"></i>SSL on SARDet (cross-dataset)</span><span><i class="sw hatch" style="color:var(--fg2);opacity:.5"></i>random-window control</span></div>
   <div class="chart panels" id="fig1"></div>
-  <figcaption>Reading: in-domain SSL (solid) lifts 1 % accuracy from 21 to 35 to 41 %. Plain DINO and LeJEPA trained on SARDet scenes (hatched) land at or below the no-SSL bar. RegionDINO object-only is the best cross-dataset row at 1 and 3 % and ties SparK at 10 %; its random-window control sits between plain DINO and RegionDINO. Scene+object lands between plain DINO and object-only, and its control at plain DINO.</figcaption>
+  <figcaption>Reading: in-domain SSL (solid) lifts 1 % accuracy from 21 to 35 to 41 %. Plain DINO and LeJEPA trained on SARDet scenes (hatched) land at or below the no-SSL bar. RegionDINO object-only is the best cross-dataset row at 1 and 3 % and ties SparK at 10 %; its random-window control sits between plain DINO and RegionDINO. Scene+object lands between plain DINO and object-only, and its control at plain DINO. In the in-domain block the arm-I rows run the RegionDINO engine on the ATRNet chips: its plain DINO reproduces A1 within a point, scene+object matches that, and object-only sits 1.6 to 2.0 points below it at every budget.</figcaption>
 </figure>
 
 <figure>
@@ -116,6 +120,13 @@ tr.grp td { text-align: left; font-size: 11.5px; text-transform: uppercase; lett
   <p class="sub">The paired test of the object views: everything else (pool, epochs, scene recipe, seed) is identical to the XA DINO row. The control keeps the object views but places the windows at random.</p></div>
   <div class="chart" id="fig2b"></div>
   <figcaption>The regions themselves carry most of the gain: random windows give +3.2 / +3.6 / +0.5, the proposed regions +9.4 / +7.1 / +1.4. With the scene views kept (scene+object) the regions still help, +2.5 / +3.9 / +1.1 against a control at &minus;0.6 / &minus;0.3 / &minus;0.3, but at a third of the object-only size. Dropping the scene views is what makes the object views count.</figcaption>
+</figure>
+
+<figure>
+  <div><div class="eyebrow">Figure 2c</div><h2>The same paired test with SSL on ATRNet chips (arm I)</h2>
+  <p class="sub">One engine, one recipe, but the SSL images are the 128-px target-centred ATRNet chips. Reference = the plain-DINO run of that engine; the first row checks that run against the earlier A1.</p></div>
+  <div class="chart" id="fig2c"></div>
+  <figcaption>Nothing beats plain DINO here. Scene+object is level with it (&minus;0.2 / &minus;0.5 / &minus;0.2) and so is its control. Object-only loses 2.0 / 1.8 / 1.6 points on every split; its random-window control loses more at 1 and 3 % (&minus;3.9 / &minus;3.3), so the proposed regions are still better than random windows, but both are worse than the whole chip. On a chip that is already centred on the vehicle the object views only remove context, which matches the response maps in Figure 5.</figcaption>
 </figure>
 
 <div class="tw"><table id="tab1"></table></div>
@@ -140,9 +151,17 @@ tr.grp td { text-align: left; font-size: 11.5px; text-transform: uppercase; lett
   <div><div class="eyebrow">Figure 5</div><h2>Where the frozen backbones respond on ATRNet test chips, before any fine-tuning</h2>
   <p class="sub">Response map = activity of the last feature map of the frozen backbone (no labels, no fine-tuning), measured against the dataset's vehicle box on 2,000 official test chips, the same chips for every model. Left: share of the map's mass inside the box; a map with no preference scores the box's area, 17.2 %. Right: share of chips whose strongest pixel lies inside the box. Bars are the mean over the three split backbones, dots the splits; the in-domain A1 backbone exists for split 1 only.</p></div>
   <div class="chart" id="fig5"></div>
-  <figcaption>Plain DINO, LeJEPA and SparK on SARDet respond <em>less</em> on the vehicle than the ImageNet start (peak in box 14 to 31 % against 47 %). RegionDINO object-only is the only SARDet backbone above the ImageNet start (peak in box 56 to 62 %), two thirds of the way to the in-domain A1 backbone (87 %). Its random-window control is back at the plain-DINO level, so the focus comes from the regions, not from the small crops. Scene+object responds like plain DINO (peak in box 12 to 21 %) and its control below it: the scene views in the loss pull the backbone back to a scene-level response, which matches its smaller accuracy gain. <strong>In-domain block (arm I):</strong> on the target-centred ATRNet chips plain DINO with the same recipe already looks at the vehicle (peak in box 81 to 84 %, close to A1&rsquo;s 87). Object views do not add focus there: scene+object and its control both sit at 74 to 79 %, and object-only drops to 43 to 55 % (its control 27 to 29 %). On a 128-px chip the proposed regions are fragments of the vehicle (median extent 16 px), so object-only views trade the whole vehicle for its brightest parts. Whether the features are also worse for classification is what the arm-I fine-tunes will say.</figcaption>
+  <figcaption>Plain DINO, LeJEPA and SparK on SARDet respond <em>less</em> on the vehicle than the ImageNet start (peak in box 14 to 31 % against 47 %). RegionDINO object-only is the only SARDet backbone above the ImageNet start (peak in box 56 to 62 %), two thirds of the way to the in-domain A1 backbone (87 %). Its random-window control is back at the plain-DINO level, so the focus comes from the regions, not from the small crops. Scene+object responds like plain DINO (peak in box 12 to 21 %) and its control below it: the scene views in the loss pull the backbone back to a scene-level response, which matches its smaller accuracy gain. <strong>In-domain block (arm I):</strong> on the target-centred ATRNet chips plain DINO with the same recipe already looks at the vehicle (peak in box 81 to 84 %, close to A1&rsquo;s 87). Object views do not add focus there: scene+object and its control both sit at 74 to 79 %, and object-only drops to 43 to 55 % (its control 27 to 29 %). On a 128-px chip the proposed regions are fragments of the vehicle (median extent 16 px), so object-only views trade the whole vehicle for its brightest parts. The arm-I fine-tunes agree with the maps: object-only is 1.6 to 2.0 points below plain DINO at every budget and scene+object is level with it (Figure 2c).</figcaption>
   <div class="chart" style="padding:8px"><img src="response_maps_split1_web.jpg" alt="Six test chips with the vehicle box and the response map of each split-1 backbone" style="width:100%;height:auto;display:block;border-radius:4px"></div>
   <figcaption>Six test chips (one per scene type, chosen by seed, not by result) with the split-1 backbones, including the scene+object rows and the five arm-I backbones. The percentage under each map is its mass inside the white box.</figcaption>
+</figure>
+
+<figure>
+  <div><div class="eyebrow">Figure 6</div><h2>The same backbones on full SARDet-100K test scenes</h2>
+  <p class="sub">Same measure as Figure 5, now on 1,500 official SARDet test scenes with at least one annotated object (the same scenes for every model), shorter side 512 px as in the SSL views. Boxes = the dataset&rsquo;s annotations, 3.4 % of a scene on average, so a map with no preference scores 3.4 % mass. Peak = share of scenes whose strongest pixel lies inside an annotated box. Bars are the mean over the three split backbones, dots the splits.</p></div>
+  <div class="chart" id="fig6"></div>
+  <div class="chart" style="padding:8px"><img src="scene_maps_split1_web.jpg" alt="Six SARDet test scenes with their annotated boxes and the response map of each split-1 backbone" style="width:100%;height:auto;display:block;border-radius:4px"></div>
+  <figcaption>On full scenes the picture turns around. The ImageNet start is the most object-focused backbone (peak in a box on 36 % of scenes), and plain DINO on SARDet spreads its response over the scene (8 to 11 %), as do LeJEPA and both scene+object rows. Inside the DINO family the object views still show: object-only puts its peak on an object in 29 to 33 % of scenes, three times plain DINO, with its random-window control at 15 to 28 %. Mass in boxes barely moves for any SSL backbone (3.6 to 4.6 % against a uniform 3.4) because the boxes are small and the map is at stride 32. SparK is the other backbone whose peak lands on objects (27 to 33 %). Per source (RegionSSL/outputs/scene_maps/scene_maps.md): on the ship datasets object-only peaks in a box on 42 % of Shipdataset scenes (plain DINO 13, ImageNet 60, SparK 62) and 36 % of HRSID scenes (plain DINO 11); on OGSOD, whose targets are small, every backbone is near 2 %. Six scenes (one per source among the larger ones, chosen by seed) with the split-1 backbones are shown below the chart.</figcaption>
 </figure>
 
 <section>
@@ -152,7 +171,10 @@ tr.grp td { text-align: left; font-size: 11.5px; text-transform: uppercase; lett
     <div><span class="pill">done</span> Object-only and its control: 6 SSL runs (5.3 GPU-h each), 18 ATRNet fine-tunes, response maps.</div>
     <div><span class="pill">done</span> Scene+object and its control: 6 SSL runs (about 10 GPU-h each), 18 ATRNet fine-tunes, response maps rerun with them (all above).</div>
     <div><span class="pill">done</span> Arm I SSL: the same engine on the ATRNet SSL pool (plain-DINO reference, both RegionDINO modes, both controls, 3 splits = 15 runs, 3.7 to 6 GPU-h each after staging the chips to node disk). Response maps with these backbones are in Figure 5.</div>
-    <div><span class="pill">running</span> Arm I fine-tunes: 15 ATRNet fine-tune jobs (3 budgets each) queued on 2026-11-19 morning; their rows go into the in-domain block of Figure 1 and Table 1, paired against A1 and the plain-DINO reference row.</div>
+    <div><span class="pill">done</span> Arm I fine-tunes: 15 ATRNet fine-tunes (3 budgets each, 2026-11-19, 20 to 25 min each after staging). Rows in the in-domain block of Figure 1 and Table 1, paired differences in Figure 2c. Result: no gain over plain DINO on the chip pool.</div>
+    <div><span class="pill">done</span> Scene response maps: the eight SARDet-pool backbones on 1,500 SARDet test scenes, three splits (Figure 6).</div>
+    <div><span class="pill">running</span> SARDet detection fine-tunes with the four RegionDINO backbones (in-domain scene test, 12 jobs of about 12 h): 10 finished on 2026-11-20, two still queued; rows go into Figures 3 and 4 and Table 2 once pulled.</div>
+    <div><span class="pill">next</span> A pool of large unlabeled scenes that is not SARDet (Umbra or Capella imagery): the stronger test of the object views, since on scenes the ImageNet start already out-focuses every SSL backbone.</div>
     <div><span class="pill">reference</span> Region file: 5,620,993 label-free regions over 94,034 images (CRC job 24761191, 48 min, 16 CPUs). The PC rebuild agreed on every count except one region.</div>
   </div>
 </section>
@@ -161,8 +183,8 @@ tr.grp td { text-align: left; font-size: 11.5px; text-transform: uppercase; lett
   <div class="eyebrow" style="margin-bottom:4px">Where the numbers come from</div>
   <div>ATRNet-STAR table: <code>SARDet_to_ATR/compare.py</code> &rarr; <code>SARDet_to_ATR/outputs/compare/cross_dataset.csv</code>. Model selection: epoch with highest validation accuracy; the official test set is scored once.</div>
   <div>Detection tables: <code>SARDet/compare/compare.py</code> &rarr; <code>SARDet/compare/outputs/20261117-223630/</code> (summary.md, runs.csv, per_source.csv). Model selection: best validation mAP on the 800-image selection set.</div>
-  <div>SSL and fine-tune runs: CRC A100 40 GB, repository commits b111bda, 45eb52e and 0c2d206 (results), SSL runs at 7aea6de and earlier. SSL export rule: final epoch, no selection. Fine-tune seeds fixed at 0; splits differ in labeled set and SSL seed.</div>
-  <div>Response maps: <code>SARDet_to_ATR/response_maps.py</code> (CRC job xa_maps 4762232, 2026-11-19, with the scene+object and arm-I backbones) &rarr; <code>SARDet_to_ATR/outputs/compare/response_maps.md</code>, per-model and per-chip CSVs, split-1 figure. Same measure as the earlier A1-vs-P4 saliency study.</div>
+  <div>SSL and fine-tune runs: CRC A100 40 GB, repository commits b111bda, 45eb52e, 0c2d206, 40a4bab and 64b9420 (results), SSL runs at 7aea6de and earlier. Arm-I fine-tunes: CRC jobs 4762649 to 4762663 (SARDet_to_ATR/crc.sbatch, methods atr_*), run folders XI_*. SSL export rule: final epoch, no selection. Fine-tune seeds fixed at 0; splits differ in labeled set and SSL seed.</div>
+  <div>Response maps: <code>SARDet_to_ATR/response_maps.py</code> (CRC job xa_maps 4762232, 2026-11-19, with the scene+object and arm-I backbones) &rarr; <code>SARDet_to_ATR/outputs/compare/response_maps.md</code>, per-model and per-chip CSVs, split-1 figure. Same measure as the earlier A1-vs-P4 saliency study. Scene version: <code>RegionSSL/scene_maps.py</code> (CRC job scene_maps 4763033, 2026-11-19) &rarr; <code>RegionSSL/outputs/scene_maps/</code> (scene_maps.md, per-model, per-image and per-source CSVs, split-1 figure).</div>
   <div>RegionDINO: <code>RegionSSL/</code> (DESIGN.md, README.md); SSL runs 2026-11-18, 100 epochs, same pool, epochs and scene recipe as XA DINO; backbone SHA-256 of each fine-tune recorded in its run_info.json.</div>
   <div>In-domain rows (A1, A2, A3, P4) come from the earlier ATRNet studies and are repeated here for scale.</div>
 </section>
@@ -178,6 +200,12 @@ const ATR = {
   "LeJEPA, SSL on ATRNet":        {key:"lejepa", pool:"atr",  v:{1:[36.07,36.00,36.61], 3:[57.31,56.71,55.76], 10:[74.26,76.39,75.71]}},
   "SparK, SSL on ATRNet":         {key:"spark", pool:"atr",   v:{1:[24.62,24.43,24.93], 3:[50.70,50.58,49.56], 10:[74.29,74.50,74.92]}},
   "CondDINO, SSL on ATRNet":      {key:"cond", pool:"atr",    v:{1:[39.35,41.03,41.89], 3:[59.63,60.26,60.41], 10:[78.43,78.87,78.63]}},
+  // arm I: the RegionDINO engine on the same ATRNet pool (XI rows); its plain-DINO run is the reference for the two modes
+  "DINO, RegionSSL engine, SSL on ATRNet": {key:"dino", pool:"atr", v:{1:[34.13,33.61,34.36], 3:[56.23,56.34,56.18], 10:[77.01,77.52,77.48]}},
+  "RegionDINO scene+object, SSL on ATRNet": {key:"region", pool:"atr", v:{1:[33.64,33.21,34.59], 3:[55.18,56.18,55.98], 10:[77.30,77.50,76.47]}},
+  "RegionDINO scene+object, random windows (control), SSL on ATRNet": {key:"region", pool:"atr", ctrl:true, v:{1:[33.44,34.10,34.28], 3:[55.34,56.11,53.05], 10:[76.59,77.18,77.45]}},
+  "RegionDINO object-only, SSL on ATRNet": {key:"region", pool:"atr", v:{1:[30.49,32.89,32.60], 3:[54.11,54.98,54.31], 10:[75.45,75.89,75.85]}},
+  "RegionDINO object-only, random windows (control), SSL on ATRNet": {key:"region", pool:"atr", ctrl:true, v:{1:[30.30,29.19,30.95], 3:[53.37,53.66,51.86], 10:[75.88,76.27,76.19]}},
   // SSL on SARDet-100K scenes (cross-dataset)
   "DINO, SSL on SARDet":          {key:"dino", pool:"sardet", v:{1:[17.14,18.04,18.10], 3:[41.44,41.82,42.29], 10:[71.32,72.83,72.68]}},
   "LeJEPA, SSL on SARDet":        {key:"lejepa", pool:"sardet",v:{1:[12.26,13.41,11.08], 3:[31.59,34.38,32.36], 10:[64.03,65.43,64.20]}},
@@ -328,17 +356,24 @@ function dotPlot(hostId, rows, xmin, xmax, unit){
   dotPlot("fig2b", rows, -3, 12, "accuracy points, RegionDINO minus plain DINO on SARDet");
 })();
 
-// Figure 5: response maps, two panels, one block per SSL dataset
+// Figure 2c: arm I, XI DINO minus A1, then RegionDINO minus XI DINO
 (function(){
-  const rows=[]; MGROUPS.forEach(g => { rows.push({head:g.title}); g.rows.forEach(r => rows.push({r})); });
+  const ref = ATR["DINO, RegionSSL engine, SSL on ATRNet"].v, a1 = ATR["DINO, SSL on ATRNet"].v; const rows=[];
+  [1,3,10].forEach(b => rows.push({label:"plain DINO, this engine, minus A1", group:"a1", budget:b, key:"dino", d: ref[b].map((v,i)=>v-a1[b][i])}));
+  [["RegionDINO scene+object, SSL on ATRNet","RegionDINO scene+object"],["RegionDINO scene+object, random windows (control), SSL on ATRNet","scene+object, random windows"],["RegionDINO object-only, SSL on ATRNet","RegionDINO object-only"],["RegionDINO object-only, random windows (control), SSL on ATRNet","object-only, random windows"]].forEach(([n,label]) => [1,3,10].forEach(b => rows.push({label, group:n, budget:b, key:"region", d: ATR[n].v[b].map((v,i)=>v-ref[b][i])})));
+  dotPlot("fig2c", rows, -5, 3, "accuracy points, minus plain DINO on ATRNet chips (same engine)");
+})();
+
+// response-map figure: two panels of bars, one block per SSL dataset (Figures 5 and 6)
+function mapFig(hostId, groups, specs, minW){
+  const rows=[]; groups.forEach(g => { rows.push({head:g.title}); g.rows.forEach(r => rows.push({r})); });
   const labelW=282, panelW=226, gap=26, top=30, rowH=26, headH=24, W=labelW+2*panelW+gap;
   const ys=[]; let yy=top; rows.forEach(x => { ys.push(yy); yy += x.head ? headH : rowH; }); const H=yy+28;
-  let s = `<svg viewBox="0 0 ${W} ${H}" style="min-width:720px" role="img" aria-label="response map measures per backbone">`;
+  let s = `<svg viewBox="0 0 ${W} ${H}" style="min-width:${minW}px" role="img" aria-label="response map measures per backbone">`;
   rows.forEach((x,i)=>{ if (x.r) s += `<text x="${labelW-12}" y="${ys[i]+rowH/2+4}" font-size="12.5" text-anchor="end" fill="var(--fg)">${esc(mdisp(x.r[0]))}</text>`; });
-  [["mass inside vehicle box, %", 2, 40, BOX_AREA, "uniform map"], ["peak inside box, % of chips", 3, 100, null, null]].forEach(([title, col, xmax, refv, refl], p) => {
+  specs.forEach(([title, col, xmax, ticks, refv, refl], p) => {
     const x0 = labelW + p*(panelW+gap), right=40, sx = v => x0 + v/xmax*(panelW-right);
     s += `<text x="${x0}" y="14" font-size="13" font-weight="600" fill="var(--fg)">${title}</text>`;
-    const ticks = xmax===40 ? [0,10,20,30] : [0,25,50,75,100];
     ticks.forEach(t => s += `<line x1="${sx(t)}" x2="${sx(t)}" y1="${top-4}" y2="${H-24}" stroke="var(--grid)"/><text x="${sx(t)}" y="${H-9}" font-size="10" text-anchor="middle" fill="var(--fg3)">${t}</text>`);
     if (refv) s += `<line x1="${sx(refv)}" x2="${sx(refv)}" y1="${top-4}" y2="${H-24}" stroke="var(--ref)" stroke-dasharray="3 3"/><text x="${sx(refv)+3}" y="${top+8}" font-size="9.5" fill="var(--fg3)">${refl} ${refv} %</text>`;
     rows.forEach((x,i)=>{ if (!x.r) return; const r = x.r;
@@ -352,9 +387,26 @@ function dotPlot(hostId, rows, xmin, xmax, unit){
   });
   rows.forEach((x,i)=>{ if (x.head) s += headRow(ys[i], headH, W, x.head); });
   s += `</svg>`;
-  const host = document.getElementById("fig5"); host.innerHTML = s;
+  const host = document.getElementById(hostId); host.innerHTML = s;
   host.querySelectorAll(".bar").forEach(g => hover(g, g.dataset.tip));
-})();
+}
+mapFig("fig5", MGROUPS, [["mass inside vehicle box, %", 2, 40, [0,10,20,30], BOX_AREA, "uniform map"], ["peak inside box, % of chips", 3, 100, [0,25,50,75,100], null, null]], 720);
+// frozen-backbone response maps on 1500 SARDet-100K test scenes (shorter side 512): mass in annotated boxes (%), peak in a box (% of scenes); per split
+const SMAPS = [
+  ["ImageNet start (no SSL)", "base", [6.5,6.5,6.5], [36.4,36.4,36.4]],
+  ["XA DINO on SARDet", "dino", [4.0,4.2,4.2], [7.6,11.1,10.6]],
+  ["XA LeJEPA on SARDet", "lejepa", [3.6,3.7,3.7], [8.5,7.8,7.5]],
+  ["XA SparK on SARDet", "spark", [5.5,7.0,6.1], [26.8,32.7,33.4]],
+  ["XA RegionDINO scene+object on SARDet", "region", [4.1,4.0,4.0], [17.3,17.5,21.3]],
+  ["XA RegionDINO scene+object on SARDet, random", "region", [3.8,3.7,4.0], [13.1,8.1,13.5]],
+  ["XA RegionDINO object-only on SARDet", "region", [4.2,4.4,4.5], [28.7,33.3,31.3]],
+  ["XA RegionDINO object-only on SARDet, random", "region", [4.1,3.5,4.6], [19.7,15.1,27.5]],
+];
+const SBOX_AREA = 3.4;
+mapFig("fig6", [
+  {title:"ImageNet start, no SSL", rows:SMAPS.filter(r => r[1]==="base")},
+  {title:"SSL on SARDet-100K scenes (in-domain for this test)", rows:SMAPS.filter(r => r[1]!=="base")},
+], [["mass inside annotated boxes, %", 2, 10, [0,2,4,6,8], SBOX_AREA, "uniform map"], ["peak inside a box, % of scenes", 3, 50, [0,10,20,30,40,50], null, null]], 720);
 
 // Figure 3: detection minus baseline
 (function(){
