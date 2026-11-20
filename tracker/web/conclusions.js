@@ -88,7 +88,7 @@ const CONCLUSIONS = [
 
 // what is being worked on and what should happen next, in order
 const TODO = [
-  {who: "Nischal", status: "next", text: "Find a second scenes-in, chips-out dataset pair with real chip labels: Sentinel-1 scenes + OpenSARShip ship-type chips first, FUSAR-Ship as fallback. This is the confirmation c04 needs."},
+  {who: "Nischal", status: "next", text: "Second, harder dataset (SARDet chips are saturated, c07). Searched 2026-11-20 (datasets/CANDIDATES.md): pick FAIR-CSAR-V1.0 SL (Gaofen-3 1 m scenes, 22 fine-grained classes, 170k boxes, ResNet detector only 39 mAP, not in SARMAE's pool; 250 GB, e-mail registration on radars.ac.cn) as the scenes-in / chips-out dataset, and SAR-ACD (3,032 aircraft chips, 6 types, ResNet-50 60 % vs SARMAE 95 %, GitHub) as a cheap third transfer test. Nischal: register and start the FAIR-CSAR download (PNG + annotations first)."},
   {who: "Claude", status: "building", text: "ViewScale study: sweep the SSL view size on the SARDet pool and map the gain (detection and chip transfer) against view size over object size (from c08)."},
   {who: "Claude", status: "building", text: "TeacherRegions study: regions proposed by a large pretrained SAR model instead of the brightness rule; student stays MobileNetV2; compare with plain transfer / distillation so it is not just transfer learning."},
   {who: "both", status: "queued", text: "Reverse direction: SSL on ATRNet chips, fine-tune and test on SARDet (chips or detection), to see whether the scene-to-chip asymmetry holds the other way."},
