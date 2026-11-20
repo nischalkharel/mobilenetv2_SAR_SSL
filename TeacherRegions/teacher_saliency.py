@@ -7,8 +7,9 @@
 Defaults (zoom 2, top 2 %) were chosen on 300 scenes against the annotation boxes (DESIGN.md section 3).
 
 Teacher: SARMAE ViT-B/16 (models/SARMAE/, see its README), frozen. A scene (shorter side 512, as the student sees it)
-is covered by a grid of 224-px windows (stride <= 144); each window gives a 14 x 14 map; windows are averaged where
-they overlap into a stride-16 map of the scene, then upsampled. Two signals: "cls" = last-block attention from the
+is covered by a grid of 224/zoom-px windows (stride <= 144/zoom, origins on the map grid; zoom 2 by default, so the
+teacher sees 112-px native windows upsampled to 224); each window gives a 14 x 14 map; windows are averaged where
+they overlap into a map with 16/zoom native px per cell, then upsampled. Two signals: "cls" = last-block attention from the
 CLS token to the patches, mean over heads; "norm" = L2 norm of the final patch tokens.
 Regions: the map's top q % pixels -> connected components -> boxes; components under min_area px are dropped; at
 most max_regions per image, by saliency mass. Saved with RegionSSL.rssl.regions.save (names, offsets, boxes,
@@ -38,7 +39,9 @@ from rssl.region_data import region_box_diagnostic  # noqa: E402
 from shared.ssl_engine import SMOKE_IMAGES  # noqa: E402
 
 DEFAULT_CKPT = Path(os.environ.get("SARMAE_CHECKPOINT", REPO / "models" / "SARMAE" / "SARMAE_vitb_checkpoint-last.pth"))   # CRC: set in crc/env.sh
-MEAN, STD = 0.5, 0.5          # SARMAE's SAR data path: gray -> 3 channels, [0,1], Normalize(0.5, 0.5)
+MEAN, STD = 0.5, 0.5          # SARMAE's SAR pretraining data path (HF repo SARMAE_Pretrain/dataset/mixed_dataset.py, the enable_sar_noise
+                              # branch used by the released run: gray -> 3 channels, [0,1], transforms.Normalize([0.5]*3, [0.5]*3));
+                              # their transforms.py (vendored) has ImageNet statistics, which that path does not use
 WIN, STRIDE_MAX, PATCH = 224, 144, 16
 
 
@@ -109,12 +112,13 @@ def load_teacher(ckpt=DEFAULT_CKPT, device="cuda"):
 
 
 # ---------------------------------------------------------------- saliency of one scene -----------------------------
-def window_origins(L, win=WIN, stride_max=STRIDE_MAX):
-    """Start positions of win-px windows covering a side of length L with stride <= stride_max (one window if L <= win)."""
+def window_origins(L, win=WIN, stride_max=STRIDE_MAX, cell=PATCH):
+    """Start positions of win-px windows covering a side of length L with stride <= stride_max (one window if L <= win),
+    snapped DOWN to multiples of cell so every window's map lands exactly on the scene's map grid (no sub-cell shift)."""
     if L <= win:
         return [0]
     n = int(np.ceil((L - win) / stride_max)) + 1
-    return [int(round(i * (L - win) / (n - 1))) for i in range(n)]
+    return sorted({int(round(i * (L - win) / (n - 1) / cell)) * cell for i in range(n)})   # L and win are multiples of cell
 
 
 @torch.no_grad()
@@ -124,8 +128,11 @@ def saliency(model, gray: Image.Image, device, zoom=1, batch=64):
     (z = 2 makes a 10-px ship about a patch wide). Window stride in native px scales the same way."""
     W, H = gray.size
     a = np.asarray(gray, dtype=np.float32) / 255.0
-    win, stride = WIN // zoom, STRIDE_MAX // zoom
-    xs, ys = window_origins(W, win, stride), window_origins(H, win, stride)
+    win, stride, cell = WIN // zoom, STRIDE_MAX // zoom, PATCH // zoom
+    Wp, Hp = int(np.ceil(W / cell)) * cell, int(np.ceil(H / cell)) * cell          # whole map cells: no unpainted edge strip
+    if (Wp, Hp) != (W, H):
+        a = np.pad(a, ((0, Hp - H), (0, Wp - W)), mode="edge")
+    xs, ys = window_origins(Wp, win, stride, cell), window_origins(Hp, win, stride, cell)
     tiles, pos = [], []
     for y0 in ys:
         for x0 in xs:
@@ -145,23 +152,24 @@ def saliency(model, gray: Image.Image, device, zoom=1, batch=64):
     g = WIN // PATCH
     cls = torch.cat(cls_l).reshape(-1, g, g)                                   # CLS -> patches, mean over heads
     nrm = torch.cat(nrm_l).reshape(-1, g, g)                                   # token norm
-    cell = PATCH // zoom                                                       # native px per map cell
-    out = {}
+    out = {}                                                                   # cell = native px per map cell (set above)
     for name, maps in (("cls", cls), ("norm", nrm)):
-        canvas = np.zeros((int(np.ceil(H / cell)), int(np.ceil(W / cell))), np.float32)
+        canvas = np.zeros((Hp // cell, Wp // cell), np.float32)
         count = np.zeros_like(canvas)
         for m, (x0, y0) in zip(maps.cpu().numpy(), pos):
             cy, cx = y0 // cell, x0 // cell
             h, w = min(g, canvas.shape[0] - cy), min(g, canvas.shape[1] - cx)
             canvas[cy:cy + h, cx:cx + w] += m[:h, :w]; count[cy:cy + h, cx:cx + w] += 1
-        canvas /= np.maximum(count, 1)
-        up = np.asarray(Image.fromarray(canvas).resize((W, H), Image.BILINEAR), dtype=np.float32)
+        if (count == 0).any():
+            raise RuntimeError("unpainted map cells (window grid bug)")
+        canvas /= count
+        up = np.asarray(Image.fromarray(canvas).resize((Wp, Hp), Image.BILINEAR), dtype=np.float32)[:H, :W]
         lo, hi = up.min(), up.max()
         out[name] = (up - lo) / (hi - lo) if hi > lo else np.zeros_like(up)
     return out
 
 
-def regions_from_map(m, top_q=5.0, min_area=12, max_regions=20):
+def regions_from_map(m, top_q=2.0, min_area=12, max_regions=20):
     """top q % pixels -> connected components -> boxes (x1,y1,x2,y2) int16 and areas int32, by saliency mass, largest first."""
     thr = np.quantile(m, 1 - top_q / 100)
     lab, n = ndimage.label(m >= thr)
@@ -237,7 +245,8 @@ def main():
             per[s][r["file_name"]] = regions_from_map(maps[s], a.top_q, a.min_area, a.max_regions)
         if k % 500 == 0 or k == len(rows):
             print(f"  {k}/{len(rows)}  {k / (time.time() - t0):.1f} images/s", flush=True)
-    extra = {"teacher": tinfo, "signal": a.signal, "top_q_pct": a.top_q, "min_area": a.min_area, "max_regions": a.max_regions,
+    extra = {"proposer": f"sarmae_vitb_{a.signal}_attention", "proposer_parameters": {"zoom": a.zoom, "top_q_pct": a.top_q, "min_area": a.min_area, "max_regions": a.max_regions, "window": WIN, "stride_max": STRIDE_MAX},
+             "teacher": tinfo, "signal": a.signal, "top_q_pct": a.top_q, "min_area": a.min_area, "max_regions": a.max_regions,
              "window": WIN, "stride_max": STRIDE_MAX, "zoom": a.zoom, "normalisation": f"gray x3, [0,1], mean {MEAN} std {STD}", "pool": pool.name}
     summaries = {}
     for s in per:                                                   # both signals are written; the chosen one under the plain name
@@ -246,7 +255,7 @@ def main():
         print(f"  wrote {d / (stem + '.npz')}: {summaries[s]['regions_total']} regions, per image mean {summaries[s]['regions_per_image']['mean']:.1f}, extent quantiles {summaries[s]['extent_px_quantiles']}")
     if a.diagnose or a.preview:
         stores = {}
-        felz = pool.regions_file()
+        felz = REPO / "RegionSSL" / "regions" / ("regions_smoke.npz" if a.smoke else "regions.npz")   # the brightness-rule file itself, whatever REGIONSSL_REGIONS_DIR says
         if felz.exists():
             stores["brightness rule"] = R.RegionStore(felz, scale=pool.region_scale)
         for s in per:

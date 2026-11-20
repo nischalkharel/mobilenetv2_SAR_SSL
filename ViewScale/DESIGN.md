@@ -28,9 +28,29 @@ squares of a **fixed extent** instead of windows with sizes drawn from the propo
 | reference: object-only (exists) | region extents: median 10 px, 75 % below 21, 95 % below 70 | mostly the 48-px floor to about 150 | 32 to 70 |
 | reference: random windows (exists) | same sizes as above, random places | same | same |
 
-e128 is the plain-DINO scale with the object-only view counts and sizes, so the two references plus the five
+e128 is the plain-DINO window scale with the object-only view counts and sizes, so the two references plus the five
 points span "object scale" to "whole scene" with everything else fixed. The floors come from `max_magnification`
 (a window is never smaller than view size / 2) and are part of the recipe being measured, so they stay.
+
+**What also changes with the extent, and must be said (review 2026-11-20).** The view sizes are fixed at 96 / 64 px,
+so the resolution the network sees falls as the window grows: e32 is upsampled 1.4 to 2 x, e64 about 1 x, e128 is
+shown at 0.3 to 0.5 x (plain DINO shows its 168 to 298-px windows at 0.75 to 1.33 x), e512 at 0.19 x (a 10-px ship
+becomes 2 px). So the sweep varies "window extent at a fixed view size", which bundles extent and magnification; it
+is the one-factor sweep of the object-only recipe, not a sweep of plain DINO's crop size. If the curve is interesting,
+one constant-resolution point (e128 with 224 / 96 views, the plain-DINO view sizes) separates the two factors; it is
+listed as optional below. Other differences from the two reference rows: square windows instead of region aspect
+ratios; one extent instead of the region-size distribution; the object-local views are centred anywhere inside an
+e x e box instead of inside a region; at e256 / e512 the two global views are near-identical crops, so the teacher
+pair is augmentation only. Identical: 18 views per image, 96 / 64 px, batch 64, 100 epochs and steps, seed = split - 1,
+optimiser and schedule (checked against region_engine.py and ssl_common.json).
+
+End points are clamped by the recipe's floors and the frame (measured in the review): at e32 the object-local
+window floors to 32 px, so every local view is the whole 32-px window at zoom 1; at e512 the global window is always
+the full 512 frame. So e32 and e512 vary less inside a run than e64 to e256 do. Read the curve with that in mind.
+
+Sanity anchor: e32 (global windows 48 to 70 px, local 32) nearly reproduces the window sizes of the existing
+random-window control, so it should land near that row (+3.2 / +3.6 / +0.5 on transfer, +1.8 / +1.6 / +1.0 on
+detection). If it does not, something other than the window extent differs and the sweep is not trustworthy.
 
 Object sizes to put on the x-axis: the proposed-region extents above (SARDet pool, 512-px frame), and the
 annotation boxes of SARDet (longer side, native px, medians: tank 21, bridge 17, ship 37, aircraft 79, harbor 80;
@@ -42,7 +62,8 @@ For each window size and split (3 splits, SSL seed = split - 1, as everywhere):
 1. **Transfer to ATRNet chips** (the cross-dataset classification test, 1 / 3 / 10 % labels): through
    `SARDet_to_ATR/crc.sbatch viewscale_e<k> <split>`; run names `XA_viewscale_e<k>_sardetssl_mobilenetv2...`.
    Cheap (25 min per job). Paired against plain XA DINO and against the object-only row.
-2. **SARDet detection** (1 / 3 / 10 % labels): through `SARDet/crc/finetune.sbatch ../ViewScale <split> auto viewscale_e<k>_ssl`.
+2. **SARDet detection** (1 / 3 / 10 % labels): through `SARDet/crc/finetune.sbatch ../ViewScale <split> auto viewscale_e<k>_ssl`
+   (the folder has a `config_finetune.json` stub the job reads; the run name comes from the MATCH argument).
    Expensive (about 12 h per job). Paired against the no-SSL baseline and the object-only row.
 3. **Frozen response maps** on ATRNet chips and SARDet scenes (the existing map tools take a `--model LABEL=PATH`),
    to see where the attention sits as the window grows.
@@ -57,6 +78,7 @@ Plot: gain (points) against window extent on a log axis, one line per budget, th
 | ATRNet transfer fine-tunes | 15 jobs x 3 budgets | 25 min each |
 | detection fine-tunes | 15 jobs x 3 budgets | about 12 h each = 180 GPU-h |
 | response maps | 2 jobs | 1 h |
+| optional: constant-resolution point (e128 with 224 / 96 views) | 3 SSL runs | 15 GPU-h |
 
 Decision for Nischal: run detection for split 1 only at first (5 jobs, one night) and extend to splits 2 and 3 if
 the curve is not flat. The transfer and map parts run for all three splits from the start.

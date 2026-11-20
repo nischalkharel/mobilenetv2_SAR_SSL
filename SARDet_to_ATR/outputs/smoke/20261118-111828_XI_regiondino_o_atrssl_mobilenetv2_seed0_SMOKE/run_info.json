@@ -1,0 +1,190 @@
+{
+  "status": "completed",
+  "started": "2026-11-18T11:18:28",
+  "environment": {
+    "python": "3.13.4",
+    "torch": "2.10.0+cu130",
+    "torchvision": "0.25.0+cu130",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "device": "cuda",
+    "cpu_threads": 24,
+    "gpu": "NVIDIA GeForce RTX 4070 SUPER"
+  },
+  "git": {
+    "commit": "ebeb10298901163a5502d0e3186ee17743820d15",
+    "uncommitted_changes": true
+  },
+  "model_selection": "epoch with highest validation accuracy (earliest on ties)",
+  "initialization": {
+    "type": "backbone_checkpoint",
+    "file": "C:\\Users\\nisch\\Documents\\SHREC\\2026_2027\\mobilenetv2_SAR_SSL\\RegionSSL\\RegionDINO_object\\outputs\\smoke\\20261118-111722_regiondino_o_atr_ssl_mobilenetv2_split1_seed0_SMOKE\\backbone_epoch2.pth",
+    "sha256": "b4da9442013df07b4935a2e0a6bf3275954e09366bb4d6664ea18d6bb42f53cb",
+    "ssl_record": {
+      "ssl_method": "regiondino_object",
+      "ssl_run_dir": "C:\\Users\\nisch\\Documents\\SHREC\\2026_2027\\mobilenetv2_SAR_SSL\\RegionSSL\\RegionDINO_object\\outputs\\smoke\\20261118-111722_regiondino_o_atr_ssl_mobilenetv2_split1_seed0_SMOKE",
+      "ssl_epoch": 2,
+      "ssl_epochs_planned": 2,
+      "ssl_seed": 0,
+      "split": 1,
+      "ssl_config": {
+        "run_name": "regiondino_o_atr_ssl_mobilenetv2",
+        "method": "regiondino_object",
+        "common": {
+          "epochs": 2,
+          "batch_size": 8,
+          "seed_rule": "split - 1",
+          "num_workers": 0,
+          "export_rule": "final epoch, no selection",
+          "seed": 0
+        },
+        "views": {
+          "resize_rule": "detector_512",
+          "global_size": 224,
+          "local_size": 96,
+          "zoom_range": [
+            0.75,
+            1.33
+          ],
+          "hflip_p": 0.5,
+          "brightness": 0.4,
+          "contrast": 0.4,
+          "color_jitter_p": 0.8,
+          "blur_sigma": [
+            0.1,
+            2.0
+          ],
+          "solarization_p": 0.0
+        },
+        "object_views": {
+          "objects_per_image": 3,
+          "obj_global_size": 96,
+          "obj_local_size": 64,
+          "obj_local_number": 4,
+          "obj_global_zoom": [
+            1.4,
+            2.2
+          ],
+          "obj_local_zoom": [
+            0.5,
+            1.0
+          ],
+          "min_object_px": 12,
+          "max_magnification": 2.0,
+          "region_source": "felz",
+          "region_sampling": "sqrt_area",
+          "obj_blur_p": [
+            1.0,
+            0.1,
+            0.5
+          ],
+          "_note": "windows are sized from each region's own extent (no fixed pixel size); max_magnification stops tiny blobs being blown up; region_source random = the control with matched-size random windows"
+        },
+        "dino": {
+          "out_dim": 4096,
+          "use_bn_in_head": false,
+          "norm_last_layer": true,
+          "momentum_teacher": 0.9995,
+          "warmup_teacher_temp": 0.04,
+          "teacher_temp": 0.04,
+          "warmup_teacher_temp_epochs": 0,
+          "student_temp": 0.1,
+          "center_momentum": 0.9
+        },
+        "optim": {
+          "optimizer": "adamw",
+          "lr": 0.0005,
+          "min_lr": 1e-06,
+          "warmup_epochs": 1,
+          "weight_decay": 0.04,
+          "weight_decay_end": 0.04,
+          "clip_grad": 3.0,
+          "freeze_last_layer": 1,
+          "use_fp16": true
+        },
+        "pool": "atrnet",
+        "smoke": true
+      },
+      "ssl_manifest": {
+        "pool": "atrnet",
+        "ssl_pool_csv": "C:\\Users\\nisch\\Documents\\SHREC\\2026_2027\\mobilenetv2_SAR_SSL\\preprocessing_dataset\\ssl_training_data.csv",
+        "csv_sha256": "67add7e44a7fc142a9c12aa324fff2f1ec0c7b049c27e9bd613703b3096ddbac",
+        "columns_available_to_the_method": [
+          "relative_path"
+        ],
+        "note": "chips of the official train folder only; validation and labeled chips of the split are excluded by the CSV; the test folder is never read by SSL",
+        "pool_dataset": "ATRNet-STAR SOC-40 train chips (the split's ssl_training_data.csv, as used by A1)",
+        "used_file_list_sha256": "197461873cac51f0307cb5f430086c995890b0beeace12e4c1fcec20493490e4",
+        "num_images": 48,
+        "labels_used": "none",
+        "labels_read_for_diagnostic_only": "view_box_coverage and region_box_diagnostic: GT boxes of up to 300 pool images, logged in run_info / manifests.json, never seen by training",
+        "regions": {
+          "file": "C:\\Users\\nisch\\Documents\\SHREC\\2026_2027\\mobilenetv2_SAR_SSL\\RegionSSL\\regions\\regions_atrnet_smoke.npz",
+          "sha256": "097ac3239772bd3cade86367e1f458a44d4b7d923584af89b951d1d3236ebace",
+          "images_in_file": 48,
+          "pool_images_with_entry": 48,
+          "pool_images_missing": 0,
+          "pool": "atrnet",
+          "box_scale_from_proposal_frame": 1.75,
+          "summary_file": "C:\\Users\\nisch\\Documents\\SHREC\\2026_2027\\mobilenetv2_SAR_SSL\\RegionSSL\\regions\\regions_atrnet_smoke_summary.json",
+          "region_source": "felz",
+          "diagnostic_with_labels": {
+            "n_images": 48,
+            "region_centre_in_a_box": 0.2553191489361702,
+            "gt_boxes_with_a_region": 0.9166666666666666,
+            "usable_regions_per_image": 3.9166666666666665,
+            "images_without_regions": 0.0
+          },
+          "object_views": {
+            "objects_per_image": 3,
+            "obj_global_size": 96,
+            "obj_local_size": 64,
+            "obj_local_number": 4,
+            "obj_global_zoom": [
+              1.4,
+              2.2
+            ],
+            "obj_local_zoom": [
+              0.5,
+              1.0
+            ],
+            "min_object_px": 12,
+            "max_magnification": 2.0,
+            "region_source": "felz",
+            "region_sampling": "sqrt_area",
+            "obj_blur_p": [
+              1.0,
+              0.1,
+              0.5
+            ]
+          }
+        }
+      },
+      "ssl_cost": {
+        "epochs_done": 2,
+        "optimizer_steps": 12,
+        "images_seen": 96,
+        "view_forwards": 1728,
+        "train_minutes": 0.3,
+        "gpu_hours": 0.005,
+        "peak_gpu_memory_gb": 0.91
+      },
+      "initialization_before_ssl": {
+        "kind": "imagenet",
+        "file": "C:\\Users\\nisch\\Documents\\SHREC\\2026_2027\\mobilenetv2_SAR_SSL\\MobileNetV2\\checkpoints\\pretrained\\mobilenet_v2_imagenet1k_v2.pth",
+        "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35"
+      },
+      "exported": {
+        "which": "teacher",
+        "mode": "object",
+        "excluded_from_export": "DINO head, student, optimizer, centers"
+      },
+      "num_tensors": 312,
+      "state_sha256": "7284b930d3b35e5c6b61bc9cefd45502b53516d0644a50ecf41960dfc141c1f9"
+    }
+  },
+  "num_parameters": 2275112,
+  "finished": "2026-11-18T11:18:34",
+  "train_minutes": 0.06,
+  "best_epoch": 1,
+  "best_val_acc": 0.03437500074505806
+}

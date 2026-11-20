@@ -24,7 +24,9 @@ METHODS = ("dino", "lejepa", "spark", "regiondino_so", "regiondino_so_random", "
            # arm I: SSL on the ATRNet pool with the RegionSSL engine (run names XI_<method>_atrssl_...)
            "atr_dino", "atr_regiondino_so", "atr_regiondino_so_random", "atr_regiondino_o", "atr_regiondino_o_random",
            # ViewScale sweep: fixed-size random windows (run names XA_viewscale_e<k>_sardetssl_...)
-           "viewscale_e32", "viewscale_e64", "viewscale_e128", "viewscale_e256", "viewscale_e512")
+           "viewscale_e32", "viewscale_e64", "viewscale_e128", "viewscale_e256", "viewscale_e512",
+           # TeacherRegions: SARMAE-proposed regions and the teacher-size random control
+           "regiondino_o_teacher", "regiondino_o_teacher_random")
 
 
 def main():

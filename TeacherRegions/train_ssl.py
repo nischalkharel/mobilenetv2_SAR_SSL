@@ -3,7 +3,7 @@
     python TeacherRegions/train_ssl.py                       # full run, config_ssl.json, region file outputs/regions_cls/regions.npz
     python TeacherRegions/train_ssl.py --smoke               # 48 images, 2 epochs (needs outputs/regions_cls/regions_smoke.npz: teacher_saliency.py --smoke)
     python TeacherRegions/train_ssl.py --resume <run folder>
-    REGIONSSL_REGIONS_DIR=TeacherRegions/outputs/regions_norm python TeacherRegions/train_ssl.py --config ... (the token-norm file)
+    REGIONSSL_REGIONS_DIR=/abs/path/to/TeacherRegions/outputs/regions_norm python TeacherRegions/train_ssl.py ...   (another region folder; ABSOLUTE path: the CRC chain script runs from SARDet/)
 
 The only difference from RegionSSL/RegionDINO_object/train_ssl.py is where the region file comes from: this script
 points REGIONSSL_REGIONS_DIR at TeacherRegions/outputs/regions_cls unless the variable is already set, then runs the

@@ -21,6 +21,9 @@ FOLDERS = {"dino": ("SARDet/DINO_SARDet", "dino_ssl_mobilenetv2"), "lejepa": ("S
            "regiondino_o_random": ("RegionSSL/RegionDINO_object", "regiondino_o_random_ssl_mobilenetv2"),
            # ViewScale sweep (ViewScale/): DINO on random square windows of one fixed extent, SARDet pool
            **{f"viewscale_e{e}": ("ViewScale", f"viewscale_e{e}_ssl_mobilenetv2") for e in (32, 64, 128, 256, 512)},
+           # TeacherRegions: regions proposed by the frozen SARMAE teacher, and the size-matched random control
+           "regiondino_o_teacher": ("TeacherRegions", "regiondino_o_teacher_ssl_mobilenetv2"),
+           "regiondino_o_teacher_random": ("TeacherRegions", "regiondino_o_teacher_random_ssl_mobilenetv2"),
            # arm I: the same engine on the ATRNet-STAR SSL pool (in-domain); atr_dino = plain DINO of that engine, the paired reference
            "atr_dino": ("RegionSSL/DINO_reference", "dino_suite_atr_ssl_mobilenetv2"),
            "atr_regiondino_so": ("RegionSSL/RegionDINO_scene_object", "regiondino_so_atr_ssl_mobilenetv2"),

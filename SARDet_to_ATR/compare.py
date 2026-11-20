@@ -50,6 +50,11 @@ def row_key(folder: Path):
               "XI_regiondino_so_random_atrssl_mobilenetv2": "XI RegionDINO scene+object on ATRNet, random windows (control)",
               "XI_regiondino_o_atrssl_mobilenetv2": "XI RegionDINO object-only on ATRNet",
               "XI_regiondino_o_random_atrssl_mobilenetv2": "XI RegionDINO object-only on ATRNet, random windows (control)",
+              # ViewScale sweep: fixed-size random windows on the SARDet pool (ViewScale/DESIGN.md)
+              **{f"XA_viewscale_e{e}_sardetssl_mobilenetv2": f"XA ViewScale e{e} (fixed {e}-px windows)" for e in (32, 64, 128, 256, 512)},
+              # TeacherRegions: RegionDINO object-only with SARMAE-proposed regions, and its size-matched random control
+              "XA_regiondino_o_teacher_sardetssl_mobilenetv2": "XA RegionDINO object-only, teacher regions",
+              "XA_regiondino_o_teacher_random_sardetssl_mobilenetv2": "XA RegionDINO object-only, teacher-size random windows (control)",
               "XC_dino_mixed_mobilenetv2": "XC DINO on mixed pool", "XC_lejepa_mixed_mobilenetv2": "XC LeJEPA on mixed pool",
               "XC_spark_mixed_mobilenetv2": "XC SparK on mixed pool"}.get(name)
     if method is None:
@@ -83,7 +88,8 @@ def main():
         if m not in methods:
             methods.append(m)
     order = ["A0", "A1", "A2", "A3", "P4 C", "P4 s", "P4 3", "XA D", "XA L", "XA S", "XA RegionDINO scene+object on", "XA RegionDINO scene+object,",
-             "XA RegionDINO object-only on", "XA RegionDINO object-only,", "XI DINO", "XI RegionDINO scene+object on ATRNet,",
+             "XA RegionDINO object-only on", "XA RegionDINO object-only, random", "XA RegionDINO object-only, teacher regions",
+             "XA RegionDINO object-only, teacher-size", "XA ViewScale e32", "XA ViewScale e64", "XA ViewScale e128", "XA ViewScale e256", "XA ViewScale e512", "XI DINO", "XI RegionDINO scene+object on ATRNet,",
              "XI RegionDINO scene+object on", "XI RegionDINO object-only on ATRNet,", "XI RegionDINO object-only on", "XC"]
     methods.sort(key=lambda m: next((i for i, o in enumerate(order) if m.startswith(o)), 99))
     lines = ["# SSL on SARDet-100K scenes (XA) or on the ATRNet pool (A1-A3, P4, XI), tested on ATRNet-STAR SOC-40 (official test accuracy, %)", "",
@@ -107,6 +113,9 @@ def main():
     pairs = {"XA DINO on SARDet": "A1 DINO on ATRNet", "XA LeJEPA on SARDet": "A2 LeJEPA on ATRNet", "XA SparK on SARDet": "A3 SparK on ATRNet",
              "XA RegionDINO scene+object on SARDet": "XA DINO on SARDet", "XA RegionDINO scene+object, random windows (control)": "XA DINO on SARDet",
              "XA RegionDINO object-only on SARDet": "XA DINO on SARDet", "XA RegionDINO object-only, random windows (control)": "XA DINO on SARDet",
+             "XA RegionDINO object-only, teacher regions": "XA DINO on SARDet",
+             "XA RegionDINO object-only, teacher-size random windows (control)": "XA DINO on SARDet",
+             **{f"XA ViewScale e{e} (fixed {e}-px windows)": "XA DINO on SARDet" for e in (32, 64, 128, 256, 512)},
              "XI DINO (suite recipe) on ATRNet": "A1 DINO on ATRNet",
              "XI RegionDINO scene+object on ATRNet": "XI DINO (suite recipe) on ATRNet",
              "XI RegionDINO scene+object on ATRNet, random windows (control)": "XI DINO (suite recipe) on ATRNet",

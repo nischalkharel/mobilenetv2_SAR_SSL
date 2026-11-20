@@ -31,18 +31,23 @@ Questions, in order:
 | FG-MAE, DOFA, TerraMind | Sentinel-1 10 m dual-pol, two-channel inputs; wrong resolution and input for target chips |
 | SARDet-100K MSFA | supervised on SARDet labels: would leak labels into a label-free method |
 
-Caveat to state in the paper: SAR-1M contains SARDet-100K (and HRSID, SSDD, MSTAR) as unlabeled pretraining data.
-Region proposals on SARDet scenes therefore come from a model that has seen those scenes without labels. ATRNet-STAR
-is not in SAR-1M, so the cross-dataset transfer test (SSL on SARDet scenes, test on ATRNet chips) is the clean one;
-the SARDet detection test is in-distribution for the teacher and is reported with that note.
+Caveat to state in the paper: SAR-1M contains SARDet-100K (and HRSID, SSDD, MSTAR) as unlabeled pretraining data,
+presumably including SARDet's test scenes. Region proposals on SARDet pool scenes therefore come from a model that has
+seen those scenes (and the test scenes) without labels; the student only ever receives region boxes for pool images,
+so the exposure is indirect, but it must be said. ATRNet-STAR is not listed among SAR-1M's 18 sources (SARMAE paper,
+dataset table; to be cited), so the cross-dataset transfer test (SSL on SARDet scenes, test on ATRNet chips) is the
+clean one; the SARDet detection test is in-distribution for the teacher and is reported with that note.
 
 ## 3. From saliency to regions (teacher_saliency.py)
 
-Input: each pool image at the working frame the student sees (SARDet: shorter side 512). The teacher takes 224 x 224,
-so the scene is covered by a 3 x 3 grid of 224-px windows (stride 144) and the per-window maps are averaged where
-they overlap; the result is a saliency map at stride 16 (32 x 32 for a 512 scene), then upsampled to the frame.
-Preprocessing as in SARMAE's own pretraining data path: grayscale replicated to 3 channels, [0, 1], normalised
-with mean 0.5 / std 0.5.
+Input: each pool image at the working frame the student sees (SARDet: shorter side 512). The teacher takes 224 x 224.
+With the chosen zoom 2, the scene is covered by a grid of 112-px native windows (stride <= 72 px, origins snapped to
+the map grid), each upsampled to 224 for the teacher, and the per-window 14 x 14 maps are averaged where they overlap
+into a map with 8 native px per cell (64 x 64 for a 512 scene), then upsampled to the frame. (Zoom 1 = 224-px windows,
+16 px per cell; measured worse, table below.) Preprocessing as in SARMAE's own pretraining data path
+(SARMAE_Pretrain/dataset/mixed_dataset.py in the release, the speckle-noise branch the released run used): grayscale
+replicated to 3 channels, [0, 1], normalised with mean 0.5 / std 0.5. Their transforms.py carries ImageNet statistics
+but that path does not use them.
 
 Two saliency signals are produced and compared (question 1 decides which one is used):
 - **CLS attention**: the last block's attention from the CLS token to every patch, averaged over heads (the DINO
@@ -84,11 +89,23 @@ All with MobileNetV2, the SARDet scene pool, 100 epochs, three splits, the usual
 | RegionDINO object-only, brightness regions | exists (c04, c08) | done |
 | RegionDINO object-only, random windows | exists | done |
 | **RegionDINO object-only, teacher regions** | this study; `config_ssl.json`, region file from teacher_saliency.py | to run |
+| **teacher-size random windows (control)** | `config_ssl_random.json`: random windows whose SIZES follow the teacher region file (the store that is loaded), positions random. Needed because teacher regions are 2 to 3 x larger than the brightness rule's (median 17 vs 10 px) and c08 says crop size alone moves detection; this control separates "where the teacher points" from "how big its regions are" | to run |
 | **feature distillation from the teacher** | student pooled feature -> linear projector -> cosine to the teacher's CLS embedding of the same 224 view; same steps and batch; no DINO loss | phase 2, code to write (`distill/`) |
 | teacher itself, fine-tuned | upper reference, not compact (86 M vs 2.2 M parameters); only at 1 % labels on ATRNet | optional |
 
 Tests: ATRNet transfer (SARDet_to_ATR, 25 min per job) first; SARDet detection (12 h per job) for split 1, then the
 rest if the transfer shows something. Frozen response maps on chips and scenes for every new backbone.
+
+Commands (CRC, after the proposer job has written outputs/regions_cls/regions.npz and the checkpoint is on /ix):
+```
+cd /ihome/ageorge/nik96/mobilenetv2_SAR_SSL && sbatch --job-name=teacher_regions TeacherRegions/crc/propose.sbatch
+cd /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet
+for s in 1 2 3; do sbatch --job-name=rot_s$s crc/ssl.sbatch ../TeacherRegions $s config_ssl.json; sbatch --job-name=rotr_s$s crc/ssl.sbatch ../TeacherRegions $s config_ssl_random.json; done
+cd .. && for s in 1 2 3; do sbatch --job-name=xa_rot_s$s SARDet_to_ATR/crc.sbatch regiondino_o_teacher $s; sbatch --job-name=xa_rotr_s$s SARDet_to_ATR/crc.sbatch regiondino_o_teacher_random $s; done
+cd SARDet && sbatch --job-name=rot_ft_s1 crc/finetune.sbatch ../TeacherRegions 1 auto regiondino_o_teacher_ssl
+```
+Note: `teacher_saliency.py --pool atrnet` would write `regions.npz`, but the ATRNet pool reads `regions_atrnet.npz`; pass
+`--out-dir` and rename if that pool is ever used.
 
 ## 5. Cost
 

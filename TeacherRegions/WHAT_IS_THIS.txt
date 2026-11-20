@@ -39,5 +39,8 @@ DESIGN.md            protocol, the teacher survey, the saliency-to-regions rule,
 sarmae_code/         the SARMAE model code, vendored unchanged with a NOTICE (license CC BY-NC 4.0)
 teacher_saliency.py  frozen SARMAE -> saliency map per pool image -> region boxes -> regions.npz in RegionSSL's format
 config_ssl.json      the RegionDINO object-only config that reads the teacher region file
+config_ssl_random.json  the size-matched control (random windows with the teacher regions' sizes)
+config_finetune.json a stub the detection fine-tune job needs (run names come from the job's MATCH argument)
+SSL launch (CRC)     cd SARDet && sbatch crc/ssl.sbatch ../TeacherRegions <split> config_ssl.json   (DESIGN.md section 4)
 crc/                 CRC job scripts (proposer as a GPU job, then the usual SSL chain)
 outputs/             region files, saliency previews, SSL runs
