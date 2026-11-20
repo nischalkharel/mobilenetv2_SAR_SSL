@@ -1,0 +1,500 @@
+host gpu-n51.crc.pitt.edu  job 4765932  start Thu Nov 19 11:47:01 PM EST 2026
+repo /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet  commit fe6cf24  branch SmokeTest_Mobilenet_with_DINO  split 1
+NVIDIA A100-PCIE-40GB, 40960 MiB, 595.91.07
+python /ix/ageorge/nik96/envs/sarssl/bin/python 3.13.16 | torch 2.10.0+cu128 | torchvision 0.25.0+cu128 | cuda True
+split 1; output root (inside each experiment folder)
+  ok       SARDET100K_ROOT                /ix/ageorge/nik96/data/SARDet_100K
+  ok       IMAGES_DIR                     /ix/ageorge/nik96/data/SARDet_100K/JPEGImages
+  ok       train.json                     /ix/ageorge/nik96/data/SARDet_100K/Annotations/train.json
+  ok       val.json                       /ix/ageorge/nik96/data/SARDet_100K/Annotations/val.json
+  ok       test.json                      /ix/ageorge/nik96/data/SARDet_100K/test.json
+  ok       mapping.json                   /ix/ageorge/nik96/data/SARDet_100K/mapping.json
+  ok       MOBILENETV2_IMAGENET_WEIGHTS   /ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth
+  ok       METADATA_CSV                   /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/data/image_metadata.csv
+  ok       SPLIT_DIR                      /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/data/split1
+  ok       VAL_SELECT_CSV                 /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/data/val_select.csv
+chips staged in 4 s: 3.8G
+SARDET_CHIPS_ROOT=/scratch/slurm-4765932/SARDet_chips
+================ dino split 2 10pct ================
+Training run: 20261119-234841_S1_dino_mobilenetv2_10pct_split2_seed0
+  device  : cuda (NVIDIA A100-PCIE-40GB)
+  init    : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/DINO_SARDet/outputs/ssl/20261114-161841_dino_ssl_mobilenetv2_split2_seed1/backbone_epoch100.pth
+  train     :  20119 chips from 9455 images  {'ship': 9582, 'aircraft': 4469, 'car': 946, 'tank': 2067, 'bridge': 2673, 'harbor': 382}
+  select    :   4258 chips from 2000 images  {'ship': 2027, 'aircraft': 1020, 'car': 266, 'tank': 246, 'bridge': 633, 'harbor': 66}
+  test      :  24203 chips from 11612 images  {'ship': 10741, 'aircraft': 6779, 'car': 1230, 'tank': 1773, 'bridge': 3281, 'harbor': 399}
+  test_clean:  24000 chips from 11562 images  {'ship': 10681, 'aircraft': 6742, 'car': 1230, 'tank': 1715, 'bridge': 3259, 'harbor': 373}
+  settings: 30 epochs, batch 64, adamw lr 0.0005, cosine, seed 0; selection by mean per-class accuracy on 'select'
+  chips in memory in 0.2 s
+    train batch   50/315  running loss 0.5144  running acc 0.8503  7s
+    train batch  100/315  running loss 0.3671  running acc 0.8881  13s
+    train batch  150/315  running loss 0.3002  running acc 0.9068  19s
+    train batch  200/315  running loss 0.2592  running acc 0.9175  25s
+    train batch  250/315  running loss 0.2311  running acc 0.9266  31s
+    train batch  300/315  running loss 0.2152  running acc 0.9317  37s
+    train batch  315/315  running loss 0.2122  running acc 0.9328  40s
+  epoch   1/30  train loss 0.2122 acc 0.9328  select acc 0.9652 mean-class 0.9252  44s  *best   elapsed 0.7 min, about 21.5 min left
+    train batch   50/315  running loss 0.0872  running acc 0.9731  6s
+    train batch  100/315  running loss 0.0928  running acc 0.9706  13s
+    train batch  150/315  running loss 0.0918  running acc 0.9709  19s
+    train batch  200/315  running loss 0.0863  running acc 0.9727  25s
+    train batch  250/315  running loss 0.0883  running acc 0.9709  31s
+    train batch  300/315  running loss 0.0843  running acc 0.9724  37s
+    train batch  315/315  running loss 0.0845  running acc 0.9721  39s
+  epoch   2/30  train loss 0.0845 acc 0.9721  select acc 0.9732 mean-class 0.9681  44s  *best   elapsed 1.5 min, about 21.4 min left
+    train batch   50/315  running loss 0.0770  running acc 0.9744  6s
+    train batch  100/315  running loss 0.0702  running acc 0.9766  12s
+    train batch  150/315  running loss 0.0696  running acc 0.9766  18s
+    train batch  200/315  running loss 0.0682  running acc 0.9767  25s
+    train batch  250/315  running loss 0.0645  running acc 0.9775  31s
+    train batch  300/315  running loss 0.0634  running acc 0.9781  37s
+    train batch  315/315  running loss 0.0628  running acc 0.9784  39s
+  epoch   3/30  train loss 0.0628 acc 0.9784  select acc 0.9798 mean-class 0.9558  43s   elapsed 2.3 min, about 20.4 min left
+    train batch   50/315  running loss 0.0339  running acc 0.9903  6s
+    train batch  100/315  running loss 0.0353  running acc 0.9881  12s
+    train batch  150/315  running loss 0.0414  running acc 0.9852  18s
+    train batch  200/315  running loss 0.0489  running acc 0.9831  25s
+    train batch  250/315  running loss 0.0506  running acc 0.9824  31s
+    train batch  300/315  running loss 0.0530  running acc 0.9823  37s
+    train batch  315/315  running loss 0.0529  running acc 0.9824  39s
+  epoch   4/30  train loss 0.0529 acc 0.9824  select acc 0.9847 mean-class 0.9768  43s  *best   elapsed 3.0 min, about 19.5 min left
+    train batch   50/315  running loss 0.0426  running acc 0.9844  6s
+    train batch  100/315  running loss 0.0470  running acc 0.9852  12s
+    train batch  150/315  running loss 0.0427  running acc 0.9867  18s
+    train batch  200/315  running loss 0.0457  running acc 0.9856  25s
+    train batch  250/315  running loss 0.0443  running acc 0.9861  31s
+    train batch  300/315  running loss 0.0423  running acc 0.9867  37s
+    train batch  315/315  running loss 0.0423  running acc 0.9865  39s
+  epoch   5/30  train loss 0.0423 acc 0.9865  select acc 0.9807 mean-class 0.9648  43s   elapsed 3.7 min, about 18.6 min left
+    train batch   50/315  running loss 0.0401  running acc 0.9862  6s
+    train batch  100/315  running loss 0.0359  running acc 0.9878  12s
+    train batch  150/315  running loss 0.0358  running acc 0.9886  18s
+    train batch  200/315  running loss 0.0355  running acc 0.9888  25s
+    train batch  250/315  running loss 0.0344  running acc 0.9888  31s
+    train batch  300/315  running loss 0.0340  running acc 0.9887  37s
+    train batch  315/315  running loss 0.0338  running acc 0.9888  39s
+  epoch   6/30  train loss 0.0338 acc 0.9888  select acc 0.9753 mean-class 0.9739  43s   elapsed 4.5 min, about 17.9 min left
+    train batch   50/315  running loss 0.0194  running acc 0.9938  6s
+    train batch  100/315  running loss 0.0238  running acc 0.9922  12s
+    train batch  150/315  running loss 0.0255  running acc 0.9919  18s
+    train batch  200/315  running loss 0.0268  running acc 0.9913  25s
+    train batch  250/315  running loss 0.0311  running acc 0.9899  31s
+    train batch  300/315  running loss 0.0314  running acc 0.9897  37s
+    train batch  315/315  running loss 0.0310  running acc 0.9898  39s
+  epoch   7/30  train loss 0.0310 acc 0.9898  select acc 0.9728 mean-class 0.9366  43s   elapsed 5.2 min, about 17.1 min left
+    train batch   50/315  running loss 0.0268  running acc 0.9903  6s
+    train batch  100/315  running loss 0.0289  running acc 0.9902  12s
+    train batch  150/315  running loss 0.0279  running acc 0.9905  18s
+    train batch  200/315  running loss 0.0306  running acc 0.9901  25s
+    train batch  250/315  running loss 0.0309  running acc 0.9899  31s
+    train batch  300/315  running loss 0.0302  running acc 0.9903  37s
+    train batch  315/315  running loss 0.0305  running acc 0.9902  39s
+  epoch   8/30  train loss 0.0305 acc 0.9902  select acc 0.9763 mean-class 0.9426  44s   elapsed 5.9 min, about 16.3 min left
+    train batch   50/315  running loss 0.0239  running acc 0.9922  6s
+    train batch  100/315  running loss 0.0198  running acc 0.9934  12s
+    train batch  150/315  running loss 0.0163  running acc 0.9950  18s
+    train batch  200/315  running loss 0.0158  running acc 0.9948  25s
+    train batch  250/315  running loss 0.0164  running acc 0.9946  31s
+    train batch  300/315  running loss 0.0169  running acc 0.9945  37s
+    train batch  315/315  running loss 0.0171  running acc 0.9943  39s
+  epoch   9/30  train loss 0.0171 acc 0.9943  select acc 0.9817 mean-class 0.9639  44s   elapsed 6.7 min, about 15.6 min left
+    train batch   50/315  running loss 0.0298  running acc 0.9909  6s
+    train batch  100/315  running loss 0.0297  running acc 0.9906  12s
+    train batch  150/315  running loss 0.0352  running acc 0.9876  18s
+    train batch  200/315  running loss 0.0352  running acc 0.9880  25s
+    train batch  250/315  running loss 0.0323  running acc 0.9890  31s
+    train batch  300/315  running loss 0.0304  running acc 0.9898  37s
+    train batch  315/315  running loss 0.0299  running acc 0.9900  39s
+  epoch  10/30  train loss 0.0299 acc 0.9900  select acc 0.9843 mean-class 0.9705  43s   elapsed 7.4 min, about 14.8 min left
+    train batch   50/315  running loss 0.0146  running acc 0.9950  6s
+    train batch  100/315  running loss 0.0156  running acc 0.9950  12s
+    train batch  150/315  running loss 0.0144  running acc 0.9952  18s
+    train batch  200/315  running loss 0.0142  running acc 0.9955  25s
+    train batch  250/315  running loss 0.0147  running acc 0.9952  31s
+    train batch  300/315  running loss 0.0148  running acc 0.9952  37s
+    train batch  315/315  running loss 0.0146  running acc 0.9953  39s
+  epoch  11/30  train loss 0.0146 acc 0.9953  select acc 0.9770 mean-class 0.9581  43s   elapsed 8.1 min, about 14.1 min left
+    train batch   50/315  running loss 0.0089  running acc 0.9969  6s
+    train batch  100/315  running loss 0.0109  running acc 0.9967  12s
+    train batch  150/315  running loss 0.0125  running acc 0.9965  18s
+    train batch  200/315  running loss 0.0122  running acc 0.9963  25s
+    train batch  250/315  running loss 0.0115  running acc 0.9966  31s
+    train batch  300/315  running loss 0.0116  running acc 0.9960  37s
+    train batch  315/315  running loss 0.0119  running acc 0.9959  39s
+  epoch  12/30  train loss 0.0119 acc 0.9959  select acc 0.9840 mean-class 0.9825  44s  *best   elapsed 8.9 min, about 13.3 min left
+    train batch   50/315  running loss 0.0280  running acc 0.9916  6s
+    train batch  100/315  running loss 0.0264  running acc 0.9919  12s
+    train batch  150/315  running loss 0.0229  running acc 0.9930  18s
+    train batch  200/315  running loss 0.0206  running acc 0.9934  25s
+    train batch  250/315  running loss 0.0185  running acc 0.9941  31s
+    train batch  300/315  running loss 0.0184  running acc 0.9941  37s
+    train batch  315/315  running loss 0.0183  running acc 0.9941  39s
+  epoch  13/30  train loss 0.0183 acc 0.9941  select acc 0.9831 mean-class 0.9636  43s   elapsed 9.6 min, about 12.6 min left
+    train batch   50/315  running loss 0.0088  running acc 0.9972  6s
+    train batch  100/315  running loss 0.0097  running acc 0.9966  12s
+    train batch  150/315  running loss 0.0113  running acc 0.9958  18s
+    train batch  200/315  running loss 0.0116  running acc 0.9958  25s
+    train batch  250/315  running loss 0.0115  running acc 0.9961  31s
+    train batch  300/315  running loss 0.0107  running acc 0.9965  37s
+    train batch  315/315  running loss 0.0104  running acc 0.9966  39s
+  epoch  14/30  train loss 0.0104 acc 0.9966  select acc 0.9887 mean-class 0.9780  44s   elapsed 10.3 min, about 11.8 min left
+    train batch   50/315  running loss 0.0047  running acc 0.9988  6s
+    train batch  100/315  running loss 0.0050  running acc 0.9984  12s
+    train batch  150/315  running loss 0.0067  running acc 0.9981  18s
+    train batch  200/315  running loss 0.0062  running acc 0.9981  25s
+    train batch  250/315  running loss 0.0062  running acc 0.9981  31s
+    train batch  300/315  running loss 0.0074  running acc 0.9979  37s
+    train batch  315/315  running loss 0.0079  running acc 0.9979  39s
+  epoch  15/30  train loss 0.0079 acc 0.9979  select acc 0.9819 mean-class 0.9460  43s   elapsed 11.1 min, about 11.1 min left
+    train batch   50/315  running loss 0.0050  running acc 0.9997  6s
+    train batch  100/315  running loss 0.0038  running acc 0.9995  12s
+    train batch  150/315  running loss 0.0035  running acc 0.9995  18s
+    train batch  200/315  running loss 0.0030  running acc 0.9995  25s
+    train batch  250/315  running loss 0.0032  running acc 0.9993  31s
+    train batch  300/315  running loss 0.0036  running acc 0.9991  37s
+    train batch  315/315  running loss 0.0035  running acc 0.9991  39s
+  epoch  16/30  train loss 0.0035 acc 0.9991  select acc 0.9845 mean-class 0.9745  44s   elapsed 11.8 min, about 10.3 min left
+    train batch   50/315  running loss 0.0041  running acc 0.9988  6s
+    train batch  100/315  running loss 0.0040  running acc 0.9984  12s
+    train batch  150/315  running loss 0.0053  running acc 0.9981  18s
+    train batch  200/315  running loss 0.0064  running acc 0.9975  25s
+    train batch  250/315  running loss 0.0063  running acc 0.9975  31s
+    train batch  300/315  running loss 0.0068  running acc 0.9974  37s
+    train batch  315/315  running loss 0.0067  running acc 0.9974  39s
+  epoch  17/30  train loss 0.0067 acc 0.9974  select acc 0.9838 mean-class 0.9553  43s   elapsed 12.6 min, about 9.6 min left
+    train batch   50/315  running loss 0.0055  running acc 0.9981  6s
+    train batch  100/315  running loss 0.0042  running acc 0.9988  12s
+    train batch  150/315  running loss 0.0037  running acc 0.9989  18s
+    train batch  200/315  running loss 0.0042  running acc 0.9987  25s
+    train batch  250/315  running loss 0.0044  running acc 0.9986  31s
+    train batch  300/315  running loss 0.0049  running acc 0.9985  37s
+    train batch  315/315  running loss 0.0048  running acc 0.9985  39s
+  epoch  18/30  train loss 0.0048 acc 0.9985  select acc 0.9894 mean-class 0.9869  44s  *best   elapsed 13.3 min, about 8.9 min left
+    train batch   50/315  running loss 0.0034  running acc 0.9991  6s
+    train batch  100/315  running loss 0.0038  running acc 0.9989  12s
+    train batch  150/315  running loss 0.0037  running acc 0.9991  18s
+    train batch  200/315  running loss 0.0034  running acc 0.9991  25s
+    train batch  250/315  running loss 0.0042  running acc 0.9988  31s
+    train batch  300/315  running loss 0.0046  running acc 0.9988  37s
+    train batch  315/315  running loss 0.0047  running acc 0.9988  38s
+  epoch  19/30  train loss 0.0047 acc 0.9988  select acc 0.9850 mean-class 0.9714  43s   elapsed 14.0 min, about 8.1 min left
+    train batch   50/315  running loss 0.0030  running acc 0.9994  6s
+    train batch  100/315  running loss 0.0034  running acc 0.9992  12s
+    train batch  150/315  running loss 0.0033  running acc 0.9992  18s
+    train batch  200/315  running loss 0.0028  running acc 0.9994  25s
+    train batch  250/315  running loss 0.0027  running acc 0.9994  31s
+    train batch  300/315  running loss 0.0024  running acc 0.9995  37s
+    train batch  315/315  running loss 0.0023  running acc 0.9995  39s
+  epoch  20/30  train loss 0.0023 acc 0.9995  select acc 0.9861 mean-class 0.9712  43s   elapsed 14.8 min, about 7.4 min left
+    train batch   50/315  running loss 0.0014  running acc 0.9997  6s
+    train batch  100/315  running loss 0.0014  running acc 0.9997  12s
+    train batch  150/315  running loss 0.0017  running acc 0.9997  19s
+    train batch  200/315  running loss 0.0027  running acc 0.9993  25s
+    train batch  250/315  running loss 0.0030  running acc 0.9992  31s
+    train batch  300/315  running loss 0.0029  running acc 0.9992  37s
+    train batch  315/315  running loss 0.0031  running acc 0.9992  39s
+  epoch  21/30  train loss 0.0031 acc 0.9992  select acc 0.9911 mean-class 0.9859  43s   elapsed 15.5 min, about 6.6 min left
+    train batch   50/315  running loss 0.0061  running acc 0.9978  6s
+    train batch  100/315  running loss 0.0048  running acc 0.9984  12s
+    train batch  150/315  running loss 0.0037  running acc 0.9990  18s
+    train batch  200/315  running loss 0.0032  running acc 0.9991  25s
+    train batch  250/315  running loss 0.0028  running acc 0.9991  31s
+    train batch  300/315  running loss 0.0025  running acc 0.9992  37s
+    train batch  315/315  running loss 0.0025  running acc 0.9993  39s
+  epoch  22/30  train loss 0.0025 acc 0.9993  select acc 0.9861 mean-class 0.9749  43s   elapsed 16.2 min, about 5.9 min left
+    train batch   50/315  running loss 0.0002  running acc 1.0000  6s
+    train batch  100/315  running loss 0.0004  running acc 1.0000  12s
+    train batch  150/315  running loss 0.0005  running acc 1.0000  18s
+    train batch  200/315  running loss 0.0006  running acc 0.9999  25s
+    train batch  250/315  running loss 0.0007  running acc 0.9999  31s
+    train batch  300/315  running loss 0.0010  running acc 0.9998  37s
+    train batch  315/315  running loss 0.0010  running acc 0.9998  39s
+  epoch  23/30  train loss 0.0010 acc 0.9998  select acc 0.9822 mean-class 0.9622  43s   elapsed 17.0 min, about 5.2 min left
+    train batch   50/315  running loss 0.0028  running acc 0.9991  6s
+    train batch  100/315  running loss 0.0023  running acc 0.9992  12s
+    train batch  150/315  running loss 0.0017  running acc 0.9995  18s
+    train batch  200/315  running loss 0.0014  running acc 0.9996  25s
+    train batch  250/315  running loss 0.0014  running acc 0.9996  31s
+    train batch  300/315  running loss 0.0014  running acc 0.9995  37s
+    train batch  315/315  running loss 0.0015  running acc 0.9995  39s
+  epoch  24/30  train loss 0.0015 acc 0.9995  select acc 0.9852 mean-class 0.9676  43s   elapsed 17.7 min, about 4.4 min left
+    train batch   50/315  running loss 0.0004  running acc 1.0000  6s
+    train batch  100/315  running loss 0.0022  running acc 0.9995  12s
+    train batch  150/315  running loss 0.0017  running acc 0.9997  18s
+    train batch  200/315  running loss 0.0014  running acc 0.9998  25s
+    train batch  250/315  running loss 0.0014  running acc 0.9997  31s
+    train batch  300/315  running loss 0.0013  running acc 0.9996  37s
+    train batch  315/315  running loss 0.0013  running acc 0.9997  39s
+  epoch  25/30  train loss 0.0013 acc 0.9997  select acc 0.9861 mean-class 0.9709  43s   elapsed 18.4 min, about 3.7 min left
+    train batch   50/315  running loss 0.0010  running acc 0.9997  6s
+    train batch  100/315  running loss 0.0014  running acc 0.9995  12s
+    train batch  150/315  running loss 0.0012  running acc 0.9997  18s
+    train batch  200/315  running loss 0.0011  running acc 0.9998  25s
+    train batch  250/315  running loss 0.0009  running acc 0.9998  31s
+    train batch  300/315  running loss 0.0008  running acc 0.9998  37s
+    train batch  315/315  running loss 0.0007  running acc 0.9999  38s
+  epoch  26/30  train loss 0.0007 acc 0.9999  select acc 0.9880 mean-class 0.9751  43s   elapsed 19.2 min, about 2.9 min left
+    train batch   50/315  running loss 0.0005  running acc 0.9997  6s
+    train batch  100/315  running loss 0.0004  running acc 0.9998  12s
+    train batch  150/315  running loss 0.0004  running acc 0.9999  18s
+    train batch  200/315  running loss 0.0004  running acc 0.9999  25s
+    train batch  250/315  running loss 0.0004  running acc 0.9999  31s
+    train batch  300/315  running loss 0.0004  running acc 0.9999  37s
+    train batch  315/315  running loss 0.0004  running acc 1.0000  39s
+  epoch  27/30  train loss 0.0004 acc 1.0000  select acc 0.9901 mean-class 0.9763  43s   elapsed 19.9 min, about 2.2 min left
+    train batch   50/315  running loss 0.0009  running acc 0.9994  6s
+    train batch  100/315  running loss 0.0007  running acc 0.9995  12s
+    train batch  150/315  running loss 0.0007  running acc 0.9996  18s
+    train batch  200/315  running loss 0.0007  running acc 0.9997  25s
+    train batch  250/315  running loss 0.0006  running acc 0.9998  31s
+    train batch  300/315  running loss 0.0005  running acc 0.9998  37s
+    train batch  315/315  running loss 0.0005  running acc 0.9998  38s
+  epoch  28/30  train loss 0.0005 acc 0.9998  select acc 0.9880 mean-class 0.9727  43s   elapsed 20.6 min, about 1.5 min left
+    train batch   50/315  running loss 0.0004  running acc 1.0000  6s
+    train batch  100/315  running loss 0.0007  running acc 0.9998  12s
+    train batch  150/315  running loss 0.0005  running acc 0.9999  18s
+    train batch  200/315  running loss 0.0005  running acc 0.9999  24s
+    train batch  250/315  running loss 0.0005  running acc 0.9999  30s
+    train batch  300/315  running loss 0.0004  running acc 0.9999  36s
+    train batch  315/315  running loss 0.0004  running acc 0.9999  38s
+  epoch  29/30  train loss 0.0004 acc 0.9999  select acc 0.9878 mean-class 0.9716  43s   elapsed 21.3 min, about 0.7 min left
+    train batch   50/315  running loss 0.0004  running acc 1.0000  6s
+    train batch  100/315  running loss 0.0004  running acc 1.0000  12s
+    train batch  150/315  running loss 0.0003  running acc 1.0000  18s
+    train batch  200/315  running loss 0.0003  running acc 1.0000  24s
+    train batch  250/315  running loss 0.0003  running acc 1.0000  31s
+    train batch  300/315  running loss 0.0003  running acc 1.0000  37s
+    train batch  315/315  running loss 0.0003  running acc 1.0000  38s
+  epoch  30/30  train loss 0.0003 acc 1.0000  select acc 0.9880 mean-class 0.9719  43s   elapsed 22.1 min, about 0.0 min left
+
+Scoring the selected epoch (18) once on the test sets:
+    test batch  100/379  7s
+    test batch  200/379  15s
+    test batch  300/379  22s
+    test batch  379/379  27s
+  test: 24203 chips  overall acc 0.9908  mean per-class acc 0.9789  ship 1.00  aircraft 1.00  car 0.99  tank 0.97  bridge 0.96  harbor 0.95
+    test_clean batch  100/375  7s
+    test_clean batch  200/375  15s
+    test_clean batch  300/375  22s
+    test_clean batch  375/375  27s
+  test_clean: 24000 chips  overall acc 0.9912  mean per-class acc 0.9794  ship 1.00  aircraft 1.00  car 0.99  tank 0.98  bridge 0.96  harbor 0.95
+
+Done in 22.09 min. Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet_chips/outputs/finetune/20261119-234841_S1_dino_mobilenetv2_10pct_split2_seed0
+================ dino split 2 3pct ================
+Training run: 20261120-001238_S1_dino_mobilenetv2_3pct_split2_seed0
+  device  : cuda (NVIDIA A100-PCIE-40GB)
+  init    : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/DINO_SARDet/outputs/ssl/20261114-161841_dino_ssl_mobilenetv2_split2_seed1/backbone_epoch100.pth
+  train     :   6185 chips from 2854 images  {'ship': 2960, 'aircraft': 1293, 'car': 263, 'tank': 713, 'bridge': 834, 'harbor': 122}
+  select    :   4258 chips from 2000 images  {'ship': 2027, 'aircraft': 1020, 'car': 266, 'tank': 246, 'bridge': 633, 'harbor': 66}
+  test      :  24203 chips from 11612 images  {'ship': 10741, 'aircraft': 6779, 'car': 1230, 'tank': 1773, 'bridge': 3281, 'harbor': 399}
+  test_clean:  24000 chips from 11562 images  {'ship': 10681, 'aircraft': 6742, 'car': 1230, 'tank': 1715, 'bridge': 3259, 'harbor': 373}
+  settings: 30 epochs, batch 64, adamw lr 0.0005, cosine, seed 0; selection by mean per-class accuracy on 'select'
+  chips in memory in 0.1 s
+    train batch   50/97  running loss 0.5011  running acc 0.8550  7s
+    train batch   97/97  running loss 0.3552  running acc 0.8947  13s
+  epoch   1/30  train loss 0.3552 acc 0.8947  select acc 0.8739 mean-class 0.6923  18s  *best   elapsed 0.3 min, about 8.6 min left
+    train batch   50/97  running loss 0.1386  running acc 0.9516  6s
+    train batch   97/97  running loss 0.1331  running acc 0.9551  12s
+  epoch   2/30  train loss 0.1331 acc 0.9551  select acc 0.9335 mean-class 0.8188  17s  *best   elapsed 0.7 min, about 9.2 min left
+    train batch   50/97  running loss 0.0770  running acc 0.9759  6s
+    train batch   97/97  running loss 0.0778  running acc 0.9749  12s
+  epoch   3/30  train loss 0.0778 acc 0.9749  select acc 0.9699 mean-class 0.9218  17s  *best   elapsed 1.0 min, about 8.6 min left
+    train batch   50/97  running loss 0.0484  running acc 0.9859  6s
+    train batch   97/97  running loss 0.0700  running acc 0.9769  12s
+  epoch   4/30  train loss 0.0700 acc 0.9769  select acc 0.9413 mean-class 0.8570  17s   elapsed 1.2 min, about 8.1 min left
+    train batch   50/97  running loss 0.0554  running acc 0.9806  6s
+    train batch   97/97  running loss 0.0497  running acc 0.9825  12s
+  epoch   5/30  train loss 0.0497 acc 0.9825  select acc 0.9281 mean-class 0.8524  17s   elapsed 1.5 min, about 7.6 min left
+    train batch   50/97  running loss 0.0536  running acc 0.9806  6s
+    train batch   97/97  running loss 0.0517  running acc 0.9821  12s
+  epoch   6/30  train loss 0.0517 acc 0.9821  select acc 0.9373 mean-class 0.8543  17s   elapsed 1.8 min, about 7.3 min left
+    train batch   50/97  running loss 0.0318  running acc 0.9888  6s
+    train batch   97/97  running loss 0.0321  running acc 0.9887  12s
+  epoch   7/30  train loss 0.0321 acc 0.9887  select acc 0.9716 mean-class 0.9246  17s  *best   elapsed 2.1 min, about 6.9 min left
+    train batch   50/97  running loss 0.0412  running acc 0.9859  6s
+    train batch   97/97  running loss 0.0352  running acc 0.9880  12s
+  epoch   8/30  train loss 0.0352 acc 0.9880  select acc 0.9641 mean-class 0.9279  17s  *best   elapsed 2.4 min, about 6.6 min left
+    train batch   50/97  running loss 0.0304  running acc 0.9906  6s
+    train batch   97/97  running loss 0.0337  running acc 0.9888  12s
+  epoch   9/30  train loss 0.0337 acc 0.9888  select acc 0.9638 mean-class 0.9290  17s  *best   elapsed 2.7 min, about 6.3 min left
+    train batch   50/97  running loss 0.0233  running acc 0.9934  6s
+    train batch   97/97  running loss 0.0187  running acc 0.9947  12s
+  epoch  10/30  train loss 0.0187 acc 0.9947  select acc 0.9652 mean-class 0.9208  17s   elapsed 3.0 min, about 5.9 min left
+    train batch   50/97  running loss 0.0161  running acc 0.9959  6s
+    train batch   97/97  running loss 0.0141  running acc 0.9961  12s
+  epoch  11/30  train loss 0.0141 acc 0.9961  select acc 0.9535 mean-class 0.8829  17s   elapsed 3.3 min, about 5.6 min left
+    train batch   50/97  running loss 0.0106  running acc 0.9972  6s
+    train batch   97/97  running loss 0.0101  running acc 0.9976  12s
+  epoch  12/30  train loss 0.0101 acc 0.9976  select acc 0.9735 mean-class 0.9431  17s  *best   elapsed 3.5 min, about 5.3 min left
+    train batch   50/97  running loss 0.0105  running acc 0.9969  6s
+    train batch   97/97  running loss 0.0089  running acc 0.9974  12s
+  epoch  13/30  train loss 0.0089 acc 0.9974  select acc 0.9528 mean-class 0.8885  17s   elapsed 3.8 min, about 5.0 min left
+    train batch   50/97  running loss 0.0109  running acc 0.9962  6s
+    train batch   97/97  running loss 0.0140  running acc 0.9956  12s
+  epoch  14/30  train loss 0.0140 acc 0.9956  select acc 0.9570 mean-class 0.8924  17s   elapsed 4.1 min, about 4.7 min left
+    train batch   50/97  running loss 0.0127  running acc 0.9959  6s
+    train batch   97/97  running loss 0.0103  running acc 0.9968  12s
+  epoch  15/30  train loss 0.0103 acc 0.9968  select acc 0.9753 mean-class 0.9391  17s   elapsed 4.4 min, about 4.4 min left
+    train batch   50/97  running loss 0.0082  running acc 0.9972  6s
+    train batch   97/97  running loss 0.0082  running acc 0.9973  12s
+  epoch  16/30  train loss 0.0082 acc 0.9973  select acc 0.9721 mean-class 0.9463  17s  *best   elapsed 4.7 min, about 4.1 min left
+    train batch   50/97  running loss 0.0071  running acc 0.9981  6s
+    train batch   97/97  running loss 0.0095  running acc 0.9976  12s
+  epoch  17/30  train loss 0.0095 acc 0.9976  select acc 0.9540 mean-class 0.8874  17s   elapsed 5.0 min, about 3.8 min left
+    train batch   50/97  running loss 0.0171  running acc 0.9944  6s
+    train batch   97/97  running loss 0.0145  running acc 0.9953  12s
+  epoch  18/30  train loss 0.0145 acc 0.9953  select acc 0.9556 mean-class 0.8825  17s   elapsed 5.3 min, about 3.5 min left
+    train batch   50/97  running loss 0.0040  running acc 0.9994  6s
+    train batch   97/97  running loss 0.0029  running acc 0.9995  12s
+  epoch  19/30  train loss 0.0029 acc 0.9995  select acc 0.9664 mean-class 0.9142  17s   elapsed 5.6 min, about 3.2 min left
+    train batch   50/97  running loss 0.0013  running acc 1.0000  6s
+    train batch   97/97  running loss 0.0022  running acc 0.9997  12s
+  epoch  20/30  train loss 0.0022 acc 0.9997  select acc 0.9702 mean-class 0.9276  17s   elapsed 5.9 min, about 2.9 min left
+    train batch   50/97  running loss 0.0030  running acc 0.9994  6s
+    train batch   97/97  running loss 0.0020  running acc 0.9997  12s
+  epoch  21/30  train loss 0.0020 acc 0.9997  select acc 0.9697 mean-class 0.9249  17s   elapsed 6.2 min, about 2.6 min left
+    train batch   50/97  running loss 0.0014  running acc 0.9997  6s
+    train batch   97/97  running loss 0.0022  running acc 0.9992  12s
+  epoch  22/30  train loss 0.0022 acc 0.9992  select acc 0.9664 mean-class 0.9166  17s   elapsed 6.4 min, about 2.3 min left
+    train batch   50/97  running loss 0.0019  running acc 0.9991  6s
+    train batch   97/97  running loss 0.0017  running acc 0.9992  12s
+  epoch  23/30  train loss 0.0017 acc 0.9992  select acc 0.9751 mean-class 0.9416  17s   elapsed 6.7 min, about 2.0 min left
+    train batch   50/97  running loss 0.0013  running acc 1.0000  6s
+    train batch   97/97  running loss 0.0011  running acc 0.9998  12s
+  epoch  24/30  train loss 0.0011 acc 0.9998  select acc 0.9723 mean-class 0.9244  17s   elapsed 7.0 min, about 1.8 min left
+    train batch   50/97  running loss 0.0009  running acc 0.9997  6s
+    train batch   97/97  running loss 0.0010  running acc 0.9998  12s
+  epoch  25/30  train loss 0.0010 acc 0.9998  select acc 0.9711 mean-class 0.9204  17s   elapsed 7.3 min, about 1.5 min left
+    train batch   50/97  running loss 0.0009  running acc 1.0000  6s
+    train batch   97/97  running loss 0.0010  running acc 0.9998  12s
+  epoch  26/30  train loss 0.0010 acc 0.9998  select acc 0.9704 mean-class 0.9263  17s   elapsed 7.6 min, about 1.2 min left
+    train batch   50/97  running loss 0.0007  running acc 1.0000  6s
+    train batch   97/97  running loss 0.0006  running acc 1.0000  12s
+  epoch  27/30  train loss 0.0006 acc 1.0000  select acc 0.9723 mean-class 0.9275  17s   elapsed 7.9 min, about 0.9 min left
+    train batch   50/97  running loss 0.0007  running acc 1.0000  6s
+    train batch   97/97  running loss 0.0006  running acc 1.0000  12s
+  epoch  28/30  train loss 0.0006 acc 1.0000  select acc 0.9718 mean-class 0.9266  17s   elapsed 8.2 min, about 0.6 min left
+    train batch   50/97  running loss 0.0008  running acc 1.0000  6s
+    train batch   97/97  running loss 0.0006  running acc 1.0000  12s
+  epoch  29/30  train loss 0.0006 acc 1.0000  select acc 0.9718 mean-class 0.9258  17s   elapsed 8.5 min, about 0.3 min left
+    train batch   50/97  running loss 0.0011  running acc 0.9997  6s
+    train batch   97/97  running loss 0.0010  running acc 0.9998  12s
+  epoch  30/30  train loss 0.0010 acc 0.9998  select acc 0.9706 mean-class 0.9259  17s   elapsed 8.7 min, about 0.0 min left
+
+Scoring the selected epoch (16) once on the test sets:
+    test batch  100/379  7s
+    test batch  200/379  15s
+    test batch  300/379  22s
+    test batch  379/379  28s
+  test: 24203 chips  overall acc 0.9669  mean per-class acc 0.9299  ship 0.99  aircraft 0.99  car 0.98  tank 0.79  bridge 0.94  harbor 0.88
+    test_clean batch  100/375  7s
+    test_clean batch  200/375  15s
+    test_clean batch  300/375  22s
+    test_clean batch  375/375  28s
+  test_clean: 24000 chips  overall acc 0.9684  mean per-class acc 0.9327  ship 0.99  aircraft 0.99  car 0.98  tank 0.81  bridge 0.94  harbor 0.89
+
+Done in 8.75 min. Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet_chips/outputs/finetune/20261120-001238_S1_dino_mobilenetv2_3pct_split2_seed0
+================ dino split 2 1pct ================
+Training run: 20261120-002258_S1_dino_mobilenetv2_1pct_split2_seed0
+  device  : cuda (NVIDIA A100-PCIE-40GB)
+  init    : /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/DINO_SARDet/outputs/ssl/20261114-161841_dino_ssl_mobilenetv2_split2_seed1/backbone_epoch100.pth
+  train     :   2032 chips from 947 images  {'ship': 1036, 'aircraft': 357, 'car': 79, 'tank': 220, 'bridge': 307, 'harbor': 33}
+  select    :   4258 chips from 2000 images  {'ship': 2027, 'aircraft': 1020, 'car': 266, 'tank': 246, 'bridge': 633, 'harbor': 66}
+  test      :  24203 chips from 11612 images  {'ship': 10741, 'aircraft': 6779, 'car': 1230, 'tank': 1773, 'bridge': 3281, 'harbor': 399}
+  test_clean:  24000 chips from 11562 images  {'ship': 10681, 'aircraft': 6742, 'car': 1230, 'tank': 1715, 'bridge': 3259, 'harbor': 373}
+  settings: 30 epochs, batch 64, adamw lr 0.0005, cosine, seed 0; selection by mean per-class accuracy on 'select'
+  chips in memory in 0.1 s
+    train batch   32/32  running loss 0.6533  running acc 0.8248  4s
+  epoch   1/30  train loss 0.6533 acc 0.8248  select acc 0.7818 mean-class 0.5270  9s  *best   elapsed 0.2 min, about 4.5 min left
+    train batch   32/32  running loss 0.1762  running acc 0.9449  4s
+  epoch   2/30  train loss 0.1762 acc 0.9449  select acc 0.8084 mean-class 0.5990  9s  *best   elapsed 0.3 min, about 4.9 min left
+    train batch   32/32  running loss 0.1118  running acc 0.9596  4s
+  epoch   3/30  train loss 0.1118 acc 0.9596  select acc 0.8974 mean-class 0.6958  9s  *best   elapsed 0.5 min, about 4.5 min left
+    train batch   32/32  running loss 0.0949  running acc 0.9700  4s
+  epoch   4/30  train loss 0.0949 acc 0.9700  select acc 0.8253 mean-class 0.7081  9s  *best   elapsed 0.7 min, about 4.3 min left
+    train batch   32/32  running loss 0.0666  running acc 0.9828  4s
+  epoch   5/30  train loss 0.0666 acc 0.9828  select acc 0.8835 mean-class 0.7757  9s  *best   elapsed 0.8 min, about 4.1 min left
+    train batch   32/32  running loss 0.0437  running acc 0.9862  4s
+  epoch   6/30  train loss 0.0437 acc 0.9862  select acc 0.9199 mean-class 0.8272  9s  *best   elapsed 1.0 min, about 3.9 min left
+    train batch   32/32  running loss 0.0325  running acc 0.9906  4s
+  epoch   7/30  train loss 0.0325 acc 0.9906  select acc 0.8962 mean-class 0.8168  9s   elapsed 1.1 min, about 3.7 min left
+    train batch   32/32  running loss 0.0408  running acc 0.9887  4s
+  epoch   8/30  train loss 0.0408 acc 0.9887  select acc 0.9009 mean-class 0.8388  9s  *best   elapsed 1.3 min, about 3.5 min left
+    train batch   32/32  running loss 0.0285  running acc 0.9911  4s
+  epoch   9/30  train loss 0.0285 acc 0.9911  select acc 0.9016 mean-class 0.8294  9s   elapsed 1.4 min, about 3.4 min left
+    train batch   32/32  running loss 0.0158  running acc 0.9956  4s
+  epoch  10/30  train loss 0.0158 acc 0.9956  select acc 0.9209 mean-class 0.8290  9s   elapsed 1.6 min, about 3.2 min left
+    train batch   32/32  running loss 0.0207  running acc 0.9931  4s
+  epoch  11/30  train loss 0.0207 acc 0.9931  select acc 0.9164 mean-class 0.8160  9s   elapsed 1.8 min, about 3.0 min left
+    train batch   32/32  running loss 0.0174  running acc 0.9951  4s
+  epoch  12/30  train loss 0.0174 acc 0.9951  select acc 0.9155 mean-class 0.8369  9s   elapsed 1.9 min, about 2.9 min left
+    train batch   32/32  running loss 0.0131  running acc 0.9956  4s
+  epoch  13/30  train loss 0.0131 acc 0.9956  select acc 0.9258 mean-class 0.8561  9s  *best   elapsed 2.1 min, about 2.7 min left
+    train batch   32/32  running loss 0.0099  running acc 0.9970  4s
+  epoch  14/30  train loss 0.0099 acc 0.9970  select acc 0.9239 mean-class 0.8521  9s   elapsed 2.2 min, about 2.5 min left
+    train batch   32/32  running loss 0.0082  running acc 0.9975  4s
+  epoch  15/30  train loss 0.0082 acc 0.9975  select acc 0.9176 mean-class 0.8421  9s   elapsed 2.4 min, about 2.4 min left
+    train batch   32/32  running loss 0.0046  running acc 0.9990  4s
+  epoch  16/30  train loss 0.0046 acc 0.9990  select acc 0.9340 mean-class 0.8682  9s  *best   elapsed 2.5 min, about 2.2 min left
+    train batch   32/32  running loss 0.0167  running acc 0.9951  4s
+  epoch  17/30  train loss 0.0167 acc 0.9951  select acc 0.9277 mean-class 0.8548  9s   elapsed 2.7 min, about 2.1 min left
+    train batch   32/32  running loss 0.0070  running acc 0.9985  4s
+  epoch  18/30  train loss 0.0070 acc 0.9985  select acc 0.9387 mean-class 0.8558  9s   elapsed 2.8 min, about 1.9 min left
+    train batch   32/32  running loss 0.0080  running acc 0.9975  4s
+  epoch  19/30  train loss 0.0080 acc 0.9975  select acc 0.9345 mean-class 0.8476  9s   elapsed 3.0 min, about 1.7 min left
+    train batch   32/32  running loss 0.0036  running acc 0.9990  4s
+  epoch  20/30  train loss 0.0036 acc 0.9990  select acc 0.9375 mean-class 0.8551  9s   elapsed 3.2 min, about 1.6 min left
+    train batch   32/32  running loss 0.0017  running acc 1.0000  4s
+  epoch  21/30  train loss 0.0017 acc 1.0000  select acc 0.9413 mean-class 0.8613  9s   elapsed 3.3 min, about 1.4 min left
+    train batch   32/32  running loss 0.0017  running acc 1.0000  4s
+  epoch  22/30  train loss 0.0017 acc 1.0000  select acc 0.9408 mean-class 0.8609  9s   elapsed 3.5 min, about 1.3 min left
+    train batch   32/32  running loss 0.0016  running acc 1.0000  4s
+  epoch  23/30  train loss 0.0016 acc 1.0000  select acc 0.9396 mean-class 0.8666  9s   elapsed 3.6 min, about 1.1 min left
+    train batch   32/32  running loss 0.0016  running acc 0.9995  4s
+  epoch  24/30  train loss 0.0016 acc 0.9995  select acc 0.9408 mean-class 0.8701  9s  *best   elapsed 3.8 min, about 0.9 min left
+    train batch   32/32  running loss 0.0013  running acc 1.0000  4s
+  epoch  25/30  train loss 0.0013 acc 1.0000  select acc 0.9418 mean-class 0.8701  9s  *best   elapsed 3.9 min, about 0.8 min left
+    train batch   32/32  running loss 0.0009  running acc 1.0000  4s
+  epoch  26/30  train loss 0.0009 acc 1.0000  select acc 0.9406 mean-class 0.8660  9s   elapsed 4.1 min, about 0.6 min left
+    train batch   32/32  running loss 0.0009  running acc 1.0000  4s
+  epoch  27/30  train loss 0.0009 acc 1.0000  select acc 0.9403 mean-class 0.8668  9s   elapsed 4.3 min, about 0.5 min left
+    train batch   32/32  running loss 0.0008  running acc 1.0000  4s
+  epoch  28/30  train loss 0.0008 acc 1.0000  select acc 0.9406 mean-class 0.8684  9s   elapsed 4.4 min, about 0.3 min left
+    train batch   32/32  running loss 0.0016  running acc 0.9995  4s
+  epoch  29/30  train loss 0.0016 acc 0.9995  select acc 0.9399 mean-class 0.8680  9s   elapsed 4.6 min, about 0.2 min left
+    train batch   32/32  running loss 0.0029  running acc 0.9990  4s
+  epoch  30/30  train loss 0.0029 acc 0.9990  select acc 0.9406 mean-class 0.8695  9s   elapsed 4.7 min, about 0.0 min left
+
+Scoring the selected epoch (25) once on the test sets:
+    test batch  100/379  7s
+    test batch  200/379  15s
+    test batch  300/379  22s
+    test batch  379/379  28s
+  test: 24203 chips  overall acc 0.9162  mean per-class acc 0.8110  ship 0.98  aircraft 0.95  car 0.82  tank 0.44  bridge 0.96  harbor 0.72
+    test_clean batch  100/375  7s
+    test_clean batch  200/375  15s
+    test_clean batch  300/375  22s
+    test_clean batch  375/375  28s
+  test_clean: 24000 chips  overall acc 0.9185  mean per-class acc 0.8154  ship 0.98  aircraft 0.95  car 0.82  tank 0.45  bridge 0.96  harbor 0.73
+
+Done in 4.73 min. Outputs in /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet_chips/outputs/finetune/20261120-002258_S1_dino_mobilenetv2_1pct_split2_seed0
+==============================================================================
+                                JOB STATISTICS                                
+==============================================================================
+
+           JobId: 4765932
+      SubmitTime: 2026-11-19T19:30:36
+         EndTime: 2026-11-20T02:47:01
+         RunTime: 00:41:40
+       AllocTRES: cpu=8,mem=48G,node=1,billing=8,gres/gpu=1
+       Partition: a100
+        NodeList: gpu-n51
+         Command: /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet_chips/crc/finetune.sbatch
+
+==============================================================================
+ For more information use the command:
+   - `sacct -M gpu -j 4765932 -S 2026-11-19T19:30:36 -E 2026-11-20T02:47:01`
+
+ To control the output of the above command:
+   - Add `--format=<field1,field2,etc>` with fields of interest
+   - See the list of all possible fields by running: `sacct --helpformat`
+==============================================================================

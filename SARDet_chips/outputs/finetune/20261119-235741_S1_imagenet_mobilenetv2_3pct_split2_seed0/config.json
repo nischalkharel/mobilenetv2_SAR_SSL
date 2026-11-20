@@ -1,0 +1,48 @@
+{
+  "run_name": "S1_imagenet_mobilenetv2",
+  "_note": "Chip classification on SARDet-100K (DESIGN.md section 4). METHOD, the backbone, the budget and the split are filled in by finetune_chips.py. data and train values are the A0/A1 ATRNet fine-tune values (Experiments/mobileNetv2_DINO/config_finetune.json) so the recipe is the same; only the chips and the 6-class head differ.",
+  "init": {
+    "type": "imagenet",
+    "backbone_checkpoint": null
+  },
+  "data": {
+    "chip_size": 128,
+    "input_size": 224,
+    "normalize_mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "normalize_std": [
+      0.229,
+      0.224,
+      0.225
+    ],
+    "augment_hflip_p": 0.5,
+    "augment_translate_pad": 8,
+    "num_workers": 0,
+    "train_csv": "split2/labeled_3pct.csv (chips)",
+    "val_csv": "val_select.csv (chips)"
+  },
+  "train": {
+    "seed": 0,
+    "epochs": 30,
+    "batch_size": 64,
+    "optimizer": "adamw",
+    "lr": 0.0005,
+    "weight_decay": 0.01,
+    "scheduler": "cosine",
+    "device": "cuda",
+    "log_every_batches": 50,
+    "selection": "epoch with the highest mean per-class accuracy on the selection chips (earliest on ties)"
+  },
+  "method": "imagenet",
+  "budget": "3pct",
+  "split": 2,
+  "chip_rule": {
+    "chip_size": 128,
+    "window_floor": 64,
+    "window_margin": 1.5
+  },
+  "smoke": false
+}
