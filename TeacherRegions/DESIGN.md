@@ -68,12 +68,13 @@ summary json with sha256). No labels are read.
 | brightness rule (RegionSSL) | 61.7 % | 7.0 % | 27.5 |
 | teacher CLS attention, zoom 1, top 5 % | 54.2 % | 9.0 % | 17.7 |
 | teacher CLS attention, zoom 2, top 5 % | 62.5 % | 10.9 % | 19.8 |
-| **teacher CLS attention, zoom 2, top 2 % (chosen)** | **61.7 %** | **13.2 %** | **17.5** |
+| **teacher CLS attention, zoom 2, top 2 % (chosen; final code with grid-aligned windows)** | **59.0 %** | **13.0 %** | **17.3** |
 | teacher token norm (any setting) | 9 to 13 % | 2 to 3 % | 12 to 18 |
 
 Zoom 2 means the teacher looks at 112-px native windows upsampled to 224 (a 16-px patch covers 8 native px, so a
-10-px ship is about a patch), 25 windows per scene. At equal recall the teacher's regions are nearly twice as often
-on an object as the brightness rule's. Token-norm saliency is useless for this teacher and is dropped.
+10-px ship is about a patch), about 25 windows per scene. At nearly equal recall (59 vs 62 % of boxes, a 300-image
+sample) the teacher's regions are almost twice as often on an object as the brightness rule's, with fewer regions
+per image. Token-norm saliency is useless for this teacher and is dropped. Numbers: outputs/check_300/.
 
 **Question 1 check**, before any SSL: on 300 annotated pool images (the same diagnostic RegionDINO already runs),
 share of GT boxes that contain a region centre, share of region centres inside a GT box, and regions per image, for
