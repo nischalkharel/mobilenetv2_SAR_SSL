@@ -71,7 +71,7 @@ function hbars(host, groups, panels, opt = {}) {
       s += `<g class="bar" data-tip="${esc(r.label)}, ${esc(p.title)}: ${fmt(m)} (${v.map(fmt).join(" / ")})">`;
       s += `<rect x="${sx(xmin)}" y="${y + 4}" width="${Math.max(0, sx(m) - sx(xmin))}" height="${rowH - 9}" rx="3" fill="${fill}" stroke="${r.hatched ? FAM[r.family] : "none"}"${r.control ? ' opacity="0.5"' : ""}/>`;
       v.forEach(q => s += `<circle cx="${sx(q)}" cy="${y + rowH / 2 - 0.5}" r="3" fill="var(--fg)" stroke="var(--surface)" stroke-width="1.5"/>`);
-      s += `<text x="${sx(m) + 6}" y="${y + rowH / 2 + 3.5}" font-size="11.5" font-family="IBM Plex Mono, Consolas, monospace" fill="var(--fg)">${fmt(m)}</text>`;
+      s += `<text x="${Math.max(sx(m), ...v.map(sx)) + 8}" y="${y + rowH / 2 + 3.5}" font-size="11.5" font-family="IBM Plex Mono, Consolas, monospace" fill="var(--fg)">${fmt(m)}</text>`;
       s += `<rect x="${x0}" y="${y}" width="${panelW}" height="${rowH}" fill="transparent"/></g>`;
     });
   });
