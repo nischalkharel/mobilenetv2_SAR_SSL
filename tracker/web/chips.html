@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chips · SAR SSL tracker</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="top"><div class="in"><span class="brand">SAR SSL tracker</span><nav id="nav"></nav><span class="meta" id="meta"></span></div></div>
+<main>
+  <div class="eyebrow">Chip classification (study S1)</div>
+  <h1>SARDet-100K chips: SSL on the scenes, tested on object chips of the same dataset</h1>
+  <p class="sub" id="task"></p>
+  <p class="sub">Chips are cut from the dataset's own detection boxes (<a href="glossary.html#sardet-chips">chip rule</a>), six classes, three label budgets, three splits. Headline metric: <a href="glossary.html#mean-per-class-accuracy">mean per-class accuracy</a> on the <a href="glossary.html#test-clean-chips">clean test chips</a>. Design and reasons: <code>SARDet_chips/DESIGN.md</code>.</p>
+
+  <section>
+    <h2>Mean per-class accuracy by label budget</h2>
+    <p class="sub">Axis starts at 70 % so the differences are visible at all; they are small. Dots = splits. Dashed line = no SSL.</p>
+    <div class="chart" id="fig1"></div>
+  </section>
+
+  <section>
+    <h2>Paired differences, same split and labeled set</h2>
+    <div class="controls"><label>compare each row against</label><span class="seg" id="refseg"><button class="on" data-ref="base">no SSL</button><button data-ref="own">its own reference</button></span><span class="seg" id="metseg"><button class="on" data-m="acc">mean per-class, clean</button><button data-m="overall">overall, clean</button><button data-m="test_acc">mean per-class, full test</button></span></div>
+    <div class="chart" id="fig2"></div>
+    <div class="caption">"~" marks a mean whose splits disagree in sign. Split 3 is the hardest draw for every method at 1 %, which is why the per-split dots spread more than the means differ.</div>
+  </section>
+
+  <section>
+    <h2>Per-class accuracy, clean test, mean of splits</h2>
+    <div class="controls"><label>label budget</label><span class="seg" id="bseg"><button class="on" data-b="1pct">1 %</button><button data-b="3pct">3 %</button><button data-b="10pct">10 %</button></span></div>
+    <div class="tw" id="cls"></div>
+    <div class="caption">Harbor (399 test chips, OGSOD only) and tank (crowded rows, 64-px windows) are the only classes with room left at 1 %.</div>
+  </section>
+
+  <section>
+    <h2>Per-source accuracy, clean test, mean of splits</h2>
+    <div class="tw" id="src"></div>
+  </section>
+
+  <section>
+    <h2>Every cell</h2>
+    <p class="sub">Click a row for the nine runs behind it.</p>
+    <div class="tw"><table id="tab"></table></div>
+    <div class="drawer" id="drawer" hidden></div>
+  </section>
+</main>
+<script src="app.js"></script>
+<script>
+(async () => {
+  await shell("chips.html");
+  const CH = await load("chips"), byId = Object.fromEntries(CH.methods.map(m => [m.id, m])), base = CH.methods.find(m => m.ssl === "none");
+  $("task").textContent = CH.task + ". " + CH.chip_rule + ".";
+  const POOLC = {none: "ImageNet start, no SSL", sardet: "SSL on SARDet-100K scenes (in-domain for this test)"};
+  if (!CH.methods.length) { $("fig1").innerHTML = `<p class="empty">no chip runs yet</p>`; return; }
+
+  const groups = groupsByPool(CH.methods, POOLC).map(g => ({title: g.title, rows: g.rows.map(m => ({label: m.label, family: m.family, control: m.control, v: Object.fromEntries(BUDGETS.map(b => [b, vals(m, b, "acc")]))}))}));
+  hbars($("fig1"), groups, BUDGETS.map(b => ({key: b, title: `${bud(b)} of labels`, xmin: 70, xmax: 100, ticks: [70, 80, 90, 100], ref: base ? mean(present(vals(base, b, "acc"))) : null})), {labelW: 262, panelW: 215});
+
+  let refMode = "base", metric = "acc";
+  function drawDiff() {
+    const rows = [];
+    CH.methods.filter(m => m !== base).forEach(m => { const ref = refMode === "base" ? base : byId[m.ref] || base;
+      BUDGETS.forEach(b => { const a = vals(m, b, metric), r = vals(ref, b, metric); rows.push({label: m.label, group: m.id, sub: bud(b), family: m.family, d: a.map((v, i) => v != null && r[i] != null ? v - r[i] : null)}); }); });
+    const all = rows.flatMap(r => present(r.d)), lim = Math.max(2, Math.ceil(Math.max(...all.map(Math.abs))));
+    dotplot($("fig2"), rows, -lim, lim, "accuracy points, method minus reference");
+  }
+  drawDiff();
+  $("refseg").querySelectorAll("button").forEach(b => b.onclick = () => { $("refseg").querySelectorAll("button").forEach(x => x.classList.remove("on")); b.classList.add("on"); refMode = b.dataset.ref; drawDiff(); });
+  $("metseg").querySelectorAll("button").forEach(b => b.onclick = () => { $("metseg").querySelectorAll("button").forEach(x => x.classList.remove("on")); b.classList.add("on"); metric = b.dataset.m; drawDiff(); });
+
+  const shade = v => { const a = Math.min(Math.abs(v) / 8, 1); return v > 0 ? `color-mix(in srgb, var(--good-bg) ${Math.round(100 * a)}%, var(--surface))` : `color-mix(in srgb, var(--bad-bg) ${Math.round(100 * a)}%, var(--surface))`; };
+  function drawCls(b) {
+    let h = `<table><thead><tr><th>method</th>${CH.classes.map(c => `<th class="num">${c}</th>`).join("")}<th class="num">mean</th></tr></thead><tbody>`;
+    CH.methods.forEach(m => { const cells = [1, 2, 3].map(s => m.cells[`${b}/${s}`]).filter(Boolean); if (!cells.length) return;
+      const bcells = base ? [1, 2, 3].map(s => base.cells[`${b}/${s}`]).filter(Boolean) : [];
+      h += `<tr class="${m.control ? "ctrl" : ""}"><td>${label(m)}</td>` + CH.classes.map(c => { const v = mean(cells.map(x => x.per_class[c])), d = m === base || !bcells.length ? 0 : v - mean(bcells.map(x => x.per_class[c])); return `<td class="num" style="background:${m === base ? "transparent" : shade(d)}" title="${m === base ? "" : f1(d) + " vs no SSL"}">${fx(v)}</td>`; }).join("") + `<td class="num">${fx(mean(cells.map(x => x.acc)))}</td></tr>`; });
+    $("cls").innerHTML = h + `</tbody></table>`;
+  }
+  drawCls("1pct");
+  $("bseg").querySelectorAll("button").forEach(b => b.onclick = () => { $("bseg").querySelectorAll("button").forEach(x => x.classList.remove("on")); b.classList.add("on"); drawCls(b.dataset.b); });
+
+  (() => { const sources = Object.keys((Object.values(base.cells)[0] || {per_source: {}}).per_source);
+    let h = `<table><thead><tr><th>method, 1 % labels</th>${sources.map(s => `<th class="num">${esc(s)}</th>`).join("")}</tr></thead><tbody>`;
+    CH.methods.forEach(m => { const cells = [1, 2, 3].map(s => m.cells[`1pct/${s}`]).filter(Boolean); if (!cells.length) return;
+      h += `<tr class="${m.control ? "ctrl" : ""}"><td>${label(m)}</td>` + sources.map(s => `<td class="num">${fx(mean(cells.map(x => x.per_source[s])))}</td>`).join("") + `</tr>`; });
+    $("src").innerHTML = h + `</tbody></table>`; })();
+
+  let h = `<thead><tr><th>method</th><th>reference</th><th class="num">1 % (s1 / s2 / s3)</th><th class="num">mean (sd)</th><th class="num">3 %</th><th class="num">mean (sd)</th><th class="num">10 %</th><th class="num">mean (sd)</th><th class="num">overall, 1 %</th></tr></thead><tbody>`;
+  groupsByPool(CH.methods, POOLC).forEach(g => { h += `<tr class="grp"><td colspan="9">${esc(g.title)}</td></tr>`;
+    g.rows.forEach(m => { h += `<tr class="click ${m.control ? "ctrl" : ""}" data-id="${m.id}"><td>${label(m)}</td><td class="sub" style="font-size:12px">${m.ref ? esc(byId[m.ref]?.label || m.ref) : "–"}</td>`;
+      BUDGETS.forEach(b => { const v = vals(m, b, "acc"), p = present(v); h += `<td class="num">${v.map(x => fx(x)).join(" / ")}</td><td class="num">${p.length ? `${fx(mean(p))} (${fx(sd(p))})` : "–"}</td>`; });
+      const o = present(vals(m, "1pct", "overall")); h += `<td class="num">${o.length ? fx(mean(o)) : "–"}</td></tr>`; }); });
+  $("tab").innerHTML = h + `</tbody>`;
+  $("tab").querySelectorAll("tr.click").forEach(tr => tr.onclick = () => { $("tab").querySelectorAll("tr.sel").forEach(x => x.classList.remove("sel")); tr.classList.add("sel"); $("drawer").hidden = false; drawer($("drawer"), byId[tr.dataset.id], "acc", v => fx(v) + " %", "mean per-class accuracy, clean test"); });
+})();
+</script>
+</body>
+</html>

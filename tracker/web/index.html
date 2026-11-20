@@ -27,12 +27,13 @@
   </section>
 
   <section>
-    <div class="eyebrow">Reading, 2026-11-19</div>
+    <div class="eyebrow">Reading, 2026-11-20</div>
     <div class="card">
       <p><b>In-domain (SSL and test both on ATRNet chips):</b> any SSL helps a lot at 1 % labels (21 &rarr; 35 to 41 %). CondDINO is top but uses acquisition metadata, so it sits apart. Plain DINO and LeJEPA tie. SparK is weakest here.</p>
       <p><b>Cross-dataset (SSL on SARDet scenes, test on ATRNet chips):</b> plain DINO and LeJEPA transfer <em>worse</em> than no SSL. RegionDINO object-only turns that into the best cross-dataset row (+9.4 over plain DINO at 1 %), with SparK second. The random-window control gets a third of the gain, so the regions matter. Cross-dataset is still far below in-domain (27 vs 35 at 1 %).</p>
       <p><b>RegionDINO on the ATRNet chips themselves (the XI rows, also called arm I):</b> no gain. Scene+object is level with plain DINO, object-only is 2 points below. A chip is already the object; cutting regions out of it only removes context. So the object views pay off when the SSL images are scenes and the test is a chip, and that is the setting to build the paper on.</p>
-      <p><b>Detection (SSL and test on SARDet):</b> no method moves mAP by more than a point. SparK is the only one positive at every budget. RegionDINO's detection rows are being computed.</p>
+      <p><b>Detection (SSL and test on SARDet):</b> RegionDINO object-only is the first method to move SARDet detection by more than a point: +1.6 / +1.4 / +1.2 mAP points at 1 / 3 / 10 %, positive on all nine cells, against SparK's +0.7. But its random-window control gets the same (+1.8 / +1.6 / +1.0). So for detection the gain comes from training DINO on small object-sized crops instead of whole scenes, not from where the crops are placed. Scene+object gives half of that and its control a third.</p>
+      <p><b>Chip classification on SARDet itself (S1):</b> a null. No SSL already reaches 81 % mean per-class accuracy at 1 % labels (92 % overall) and every SSL row lands within split noise of it. The six coarse classes are too easy, and the splits differ by up to 7 points, more than any method difference. Study S2 (tiles) is parked; a harder version of this test (smaller budget, or train and test on different source datasets) would be the way to get signal from chips.</p>
       <p style="margin:0"><b>Next:</b> a classification test where the SSL pool is large scenes and the labeled chips come from the same sensor (Sentinel-1 scenes + OpenSARShip chips, or chips cut from SARDet boxes), and later a non-SARDet scene pool (Umbra / Capella). Ideas and doubts go in the <a href="ideas.html">idea box</a>.</p>
     </div>
   </section>
@@ -46,7 +47,7 @@
 <script>
 (async () => {
   await shell("index.html");
-  const C = await load("classification"), D = await load("detection"), meta = await load("meta");
+  const C = await load("classification"), D = await load("detection"), CH = await load("chips"), meta = await load("meta");
   let ideas = {ideas: []}; try { ideas = await (await fetch("/api/ideas")).json(); } catch (e) {}
 
   // paired difference of m against base over the splits both have, for one budget and field
@@ -58,7 +59,7 @@
 
   // ---- experiment map ----
   $("map").innerHTML = meta.settings.map(st => {
-    const det = st.table === "detection", T = det ? D : C, field = det ? "map" : "acc", scale = det ? 100 : 1;
+    const det = st.table === "detection", T = det ? D : st.table === "chips" ? CH : C, field = det ? "map" : "acc", scale = det ? 100 : 1;
     const base = T.methods.find(m => m.ssl === "none"), rows = T.methods.filter(m => m.ssl === st.ssl);
     const line = m => {
       const means = BUDGETS.map(b => mean(present(vals(m, b, field))) * scale);
@@ -68,7 +69,7 @@
     return `<div class="card"><h3>${esc(st.title)}</h3><div class="task">${esc(st.task)}${det ? ", shown &times;100" : ""}</div>
       <table><thead><tr><th>method</th><th>done</th><th class="num">1 %</th><th class="num">3 %</th><th class="num">10 %</th><th class="num">vs no SSL, 1 %</th></tr></thead>
       <tbody>${base ? line(base) : ""}${rows.map(line).join("")}${rows.length ? "" : `<tr><td colspan="6" class="empty">nothing run yet</td></tr>`}</tbody></table>
-      <p style="margin:8px 0 0"><a href="${det ? "detection.html" : "classification.html"}">open the ${det ? "detection" : "classification"} page &rarr;</a></p></div>`;
+      <p style="margin:8px 0 0"><a href="${det ? "detection.html" : st.table === "chips" ? "chips.html" : "classification.html"}">open the ${det ? "detection" : st.table === "chips" ? "chips" : "classification"} page &rarr;</a></p></div>`;
   }).join("");
 
   // ---- headline cards ----
@@ -79,7 +80,10 @@
   const bx = best("sardet", "1pct"); if (bx) { const d = diff(bx, a0, "1pct", "acc"), dd = diff(bx, byId.xa_dino, "1pct", "acc"); cards.push([f1(mean(dd)), "vs plain DINO, 1 % labels", `Best cross-dataset SSL: ${bx.label}`, `${fx(mean(present(vals(bx, "1pct"))))} % after SSL on SARDet scenes; plain DINO gets ${fx(mean(present(vals(byId.xa_dino, "1pct"))))} %, no SSL ${fx(mean(present(vals(a0, "1pct"))))} %. ${f1(mean(d))} over no SSL.`, sign(dd)]); }
   if (byId.xi_ro && byId.xi_dino) { const d = BUDGETS.map(b => mean(diff(byId.xi_ro, byId.xi_dino, b, "acc"))); cards.push([f1(d[0]), "object-only vs plain DINO on ATRNet chips", "On chips the object views do not help (XI rows)", `${d.map(f1).join(" / ")} at 1 / 3 / 10 %. Scene+object: ${BUDGETS.map(b => f1(mean(diff(byId.xi_rso, byId.xi_dino, b, "acc")))).join(" / ")}.`, d.every(v => v < 0) ? "bad" : ""]); }
   const db = D.methods.find(m => m.ssl === "none");
-  if (db) { const scored = D.methods.filter(m => m.ssl !== "none" && !m.control).map(m => { const d = BUDGETS.flatMap(b => diff(m, db, b, "map", 100)); return {m, d}; }).filter(x => x.d.length).sort((x, y) => mean(y.d) - mean(x.d)); if (scored.length) { const s = scored[0]; cards.push([f1(mean(s.d)), "mAP points, all budgets", `Detection: ${s.m.label} is the best SSL`, `Positive on ${s.d.filter(v => v > 0).length} of ${s.d.length} cells. No method moves SARDet detection by more than about a point.`, sign(s.d)]); } }
+  if (db) { const scored = D.methods.filter(m => m.ssl !== "none" && !m.control).map(m => { const d = BUDGETS.flatMap(b => diff(m, db, b, "map", 100)); return {m, d}; }).filter(x => x.d.length).sort((x, y) => mean(y.d) - mean(x.d)); if (scored.length) { const s = scored[0]; cards.push([f1(mean(s.d)), "mAP points, all budgets", `Detection: ${s.m.label} is the best SSL`, `Positive on ${s.d.filter(v => v > 0).length} of ${s.d.length} cells. Its random-window control gets the same gain, so the small-crop recipe is what helps detection, not the region placement.`, sign(s.d)]); } }
+  const cb = CH.methods.find(m => m.ssl === "none");
+  if (cb && CH.methods.length > 1) { const ds = CH.methods.filter(m => m.ssl !== "none").map(m => ({m, d: diff(m, cb, "1pct", "acc")})).filter(x => x.d.length); const big = ds.sort((x, y) => Math.abs(mean(y.d)) - Math.abs(mean(x.d)))[0];
+    cards.push([f1(mean(big.d)), `largest change vs no SSL, 1 % labels (${big.m.label})`, "SARDet chips: no method separates from no SSL", `Mean per-class accuracy sits at ${fx(mean(present(vals(cb, "1pct"))))} % with no SSL and every SSL row is within split noise (splits differ by up to 7 points). The six-class task is too easy for 1 % labels to tell methods apart.`, sign(big.d)]); }
   $("cards").innerHTML = cards.map(([n, u, l, p, cls]) => `<div class="card"><div class="num ${cls}">${n}<small>${esc(u)}</small></div><div class="lbl">${esc(l)}</div><p>${esc(p)}</p></div>`).join("");
 
   // ---- latest ideas ----

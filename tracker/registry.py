@@ -72,6 +72,19 @@ DETECTION = {
     "RegionDINO_scene_object (random)": dict(id="d_rsor", label="scene+object, random windows", family="region", ssl="sardet", ref="d_dino", control=True, note="Its random-window control."),
 }
 
+# ---- chip classification on SARDet-100K (task: 6-class chips cut from the detection boxes; SSL always on SARDet scenes) ----
+CHIPS = {
+    "imagenet": dict(id="c_base", label="ImageNet start, no SSL", family="base", ssl="none", ref=None,
+                     note="ImageNet weights fine-tuned directly on the labeled chips."),
+    "dino": dict(id="c_dino", label="DINO", family="dino", ssl="sardet", ref="c_base", note="Plain DINO on the SARDet scenes, then chips."),
+    "lejepa": dict(id="c_lejepa", label="LeJEPA", family="lejepa", ssl="sardet", ref="c_base", note="LeJEPA on the scenes, then chips."),
+    "spark": dict(id="c_spark", label="SparK", family="spark", ssl="sardet", ref="c_base", note="SparK on the scenes, then chips."),
+    "regiondino_so": dict(id="c_rso", label="RegionDINO scene+object", family="region", ssl="sardet", ref="c_dino", note="Scene+object views on the scenes, then chips."),
+    "regiondino_so_random": dict(id="c_rsor", label="scene+object, random windows", family="region", ssl="sardet", ref="c_dino", control=True, note="Its random-window control."),
+    "regiondino_o": dict(id="c_ro", label="RegionDINO object-only", family="region", ssl="sardet", ref="c_dino", note="Object-only views on the scenes, then chips."),
+    "regiondino_o_random": dict(id="c_ror", label="object-only, random windows", family="region", ssl="sardet", ref="c_dino", control=True, note="Its random-window control."),
+}
+
 POOLS = {
     "none": "no SSL",
     "atr": "ATRNet-STAR chips (128 px, target-centred, SOC-40 unlabeled pool)",
@@ -86,6 +99,8 @@ SETTINGS = [
          table="classification", ssl="sardet", task="40-class accuracy on the official ATRNet-STAR test set"),
     dict(id="sardet_det", title="SSL on SARDet-100K scenes, detect on SARDet-100K", short="in-domain detection",
          table="detection", ssl="sardet", task="mAP@[.5:.95] on the official SARDet-100K test set"),
+    dict(id="sardet_chips", title="SSL on SARDet-100K scenes, classify SARDet-100K chips", short="in-domain chip classification",
+         table="chips", ssl="sardet", task="mean per-class accuracy on chips cut from the official test boxes (clean set, 6 classes)"),
 ]
 
 # families in display order, with the plain name of each

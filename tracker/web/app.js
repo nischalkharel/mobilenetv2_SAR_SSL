@@ -21,7 +21,7 @@ async function load(name) {
 
 // ---- shell: nav + meta line ----
 async function shell(active) {
-  const pages = [["index.html", "Overview"], ["classification.html", "Classification"], ["detection.html", "Detection"], ["maps.html", "Response maps"], ["runs.html", "Runs"], ["ideas.html", "Ideas"], ["glossary.html", "Glossary"]];
+  const pages = [["index.html", "Overview"], ["classification.html", "Classification"], ["detection.html", "Detection"], ["maps.html", "Response maps"], ["chips.html", "Chips"], ["runs.html", "Runs"], ["ideas.html", "Ideas"], ["glossary.html", "Glossary"]];
   const nav = $("nav");
   nav.innerHTML = pages.map(([h, t]) => `<a href="${h}" class="${h === active ? "active" : ""}">${t}</a>`).join("");
   try {
@@ -61,15 +61,15 @@ function hbars(host, groups, panels, opt = {}) {
   s += `</defs>`;
   rows.forEach((x, i) => { if (x.r) s += `<text x="${labelW - 12}" y="${ys[i] + rowH / 2 + 4}" font-size="12.5" text-anchor="end" fill="var(--fg)">${esc(x.r.label)}</text>`; });
   panels.forEach((p, k) => {
-    const x0 = labelW + k * (panelW + gap), right = 46, sx = v => x0 + v / p.xmax * (panelW - right), fmt = p.fmt || (v => v.toFixed(1));
+    const x0 = labelW + k * (panelW + gap), right = 46, xmin = p.xmin || 0, sx = v => x0 + (v - xmin) / (p.xmax - xmin) * (panelW - right), fmt = p.fmt || (v => v.toFixed(1));
     s += `<text x="${x0}" y="14" font-size="13" font-weight="600" fill="var(--fg)">${esc(p.title)}</text>`;
     p.ticks.forEach(t => s += `<line x1="${sx(t)}" x2="${sx(t)}" y1="${top - 4}" y2="${H - 22}" stroke="var(--grid)"/><text x="${sx(t)}" y="${H - 7}" font-size="10" text-anchor="middle" fill="var(--fg3)">${t}</text>`);
     if (p.ref != null) s += `<line x1="${sx(p.ref)}" x2="${sx(p.ref)}" y1="${top - 4}" y2="${H - 22}" stroke="var(--ref)" stroke-dasharray="3 3"/>${p.refLabel ? `<text x="${sx(p.ref) + 3}" y="${top + 8}" font-size="9.5" fill="var(--fg3)">${esc(p.refLabel)}</text>` : ""}`;
     rows.forEach((x, i) => {
-      if (!x.r) return; const r = x.r, v = present(r.v[p.key] || []); if (!v.length) { s += `<text x="${sx(0) + 4}" y="${ys[i] + rowH / 2 + 4}" font-size="11" fill="var(--fg3)">not run</text>`; return; }
+      if (!x.r) return; const r = x.r, v = present(r.v[p.key] || []); if (!v.length) { s += `<text x="${sx(xmin) + 4}" y="${ys[i] + rowH / 2 + 4}" font-size="11" fill="var(--fg3)">not run</text>`; return; }
       const m = mean(v), y = ys[i], fill = r.hatched ? `url(#h${host.id}${i})` : FAM[r.family];
       s += `<g class="bar" data-tip="${esc(r.label)}, ${esc(p.title)}: ${fmt(m)} (${v.map(fmt).join(" / ")})">`;
-      s += `<rect x="${sx(0)}" y="${y + 4}" width="${Math.max(0, sx(m) - sx(0))}" height="${rowH - 9}" rx="3" fill="${fill}" stroke="${r.hatched ? FAM[r.family] : "none"}"${r.control ? ' opacity="0.5"' : ""}/>`;
+      s += `<rect x="${sx(xmin)}" y="${y + 4}" width="${Math.max(0, sx(m) - sx(xmin))}" height="${rowH - 9}" rx="3" fill="${fill}" stroke="${r.hatched ? FAM[r.family] : "none"}"${r.control ? ' opacity="0.5"' : ""}/>`;
       v.forEach(q => s += `<circle cx="${sx(q)}" cy="${y + rowH / 2 - 0.5}" r="3" fill="var(--fg)" stroke="var(--surface)" stroke-width="1.5"/>`);
       s += `<text x="${sx(m) + 6}" y="${y + rowH / 2 + 3.5}" font-size="11.5" font-family="IBM Plex Mono, Consolas, monospace" fill="var(--fg)">${fmt(m)}</text>`;
       s += `<rect x="${x0}" y="${y}" width="${panelW}" height="${rowH}" fill="transparent"/></g>`;

@@ -143,6 +143,45 @@ def detection():
             "methods": [rows[i] for i in order if i in rows], "per_source": per_source, "pools": registry.POOLS}
 
 
+# ---------------------------------------------------------------- chip classification (SARDet-100K chips) ---------
+CHIP_RE = re.compile(r"^\d{8}-\d{6}_S1_(?P<method>.+?)_mobilenetv2_(?P<budget>\d+pct)_split(?P<split>[123])_seed0$")
+
+
+def chips():
+    rows = {}
+    for run in sorted((REPO / "SARDet_chips" / "outputs" / "finetune").glob("*")):
+        m = CHIP_RE.match(run.name)
+        reg = registry.CHIPS.get(m["method"]) if m else None
+        if reg is None:
+            continue
+        info = read_json(run / "run_info.json") or {}
+        mc, mt = read_json(run / "eval_test_clean" / "metrics.json"), read_json(run / "eval_test" / "metrics.json")
+        if info.get("status") != "completed" or not mc or not mt:
+            continue
+        hist = read_csv(run / "history.csv")
+        cell = {
+            "run": rel(run), "status": "completed",
+            "acc": round(100 * mc["mean_per_class_accuracy"], 2), "overall": round(100 * mc["overall_accuracy"], 2),
+            "test_acc": round(100 * mt["mean_per_class_accuracy"], 2), "test_overall": round(100 * mt["overall_accuracy"], 2),
+            "per_class": {c: round(100 * v, 1) for c, v in mc["per_class_accuracy"].items()},
+            "per_source": {c: round(100 * v, 1) for c, v in mc["per_source_accuracy"].items()},
+            "n_clean": mc["num_chips"], "n_test": mt["num_chips"],
+            "best_epoch": info.get("best_epoch"), "epochs_run": len(hist), "train_minutes": fnum(info.get("train_minutes"), 1),
+            "started": info.get("started"), "finished": info.get("finished"), "commit": (info.get("git") or {}).get("commit", "")[:7],
+            "backbone": (info.get("initialization") or {}).get("file", "").split("/")[-1], "ssl_run": (info.get("initialization") or {}).get("ssl_run_dir"),
+            "val_curve": [fnum(h.get("val_mean_class_acc"), 4) for h in hist],
+        }
+        r = rows.setdefault(reg["id"], {"compare_label": m["method"], **reg, "cells": {}})
+        prev = r["cells"].get(f"{m['budget']}/{m['split']}")
+        if prev is None or (cell["started"] or "") > (prev["started"] or ""):
+            r["cells"][f"{m['budget']}/{m['split']}"] = cell
+    order = [v["id"] for v in registry.CHIPS.values()]
+    return {"task": "SARDet-100K chip classification (6 classes), mean per-class accuracy % on the clean test chips; overall accuracy and the full test set stored too",
+            "budgets": ["1pct", "3pct", "10pct"], "splits": [1, 2, 3], "classes": ["ship", "aircraft", "car", "tank", "bridge", "harbor"],
+            "methods": [rows[i] for i in order if i in rows], "pools": registry.POOLS,
+            "chip_rule": "square window = max(64 px, 1.5 x longer box side), resized to 128; test_clean = test chips minus images shared with train minus chips holding another class"}
+
+
 # ---------------------------------------------------------------- response maps ----------------------------------
 def maps():
     chips = read_csv(REPO / "SARDet_to_ATR" / "outputs" / "compare" / "response_maps_per_model.csv")
@@ -179,7 +218,7 @@ def maps():
 # ---------------------------------------------------------------- every run folder ---------------------------------
 SSL_GLOBS = ["Experiments/*/outputs/ssl/*", "SARDet/*/outputs/ssl/*", "RegionSSL/*/outputs/ssl/*"]
 FT_GLOBS = ["Experiments/*/outputs/finetune/*", "Experiments/Baseline/Baseline_Output/*", "SARDet_to_ATR/outputs/finetune/*",
-            "SARDet/*/outputs/finetune/*", "RegionSSL/*/outputs/finetune/*"]
+            "SARDet/*/outputs/finetune/*", "RegionSSL/*/outputs/finetune/*", "SARDet_chips/outputs/finetune/*"]
 
 
 def curve(hist, col):
@@ -216,8 +255,8 @@ def runs():
                     r["exported"] = (info.get("exported_backbone") or {}).get("file")
                     r["gpu_hours"] = fnum(cost.get("gpu_hours") or (float(minutes) / 60 if minutes else None), 1)
                 else:
-                    col = "val_acc" if hist and "val_acc" in hist[0] else "val_select_map"
-                    r["curve"] = curve(hist, col); r["curve_name"] = {"val_acc": "validation accuracy per epoch", "val_select_map": "val-select mAP per 2 epochs"}[col]
+                    col = "val_mean_class_acc" if hist and "val_mean_class_acc" in hist[0] else "val_acc" if hist and "val_acc" in hist[0] else "val_select_map"
+                    r["curve"] = curve(hist, col); r["curve_name"] = {"val_acc": "validation accuracy per epoch", "val_select_map": "val-select mAP per 2 epochs", "val_mean_class_acc": "selection mean per-class accuracy per epoch"}[col]
                     r["best_epoch"] = info.get("best_epoch")
                     init = info.get("initialization") or info.get("backbone") or {}
                     r["backbone"] = (init.get("file") or init.get("path") or "").split("/")[-1] if isinstance(init, dict) else str(init)
@@ -233,7 +272,7 @@ def main():
         subprocess.run([sys.executable, str(REPO / "SARDet_to_ATR" / "compare.py")], check=True, cwd=REPO)
         subprocess.run([sys.executable, str(REPO / "SARDet" / "compare" / "compare.py")], check=True, cwd=REPO / "SARDet")
     OUT.mkdir(parents=True, exist_ok=True)
-    data = {"classification": classification(), "detection": detection(), "maps": maps(), "runs": runs()}
+    data = {"classification": classification(), "detection": detection(), "chips": chips(), "maps": maps(), "runs": runs()}
     try:
         commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, cwd=REPO).stdout.strip()
     except OSError:
@@ -245,6 +284,7 @@ def main():
     c, d, r = data["classification"], data["detection"], data["runs"]
     print(f"classification: {len(c['methods'])} methods, {sum(len(m['cells']) for m in c['methods'])} cells")
     print(f"detection: {len(d['methods'])} methods, {sum(len(m['cells']) for m in d['methods'])} cells ({d.get('compare_folder')})")
+    print(f"chips: {len(data['chips']['methods'])} methods, {sum(len(m['cells']) for m in data['chips']['methods'])} cells")
     print(f"maps: {len(data['maps']['chips']['rows'])} chip rows, {len(data['maps']['scenes']['rows'])} scene rows")
     print(f"runs: {r['count']}  -> {OUT}")
 
