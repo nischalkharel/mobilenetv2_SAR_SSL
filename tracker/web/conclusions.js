@@ -1,0 +1,97 @@
+// What we know so far, one short sentence each, in time order, with the evidence behind it.
+// Hand-maintained (Claude updates it when a result lands; Nischal edits freely). Each entry:
+//   id, date, title (the conclusion in one sentence), strength: strong | medium | weak | null,
+//   status: established | needs confirmation | parked | superseded,
+//   what: plain explanation of what we saw,  evidence: [{study, numbers, see (page link)}],
+//   tried: what was run to get there (incl. controls),  means: what it tells us for the story,
+//   next: what would make it stronger or what it leaves open.
+const STRENGTH = {strong: "strong result", medium: "useful result", weak: "weak signal", null: "null result"};
+
+const CONCLUSIONS = [
+  {id: "c01", date: "2026-10-28", strength: "strong", status: "established",
+   title: "On its own dataset, SSL on the ATRNet chips lifts 1 %-label accuracy from 21 % to 35 %; DINO and LeJEPA tie, SparK lags.",
+   what: "MobileNetV2 from ImageNet weights, 100 epochs of SSL on the unlabeled ATRNet-STAR chips, then fine-tuning on 1 / 3 / 10 % of the labels. Any SSL helps a lot when labels are scarce; the gain shrinks to about 6 points at 10 %.",
+   evidence: [{study: "A0 vs A1 / A2 / A3, 3 splits", numbers: "1 % labels: no SSL 20.7, DINO 35.1, LeJEPA 36.2, SparK 24.7. 10 %: 71.7 / 77.6 / 75.5 / 74.6.", see: "classification.html"}],
+   tried: "Three SSL methods with one shared recipe (same views, epochs, batch), three splits each with its own labeled draw and SSL seed, fine-tune seed fixed.",
+   means: "The baseline of the whole project: SSL on in-domain chips works, and DINO is a fair reference method.",
+   next: "Nothing; this is settled."},
+
+  {id: "c02", date: "2026-11-10", strength: "medium", status: "parked",
+   title: "Centering DINO per acquisition-metadata group (CondDINO) beats plain DINO in-domain, but it uses metadata, so it is set aside.",
+   what: "DINO keeps a running mean of the teacher output; CondDINO keeps one per metadata group (sensor setting, polarization). It wins by 5.7 points at 1 % labels and its controls (scrambled groups, three fields) sit at plain DINO, so the metadata is what helps.",
+   evidence: [{study: "P4 vs A1, 3 splits; controls split 1", numbers: "1 %: CondDINO 40.8 vs DINO 35.1; scrambled 34.8, 3-field 34.7. 10 %: 78.6 vs 77.6.", see: "classification.html"},
+              {study: "On SARDet detection", numbers: "CondDINO (source + polarization) +0.2 / +0.3 / −0.3 mAP vs no SSL; its permuted control +0.6 / +0.4 / −0.2.", see: "detection.html"}],
+   tried: "Two conditioning fields, a scrambled control, a three-field variant; the same idea on SARDet detection (no gain).",
+   means: "Metadata-aware SSL is a real effect on chips but needs information the plain rows do not get, so it cannot be the headline method. Kept as a secondary finding.",
+   next: "Only worth reviving as a 'when metadata is available' section of the paper."},
+
+  {id: "c03", date: "2026-11-17", strength: "medium", status: "established",
+   title: "SSL on SARDet scenes transfers to ATRNet chips worse than no SSL for DINO and LeJEPA; only SparK carries over.",
+   what: "Backbones trained on 94,034 full SARDet scenes were fine-tuned on ATRNet chips. Plain DINO landed 3 points below the no-SSL start at 1 % labels and LeJEPA 8 points below; SparK was 2 to 5 points above.",
+   evidence: [{study: "XA rows vs A0, 3 splits", numbers: "1 %: no SSL 20.7, DINO 17.8, LeJEPA 12.3, SparK 22.7. 3 %: 43.4 / 41.8 / 32.8 / 48.0.", see: "classification.html"},
+              {study: "Response maps on ATRNet test chips", numbers: "peak in the vehicle box: ImageNet start 47 %, DINO 18 %, LeJEPA 27 %, SparK 15 %.", see: "maps.html"}],
+   tried: "Same three methods, same recipe, the SSL pool swapped from chips to scenes.",
+   means: "The problem the rest of the work attacks: SSL on scenes learns the scene, and that hurts when the downstream images are object chips. This is the practical setting (big unlabeled archives, few chip labels).",
+   next: "Confirm on a second scene archive (see to-do)."},
+
+  {id: "c04", date: "2026-11-18", strength: "strong", status: "needs confirmation",
+   title: "Cutting DINO's views around label-free bright regions (RegionDINO object-only) turns that loss into the best cross-dataset result: +9.4 points over plain DINO at 1 % labels.",
+   what: "A pixel rule proposes bright compact regions in each scene; DINO's views are cut around them instead of anywhere in the scene. No labels anywhere. The gain is positive on all nine split-budget cells and the random-window control gets a third of it, so the placement of the views is what matters.",
+   evidence: [{study: "XA RegionDINO object-only vs XA DINO, 3 splits", numbers: "27.2 / 49.0 / 73.7 vs 17.8 / 41.8 / 72.3 (+9.4 / +7.1 / +1.4). Control: +3.2 / +3.6 / +0.5. Over no SSL: +6.4 / +5.5 / +2.0.", see: "classification.html"},
+              {study: "Response maps on ATRNet chips", numbers: "peak in box 56 to 62 % (plain DINO 17 to 19, ImageNet 47, control 15).", see: "maps.html"}],
+   tried: "Object-only and scene+object modes, each with a random-window control; three splits; frozen-backbone response maps to check where the network looks.",
+   means: "The core claim of the paper: object-centred views fix scene-to-chip transfer with no labels. It is one dataset pair so far.",
+   next: "A second scenes-in, chips-out dataset (Sentinel-1 + OpenSARShip, or FUSAR-Ship)."},
+
+  {id: "c05", date: "2026-11-19", strength: "medium", status: "established",
+   title: "Keeping the whole-scene views next to the object views (scene+object) gives only a third of the gain, and the maps stay scene-level.",
+   what: "Scene+object is DINO's normal views plus object views. It gains +2.5 / +3.9 / +1.1 over plain DINO (object-only: +9.4 / +7.1 / +1.4), and its frozen response maps look like plain DINO's.",
+   evidence: [{study: "XA scene+object vs XA DINO", numbers: "20.2 / 45.7 / 73.4; control 17.1 / 41.5 / 72.0 (= plain DINO).", see: "classification.html"},
+              {study: "Response maps", numbers: "peak in box 12 to 21 % (plain DINO 17 to 19).", see: "maps.html"}],
+   tried: "Both modes with controls, same pool and epochs.",
+   means: "Dropping the scene views is what makes the object views count. Object-only is the method.",
+   next: "None needed."},
+
+  {id: "c06", date: "2026-11-19", strength: "medium", status: "established",
+   title: "When the SSL images are already object chips, the object views do not help: on the ATRNet pool RegionDINO is level with or 2 points below plain DINO.",
+   what: "The same engine run on the ATRNet chips themselves (the XI rows). Plain DINO reproduces A1; scene+object is level; object-only loses 2.0 / 1.8 / 1.6 points. On a 128-px chip the regions are fragments of the vehicle, so object views only remove context.",
+   evidence: [{study: "XI rows vs XI plain DINO, 3 splits", numbers: "plain DINO 34.0 / 56.2 / 77.3; scene+object 33.8 / 55.8 / 77.1; object-only 32.0 / 54.5 / 75.7.", see: "classification.html"},
+              {study: "Response maps", numbers: "plain DINO on chips already peaks in the box on 81 to 84 % of chips; object-only 43 to 55 %.", see: "maps.html"}],
+   tried: "Plain-DINO reference, both modes, both controls, three splits.",
+   means: "Bounds the claim: the method is for scene pools, not for chip pools. Say so in the paper.",
+   next: "None."},
+
+  {id: "c07", date: "2026-11-19", strength: "medium", status: "established",
+   title: "On full scenes the plain ImageNet weights are the most object-focused backbone; every scene-trained SSL spreads its response, and object-only brings the peak back onto objects three times as often as plain DINO.",
+   what: "Frozen-backbone response maps on 1,500 SARDet test scenes. Peak-in-a-box: ImageNet 36 %, plain DINO 8 to 11 %, object-only 29 to 33 % (control 15 to 28), SparK 27 to 33 %.",
+   evidence: [{study: "Scene response maps, 3 splits", numbers: "see the scenes chart and per-source table.", see: "maps.html"}],
+   tried: "Eight backbones, three splits, the same 1,500 scenes.",
+   means: "Explains c03 and c04 at the feature level: scene SSL learns background; object views pull attention back.",
+   next: "None."},
+
+  {id: "c08", date: "2026-11-20", strength: "medium", status: "established",
+   title: "On SARDet detection, RegionDINO object-only is the first method to gain more than a point of mAP at every budget, but its random-window control gains the same: small crops help detection, placement does not.",
+   what: "Faster R-CNN fine-tuned on 1 / 3 / 10 % of SARDet labels from each backbone. Object-only +1.6 / +1.4 / +1.2 mAP points over no SSL (SparK, the previous best, +0.7). The control with the same crop sizes at random places: +1.8 / +1.6 / +1.0.",
+   evidence: [{study: "Detection, 10 methods, 3 splits", numbers: "object-only 0.173 / 0.227 / 0.298 vs no SSL 0.157 / 0.213 / 0.285; scene+object +1.2 / +1.0 / +0.3.", see: "detection.html"}],
+   tried: "Both modes, both controls, next to DINO / LeJEPA / SparK / CondDINO from before.",
+   means: "Two effects, now separated: training DINO on object-sized crops instead of whole scenes helps whenever the SSL images are scenes (detection and transfer both); where the crops sit matters only for transfer to chips (c04).",
+   next: "The view-size sweep (ViewScale study) to map the crop-size effect."},
+
+  {id: "c09", date: "2026-11-20", strength: "null", status: "established",
+   title: "Classifying chips cut from SARDet's own boxes cannot tell the methods apart: every SSL row is within split noise of no SSL.",
+   what: "Six coarse classes; no SSL already reaches 81 % mean per-class accuracy (92 % overall) at 1 % labels; the splits differ by up to 7 points, more than any method difference.",
+   evidence: [{study: "S1, 8 methods, 72 cells", numbers: "1 %: no SSL 81.0, DINO 82.2, object-only 82.4, scene+object 82.4, controls 80.5 and 83.6.", see: "chips.html"}],
+   tried: "All eight backbones, three budgets, three splits; clean and full test sets; per-class and per-source tables.",
+   means: "A null on an easy test; it neither supports nor contradicts c04. SARDet chips need a harder protocol (smaller budget, or train and test on different source datasets) to carry signal.",
+   next: "Parked unless the chip test is made harder."},
+];
+
+// what is being worked on and what should happen next, in order
+const TODO = [
+  {who: "Nischal", status: "next", text: "Find a second scenes-in, chips-out dataset pair with real chip labels: Sentinel-1 scenes + OpenSARShip ship-type chips first, FUSAR-Ship as fallback. This is the confirmation c04 needs."},
+  {who: "Claude", status: "building", text: "ViewScale study: sweep the SSL view size on the SARDet pool and map the gain (detection and chip transfer) against view size over object size (from c08)."},
+  {who: "Claude", status: "building", text: "TeacherRegions study: regions proposed by a large pretrained SAR model instead of the brightness rule; student stays MobileNetV2; compare with plain transfer / distillation so it is not just transfer learning."},
+  {who: "both", status: "queued", text: "Reverse direction: SSL on ATRNet chips, fine-tune and test on SARDet (chips or detection), to see whether the scene-to-chip asymmetry holds the other way."},
+  {who: "both", status: "later", text: "Shadow-consistent SSL (range direction as a label-free signal) and S2 blind tiles: only if the lines above stall."},
+  {who: "both", status: "before writing", text: "Re-run everything that goes into the paper under one controlled protocol once the story is fixed."},
+];

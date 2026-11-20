@@ -46,8 +46,10 @@ class RegionDINOMethod:
         if self.mode != "scene":
             if len(args.obj_blur_p) != 3:
                 raise ValueError("obj_blur_p needs 3 values: object-global 1, object-global 2, object-local views")
-            if args.region_source not in ("felz", "random"):
-                raise ValueError("region_source must be felz (the proposer) or random (the control)")
+            if args.region_source not in ("felz", "random", "fixed"):
+                raise ValueError("region_source must be felz (the proposer), random (the control) or fixed (the view-size sweep)")
+            if args.region_source == "fixed" and not getattr(args, "fixed_extent_px", None):
+                raise ValueError("region_source fixed needs fixed_extent_px (window extent in pixels of the working image)")
         self.pool_name = getattr(args, "pool", "sardet")
         self.history_columns = ["loss", "scene_loss", "object_loss", "teacher_entropy", "teacher_marginal_entropy", "feature_cosine",
                                 "feature_std", "fallback_rate", "lr", "wd", "momentum", "teacher_temp", "center_norm", "object_center_norm"]
@@ -69,6 +71,7 @@ class RegionDINOMethod:
             return ds
         self.store = R.RegionStore(pool.regions_file(smoke), scale=pool.region_scale)
         opts = {k: getattr(args, k) for k in OBJECT_KEYS}
+        opts["fixed_extent_px"] = getattr(args, "fixed_extent_px", None)      # only the ViewScale configs set it
         ds = RegionViewDataset(rows, self.scene_plan(args), self.store, opts, seed=args.seed, pool=pool)
         self.n_scene = len(ds.scene_plan) and sum(c for _, c, _ in ds.scene_plan)
         self.n_obj_slots = sum(c for _, c, _ in ds.obj_slots)

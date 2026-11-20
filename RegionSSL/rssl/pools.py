@@ -16,6 +16,7 @@ and of A1's global crops; boxes are scaled by 224 / 128.
 """
 import csv
 import hashlib
+import os
 import re
 import sys
 from pathlib import Path
@@ -25,7 +26,7 @@ from PIL import Image
 
 REPO = Path(__file__).resolve().parents[2]
 ATR_DINO_DIR = REPO / "Experiments" / "mobileNetv2_DINO"       # the A1 experiment: paths.py and data.py (read-only)
-REGIONS_DIR = Path(__file__).resolve().parents[1] / "regions"
+REGIONS_DIR = Path(os.environ.get("REGIONSSL_REGIONS_DIR", Path(__file__).resolve().parents[1] / "regions"))   # same variable as rssl/regions.py
 
 
 def sha256_of_file(path: Path) -> str:

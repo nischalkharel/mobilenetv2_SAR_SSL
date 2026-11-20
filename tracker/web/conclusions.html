@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conclusions · SAR SSL tracker</title>
+<link rel="stylesheet" href="app.css">
+<style>
+  .tl { position: relative; margin-top: 10px; }
+  .c { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+  .c .hd { display: grid; grid-template-columns: 92px 1fr auto; gap: 14px; align-items: center; padding: 12px 16px; cursor: pointer; }
+  .c .hd:hover { background: var(--surface2); }
+  .c .date { font-size: 12px; color: var(--fg3); font-family: "IBM Plex Mono", Consolas, monospace; }
+  .c .t { font-weight: 600; line-height: 1.4; }
+  .c .tags { display: flex; gap: 6px; white-space: nowrap; }
+  .c .body { display: none; padding: 4px 16px 16px 122px; border-top: 1px solid var(--line); }
+  .c.open .body { display: block; }
+  .c .body h4 { margin: 12px 0 4px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg3); }
+  .c .body p { color: var(--fg2); margin: 0 0 4px; max-width: 900px; }
+  .ev { width: 100%; font-size: 13px; }
+  .ev td { vertical-align: top; }
+  .pill.strong { background: var(--good-bg); color: var(--good); border-color: transparent; }
+  .pill.medium { background: color-mix(in srgb, var(--accent) 15%, var(--surface)); color: var(--accent); border-color: transparent; }
+  .pill.weak { background: #fff3cd; color: #7a5a00; border-color: transparent; }
+  .pill.null { background: var(--surface2); color: var(--fg3); }
+  .pill.needs { background: #fff3cd; color: #7a5a00; border-color: transparent; }
+  .todo { display: grid; gap: 8px; }
+  .todo .it { display: grid; grid-template-columns: 90px 80px 1fr; gap: 12px; align-items: baseline; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+  .todo .who { font-size: 12px; color: var(--fg3); }
+  .story { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; padding: 14px 18px; }
+  @media (max-width: 700px) { .c .hd { grid-template-columns: 1fr; } .c .body { padding-left: 16px; } .todo .it { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="top"><div class="in"><span class="brand">SAR SSL tracker</span><nav id="nav"></nav><span class="meta" id="meta"></span></div></div>
+<main>
+  <div class="eyebrow">Conclusions so far</div>
+  <h1>What we know, in order, and where each piece came from</h1>
+  <p class="sub">One sentence per finding. Click a sentence to see the numbers behind it, what was tried, what it means for the story and what would make it stronger. The strength tag is a judgement of how much weight the finding can carry in a paper; "needs confirmation" means it rests on one dataset pair.</p>
+
+  <section class="story">
+    <div class="eyebrow">The story as it stands, 2026-11-20</div>
+    <p style="margin-top:6px"><b>Problem.</b> Self-supervised learning on large unlabeled SAR scene archives is the practical setting, but scene-trained backbones transfer to object chips worse than plain ImageNet weights (c03), because they learn the scene rather than the objects (c07).</p>
+    <p><b>Method.</b> Cut DINO's views around label-free bright regions. That turns the loss into the best cross-dataset result, +9 points at 1 % labels, with a random-window control showing the placement matters (c04). Keeping the scene views dilutes it (c05).</p>
+    <p><b>Limits, honestly measured.</b> It does nothing when the SSL images are already chips (c06), and on an easy in-dataset chip test nothing separates (c09). On detection the crop size is what helps, not the placement (c08).</p>
+    <p style="margin:0"><b>What is missing for a strong paper.</b> A second scenes-in, chips-out dataset pair confirming c04, and a map of the crop-size effect (c08) so the recipe has a rule behind it. Both are on the to-do list below. <span id="counts" class="sub" style="font-size:12.5px"></span></p>
+  </section>
+
+  <section>
+    <div class="eyebrow">Findings, oldest first</div>
+    <div class="controls"><span class="seg" id="fseg"><button class="on" data-f="">all</button><button data-f="strong">strong</button><button data-f="medium">useful</button><button data-f="null">null</button></span><button id="expand">expand all</button></div>
+    <div class="tl" id="list"></div>
+  </section>
+
+  <section>
+    <div class="eyebrow">To do, in order</div>
+    <div class="todo" id="todo" style="margin-top:8px"></div>
+    <p class="sub" style="margin-top:10px;font-size:12.5px">The idea box holds raw ideas; this list holds what has been decided. Both are files in the repository (<code>tracker/web/conclusions.js</code>, <code>tracker/ideas.json</code>).</p>
+  </section>
+</main>
+<script src="app.js"></script>
+<script src="conclusions.js"></script>
+<script>
+(async () => {
+  await shell("conclusions.html");
+  let filter = "";
+  const n = Object.fromEntries(["strong", "medium", "weak", "null"].map(k => [k, CONCLUSIONS.filter(c => c.strength === k).length]));
+  $("counts").textContent = `(${CONCLUSIONS.length} findings: ${n.strong} strong, ${n.medium} useful, ${n.weak} weak, ${n.null} null; ${CONCLUSIONS.filter(c => c.status === "needs confirmation").length} awaiting confirmation)`;
+  function draw() {
+    const rows = CONCLUSIONS.filter(c => !filter || c.strength === filter);
+    $("list").innerHTML = rows.map(c => `<div class="c" id="${c.id}"><div class="hd"><span class="date">${c.id} · ${esc(c.date)}</span><span class="t">${esc(c.title)}</span><span class="tags"><span class="pill ${c.strength}">${STRENGTH[c.strength]}</span>${c.status !== "established" ? `<span class="pill ${c.status === "needs confirmation" ? "needs" : ""}">${esc(c.status)}</span>` : ""}</span></div>
+      <div class="body">
+        <h4>What we saw</h4><p>${esc(c.what)}</p>
+        <h4>Evidence</h4><table class="ev"><tbody>${c.evidence.map(e => `<tr><td style="width:260px"><b>${esc(e.study)}</b></td><td>${esc(e.numbers)}</td><td style="width:120px"><a href="${esc(e.see)}">open page &rarr;</a></td></tr>`).join("")}</tbody></table>
+        <h4>What was tried</h4><p>${esc(c.tried)}</p>
+        <h4>What it means</h4><p>${esc(c.means)}</p>
+        <h4>What would make it stronger / what it leaves open</h4><p>${esc(c.next)}</p>
+      </div></div>`).join("");
+    $("list").querySelectorAll(".hd").forEach(h => h.onclick = () => h.parentNode.classList.toggle("open"));
+    if (location.hash) { const el = document.querySelector(location.hash); if (el) { el.classList.add("open"); el.scrollIntoView({block: "center"}); } }
+  }
+  draw();
+  $("fseg").querySelectorAll("button").forEach(b => b.onclick = () => { $("fseg").querySelectorAll("button").forEach(x => x.classList.remove("on")); b.classList.add("on"); filter = b.dataset.f; draw(); });
+  $("expand").onclick = () => { const all = [...document.querySelectorAll(".c")], open = all.every(c => c.classList.contains("open")); all.forEach(c => c.classList.toggle("open", !open)); $("expand").textContent = open ? "expand all" : "collapse all"; };
+  $("todo").innerHTML = TODO.map(t => `<div class="it"><span class="pill ${t.status === "next" ? "ok" : t.status === "building" ? "warn" : ""}">${esc(t.status)}</span><span class="who">${esc(t.who)}</span><span>${esc(t.text)}</span></div>`).join("");
+})();
+</script>
+</body>
+</html>

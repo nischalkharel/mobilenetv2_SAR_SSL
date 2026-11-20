@@ -26,7 +26,7 @@ from shared import paths  # noqa: E402
 EXPERIMENTS = ["baseline_SARDet", "DINO_SARDet", "LeJEPA_SARDet", "SparK_SARDet", "CondDINO_SARDet",
                # RegionSSL study (separate folder; its fine-tunes use the same protocol); rows named by their SSL run_name
                "../RegionSSL/RegionDINO_scene_object", "../RegionSSL/RegionDINO_object"]
-VARIANT_EXPERIMENTS = {"CondDINO_SARDet", "RegionDINO_scene_object", "RegionDINO_object"}   # several SSL configs per folder
+VARIANT_EXPERIMENTS = {"CondDINO_SARDet", "RegionDINO_scene_object", "RegionDINO_object", "ViewScale"}   # several SSL configs per folder
 BUDGETS = ["1pct", "3pct", "10pct"]
 BASELINE = "baseline_SARDet"
 

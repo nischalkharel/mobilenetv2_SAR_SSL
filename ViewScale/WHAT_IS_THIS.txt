@@ -1,0 +1,32 @@
+ViewScale: how big should the SSL training windows be, relative to the objects?
+
+What this folder is
+-------------------
+A one-factor sweep of the window size that DINO trains on, using the SARDet-100K scene pool and the
+RegionDINO engine (RegionSSL/). Every run is the "object-only" recipe (18 small views per image, no whole-scene
+views) with ONE change: the windows are random squares of a fixed size instead of windows around proposed regions.
+Sizes swept: 32, 64, 128, 256 and 512 px (whole scene) in the 512-px working frame. The existing object-only run
+(windows from the proposed regions, median region 10 px) and its random-size control are the two reference points.
+
+What Nischal wanted and was thinking (2026-11-20)
+-------------------------------------------------
+The detection result on SARDet said: RegionDINO object-only gains +1.5 mAP over no SSL, the biggest gain of any
+method, BUT its random-window control gains the same. So on detection the gain comes from training on small,
+object-sized crops rather than whole scenes, and not from where the crops are placed. Nobody has mapped that for
+SAR. Nischal: "this sounds interesting we can do this ... make this in a folder and get it ready. always have
+agents checking your work and designs and some agents should understand the overall picture too so they can make
+sure we aren't doing non-consistent things."
+
+The question in one line
+------------------------
+Plot the gain (SARDet detection mAP, and transfer to ATRNet chips) against window size / object size. If there is a
+clear best size we get a rule of thumb for SAR SSL ("set the view to about N times the target size") and a curve
+to back it. It also tells us whether RegionDINO's region placement adds anything beyond choosing the right scale.
+
+Where things are
+----------------
+DESIGN.md           the protocol, the sweep points, the cost, what is measured, the decisions
+config_ssl_e*.json  one SSL config per window size (only run_name and fixed_extent_px differ)
+train_ssl.py        the entry point (the RegionDINO object-only method with the fixed-window source)
+(no crc/ folder)    SSL runs use the suite's chain script: cd SARDet && sbatch crc/ssl.sbatch ../ViewScale <split> config_ssl_e<k>.json
+outputs/            SSL runs land in outputs/ssl/; fine-tunes go through SARDet_to_ATR (chips) and SARDet (detection)

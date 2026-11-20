@@ -1,0 +1,43 @@
+TeacherRegions: a big pretrained SAR model says where the objects are; the small model learns there.
+
+What this folder is
+-------------------
+RegionDINO (RegionSSL/) cuts DINO's views around label-free regions found by a brightness rule (bright compact
+blobs). That rule is cheap but can only find bright blobs: faint targets are missed, bright clutter is kept.
+Here the regions come instead from the attention / saliency of a large pretrained SAR foundation model (SARMAE,
+ViT-B, trained on 1.3 M SAR chips; models/SARMAE/). The student stays MobileNetV2 and the training recipe stays
+RegionDINO object-only; only the region file changes. The teacher is frozen, is never fine-tuned, and is not used
+at test time: it acts as a filter that tells the self-supervised student what to look at while it learns.
+
+What Nischal wanted and was thinking (2026-11-20)
+-------------------------------------------------
+"this sounds interesting and relevant too but I'm worried if this would just be transfer learning? maybe we should
+try to do the transfer learning things too as a comparison. So I guess our goal here will be: use the bigger SAR
+models and use them as a filter that makes the self-learning models focus on important things as they learn. this
+is really interesting to me." Also: "we will need to figure out the best current SAR model too so we can get it
+working for our task in a helpful way. we shouldn't be using some bad old model" and "make sure agents are checking
+and making sure everything is working properly and everything is consistent and defensible."
+
+The question in one line
+------------------------
+Does a teacher-proposed region file beat the brightness rule (and random windows) for the compact student, and is
+that gain more than what plain transfer from the teacher (distillation of its features into MobileNetV2) gives?
+The comparison that answers "is this just transfer learning": teacher-regions RegionDINO vs feature distillation
+from the same teacher vs the brightness-rule RegionDINO, all with MobileNetV2, all tested on the same ATRNet
+transfer and SARDet detection protocols.
+
+Which teacher and why
+---------------------
+SARMAE ViT-B (CVPR 2026): the only recent SAR foundation model with public, ungated weights, trained on the right
+sensors and resolutions, with attention maps shown in its paper to sit on objects. Fallback: SARATR-X v1 (HiViT-B,
+click-through gate). SARATR-X v2 is stronger but needs an email to the author. Survey in DESIGN.md section 2.
+Caveat recorded there: SARMAE's pretraining pool contains SARDet-100K (no labels), not ATRNet-STAR.
+
+Where things are
+----------------
+DESIGN.md            protocol, the teacher survey, the saliency-to-regions rule, the three-way comparison, cost
+sarmae_code/         the SARMAE model code, vendored unchanged with a NOTICE (license CC BY-NC 4.0)
+teacher_saliency.py  frozen SARMAE -> saliency map per pool image -> region boxes -> regions.npz in RegionSSL's format
+config_ssl.json      the RegionDINO object-only config that reads the teacher region file
+crc/                 CRC job scripts (proposer as a GPU job, then the usual SSL chain)
+outputs/             region files, saliency previews, SSL runs

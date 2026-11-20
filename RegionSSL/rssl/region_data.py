@@ -18,6 +18,9 @@ in (counted as `fallback` so the run record shows how often that happened).
 region_source "random" is the control: K random windows per image whose extents and aspects are drawn from
 the pooled, sampling-weighted size distribution of the real regions (see __init__), so window sizes match
 what the real runs train on while positions carry no information.
+region_source "fixed" (the ViewScale sweep): K random SQUARE windows per image whose extent is the single
+number fixed_extent_px, at random places. Everything else (zooms, view sizes, counts) is the object-only recipe,
+so a sweep over fixed_extent_px varies one thing only: how large the training windows are.
 
 Batch layout (collate): scene slots -> list of (B,1,S,S); object slots -> list of (B*K,1,S,S), image-major
 (image 0 object 0, image 0 object 1, ..., image 1 object 0, ...). DINO's loss then treats each object as a
@@ -123,7 +126,12 @@ class RegionViewDataset(Dataset):
         return b, w
 
     def random_box(self, W, H, rng):
-        """A box with a real region's extent and aspect at a random place (control / fallback)."""
+        """A box with a real region's extent and aspect at a random place (control / fallback); with
+        region_source "fixed", a square box of extent fixed_extent_px at a random place (the view-size sweep)."""
+        if self.o.get("region_source") == "fixed":
+            e = int(min(int(self.o["fixed_extent_px"]), W, H))
+            x1, y1 = rng.randint(0, W - e), rng.randint(0, H - e)
+            return np.array([x1, y1, x1 + e, y1 + e], dtype=np.int32)
         j = rng.randrange(len(self.pooled_extents))
         e = int(min(self.pooled_extents[j], W, H))
         a = float(self.pooled_aspects[j])
@@ -134,7 +142,7 @@ class RegionViewDataset(Dataset):
 
     def choose_boxes(self, file_name, W, H, rng):
         """K boxes for this image; returns (boxes, n_real_usable, fallback flag)."""
-        if self.o["region_source"] == "random":
+        if self.o["region_source"] in ("random", "fixed"):
             return [self.random_box(W, H, rng) for _ in range(self.K)], 0, 0
         real, weights = self.usable_boxes(file_name)
         if len(real) == 0:
