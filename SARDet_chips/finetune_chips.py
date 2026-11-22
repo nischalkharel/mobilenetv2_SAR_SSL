@@ -5,7 +5,8 @@
     python SARDet_chips/finetune_chips.py --method regiondino_o --budget 10pct --split 3 --backbone <file>
     python SARDet_chips/finetune_chips.py --method dino --budget 1pct --split 1 --smoke --device cpu   # pipeline check
 
-Methods: imagenet (no SSL), dino, lejepa, spark, regiondino_so, regiondino_so_random, regiondino_o, regiondino_o_random.
+Methods: imagenet (no SSL), dino, lejepa, spark, regiondino_so, regiondino_so_random, regiondino_o, regiondino_o_random,
+regiondino_o_teacher, regiondino_o_teacher_random (TeacherRegions/ backbones, same scene pool).
 The SSL backbone of method m for split s is the newest completed scene SSL run of split s (SARDet_to_ATR/find_backbone.py).
 Model, training loop, transforms, run records and charts are the ATRNet fine-tune code (Experiments/mobileNetv2_DINO);
 only the data (chips from one array file) and the head size (6 classes) differ. DESIGN.md section 4.
@@ -37,7 +38,8 @@ from utils import environment_info, git_info, resolve_device, save_json, set_see
 sys.path.insert(0, str(cp.REPO_ROOT / "SARDet_to_ATR"))
 import find_backbone  # noqa: E402
 
-METHODS = ["imagenet", "dino", "lejepa", "spark", "regiondino_so", "regiondino_so_random", "regiondino_o", "regiondino_o_random"]
+METHODS = ["imagenet", "dino", "lejepa", "spark", "regiondino_so", "regiondino_so_random", "regiondino_o", "regiondino_o_random",
+           "regiondino_o_teacher", "regiondino_o_teacher_random"]   # TeacherRegions backbones (added 2026-11-22)
 SMOKE_PER_CLASS, SMOKE_EPOCHS = 12, 2
 
 

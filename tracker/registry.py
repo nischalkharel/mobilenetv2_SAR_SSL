@@ -104,6 +104,8 @@ CHIPS = {
     "regiondino_so_random": dict(id="c_rsor", label="scene+object, random windows", family="region", ssl="sardet", ref="c_dino", control=True, note="Its random-window control."),
     "regiondino_o": dict(id="c_ro", label="RegionDINO object-only", family="region", ssl="sardet", ref="c_dino", note="Object-only views on the scenes, then chips."),
     "regiondino_o_random": dict(id="c_ror", label="object-only, random windows", family="region", ssl="sardet", ref="c_dino", control=True, note="Its random-window control."),
+    "regiondino_o_teacher": dict(id="c_rot", label="object-only, teacher regions", family="region", ssl="sardet", ref="c_ro", note="Windows on SARMAE-proposed regions (TeacherRegions backbone), then chips; paired against the brightness-rule row."),
+    "regiondino_o_teacher_random": dict(id="c_rotr", label="teacher-size random windows", family="region", ssl="sardet", ref="c_rot", control=True, note="Random windows with the teacher regions' sizes, then chips."),
 }
 
 POOLS = {

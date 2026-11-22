@@ -19,9 +19,10 @@ import chip_paths as cp  # noqa: E402
 
 LABELS = {"imagenet": "ImageNet start (no SSL)", "dino": "DINO on scenes", "lejepa": "LeJEPA on scenes", "spark": "SparK on scenes",
           "regiondino_so": "RegionDINO scene+object", "regiondino_so_random": "RegionDINO scene+object, random windows (control)",
-          "regiondino_o": "RegionDINO object-only", "regiondino_o_random": "RegionDINO object-only, random windows (control)"}
+          "regiondino_o": "RegionDINO object-only", "regiondino_o_random": "RegionDINO object-only, random windows (control)",
+          "regiondino_o_teacher": "RegionDINO object-only, teacher regions", "regiondino_o_teacher_random": "RegionDINO object-only, teacher-size random windows (control)"}
 REF = {"dino": "imagenet", "lejepa": "imagenet", "spark": "imagenet", "regiondino_so": "dino", "regiondino_so_random": "dino",
-       "regiondino_o": "dino", "regiondino_o_random": "dino"}
+       "regiondino_o": "dino", "regiondino_o_random": "dino", "regiondino_o_teacher": "regiondino_o", "regiondino_o_teacher_random": "regiondino_o_teacher"}
 BUDGETS = ["1pct", "3pct", "10pct"]
 NAME_RE = re.compile(r"^\d{8}-\d{6}_S1_(?P<method>.+?)_mobilenetv2_(?P<budget>\d+pct)_split(?P<split>[123])_seed0$")
 
