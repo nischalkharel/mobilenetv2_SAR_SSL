@@ -1,11 +1,13 @@
 # TeacherRegions: regions proposed by a large pretrained SAR model, student stays compact
 
 Status 2026-11-22: proposer run on the full pool (outputs/regions_cls/regions.npz, 1.84 M regions, median extent 16 px),
-6 SSL runs and 18 ATRNet transfer fine-tunes done on CRC; detection split 1 running. RESULT (tracker c11): teacher
+6 SSL runs, 18 ATRNet transfer fine-tunes and 6 detection fine-tunes (split 1) done on CRC. RESULT (tracker c11): teacher
 regions 25.3 / 49.0 / 73.5 at 1 / 3 / 10 %, brightness rule 27.2 / 49.0 / 73.7, teacher-size random control 18.4 /
 42.5 / 72.5, plain DINO 17.8 / 41.9 / 72.3. Teacher vs rule -1.9 / 0.0 / -0.2 (all three splits negative at 1 %);
 teacher vs its control +6.9 / +6.6 / +1.0. A twice-as-precise proposer does not transfer better: the cheap rule is
-enough. Phase 2 (distillation comparison) parked unless detection disagrees.
+enough. Detection split 1 (mAP@0.5:0.95 at 1 / 3 / 10 %): teacher regions 16.9 / 22.5 / 29.8, brightness rule 17.1 /
+22.7 / 29.6, teacher-size random control 16.2 / 21.8 / 28.9, no SSL 15.3 / 20.7 / 28.4: same answer. Study closed;
+phase 2 (distillation comparison) not built. Compare table: SARDet/compare/outputs/20261122-181618/summary.md.
 
 ## 1. The idea and the question
 
