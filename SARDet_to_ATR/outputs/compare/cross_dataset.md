@@ -16,6 +16,8 @@
 | XA RegionDINO scene+object, random windows (control) | 17.0 / 17.4 / 17.0 | 17.1 (0.3) | 41.8 / 42.4 / 40.4 | 41.5 (1.0) | 72.3 / 72.5 / 71.0 | 72.0 (0.8) |
 | XA RegionDINO object-only on SARDet | 27.6 / 27.3 / 26.6 | 27.2 (0.5) | 48.8 / 49.3 / 48.8 | 49.0 (0.3) | 73.5 / 73.8 / 73.8 | 73.7 (0.2) |
 | XA RegionDINO object-only, random windows (control) | 20.3 / 21.3 / 21.2 | 20.9 (0.6) | 45.5 / 46.2 / 44.6 | 45.4 (0.8) | 72.6 / 73.0 / 72.6 | 72.7 (0.2) |
+| XA RegionDINO object-only, teacher regions | 25.9 / 24.8 / 25.2 | 25.3 (0.6) | 48.9 / 49.1 / 49.0 | 49.0 (0.1) | 72.9 / 73.7 / 73.9 | 73.5 (0.5) |
+| XA RegionDINO object-only, teacher-size random windows (control) | 18.5 / 17.9 / 18.8 | 18.4 (0.5) | 42.5 / 42.9 / 41.9 | 42.5 (0.5) | 72.5 / 72.8 / 72.2 | 72.5 (0.3) |
 | XA ViewScale e32 (fixed 32-px windows) | 18.6 / 17.7 / 18.8 | 18.3 (0.6) | 42.6 / 42.4 / 42.7 | 42.6 (0.2) | 72.2 / 72.3 / 72.3 | 72.3 (0.1) |
 | XA ViewScale e64 (fixed 64-px windows) | 19.6 / 19.9 / 20.4 | 20.0 (0.4) | 43.3 / 45.0 / 44.6 | 44.3 (0.9) | 72.4 / 72.3 / 72.7 | 72.5 (0.2) |
 | XA ViewScale e128 (fixed 128-px windows) | 22.7 / 20.5 / 21.1 | 21.4 (1.2) | 46.6 / 47.3 / 46.4 | 46.8 (0.4) | 73.2 / 72.8 / 73.6 | 73.2 (0.4) |
@@ -54,6 +56,12 @@ Reference = the same method's ATRNet-SSL row (A1/A2/A3) for DINO/LeJEPA/SparK; =
 | XA RegionDINO object-only, random windows (control) | 1pct | +3.2 / +3.2 / +3.1 | +3.2 | -0.4 / +0.5 / +0.5 | +0.2 |
 | XA RegionDINO object-only, random windows (control) | 3pct | +4.1 / +4.4 / +2.3 | +3.6 | +2.7 / +3.3 / +0.0 | +2.0 |
 | XA RegionDINO object-only, random windows (control) | 10pct | +1.2 / +0.2 / -0.0 | +0.5 | +1.3 / +1.4 / +0.3 | +1.0 |
+| XA RegionDINO object-only, teacher regions | 1pct | +8.8 / +6.7 / +7.1 | +7.5 | +5.2 / +3.9 / +4.5 | +4.6 |
+| XA RegionDINO object-only, teacher regions | 3pct | +7.5 / +7.2 / +6.7 | +7.1 | +6.1 / +6.1 / +4.5 | +5.6 |
+| XA RegionDINO object-only, teacher regions | 10pct | +1.6 / +0.9 / +1.2 | +1.2 | +1.7 / +2.1 / +1.6 | +1.8 |
+| XA RegionDINO object-only, teacher-size random windows (control) | 1pct | +1.4 / -0.2 / +0.7 | +0.6 | -2.2 / -2.9 / -1.9 | -2.4 |
+| XA RegionDINO object-only, teacher-size random windows (control) | 3pct | +1.1 / +1.1 / -0.3 | +0.6 | -0.2 / -0.0 / -2.6 | -1.0 |
+| XA RegionDINO object-only, teacher-size random windows (control) | 10pct | +1.1 / -0.0 / -0.5 | +0.2 | +1.3 / +1.1 / -0.1 | +0.8 |
 | XA ViewScale e32 (fixed 32-px windows) | 1pct | +1.4 / -0.4 / +0.7 | +0.6 | -2.2 / -3.2 / -1.9 | -2.4 |
 | XA ViewScale e32 (fixed 32-px windows) | 3pct | +1.2 / +0.6 / +0.4 | +0.7 | -0.2 / -0.6 / -1.8 | -0.8 |
 | XA ViewScale e32 (fixed 32-px windows) | 10pct | +0.9 / -0.5 / -0.3 | +0.0 | +1.0 / +0.7 / +0.0 | +0.6 |
