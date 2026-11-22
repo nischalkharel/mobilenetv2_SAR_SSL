@@ -1,0 +1,372 @@
+{
+  "kind": "finetune",
+  "status": "completed",
+  "started": "2026-11-21T23:10:52",
+  "run_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/ViewScale/outputs/finetune/20261121-231052_viewscale_e32_ssl_mobilenetv2_3pct_split1_seed0",
+  "config": {
+    "shared_finetune_config": {
+      "_lr_decision": "DECIDED 2026-11-13 from crc/lr_check.sbatch (CRC job 4727010; baseline, 10 %, split 1, val_select mAP@[.5:.95]; no SSL backbone involved): lr 1e-4 -> 0.3192, 2e-4 -> 0.3138, 5e-4 -> 0.3100. train.lr = 1e-4 for every method from here on. Run folders: baseline_SARDet/outputs/finetune/2026111*_lrcheck_baseline_lr0.000{1,2,5}_10pct_split1_seed0 (protocol_deviation runs, excluded by compare.py).",
+      "detector": {
+        "input_size": 512,
+        "fpn_return_layers": {
+          "3": 24,
+          "6": 32,
+          "13": 96,
+          "18": 1280
+        },
+        "fpn_channels": 128,
+        "anchor_sizes": [
+          [
+            8,
+            16
+          ],
+          [
+            16,
+            32
+          ],
+          [
+            32,
+            64
+          ],
+          [
+            64,
+            128
+          ],
+          [
+            128,
+            256
+          ]
+        ],
+        "aspect_ratios": [
+          0.5,
+          1.0,
+          2.0
+        ],
+        "image_mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "image_std": [
+          0.229,
+          0.224,
+          0.225
+        ],
+        "box_score_thresh": 0.05,
+        "box_nms_thresh": 0.5,
+        "box_detections_per_img": 100,
+        "rpn_pre_nms_top_n_train": 2000,
+        "rpn_post_nms_top_n_train": 2000,
+        "rpn_pre_nms_top_n_test": 1000,
+        "rpn_post_nms_top_n_test": 1000,
+        "backbone_bn": "train"
+      },
+      "train": {
+        "seed": 0,
+        "batch_size": 8,
+        "lr": 0.0001,
+        "weight_decay": 0.05,
+        "warmup_epochs": 1,
+        "min_lr_factor": 0.01,
+        "epochs_by_budget": {
+          "1pct": 60,
+          "3pct": 40,
+          "10pct": 24
+        },
+        "hflip_p": 0.5,
+        "num_workers": 8,
+        "precision": "fp32",
+        "grad_clip_norm": null,
+        "eval_every": 2,
+        "selection_metric": "map",
+        "selection_subset": "val_select"
+      }
+    },
+    "budget": "3pct",
+    "epochs": 40,
+    "lr": 0.0001,
+    "seed": 0,
+    "backbone_arg": "../ViewScale/outputs/ssl/20261120-191931_viewscale_e32_ssl_mobilenetv2_split1_seed0/backbone_epoch100.pth",
+    "run_name": "viewscale_e32_ssl_mobilenetv2",
+    "experiment_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/ViewScale"
+  },
+  "git": {
+    "commit": "7879269c81c6676ed41f2e9428468ea507d7950a",
+    "branch": "SmokeTest_Mobilenet_with_DINO",
+    "uncommitted_changes": true
+  },
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.10.0+cu128",
+    "platform": "Linux-5.14.0-503.22.1.el9_5.x86_64-x86_64-with-glibc2.34",
+    "hostname": "gpu-n49.crc.pitt.edu",
+    "cpu_count": 64,
+    "slurm_job_id": "4781947",
+    "cuda_available": true,
+    "torchvision": "0.25.0+cu128",
+    "gpu": "NVIDIA A100-PCIE-40GB",
+    "gpu_memory_gb": 39.5
+  },
+  "dataset_root": "/scratch/slurm-4781947/SARDet_100K",
+  "split": 1,
+  "command": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/shared/finetune.py --experiment-dir ../ViewScale --run-name viewscale_e32_ssl_mobilenetv2 --budget 3pct --backbone ../ViewScale/outputs/ssl/20261120-191931_viewscale_e32_ssl_mobilenetv2_split1_seed0/backbone_epoch100.pth",
+  "audit": {
+    "split": 1,
+    "manifest_sha256": {
+      "ssl_pool.csv": "6b72e480e6888bf81b19ef9660aaaaca6304232db2ed0984a2c1ee6a0fcb34f3",
+      "val_select.csv": "e0c8c3cc990e6f3bf17d98665cf74b8ac77963953d223eec499d256ceced709c",
+      "eval_subsets.json": "22fba97e80a49a5461b3e00165dc60c70da5defd957c67cbbaa60ea0bd8144b9",
+      "image_metadata.csv": "8ee0b986a3d73e5334ac035733cf56686ad3081769961084debfc0daa6f552a9",
+      "split1/labeled_1pct.csv": "2bc21c78c0ffd44c3a09684b6d5c2da760cf0f2fde140e83b30b48eaf31532da",
+      "split1/labeled_3pct.csv": "2a8b6e40b3606dd2425a9779ba8dfa779418e50345c7f2daa8e55408f3190395",
+      "split1/labeled_10pct.csv": "17f37087fdfce265c06541431a6cec1d88d1ffa5194c1115ff4d97be6b1ef7db"
+    },
+    "counts": {
+      "ssl_pool": 94034,
+      "labeled_1pct": 962,
+      "labeled_3pct": 2841,
+      "labeled_10pct": 9460,
+      "val_select": 2000,
+      "val": 10492,
+      "test": 11613,
+      "test_clean": 11563,
+      "val_clean": 10208
+    }
+  },
+  "backbone": {
+    "kind": "ssl",
+    "ssl_method": "viewscale",
+    "ssl_run_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/ViewScale/outputs/ssl/20261120-191931_viewscale_e32_ssl_mobilenetv2_split1_seed0",
+    "ssl_epoch": 100,
+    "ssl_epochs_planned": 100,
+    "ssl_seed": 0,
+    "split": 1,
+    "ssl_config": {
+      "run_name": "viewscale_e32_ssl_mobilenetv2",
+      "method": "viewscale",
+      "common": {
+        "epochs": 100,
+        "batch_size": 64,
+        "seed_rule": "split - 1",
+        "num_workers": 8,
+        "export_rule": "final epoch, no selection",
+        "seed": 0
+      },
+      "views": {
+        "resize_rule": "detector_512",
+        "global_size": 224,
+        "local_size": 96,
+        "zoom_range": [
+          0.75,
+          1.33
+        ],
+        "hflip_p": 0.5,
+        "brightness": 0.4,
+        "contrast": 0.4,
+        "color_jitter_p": 0.8,
+        "blur_sigma": [
+          0.1,
+          2.0
+        ],
+        "solarization_p": 0.0
+      },
+      "object_views": {
+        "objects_per_image": 3,
+        "obj_global_size": 96,
+        "obj_local_size": 64,
+        "obj_local_number": 4,
+        "obj_global_zoom": [
+          1.4,
+          2.2
+        ],
+        "obj_local_zoom": [
+          0.5,
+          1.0
+        ],
+        "min_object_px": 12,
+        "max_magnification": 2.0,
+        "region_source": "fixed",
+        "region_sampling": "sqrt_area",
+        "obj_blur_p": [
+          1.0,
+          0.1,
+          0.5
+        ],
+        "_note": "fixed_extent_px is the window extent e; object-global windows = e x obj_global_zoom (floor obj_global_size / max_magnification), object-local = e x obj_local_zoom",
+        "fixed_extent_px": 32
+      },
+      "dino": {
+        "out_dim": 4096,
+        "use_bn_in_head": false,
+        "norm_last_layer": true,
+        "momentum_teacher": 0.9995,
+        "warmup_teacher_temp": 0.04,
+        "teacher_temp": 0.04,
+        "warmup_teacher_temp_epochs": 0,
+        "student_temp": 0.1,
+        "center_momentum": 0.9
+      },
+      "optim": {
+        "optimizer": "adamw",
+        "lr": 0.0005,
+        "min_lr": 1e-06,
+        "warmup_epochs": 10,
+        "weight_decay": 0.04,
+        "weight_decay_end": 0.04,
+        "clip_grad": 3.0,
+        "freeze_last_layer": 1,
+        "use_fp16": true
+      },
+      "smoke": false
+    },
+    "ssl_manifest": {
+      "pool": "sardet",
+      "ssl_pool_csv": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet/data/ssl_pool.csv",
+      "csv_sha256": "6b72e480e6888bf81b19ef9660aaaaca6304232db2ed0984a2c1ee6a0fcb34f3",
+      "columns_available_to_the_method": [
+        "file_name",
+        "official_split",
+        "image_id",
+        "width",
+        "height",
+        "source",
+        "satellite",
+        "polarization",
+        "band",
+        "group"
+      ],
+      "pool_dataset": "SARDet-100K (official train + val scenes, the suite's SSL pool)",
+      "used_file_list_sha256": "4c52cb0df91eb906155cc08c1c853727386acf2f98eace9ca389154d770665d5",
+      "num_images": 94034,
+      "labels_used": "none",
+      "labels_read_for_diagnostic_only": "view_box_coverage and region_box_diagnostic: GT boxes of up to 300 pool images, logged in run_info / manifests.json, never seen by training",
+      "regions": {
+        "file": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/RegionSSL/regions/regions.npz",
+        "sha256": "a432dc761ff67c28dd38137c1cc05b68778f81384975a0aad931da6fa6137488",
+        "images_in_file": 94034,
+        "pool_images_with_entry": 94034,
+        "pool_images_missing": 0,
+        "pool": "sardet",
+        "box_scale_from_proposal_frame": 1.0,
+        "summary_file": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/RegionSSL/regions/regions_summary.json",
+        "region_source": "fixed",
+        "diagnostic_with_labels": {
+          "n_images": 300,
+          "region_centre_in_a_box": 0.06158888009944626,
+          "gt_boxes_with_a_region": 0.5985815602836879,
+          "usable_regions_per_image": 29.496666666666666,
+          "images_without_regions": 0.0
+        },
+        "object_views": {
+          "objects_per_image": 3,
+          "obj_global_size": 96,
+          "obj_local_size": 64,
+          "obj_local_number": 4,
+          "obj_global_zoom": [
+            1.4,
+            2.2
+          ],
+          "obj_local_zoom": [
+            0.5,
+            1.0
+          ],
+          "min_object_px": 12,
+          "max_magnification": 2.0,
+          "region_source": "fixed",
+          "region_sampling": "sqrt_area",
+          "obj_blur_p": [
+            1.0,
+            0.1,
+            0.5
+          ],
+          "fixed_extent_px": 32
+        }
+      }
+    },
+    "ssl_cost": {
+      "epochs_done": 100,
+      "optimizer_steps": 146900,
+      "images_seen": 9401600,
+      "view_forwards": 169228800,
+      "train_minutes": 316.09,
+      "gpu_hours": 5.268,
+      "peak_gpu_memory_gb": 6.28
+    },
+    "initialization_before_ssl": {
+      "kind": "imagenet",
+      "file": "/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth",
+      "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35"
+    },
+    "exported": {
+      "which": "teacher",
+      "mode": "object",
+      "excluded_from_export": "DINO head, student, optimizer, centers"
+    },
+    "num_tensors": 312,
+    "state_sha256": "cd36db2d932c382e4edf112c1ec92d9c36d0952b2a087bbd2bbf409b4dbf534b",
+    "file": "../ViewScale/outputs/ssl/20261120-191931_viewscale_e32_ssl_mobilenetv2_split1_seed0/backbone_epoch100.pth",
+    "file_sha256": "153496ccf25c9a68a7afe01117a2461d0d38219bfc114c575bf1ccc661188978"
+  },
+  "head_fingerprint_sha256": "6287b3460b729d57fd14e8c0f92753bf108c36a78953b08eec3157b386c86998",
+  "parameters": {
+    "total": 10658497,
+    "backbone": 2223872,
+    "fpn_and_heads": 8434625
+  },
+  "protocol_deviation": null,
+  "precision": {
+    "cudnn_allow_tf32": true,
+    "matmul_allow_tf32": false
+  },
+  "pycocotools": "unknown",
+  "n_train_images": 2841,
+  "n_val_select": 2000,
+  "train_minutes": 35.64,
+  "best_epoch": 38,
+  "best_val_select_map": 0.22998989423065153,
+  "checkpoints": {
+    "best.pt": "ff5d21cf447395a8688146f13624ec5fe8986587c3b31a18985c1b0925c90d98",
+    "last.pt": "403bfddac507d310eaab768a496a6c2788d2967882faedb6e0ff06c1916d0812"
+  },
+  "final_metrics": {
+    "best_val": {
+      "map": 0.21050281631053347,
+      "map50": 0.4677531230639423,
+      "map75": 0.1634921477935013,
+      "map_small": 0.19955621364055806,
+      "map_medium": 0.2700537884488657,
+      "map_large": 0.12927484132593528,
+      "n_images": 10492
+    },
+    "best_test": {
+      "map": 0.21440818669636968,
+      "map50": 0.4762194540321586,
+      "map75": 0.16178053700134384,
+      "map_small": 0.19362544611930432,
+      "map_medium": 0.2899710588033745,
+      "map_large": 0.15285147898977192,
+      "n_images": 11613
+    },
+    "best_test_clean": {
+      "map": 0.21427617915221744,
+      "map50": 0.47626395808309735,
+      "map75": 0.16122706648262572,
+      "map_small": 0.1936518680310583,
+      "map_medium": 0.2898326714438136,
+      "map_large": 0.1524381584955455,
+      "n_images": 11563
+    },
+    "last_test": {
+      "map": 0.2110772740110128,
+      "map50": 0.46787837495330936,
+      "map75": 0.16272524787286838,
+      "map_small": 0.18905812490723056,
+      "map_medium": 0.29086532753066086,
+      "map_large": 0.1471527976037155,
+      "n_images": 11613
+    }
+  },
+  "finished": "2026-11-21T23:53:11",
+  "wall_minutes": 42.31,
+  "peak_gpu_memory_gb": 4.14
+}
