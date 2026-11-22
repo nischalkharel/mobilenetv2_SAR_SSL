@@ -48,17 +48,45 @@ to the chips by hand. FAIR-CSAR gives all of that in one package at 1 m with 22 
 3. Keep SRSDD on the list as a small inshore-ship detection test if we need a third detection dataset; skip the
    land-cover sets.
 
-## Open questions before building
+## FAIR-CSAR-V1.0 SL as it really is (inventory 2026-11-22, `fair_csar_inventory.py` over every annotation file)
 
-- FAIR-CSAR slice size and how many slices: the instruction PDF gives only instance counts (170k SL) and the file naming
-  (`..._02048_26208` suggests 2048-px slices with an offset). Confirm after download; decide the SSL working frame
-  (SARDet used shorter side 512; at 1 m a 2048 slice downsampled 4x would make a 40 m aircraft 10 px, so we may need to
-  tile instead of downsample: this is the S2 tile question again, now for a good reason).
-- Chip rule for aircraft: the SARDet rule (window = max(64, 1.5 x longer side), resize to 128) keeps a 40 m aircraft
-  at 1 m about 60 px wide inside the 128 chip. Fine. For bridges and tower cranes the boxes are elongated; same rule.
-- Label budgets: with ~170k boxes and 22 classes, 1 % is about 1,700 chips (77 per class on average, imbalanced).
-  Report mean per-class accuracy as in S1.
-- Leakage: SARMAE never saw FAIR-CSAR (clean teacher). SARATR-X-v2 did (do not use it there).
+Both SL archives are on CRC, verified (md5), extracted without the complex .mat files to
+`/ix/ageorge/nik96/data/FAIR_CSAR/extracted/{test,trainval}/{PNGImages,Annotations,METAXmls,KeyPoints}` (12 GB).
+The annotation and metadata folders plus 20 test PNGs are on the PC as `..\2026_2027\FAIR_CSAR_sample\` (not in git).
+Full tables: `datasets/outputs/fair_csar_inventory.md`.
+
+- Slices are 1024 x 1024 px, 8-bit grey PNG (uint8, mean about 30 to 55, long bright tail), 1 m nominal, HH mostly.
+  The SLC name fields are range and azimuth offsets, not a 2048 grid as guessed earlier.
+- trainval: 105 scenes, 11,959 slices, 69,298 objects. test: 26 scenes, 2,706 slices, 15,987 objects. Every slice
+  holds at least one object (median 3, p95 21): the dataset ships only annotated slices, so the SSL pool is "scenes
+  with objects", like SARDet.
+- 22 classes, all present in both splits: 12 aircraft (A220, A320, A330, 737, 747, 767, 777, Fokker-50, Gulfstream,
+  Helicopter, Airfreighter, Other_Aircraft), 7 ship (Bulk_Carrier, Container_Ship, General_Cargo_Ship,
+  Motion_Defocusing_Ship, Oil_Tanker, Other_Ship, Warship), Bridge, Tank, Tower_Crane. Imbalanced: Tank 15,364 and
+  General_Cargo_Ship 13,196 in trainval against Boeing747 332 and Fokker-50 487.
+- Object size (oriented-box long side, slice pixels): median 52, p5 18, p95 158. Aircraft 33 to 78 px median
+  (Helicopter 14), ships 51 to 182, Bridge median 84 with a tail to 850, Tower_Crane 91. 44 % of objects fall in 32
+  to 64 px, 30 % in 64 to 128.
+- 1 % of trainval per class: 3 (Boeing747) to 154 (Tank) chips; six classes get under 10. A per-class floor
+  (for example at least 5) or a 2 % smallest budget is needed; mean per-class accuracy is the headline, as in S1.
+- Site overlap: many scenes are the same harbour on different dates (14 scenes at E139.7 N35.5, 12 trainval + 2
+  test), so the official split separates acquisitions, not places. Fine for the chip test (that is the benchmark's
+  own split); state it in the paper.
+
+## Protocol decision for the FAIR-CSAR chip study (proposed, to review before building)
+
+- SSL pool: the 11,959 trainval slices only (test slices never enter SSL). Working frame, two options to run as
+  arms: (a) tiles, each slice cut 2 x 2 into 512-px tiles at native 1 m (47,836 tiles; keeps the detail that makes
+  this dataset harder; matches the suite's 512 frame); (b) the slice downsampled to 512 (2 m per pixel, 11,959
+  images; a 50-px object becomes 25 px, like SARDet). (a) is the main arm; (b) answers the sponsors' resolution
+  question from 2026-11-13.
+- Chips: the SARDet_chips rule unchanged (window = max(64, 1.5 x long side), resize to 128), cut at native
+  resolution from the oriented box's axis-aligned extent; difficult-flag objects kept but reported separately.
+- Labels: 22 classes, mean per-class accuracy on test, budgets 1 / 3 / 10 % of trainval chips with a per-class
+  floor of 5, three splits as in S1.
+- Rows: no SSL, DINO, object-only RegionDINO + random control (and the teacher pair if the S1 teacher jobs say
+  anything), each on arm (a); DINO and object-only on arm (b). SARMAE linear probe / fine-tune as the big reference
+  (clean: never trained on FAIR-CSAR).
 
 ## Sources
 
