@@ -1,7 +1,7 @@
 // Shared helpers for the tracker pages: data loading, colours, SVG charts, tables, tooltip.
 // Every chart is plain SVG built from strings; no library.
 
-const FAM = {base: "var(--base)", dino: "var(--dino)", lejepa: "var(--lejepa)", spark: "var(--spark)", cond: "var(--cond)", region: "var(--region)"};
+const FAM = {base: "var(--base)", dino: "var(--dino)", lejepa: "var(--lejepa)", spark: "var(--spark)", cond: "var(--cond)", region: "var(--region)", scale: "var(--scale)"};
 const POOL = {none: "ImageNet start, no SSL", atr: "SSL on ATRNet-STAR chips (in-domain)", sardet: "SSL on SARDet-100K scenes (cross-dataset)"};
 const POOL_DET = {none: "ImageNet start, no SSL", sardet: "SSL on SARDet-100K scenes (in-domain for detection)"};
 const BUDGETS = ["1pct", "3pct", "10pct"];

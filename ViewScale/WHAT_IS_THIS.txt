@@ -23,8 +23,15 @@ Plot the gain (SARDet detection mAP, and transfer to ATRNet chips) against windo
 clear best size we get a rule of thumb for SAR SSL ("set the view to about N times the target size") and a curve
 to back it. It also tells us whether RegionDINO's region placement adds anything beyond choosing the right scale.
 
+Status (2026-11-22)
+-------------------
+Run and analysed: see DESIGN.md top and outputs/analysis/curve.png. Short answer: bigger windows help up to about
+256 px (whole-scene windows still beat plain DINO), and placing the windows on proposed regions adds about as much
+again on the chip transfer. Detection split 1 follows the same curve. Tracker conclusion c10.
+
 Where things are
 ----------------
+analyze.py          gain-vs-extent curve and tables from the two compare outputs -> outputs/analysis/
 DESIGN.md           the protocol, the sweep points, the cost, what is measured, the decisions
 config_ssl_e*.json  one SSL config per window size (only run_name and fixed_extent_px differ)
 train_ssl.py        the entry point (the RegionDINO object-only method with the fixed-window source)

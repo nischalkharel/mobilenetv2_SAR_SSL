@@ -1,7 +1,11 @@
 # ViewScale: the SSL window size against the object size
 
-Status 2026-11-20: protocol written, code is a 15-line additive change to RegionSSL (`region_source: "fixed"`),
-configs and job scripts ready, nothing run yet.
+Status 2026-11-22: 15 SSL runs, 45 ATRNet transfer fine-tunes (3 splits) and 15 detection fine-tunes (split 1) done on CRC;
+results in `outputs/analysis/` (curve.png, summary.md, from `python ViewScale/analyze.py`) and in the tracker (conclusion c10).
+Headline: transfer gain over plain DINO at 1 % rises +0.6 / +2.2 / +3.7 / +4.9 / +4.3 for e32 ... e512; the region-placed
+row is +9.4, its random control +3.2. Detection split 1 at 1 %: +0.5 / +1.6 / +1.9 / +2.1 / +1.6 mAP points (regions +1.6).
+Open: detection splits 2 and 3; the optional constant-resolution point. The e32 anchor did NOT reproduce the random-window
+control (+0.6 vs +3.2): the control's size mixture (tail of larger windows) carries part of its gain, see section 2.
 
 ## 1. The question
 

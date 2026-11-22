@@ -16,6 +16,11 @@
 | XA RegionDINO scene+object, random windows (control) | 17.0 / 17.4 / 17.0 | 17.1 (0.3) | 41.8 / 42.4 / 40.4 | 41.5 (1.0) | 72.3 / 72.5 / 71.0 | 72.0 (0.8) |
 | XA RegionDINO object-only on SARDet | 27.6 / 27.3 / 26.6 | 27.2 (0.5) | 48.8 / 49.3 / 48.8 | 49.0 (0.3) | 73.5 / 73.8 / 73.8 | 73.7 (0.2) |
 | XA RegionDINO object-only, random windows (control) | 20.3 / 21.3 / 21.2 | 20.9 (0.6) | 45.5 / 46.2 / 44.6 | 45.4 (0.8) | 72.6 / 73.0 / 72.6 | 72.7 (0.2) |
+| XA ViewScale e32 (fixed 32-px windows) | 18.6 / 17.7 / 18.8 | 18.3 (0.6) | 42.6 / 42.4 / 42.7 | 42.6 (0.2) | 72.2 / 72.3 / 72.3 | 72.3 (0.1) |
+| XA ViewScale e64 (fixed 64-px windows) | 19.6 / 19.9 / 20.4 | 20.0 (0.4) | 43.3 / 45.0 / 44.6 | 44.3 (0.9) | 72.4 / 72.3 / 72.7 | 72.5 (0.2) |
+| XA ViewScale e128 (fixed 128-px windows) | 22.7 / 20.5 / 21.1 | 21.4 (1.2) | 46.6 / 47.3 / 46.4 | 46.8 (0.4) | 73.2 / 72.8 / 73.6 | 73.2 (0.4) |
+| XA ViewScale e256 (fixed 256-px windows) | 22.0 / 22.9 / 23.0 | 22.6 (0.6) | 46.5 / 46.4 / 46.8 | 46.6 (0.2) | 73.6 / 73.7 / 73.5 | 73.6 (0.1) |
+| XA ViewScale e512 (fixed 512-px windows) | 21.2 / 22.6 / 22.3 | 22.0 (0.8) | 45.9 / 45.7 / 45.1 | 45.6 (0.4) | 73.7 / 72.9 / 72.9 | 73.2 (0.4) |
 | XI DINO (suite recipe) on ATRNet | 34.1 / 33.6 / 34.4 | 34.0 (0.4) | 56.2 / 56.3 / 56.2 | 56.2 (0.1) | 77.0 / 77.5 / 77.5 | 77.3 (0.3) |
 | XI RegionDINO scene+object on ATRNet, random windows (control) | 33.4 / 34.1 / 34.3 | 33.9 (0.4) | 55.3 / 56.1 / 53.1 | 54.8 (1.6) | 76.6 / 77.2 / 77.4 | 77.1 (0.4) |
 | XI RegionDINO scene+object on ATRNet | 33.6 / 33.2 / 34.6 | 33.8 (0.7) | 55.2 / 56.2 / 56.0 | 55.8 (0.5) | 77.3 / 77.5 / 76.5 | 77.1 (0.5) |
@@ -49,6 +54,21 @@ Reference = the same method's ATRNet-SSL row (A1/A2/A3) for DINO/LeJEPA/SparK; =
 | XA RegionDINO object-only, random windows (control) | 1pct | +3.2 / +3.2 / +3.1 | +3.2 | -0.4 / +0.5 / +0.5 | +0.2 |
 | XA RegionDINO object-only, random windows (control) | 3pct | +4.1 / +4.4 / +2.3 | +3.6 | +2.7 / +3.3 / +0.0 | +2.0 |
 | XA RegionDINO object-only, random windows (control) | 10pct | +1.2 / +0.2 / -0.0 | +0.5 | +1.3 / +1.4 / +0.3 | +1.0 |
+| XA ViewScale e32 (fixed 32-px windows) | 1pct | +1.4 / -0.4 / +0.7 | +0.6 | -2.2 / -3.2 / -1.9 | -2.4 |
+| XA ViewScale e32 (fixed 32-px windows) | 3pct | +1.2 / +0.6 / +0.4 | +0.7 | -0.2 / -0.6 / -1.8 | -0.8 |
+| XA ViewScale e32 (fixed 32-px windows) | 10pct | +0.9 / -0.5 / -0.3 | +0.0 | +1.0 / +0.7 / +0.0 | +0.6 |
+| XA ViewScale e64 (fixed 64-px windows) | 1pct | +2.5 / +1.9 / +2.3 | +2.2 | -1.1 / -0.9 / -0.3 | -0.8 |
+| XA ViewScale e64 (fixed 64-px windows) | 3pct | +1.9 / +3.2 / +2.3 | +2.5 | +0.5 / +2.1 / +0.1 | +0.9 |
+| XA ViewScale e64 (fixed 64-px windows) | 10pct | +1.1 / -0.5 / +0.1 | +0.2 | +1.2 / +0.7 / +0.4 | +0.8 |
+| XA ViewScale e128 (fixed 128-px windows) | 1pct | +5.6 / +2.5 / +3.0 | +3.7 | +2.0 / -0.3 / +0.4 | +0.7 |
+| XA ViewScale e128 (fixed 128-px windows) | 3pct | +5.2 / +5.5 / +4.1 | +4.9 | +3.9 / +4.3 / +1.9 | +3.4 |
+| XA ViewScale e128 (fixed 128-px windows) | 10pct | +1.9 / -0.1 / +0.9 | +0.9 | +2.0 / +1.1 / +1.2 | +1.5 |
+| XA ViewScale e256 (fixed 256-px windows) | 1pct | +4.8 / +4.9 / +4.9 | +4.9 | +1.2 / +2.1 / +2.3 | +1.9 |
+| XA ViewScale e256 (fixed 256-px windows) | 3pct | +5.0 / +4.6 / +4.5 | +4.7 | +3.7 / +3.4 / +2.3 | +3.1 |
+| XA ViewScale e256 (fixed 256-px windows) | 10pct | +2.3 / +0.9 / +0.8 | +1.3 | +2.4 / +2.1 / +1.2 | +1.9 |
+| XA ViewScale e512 (fixed 512-px windows) | 1pct | +4.0 / +4.6 / +4.2 | +4.3 | +0.4 / +1.8 / +1.6 | +1.3 |
+| XA ViewScale e512 (fixed 512-px windows) | 3pct | +4.4 / +3.9 / +2.8 | +3.7 | +3.1 / +2.8 / +0.6 | +2.1 |
+| XA ViewScale e512 (fixed 512-px windows) | 10pct | +2.3 / +0.1 / +0.3 | +0.9 | +2.4 / +1.3 / +0.6 | +1.4 |
 | XI DINO (suite recipe) on ATRNet | 1pct | -1.0 / -1.1 / -1.2 | -1.1 | +13.4 / +12.8 / +13.7 | +13.3 |
 | XI DINO (suite recipe) on ATRNet | 3pct | -0.1 / +1.6 / -0.5 | +0.3 | +13.4 / +13.4 / +11.7 | +12.8 |
 | XI DINO (suite recipe) on ATRNet | 10pct | -0.9 / -0.1 / +0.1 | -0.3 | +5.8 / +5.9 / +5.2 | +5.6 |

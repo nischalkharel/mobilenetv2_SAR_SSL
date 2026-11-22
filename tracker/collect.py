@@ -99,8 +99,10 @@ def det_registry_key(method):
     exp, _, variant = method.partition(":")
     if exp == "CondDINO_SARDet":
         return "CondDINO_SARDet (permuted)" if "perm" in variant else "CondDINO_SARDet"
-    if exp.startswith("RegionDINO"):
+    if exp.startswith("RegionDINO") or exp == "TeacherRegions":
         return f"{exp} (random)" if "random" in variant else exp
+    if exp == "ViewScale":                     # 'ViewScale:viewscale_e128_ssl_mobilenetv2' -> 'ViewScale e128'
+        return "ViewScale " + variant.split("_")[1]
     return exp
 
 

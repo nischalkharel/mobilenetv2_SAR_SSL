@@ -4,7 +4,7 @@ A row = one SSL method (or no SSL) trained on one unlabeled pool, then fine-tune
 Fields:
     id        short key used in the JSON files and the pages
     label     name shown in tables and charts
-    family    colour family: base | dino | lejepa | spark | cond | region
+    family    colour family: base | dino | lejepa | spark | cond | region | scale (the ViewScale sweep)
     ssl       unlabeled pool: none | atr (ATRNet-STAR SOC-40 chips) | sardet (SARDet-100K scenes)
     control   True for a control row (random windows, scrambled conditioning ...), drawn lighter
     ref       id of the row a paired difference is taken against (None = no paired row)
@@ -43,6 +43,20 @@ CLASSIFICATION = {
                                                 note="DINO on the object regions only; the scene views are dropped."),
     "XA RegionDINO object-only, random windows (control)": dict(id="xa_ror", label="object-only, random windows", family="region", ssl="sardet", ref="xa_dino", control=True,
                                                                 note="Object-only with the windows placed at random."),
+    "XA ViewScale e32 (fixed 32-px windows)": dict(id="xa_vs32", label="ViewScale e32 (32-px windows)", family="scale", ssl="sardet", ref="xa_dino",
+                                                 note="Object-only recipe with random square windows of a fixed 32-px extent (512-px frame): the window-size sweep, one point."),
+    "XA ViewScale e64 (fixed 64-px windows)": dict(id="xa_vs64", label="ViewScale e64 (64-px windows)", family="scale", ssl="sardet", ref="xa_dino",
+                                                 note="Object-only recipe with random square windows of a fixed 64-px extent (512-px frame): the window-size sweep, one point."),
+    "XA ViewScale e128 (fixed 128-px windows)": dict(id="xa_vs128", label="ViewScale e128 (128-px windows)", family="scale", ssl="sardet", ref="xa_dino",
+                                                 note="Object-only recipe with random square windows of a fixed 128-px extent (512-px frame): the window-size sweep, one point."),
+    "XA ViewScale e256 (fixed 256-px windows)": dict(id="xa_vs256", label="ViewScale e256 (256-px windows)", family="scale", ssl="sardet", ref="xa_dino",
+                                                 note="Object-only recipe with random square windows of a fixed 256-px extent (512-px frame): the window-size sweep, one point."),
+    "XA ViewScale e512 (fixed 512-px windows)": dict(id="xa_vs512", label="ViewScale e512 (512-px windows)", family="scale", ssl="sardet", ref="xa_dino",
+                                                 note="Object-only recipe with random square windows of a fixed 512-px extent (512-px frame): the window-size sweep, one point."),
+    "XA RegionDINO object-only, teacher regions": dict(id="xa_rot", label="object-only, teacher regions", family="region", ssl="sardet", ref="xa_ro",
+                                                        note="Object-only recipe with the windows placed on regions proposed by the frozen SARMAE teacher's attention instead of the brightness rule. Paired against the brightness-rule row."),
+    "XA RegionDINO object-only, teacher-size random windows (control)": dict(id="xa_rotr", label="teacher-size random windows", family="region", ssl="sardet", ref="xa_rot", control=True,
+                                                                             note="Random windows with the teacher regions' sizes (2 to 3 x larger than the brightness-rule regions): separates placement from size."),
     "XI DINO (suite recipe) on ATRNet": dict(id="xi_dino", label="DINO, RegionSSL engine", family="dino", ssl="atr", ref="a1",
                                              note="Plain DINO run by the RegionDINO engine on the ATRNet chips: the paired reference for the XI RegionDINO rows, and a check against A1."),
     "XI RegionDINO scene+object on ATRNet": dict(id="xi_rso", label="RegionDINO scene+object", family="region", ssl="atr", ref="xi_dino",
@@ -68,6 +82,13 @@ DETECTION = {
                                        note="CondDINO with the conditioning permuted."),
     "RegionDINO_object": dict(id="d_ro", label="RegionDINO object-only", family="region", ssl="sardet", ref="d_dino", note="Object-only views, detection on SARDet itself."),
     "RegionDINO_object (random)": dict(id="d_ror", label="object-only, random windows", family="region", ssl="sardet", ref="d_dino", control=True, note="Its random-window control."),
+    "ViewScale e32": dict(id="d_vs32", label="ViewScale e32 (32-px windows)", family="scale", ssl="sardet", ref="d_base", note="Fixed 32-px random windows, object-only recipe (split 1 only at first)."),
+    "ViewScale e64": dict(id="d_vs64", label="ViewScale e64 (64-px windows)", family="scale", ssl="sardet", ref="d_base", note="Fixed 64-px random windows, object-only recipe (split 1 only at first)."),
+    "ViewScale e128": dict(id="d_vs128", label="ViewScale e128 (128-px windows)", family="scale", ssl="sardet", ref="d_base", note="Fixed 128-px random windows, object-only recipe (split 1 only at first)."),
+    "ViewScale e256": dict(id="d_vs256", label="ViewScale e256 (256-px windows)", family="scale", ssl="sardet", ref="d_base", note="Fixed 256-px random windows, object-only recipe (split 1 only at first)."),
+    "ViewScale e512": dict(id="d_vs512", label="ViewScale e512 (512-px windows)", family="scale", ssl="sardet", ref="d_base", note="Fixed 512-px random windows, object-only recipe (split 1 only at first)."),
+    "TeacherRegions": dict(id="d_rot", label="object-only, teacher regions", family="region", ssl="sardet", ref="d_ro", note="Windows on SARMAE-proposed regions; paired against the brightness-rule row."),
+    "TeacherRegions (random)": dict(id="d_rotr", label="teacher-size random windows", family="region", ssl="sardet", ref="d_rot", control=True, note="Random windows with the teacher regions' sizes."),
     "RegionDINO_scene_object": dict(id="d_rso", label="RegionDINO scene+object", family="region", ssl="sardet", ref="d_dino", note="Scene+object views, detection on SARDet itself."),
     "RegionDINO_scene_object (random)": dict(id="d_rsor", label="scene+object, random windows", family="region", ssl="sardet", ref="d_dino", control=True, note="Its random-window control."),
 }
