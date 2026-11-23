@@ -74,6 +74,8 @@ def cut_slice(job):
     with Image.open(fp.png_path(split, name)) as im:
         a = np.asarray(im.convert("L"))
     h, w = a.shape
+    if (h, w) != (fp.SLICE_SIZE, fp.SLICE_SIZE):
+        raise ValueError(f"{name}: PNG is {w} x {h}, expected {fp.SLICE_SIZE} (the clipped flag assumes it)")
     out = np.empty((len(rows), size, size), dtype=np.uint8)
     for i, r in enumerate(rows):
         side = int(round(r["window_side"]))
@@ -93,13 +95,13 @@ def summary_text(rows, meta):
     L.append("## Chips per class and dataset split\n\n| class | trainval | test |\n|---|---|---|")
     for cls in fp.CLASS_NAMES:
         L.append(f"| {cls} | {c[('trainval', cls)]} | {c[('test', cls)]} |")
-    L.append("\n## Flags on test chips (share of the class)\n\n| class | n | holds another object's centre | of another class | window clipped at the border | difficult | median window side (px) |\n|---|---|---|---|---|---|---|")
+    L.append("\n## Flags on test chips (share of the class)\n\n| class | n | holds another object's centre | of another class | window clipped at the border | difficulty > 0 | median window side (px) |\n|---|---|---|---|---|---|---|")
     for cls in fp.CLASS_NAMES:
         t = [r for r in rows if r["official_split"] == "test" and r["class_name"] == cls]
         if t:
             n = len(t)
             L.append(f"| {cls} | {n} | {100 * sum(r['n_others_inside'] > 0 for r in t) / n:.1f} % | {100 * sum(r['other_class_inside'] for r in t) / n:.1f} % | "
-                     f"{100 * sum(r['clipped'] for r in t) / n:.1f} % | {100 * sum(r['difficult'] for r in t) / n:.1f} % | {np.median([r['window_side'] for r in t]):.0f} |")
+                     f"{100 * sum(r['clipped'] for r in t) / n:.1f} % | {100 * sum(r['difficult'] > 0 for r in t) / n:.1f} % | {np.median([r['window_side'] for r in t]):.0f} |")
     return "\n".join(L) + "\n"
 
 

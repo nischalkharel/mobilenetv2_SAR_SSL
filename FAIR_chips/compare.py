@@ -4,7 +4,7 @@
 
 Headline: mean per-class accuracy on test_clean (22 classes), per split and mean (sd); then overall accuracy, then the
 full test set, then paired differences against each method's reference (same split and budget), then per major
-category and per class at 10 %.
+category and per class at 1 % labels.
 """
 import csv
 import json
@@ -17,7 +17,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import fair_paths as fp  # noqa: E402
-from finetune_chips import METHODS  # noqa: E402
+METHODS = fp.METHODS
 
 LABELS = {"imagenet": "ImageNet start (no SSL)",
           "fair_dino_tiles": "DINO on FAIR tiles", "fair_ro_tiles": "RegionDINO object-only on FAIR tiles", "fair_ror_tiles": "object-only, random windows on FAIR tiles (control)",

@@ -32,7 +32,7 @@ from torch.utils.data import DataLoader
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import fair_paths as fp  # noqa: E402  (puts SARDet_chips/, SARDet/ and Experiments/mobileNetv2_DINO/ on sys.path)
-from chip_data import ChipDataset, class_counts, content_hash, load_chip_rows, records  # noqa: E402  (FAIR_chips/chip_data.py: first on sys.path)
+from fair_chip_data import ChipDataset, class_counts, content_hash, load_chip_rows, records  # noqa: E402  (named fair_* so SARDet_chips/chip_data.py, also on sys.path, is not shadowed)
 from data import build_transform  # noqa: E402
 from engine import predict, train_one_epoch  # noqa: E402
 from model import build_model  # noqa: E402
@@ -42,9 +42,7 @@ from utils import environment_info, git_info, resolve_device, save_json, set_see
 sys.path.insert(0, str(fp.REPO_ROOT / "SARDet_to_ATR"))
 import find_backbone  # noqa: E402
 
-FAIR_METHODS = [f"fair_{m}_{arm}" for arm in ("tiles", "down") for m in ("dino", "ro", "ror")]
-SARDET_METHODS = {"sardet_dino": "dino", "sardet_regiondino_o": "regiondino_o", "sardet_regiondino_o_random": "regiondino_o_random"}
-METHODS = ["imagenet"] + FAIR_METHODS + list(SARDET_METHODS)
+METHODS, SARDET_METHODS = fp.METHODS, fp.SARDET_METHODS
 SMOKE_PER_CLASS, SMOKE_EPOCHS = 6, 2
 N = len(fp.CLASS_NAMES)
 
@@ -139,6 +137,8 @@ def main():
             raise ValueError(f"{k} is empty")
     if {r["slice"] for r in sets["select"]["rows"]} & pool_slices:
         raise ValueError("selection chips come from SSL-pool slices")
+    if {r["slice"] for r in sets["test"]["rows"]} & pool_slices:
+        raise ValueError("test chips come from SSL-pool slices")
     if any(r["official_split"] != "test" for r in sets["test"]["rows"]) or any(r["official_split"] == "test" for r in sets["train"]["rows"]):
         raise ValueError("test chips must be test-split chips and train chips trainval chips")
 

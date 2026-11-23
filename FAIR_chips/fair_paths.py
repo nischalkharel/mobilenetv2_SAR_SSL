@@ -67,6 +67,12 @@ MAJOR = {**{c: "Aircraft" for c in CLASS_NAMES[:12]}, **{c: "Ship" for c in CLAS
 # ---- chip rule: the SARDet_chips rule unchanged (DESIGN.md section 3) -------------------------------------
 CHIP_SIZE, WINDOW_FLOOR, WINDOW_MARGIN = _cp.CHIP_SIZE, _cp.WINDOW_FLOOR, _cp.WINDOW_MARGIN   # 128, 64, 1.5
 
+# ---- fine-tune method names (here, not in finetune_chips.py, so compare.py never imports a module that
+# SARDet_chips/finetune_chips.py would shadow on sys.path) ----
+FAIR_METHODS = [f"fair_{m}_{arm}" for arm in ("tiles", "down") for m in ("dino", "ro", "ror")]
+SARDET_METHODS = {"sardet_dino": "dino", "sardet_regiondino_o": "regiondino_o", "sardet_regiondino_o_random": "regiondino_o_random"}
+METHODS = ["imagenet"] + FAIR_METHODS + list(SARDET_METHODS)
+
 OUTPUT_ROOT = HERE / "outputs"
 FINETUNE_OUTPUT_DIR = OUTPUT_ROOT / "finetune"
 COMPARE_OUTPUT_DIR = OUTPUT_ROOT / "compare"

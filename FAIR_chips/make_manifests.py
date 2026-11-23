@@ -185,7 +185,7 @@ def main():
         by_scene[s["scene"]].append(s)
     for scene, ss in sorted(by_scene.items()):
         rng.shuffle(ss)
-        k = round(SELECT_FRACTION * len(ss)) if len(ss) >= 5 else 0
+        k = max(1, round(SELECT_FRACTION * len(ss))) if len(ss) >= 5 else 0      # at least one per scene with 5+ slices
         for s in ss[:k]:
             s["role"] = "select"
     select = [s for s in trainval if s["role"] == "select"]

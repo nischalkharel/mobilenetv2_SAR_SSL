@@ -15,7 +15,7 @@ from collections import Counter
 from pathlib import Path
 
 import fair_paths as fp
-from chip_data import ChipDataset, sha256_file  # noqa: F401  SARDet_chips (on sys.path via fair_paths)
+from chip_data import ChipDataset, sha256_file  # noqa: F401  SARDet_chips/chip_data.py (on sys.path via fair_paths; this file is named fair_* so it never shadows it)
 
 
 def load_chip_rows(root: Path = None):

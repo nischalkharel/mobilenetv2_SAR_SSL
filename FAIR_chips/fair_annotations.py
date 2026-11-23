@@ -2,7 +2,7 @@
 
     x1 y1 x2 y2 x3 y3 x4 y4 class difficulty        (oriented box as 4 corners in slice pixels)
 
-objects(split, slice) -> list of dicts: obj_id (line index), class_name, label, difficult (0/1), cx, cy (box centre),
+objects(split, slice) -> list of dicts: obj_id (line index), class_name, label, difficult (the file's level: 0, 1 or 2), cx, cy (box centre),
 long, short (side lengths of the oriented box), x0, y0, x1, y1 (axis-aligned extent of the 4 corners).
 slice_name -> scene id: the name without its last two numeric fields (range and azimuth offsets).
 """
@@ -25,6 +25,8 @@ def objects(split: str, slice_name: str) -> list:
     for k, line in enumerate(fp.annotation_path(split, slice_name).read_text(encoding="utf-8").splitlines()):
         parts = line.split()
         if len(parts) < 9:
+            if parts and not parts[0].endswith(":"):          # DOTA headers ("imagesource:", "gsd:") are the only short lines allowed
+                raise ValueError(f"malformed annotation line in {split}/{slice_name} line {k}: {line!r}")
             continue
         pts = [(float(parts[i]), float(parts[i + 1])) for i in range(0, 8, 2)]
         if parts[8] not in LABEL:
