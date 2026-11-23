@@ -66,7 +66,9 @@ the place. That is the benchmark's own split; the paper states it.
 The SARDet_chips rule unchanged: square window centred on the oriented box's centre, side = max(64, 1.5 x longer
 box side) in native pixels, edge-padded at the slice border, resized to 128 x 128, 8-bit grey. One chip per
 physical object (the owner annotation, `data/objects.csv`), 25,703 chips in one array (`make_chips.py`, 0.4 GB). Flags per chip: another object's
-centre inside the window, another class inside, clipped at the border, the dataset's difficult flag. Bridges have a
+centre inside the window, another class inside, clipped at the border, the dataset's difficulty level (0 for 89 %
+of annotations, 1 for 7 %, 2 for 4 %; the paper's meaning of level 2 is still to be looked up; nothing in training
+or scoring reads it). Bridges have a
 long tail (95th percentile 850 px): their windows are up to 1,275 px, mostly padding; the flag table in
 `summary.md` shows how many.
 
