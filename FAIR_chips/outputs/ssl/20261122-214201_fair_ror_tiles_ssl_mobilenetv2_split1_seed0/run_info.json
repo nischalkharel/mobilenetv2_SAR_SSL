@@ -1,0 +1,163 @@
+{
+  "kind": "ssl",
+  "status": "completed",
+  "started": "2026-11-22T21:42:02",
+  "run_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/FAIR_chips/outputs/ssl/20261122-214201_fair_ror_tiles_ssl_mobilenetv2_split1_seed0",
+  "config": {
+    "run_name": "fair_ror_tiles_ssl_mobilenetv2",
+    "method": "regiondino_object",
+    "common": {
+      "epochs": 100,
+      "batch_size": 64,
+      "seed_rule": "split - 1",
+      "num_workers": 8,
+      "export_rule": "final epoch, no selection",
+      "seed": 0
+    },
+    "views": {
+      "resize_rule": "detector_512",
+      "global_size": 224,
+      "local_size": 96,
+      "zoom_range": [
+        0.75,
+        1.33
+      ],
+      "hflip_p": 0.5,
+      "brightness": 0.4,
+      "contrast": 0.4,
+      "color_jitter_p": 0.8,
+      "blur_sigma": [
+        0.1,
+        2.0
+      ],
+      "solarization_p": 0.0
+    },
+    "pool": "fair_tiles",
+    "object_views": {
+      "objects_per_image": 3,
+      "obj_global_size": 96,
+      "obj_local_size": 64,
+      "obj_local_number": 4,
+      "obj_global_zoom": [
+        1.4,
+        2.2
+      ],
+      "obj_local_zoom": [
+        0.5,
+        1.0
+      ],
+      "min_object_px": 12,
+      "max_magnification": 2.0,
+      "region_source": "random",
+      "region_sampling": "sqrt_area",
+      "obj_blur_p": [
+        1.0,
+        0.1,
+        0.5
+      ],
+      "_note": "windows are sized from each region's own extent (no fixed pixel size); max_magnification stops tiny blobs being blown up; region_source random = the control with matched-size random windows"
+    },
+    "dino": {
+      "out_dim": 4096,
+      "use_bn_in_head": false,
+      "norm_last_layer": true,
+      "momentum_teacher": 0.9995,
+      "warmup_teacher_temp": 0.04,
+      "teacher_temp": 0.04,
+      "warmup_teacher_temp_epochs": 0,
+      "student_temp": 0.1,
+      "center_momentum": 0.9
+    },
+    "optim": {
+      "optimizer": "adamw",
+      "lr": 0.0005,
+      "min_lr": 1e-06,
+      "warmup_epochs": 10,
+      "weight_decay": 0.04,
+      "weight_decay_end": 0.04,
+      "clip_grad": 3.0,
+      "freeze_last_layer": 1,
+      "use_fp16": true
+    },
+    "smoke": false
+  },
+  "git": {
+    "commit": "fd863629cbfff160c2695151e2f56a6829e2ca2b",
+    "branch": "SmokeTest_Mobilenet_with_DINO",
+    "uncommitted_changes": true
+  },
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.10.0+cu128",
+    "platform": "Linux-5.14.0-503.22.1.el9_5.x86_64-x86_64-with-glibc2.34",
+    "hostname": "gpu-n34.crc.pitt.edu",
+    "cpu_count": 48,
+    "slurm_job_id": "4787394",
+    "cuda_available": true,
+    "torchvision": "0.25.0+cu128",
+    "gpu": "NVIDIA A100-PCIE-40GB",
+    "gpu_memory_gb": 39.5
+  },
+  "dataset_root": "/ix/ageorge/nik96/data/SARDet_100K",
+  "split": 1,
+  "command": "FAIR_chips/train_ssl.py --config FAIR_chips/config_ssl_ror_tiles.json",
+  "method": "regiondino_object",
+  "initialization": {
+    "kind": "imagenet",
+    "file": "/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth",
+    "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35"
+  },
+  "checkpoint_rule": "final epoch, fixed in advance; the SSL loss never selects a checkpoint",
+  "export_rule": "teacher backbone, final epoch",
+  "views_per_image": 18,
+  "view_plan": {
+    "pool": "fair_tiles",
+    "input_size": 512,
+    "scene": [],
+    "object": [
+      [
+        "obj_global",
+        3,
+        1.0
+      ],
+      [
+        "obj_global",
+        3,
+        0.1
+      ],
+      [
+        "obj_local",
+        12,
+        0.5
+      ]
+    ],
+    "objects_per_image": 3,
+    "obj_global_size": 96,
+    "obj_local_size": 64
+  },
+  "cost": {
+    "epochs_done": 100,
+    "optimizer_steps": 29700,
+    "images_seen": 1900800,
+    "view_forwards": 34214400,
+    "train_minutes": 67.29,
+    "gpu_hours": 1.121,
+    "peak_gpu_memory_gb": 6.28
+  },
+  "view_box_coverage": null,
+  "schedule_fingerprint": "b70fbf589829b56f2f22fdbc16d24f989a906f66f3cc2a9d03ef590ee562d58c",
+  "steps_per_epoch": 297,
+  "total_steps": 29700,
+  "num_trainable_parameters": 10616832,
+  "measured_seconds_per_step": 0.1319,
+  "estimated_hours_for_all_epochs": 1.09,
+  "exported_backbone": {
+    "file": "backbone_epoch100.pth",
+    "state_sha256": "66fc8722658f3148d32f824c649d42238cd9df0e7e0cded30a50466f215ec6a0",
+    "file_sha256": "24212441d81c15ce5c4558c8ef344a01fcb1f285b609200e7987cef92efa29cc",
+    "num_tensors": 312
+  },
+  "finished": "2026-11-22T22:51:33",
+  "wall_minutes": 69.53,
+  "peak_gpu_memory_gb": 6.28
+}

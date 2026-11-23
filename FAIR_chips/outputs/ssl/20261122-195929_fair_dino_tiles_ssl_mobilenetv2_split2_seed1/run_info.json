@@ -1,0 +1,147 @@
+{
+  "kind": "ssl",
+  "status": "completed",
+  "started": "2026-11-22T19:59:29",
+  "run_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/FAIR_chips/outputs/ssl/20261122-195929_fair_dino_tiles_ssl_mobilenetv2_split2_seed1",
+  "config": {
+    "run_name": "fair_dino_tiles_ssl_mobilenetv2",
+    "method": "regiondino_scene",
+    "common": {
+      "epochs": 100,
+      "batch_size": 64,
+      "seed_rule": "split - 1",
+      "num_workers": 8,
+      "export_rule": "final epoch, no selection",
+      "seed": 1
+    },
+    "views": {
+      "resize_rule": "detector_512",
+      "global_size": 224,
+      "local_size": 96,
+      "zoom_range": [
+        0.75,
+        1.33
+      ],
+      "hflip_p": 0.5,
+      "brightness": 0.4,
+      "contrast": 0.4,
+      "color_jitter_p": 0.8,
+      "blur_sigma": [
+        0.1,
+        2.0
+      ],
+      "solarization_p": 0.0
+    },
+    "pool": "fair_tiles",
+    "dino_views": {
+      "local_crops_number": 8,
+      "blur_p": [
+        1.0,
+        0.1,
+        0.5
+      ]
+    },
+    "dino": {
+      "out_dim": 4096,
+      "use_bn_in_head": false,
+      "norm_last_layer": true,
+      "momentum_teacher": 0.9995,
+      "warmup_teacher_temp": 0.04,
+      "teacher_temp": 0.04,
+      "warmup_teacher_temp_epochs": 0,
+      "student_temp": 0.1,
+      "center_momentum": 0.9
+    },
+    "optim": {
+      "optimizer": "adamw",
+      "lr": 0.0005,
+      "min_lr": 1e-06,
+      "warmup_epochs": 10,
+      "weight_decay": 0.04,
+      "weight_decay_end": 0.04,
+      "clip_grad": 3.0,
+      "freeze_last_layer": 1,
+      "use_fp16": true
+    },
+    "smoke": false
+  },
+  "git": {
+    "commit": "2acbf390345e2ff46a57c102bf0ff81e65bd1d06",
+    "branch": "SmokeTest_Mobilenet_with_DINO",
+    "uncommitted_changes": true
+  },
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.10.0+cu128",
+    "platform": "Linux-5.14.0-503.22.1.el9_5.x86_64-x86_64-with-glibc2.34",
+    "hostname": "gpu-n35.crc.pitt.edu",
+    "cpu_count": 64,
+    "slurm_job_id": "4787313",
+    "cuda_available": true,
+    "torchvision": "0.25.0+cu128",
+    "gpu": "NVIDIA A100-PCIE-40GB",
+    "gpu_memory_gb": 39.5
+  },
+  "dataset_root": "/ix/ageorge/nik96/data/SARDet_100K",
+  "split": 2,
+  "command": "FAIR_chips/train_ssl.py --config FAIR_chips/config_ssl_dino_tiles.json",
+  "method": "regiondino_scene",
+  "initialization": {
+    "kind": "imagenet",
+    "file": "/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth",
+    "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35"
+  },
+  "checkpoint_rule": "final epoch, fixed in advance; the SSL loss never selects a checkpoint",
+  "export_rule": "teacher backbone, final epoch",
+  "views_per_image": 10,
+  "view_plan": {
+    "pool": "fair_tiles",
+    "input_size": 512,
+    "scene": [
+      [
+        "global",
+        1,
+        1.0
+      ],
+      [
+        "global",
+        1,
+        0.1
+      ],
+      [
+        "local",
+        8,
+        0.5
+      ]
+    ],
+    "object": [],
+    "objects_per_image": 0,
+    "obj_global_size": null,
+    "obj_local_size": null
+  },
+  "cost": {
+    "epochs_done": 100,
+    "optimizer_steps": 29700,
+    "images_seen": 1900800,
+    "view_forwards": 19008000,
+    "train_minutes": 88.39,
+    "gpu_hours": 1.473,
+    "peak_gpu_memory_gb": 9.19
+  },
+  "view_box_coverage": null,
+  "schedule_fingerprint": "b70fbf589829b56f2f22fdbc16d24f989a906f66f3cc2a9d03ef590ee562d58c",
+  "steps_per_epoch": 297,
+  "total_steps": 29700,
+  "num_trainable_parameters": 10616832,
+  "measured_seconds_per_step": 0.174,
+  "estimated_hours_for_all_epochs": 1.44,
+  "exported_backbone": {
+    "file": "backbone_epoch100.pth",
+    "state_sha256": "5dba9bcb8b10a255fe98507838ae4f2bc32ac53d8e8155e4eadd568c47fb414c",
+    "file_sha256": "c5cc0ae901e3e5f7dd7c14edc0d38c5a862decfebd5a2f64184bf034adbcd375",
+    "num_tensors": 312
+  },
+  "finished": "2026-11-22T21:29:43",
+  "wall_minutes": 90.23,
+  "peak_gpu_memory_gb": 9.19
+}
