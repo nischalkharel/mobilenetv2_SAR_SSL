@@ -36,7 +36,8 @@ def main():
         test = sorted(r["slice"] for r in csv.DictReader(f) if r["split"] == "test")[:20]
     need.update(("test", s) for s in test)
     out = fp.DATA_DIR / "pc_smoke_pngs.txt"
-    out.write_text("".join(f"{split}/PNGImages/{s}.png\n" for split, s in sorted(need)), encoding="utf-8")
+    with open(out, "w", newline="\n", encoding="utf-8") as f:          # LF endings: the list is fed to tar -T on Linux
+        f.write("".join(f"{split}/PNGImages/{s}.png\n" for split, s in sorted(need)))
     print(f"{len(need)} PNGs listed in {out}")
 
 

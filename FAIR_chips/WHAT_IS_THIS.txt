@@ -1,0 +1,37 @@
+FAIR_chips/: the second scenes-in, chips-out test, on FAIR-CSAR-V1.0 SL (Gaofen-3, 1 m, 22 fine-grained classes).
+
+What it asks (plain words)
+--------------------------
+SARDet chips were too easy (everything at 92 %+). This dataset is harder: eleven aircraft types, seven ship types,
+objects 20 to 160 px, strong imbalance. We train MobileNetV2 with SSL on the unlabeled 1 m slices and then fine-tune
+it on a few labeled object chips cut from the same dataset, asking: does SSL help; does placing the views on bright
+regions (RegionDINO) help like it did on ATRNet; does the native 1 m beat a 2 m downsample; and do the SARDet-pool
+backbones transfer here. Design, subsets and leakage notes: DESIGN.md.
+
+Status (2026-11-22)
+-------------------
+Built on the PC, nothing run on CRC. Manifests drawn and committed (data/). PC smoke waits for the sample PNGs
+listed in data/pc_smoke_pngs.txt. Reviewer pass before the first cluster launch.
+
+How it runs (CRC, from the repository root)
+--------------------------------------------
+sbatch --job-name=make_fair_chips FAIR_chips/crc/make_chips.sbatch              (once, CPU)
+sbatch --job-name=regions_fair_tiles FAIR_chips/crc/regions.sbatch fair_tiles  (once, CPU; and fair_down)
+sbatch --job-name=fro_t_s1 FAIR_chips/crc/ssl.sbatch config_ssl_ro_tiles.json 1 (one SSL chain per config and split)
+sbatch --job-name=fch_ro_t_s1 FAIR_chips/crc/finetune.sbatch fair_ro_tiles 1    (3 budgets of one split)
+python FAIR_chips/compare.py                                                    (the table)
+
+Where things are
+----------------
+fair_paths.py         paths from env vars (FAIR_CSAR_ROOT, FAIR_CHIPS_ROOT), the 22 classes, the chip rule
+fair_annotations.py   reads the DOTA text annotations
+make_manifests.py     draws data/ (select, ssl_pool, labeled sets, counts, hashes); never redrawn without --overwrite
+make_chips.py         cuts the chips into one array file (FAIR_CHIPS_ROOT)
+chip_data.py          the sets and the dataset class
+finetune_chips.py     one fine-tune run; config_finetune.json its settings
+train_ssl.py          SSL entry (RegionSSL engine); config_ssl_<dino|ro|ror>_<tiles|down>.json
+compare.py            outputs/compare/chips.md
+smoke_list.py         the PNG list for a PC smoke check
+crc/                  job scripts and the CRC environment
+outputs/              ssl/, finetune/, compare/ (run records committed, weights not)
+Also touched (additive): RegionSSL/rssl/pools.py (two FAIR pools), SARDet_to_ATR/find_backbone.py (fair_* names).
