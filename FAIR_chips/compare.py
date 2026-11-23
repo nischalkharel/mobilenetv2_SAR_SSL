@@ -19,11 +19,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import fair_paths as fp  # noqa: E402
 METHODS = fp.METHODS
 
-LABELS = {"imagenet": "ImageNet start (no SSL)",
-          "fair_dino_tiles": "DINO on FAIR tiles", "fair_ro_tiles": "RegionDINO object-only on FAIR tiles", "fair_ror_tiles": "object-only, random windows on FAIR tiles (control)",
-          "fair_dino_down": "DINO on FAIR downsampled slices", "fair_ro_down": "RegionDINO object-only on FAIR downsampled", "fair_ror_down": "object-only, random windows on FAIR downsampled (control)",
-          "sardet_dino": "DINO on SARDet scenes (cross-dataset)", "sardet_regiondino_o": "RegionDINO object-only on SARDet scenes (cross-dataset)",
-          "sardet_regiondino_o_random": "object-only, random windows on SARDet scenes (cross-dataset control)"}
+# Row labels follow Nischal's convention: SSL-<dataset> / FINETUNE-<dataset> / TEST-<dataset> / <technique>
+_F = "FAIR-CSAR"
+LABELS = {"imagenet": f"SSL-none / FINETUNE-{_F} / TEST-{_F} / ImageNet start",
+          "fair_dino_tiles": f"SSL-{_F} tiles / FINETUNE-{_F} / TEST-{_F} / DINO",
+          "fair_ro_tiles": f"SSL-{_F} tiles / FINETUNE-{_F} / TEST-{_F} / RegionDINO object-only",
+          "fair_ror_tiles": f"SSL-{_F} tiles / FINETUNE-{_F} / TEST-{_F} / random windows (control)",
+          "fair_dino_down": f"SSL-{_F} downsampled / FINETUNE-{_F} / TEST-{_F} / DINO",
+          "fair_ro_down": f"SSL-{_F} downsampled / FINETUNE-{_F} / TEST-{_F} / RegionDINO object-only",
+          "fair_ror_down": f"SSL-{_F} downsampled / FINETUNE-{_F} / TEST-{_F} / random windows (control)",
+          "sardet_dino": f"SSL-SARDet-100K / FINETUNE-{_F} / TEST-{_F} / DINO",
+          "sardet_regiondino_o": f"SSL-SARDet-100K / FINETUNE-{_F} / TEST-{_F} / RegionDINO object-only",
+          "sardet_regiondino_o_random": f"SSL-SARDet-100K / FINETUNE-{_F} / TEST-{_F} / random windows (control)"}
 REF = {"fair_dino_tiles": "imagenet", "fair_ro_tiles": "fair_dino_tiles", "fair_ror_tiles": "fair_dino_tiles",
        "fair_dino_down": "imagenet", "fair_ro_down": "fair_dino_down", "fair_ror_down": "fair_dino_down",
        "sardet_dino": "imagenet", "sardet_regiondino_o": "sardet_dino", "sardet_regiondino_o_random": "sardet_dino"}
