@@ -15,6 +15,8 @@ Mean per-class accuracy on test_clean, % (headline); per split and mean (sd). Th
 | RegionDINO scene+object, random windows (control) | 86.0 / 85.3 / 79.6 | 83.6 (3.5) | 91.3 / 92.1 / 90.4 | 91.3 (0.9) | 96.8 / 98.1 / 96.8 | 97.2 (0.8) |
 | RegionDINO object-only | 85.4 / 82.6 / 79.3 | 82.4 (3.0) | 92.7 / 92.3 / 90.6 | 91.9 (1.1) | 96.3 / 97.0 / 97.0 | 96.8 (0.4) |
 | RegionDINO object-only, random windows (control) | 82.8 / 80.2 / 78.5 | 80.5 (2.2) | 91.2 / 94.8 / 90.3 | 92.1 (2.4) | 96.9 / 98.3 / 96.5 | 97.3 (1.0) |
+| RegionDINO object-only, teacher regions | 84.7 / 81.2 / 80.2 | 82.0 (2.3) | 92.8 / 92.6 / 88.8 | 91.4 (2.3) | 97.0 / 98.0 / 96.5 | 97.2 (0.8) |
+| RegionDINO object-only, teacher-size random windows (control) | 84.7 / 79.2 / 77.3 | 80.4 (3.8) | 92.0 / 89.6 / 89.1 | 90.2 (1.6) | 96.0 / 97.9 / 96.6 | 96.8 (1.0) |
 
 ## Overall accuracy, test_clean
 
@@ -28,6 +30,8 @@ Mean per-class accuracy on test_clean, % (headline); per split and mean (sd). Th
 | RegionDINO scene+object, random windows (control) | 93.4 / 92.3 / 91.0 | 92.2 (1.2) | 96.9 / 96.7 / 95.6 | 96.4 (0.7) | 99.0 / 99.2 / 99.0 | 99.1 (0.1) |
 | RegionDINO object-only | 94.3 / 92.4 / 91.1 | 92.6 (1.6) | 97.3 / 96.8 / 96.4 | 96.8 (0.5) | 98.6 / 99.0 / 98.7 | 98.8 (0.2) |
 | RegionDINO object-only, random windows (control) | 92.5 / 91.5 / 91.7 | 91.9 (0.6) | 97.1 / 96.8 / 96.4 | 96.8 (0.4) | 99.0 / 99.3 / 98.8 | 99.0 (0.2) |
+| RegionDINO object-only, teacher regions | 93.1 / 91.9 / 90.9 | 92.0 (1.1) | 97.3 / 96.8 / 95.7 | 96.6 (0.8) | 99.0 / 99.3 / 98.6 | 99.0 (0.3) |
+| RegionDINO object-only, teacher-size random windows (control) | 93.3 / 91.4 / 91.4 | 92.0 (1.1) | 96.9 / 95.8 / 95.8 | 96.2 (0.6) | 98.7 / 99.2 / 99.0 | 98.9 (0.3) |
 
 ## Mean per-class accuracy, full test
 
@@ -41,6 +45,8 @@ Mean per-class accuracy on test_clean, % (headline); per split and mean (sd). Th
 | RegionDINO scene+object, random windows (control) | 85.9 / 85.0 / 79.4 | 83.4 (3.5) | 91.1 / 91.9 / 90.2 | 91.1 (0.8) | 96.5 / 98.1 / 96.6 | 97.1 (0.9) |
 | RegionDINO object-only | 85.3 / 82.3 / 79.3 | 82.3 (3.0) | 92.4 / 92.1 / 90.6 | 91.7 (1.0) | 96.2 / 97.0 / 96.9 | 96.7 (0.5) |
 | RegionDINO object-only, random windows (control) | 82.7 / 79.9 / 78.4 | 80.3 (2.2) | 91.0 / 94.7 / 90.3 | 92.0 (2.4) | 96.7 / 98.3 / 96.4 | 97.1 (1.0) |
+| RegionDINO object-only, teacher regions | 84.5 / 80.9 / 80.1 | 81.8 (2.4) | 92.5 / 92.4 / 88.6 | 91.2 (2.2) | 96.7 / 98.0 / 96.5 | 97.1 (0.8) |
+| RegionDINO object-only, teacher-size random windows (control) | 84.6 / 78.7 / 77.3 | 80.2 (3.9) | 91.8 / 89.3 / 89.0 | 90.0 (1.5) | 95.7 / 97.8 / 96.5 | 96.7 (1.1) |
 
 ## Overall accuracy, full test
 
@@ -54,6 +60,8 @@ Mean per-class accuracy on test_clean, % (headline); per split and mean (sd). Th
 | RegionDINO scene+object, random windows (control) | 93.3 / 92.2 / 90.8 | 92.1 (1.3) | 96.8 / 96.5 / 95.5 | 96.3 (0.7) | 99.0 / 99.2 / 98.9 | 99.0 (0.1) |
 | RegionDINO object-only | 94.2 / 92.2 / 91.0 | 92.5 (1.6) | 97.2 / 96.6 / 96.3 | 96.7 (0.5) | 98.6 / 98.9 / 98.7 | 98.7 (0.2) |
 | RegionDINO object-only, random windows (control) | 92.4 / 91.3 / 91.5 | 91.7 (0.6) | 97.0 / 96.7 / 96.4 | 96.7 (0.3) | 99.0 / 99.2 / 98.8 | 99.0 (0.2) |
+| RegionDINO object-only, teacher regions | 92.9 / 91.7 / 90.7 | 91.8 (1.1) | 97.2 / 96.6 / 95.6 | 96.5 (0.8) | 98.9 / 99.3 / 98.6 | 98.9 (0.3) |
+| RegionDINO object-only, teacher-size random windows (control) | 93.1 / 91.2 / 91.2 | 91.8 (1.1) | 96.8 / 95.6 / 95.7 | 96.0 (0.7) | 98.6 / 99.1 / 98.9 | 98.9 (0.3) |
 
 ## Paired differences, mean per-class accuracy on test_clean (points): method minus its reference, same split and budget
 
@@ -82,6 +90,12 @@ Reference: no SSL for DINO / LeJEPA / SparK; plain DINO for the RegionDINO rows 
 | RegionDINO object-only, random windows (control) | 1pct | -3.5 / -1.4 / -0.3 | -1.7 | -0.0 / -0.3 / -1.1 | -0.5 |
 | RegionDINO object-only, random windows (control) | 3pct | -1.6 / +1.6 / +0.0 | +0.0 | -1.3 / +3.3 / +0.0 | +0.7 |
 | RegionDINO object-only, random windows (control) | 10pct | +0.4 / +0.4 / +0.1 | +0.3 | +0.7 / +0.7 / +0.9 | +0.7 |
+| RegionDINO object-only, teacher regions | 1pct | -0.7 / -1.3 / +0.8 | -0.4 | +1.8 / +0.8 / +0.6 | +1.1 |
+| RegionDINO object-only, teacher regions | 3pct | +0.1 / +0.3 / -1.9 | -0.5 | +0.3 / +1.1 / -1.5 | -0.0 |
+| RegionDINO object-only, teacher regions | 10pct | +0.7 / +1.0 / -0.5 | +0.4 | +0.7 / +0.4 / +0.9 | +0.7 |
+| RegionDINO object-only, teacher-size random windows (control) | 1pct | +0.0 / -2.1 / -2.9 | -1.6 | +1.8 / -1.3 / -2.2 | -0.6 |
+| RegionDINO object-only, teacher-size random windows (control) | 3pct | -0.8 / -3.0 / +0.3 | -1.1 | -0.5 / -1.9 / -1.1 | -1.2 |
+| RegionDINO object-only, teacher-size random windows (control) | 10pct | -1.0 / -0.2 / +0.0 | -0.4 | -0.3 / +0.2 / +0.9 | +0.3 |
 
 ## Per-class accuracy on test_clean, mean of splits (%)
 
@@ -98,6 +112,8 @@ Reference: no SSL for DINO / LeJEPA / SparK; plain DINO for the RegionDINO rows 
 | RegionDINO scene+object, random windows (control) | 96.5 | 93.4 | 85.9 | 76.2 | 90.5 | 59.2 |
 | RegionDINO object-only | 97.5 | 93.7 | 86.9 | 63.6 | 95.7 | 57.1 |
 | RegionDINO object-only, random windows (control) | 97.5 | 93.1 | 82.9 | 58.9 | 96.1 | 54.5 |
+| RegionDINO object-only, teacher regions | 97.0 | 92.2 | 83.7 | 66.8 | 95.3 | 57.2 |
+| RegionDINO object-only, teacher-size random windows (control) | 96.6 | 94.8 | 82.0 | 61.8 | 95.6 | 51.7 |
 
 3pct:
 
@@ -111,6 +127,8 @@ Reference: no SSL for DINO / LeJEPA / SparK; plain DINO for the RegionDINO rows 
 | RegionDINO scene+object, random windows (control) | 98.3 | 97.4 | 94.1 | 89.1 | 95.4 | 73.2 |
 | RegionDINO object-only | 98.6 | 97.3 | 96.8 | 89.4 | 96.6 | 72.5 |
 | RegionDINO object-only, random windows (control) | 98.6 | 97.8 | 97.0 | 91.1 | 94.3 | 73.8 |
+| RegionDINO object-only, teacher regions | 98.8 | 97.4 | 96.1 | 87.0 | 95.7 | 73.4 |
+| RegionDINO object-only, teacher-size random windows (control) | 98.1 | 97.4 | 94.3 | 85.8 | 96.6 | 69.3 |
 
 10pct:
 
@@ -124,6 +142,8 @@ Reference: no SSL for DINO / LeJEPA / SparK; plain DINO for the RegionDINO rows 
 | RegionDINO scene+object, random windows (control) | 99.6 | 99.8 | 99.7 | 96.0 | 98.2 | 90.1 |
 | RegionDINO object-only | 99.1 | 99.8 | 99.6 | 95.8 | 97.9 | 88.4 |
 | RegionDINO object-only, random windows (control) | 99.6 | 99.8 | 99.8 | 95.5 | 98.3 | 90.5 |
+| RegionDINO object-only, teacher regions | 99.2 | 99.8 | 99.8 | 97.3 | 98.4 | 88.7 |
+| RegionDINO object-only, teacher-size random windows (control) | 99.6 | 99.5 | 99.9 | 95.6 | 98.1 | 88.1 |
 
 ## Per-source accuracy on test_clean, mean of splits (%)
 
@@ -140,6 +160,8 @@ Reference: no SSL for DINO / LeJEPA / SparK; plain DINO for the RegionDINO rows 
 | RegionDINO scene+object, random windows (control) | 87.1 | 91.9 | 89.1 | 83.6 | 96.6 | 96.1 | 85.9 | 90.0 | 99.4 |
 | RegionDINO object-only | 89.2 | 94.2 | 90.4 | 82.2 | 97.1 | 96.3 | 86.9 | 91.3 | 99.7 |
 | RegionDINO object-only, random windows (control) | 81.1 | 95.2 | 88.5 | 80.7 | 98.2 | 96.2 | 82.9 | 92.6 | 99.6 |
+| RegionDINO object-only, teacher regions | 73.0 | 94.7 | 89.5 | 82.8 | 94.8 | 95.2 | 83.7 | 92.4 | 99.4 |
+| RegionDINO object-only, teacher-size random windows (control) | 79.0 | 93.2 | 88.2 | 80.9 | 96.9 | 98.3 | 82.0 | 89.3 | 99.5 |
 
 3pct:
 
@@ -153,6 +175,8 @@ Reference: no SSL for DINO / LeJEPA / SparK; plain DINO for the RegionDINO rows 
 | RegionDINO scene+object, random windows (control) | 90.1 | 96.7 | 92.7 | 91.6 | 99.1 | 99.9 | 94.1 | 95.2 | 99.7 |
 | RegionDINO object-only | 93.2 | 97.0 | 93.2 | 92.3 | 99.1 | 99.9 | 96.8 | 94.9 | 99.8 |
 | RegionDINO object-only, random windows (control) | 91.0 | 97.2 | 94.0 | 91.5 | 99.2 | 99.8 | 97.0 | 94.7 | 99.8 |
+| RegionDINO object-only, teacher regions | 91.1 | 97.6 | 92.9 | 91.0 | 99.3 | 99.9 | 96.1 | 96.4 | 99.9 |
+| RegionDINO object-only, teacher-size random windows (control) | 89.9 | 97.0 | 92.8 | 90.6 | 99.1 | 99.7 | 94.3 | 90.2 | 99.5 |
 
 10pct:
 
@@ -166,3 +190,5 @@ Reference: no SSL for DINO / LeJEPA / SparK; plain DINO for the RegionDINO rows 
 | RegionDINO scene+object, random windows (control) | 98.9 | 99.3 | 99.1 | 96.7 | 99.6 | 99.9 | 99.7 | 99.1 | 99.9 |
 | RegionDINO object-only | 98.6 | 97.7 | 99.1 | 96.4 | 99.4 | 99.9 | 99.6 | 96.7 | 99.9 |
 | RegionDINO object-only, random windows (control) | 98.6 | 98.9 | 99.2 | 96.7 | 99.4 | 99.9 | 99.8 | 98.4 | 99.9 |
+| RegionDINO object-only, teacher regions | 98.5 | 97.9 | 99.2 | 97.3 | 99.4 | 99.9 | 99.8 | 97.6 | 99.9 |
+| RegionDINO object-only, teacher-size random windows (control) | 98.2 | 99.4 | 98.5 | 96.5 | 99.6 | 99.9 | 99.9 | 98.5 | 99.9 |
