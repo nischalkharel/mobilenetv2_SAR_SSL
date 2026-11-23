@@ -1,7 +1,8 @@
 # FAIR-CSAR chip study: SSL on 1 m Gaofen-3 slices, fine-tuned and tested on 22-class object chips
 
-Status 2026-11-22: built on the PC (manifests drawn and committed, code written, PC smoke pending the sample PNGs
-from CRC), nothing run on CRC yet. Reviewer pass before the first cluster launch. Protocol decision in
+Status 2026-11-22 (night): built, reviewed by two agents (fixes applied), PC smoke passed on the sample PNGs (chips cut,
+regions proposed for both pools, SSL smoke for dino / ro / ror on tiles and ro on down, resume, fine-tune from ImageNet and
+from a smoke backbone). Nothing run on CRC yet; launch order in section 5. Protocol decision in
 `datasets/CANDIDATES.md` (2026-11-22), inventory in `datasets/outputs/fair_csar_inventory.md`.
 
 ## 1. Why this dataset and what it asks
