@@ -86,8 +86,15 @@ Pools (RegionSSL/rssl/pools.py): `fair_tiles` = the unique 512-px tiles of the s
 (`data/ssl_tiles.csv`, 19,036 images per epoch; the 50 % slice overlap would otherwise make three of four tiles
 exact repeats); `fair_down` = every ssl_pool slice resized 1024 -> 512 (10,769 images per epoch, 2 m per pixel;
 overlapping slices kept, since no two are the same crop). Everything shared (100 epochs, batch 64, seed = split - 1,
-view recipe) comes from SARDet/shared/ssl_common.json as for every other SSL run, so at equal epochs the tiles arm
-sees 1.8 x the images and the same ground area per epoch; the cost record of each run states both. The three splits are three SSL seeds on the same pool, paired with the three labeled draws
+view recipe) comes from SARDet/shared/ssl_common.json as for every other SSL run. Caveat (reviewer, 2026-11-22):
+at equal epochs the two arms differ in more than resolution. Tiles: 19,036 de-duplicated images, 297 steps per
+epoch, 29,700 steps in all, each ground point seen about once per epoch at 1 m. Down: 10,769 overlapping slices, 168
+steps per epoch, 16,800 steps, each ground point seen about four times per epoch at 2 m (in four slice contexts), and
+the 10-epoch warm-up is shorter in steps. So "tiles beats down" could be step count and "down beats tiles" could be
+the 4 x redundancy. The arms are therefore read as "the practical recipe at each resolution"; the cost record of
+every run lists images_seen and optimizer_steps. If the tiles result is worth the question, ONE matched-steps row is
+added for plain DINO: a fixed subset of 10,769 of the tiles (seed 0, the same subset for every split), which gives the
+down arm's images per epoch and steps at 1 m; it costs about 57 % of a tiles run and is not built until then. The three splits are three SSL seeds on the same pool, paired with the three labeled draws
 (the suite's rule). Regions are proposed once per pool (CPU job) with the same brightness rule as SARDet.
 
 Fine-tune (`finetune_chips.py`): the SARDet_chips / ATRNet recipe unchanged (128-px chips resized to 224, AdamW
@@ -118,7 +125,8 @@ differences under about 3 points at 1 % are noise.
 FAIR_chips/
   fair_paths.py        env FAIR_CSAR_ROOT / FAIR_CHIPS_ROOT, classes (22, fixed order), chip rule, manifest paths
   fair_annotations.py  DOTA text parser (oriented box -> centre, long/short side, extent), scene id from the slice name
-  make_manifests.py    data/ (objects = de-duplicated annotations, select, ssl_pool, ssl_tiles, labeled sets x 3 splits, counts, hashes)
+  make_manifests.py    data/: objects.csv (de-duplicated annotations with their owner copy), slices.csv, select.csv,
+                       ssl_pool.csv, ssl_tiles.csv (unique tiles, TILE_DUP_PX 128), split{1,2,3}/labeled_*.csv + counts.json, hashes.json
   smoke_list.py        data/pc_smoke_pngs.txt: the PNGs a PC smoke check needs (fetched from CRC with tar -T)
   make_chips.py        chips array + csv + previews (FAIR_CHIPS_ROOT)
   chip_data.py         sets (train / select / test / test_clean) and the ChipDataset (from SARDet_chips)

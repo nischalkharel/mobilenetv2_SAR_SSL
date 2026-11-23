@@ -11,11 +11,15 @@ The dataset class is SARDet_chips/chip_data.ChipDataset (one array file, chips k
 import csv
 import hashlib
 import json
+import sys
 from collections import Counter
 from pathlib import Path
 
 import fair_paths as fp
-from chip_data import ChipDataset, sha256_file  # noqa: F401  SARDet_chips/chip_data.py (on sys.path via fair_paths; this file is named fair_* so it never shadows it)
+
+if str(fp.SARDET_CHIPS_DIR) not in sys.path:
+    sys.path.append(str(fp.SARDET_CHIPS_DIR))          # appended: SARDet_chips/chip_data.py is wanted, nothing of FAIR_chips is shadowed
+from chip_data import ChipDataset, sha256_file  # noqa: E402, F401  (this file is named fair_* so it never shadows that one)
 
 
 def load_chip_rows(root: Path = None):

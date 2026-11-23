@@ -31,7 +31,11 @@ import torch
 from torch.utils.data import DataLoader
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import fair_paths as fp  # noqa: E402  (puts SARDet_chips/, SARDet/ and Experiments/mobileNetv2_DINO/ on sys.path)
+import fair_paths as fp  # noqa: E402
+sys.path.insert(0, str(fp.SARDET_CHIPS_DIR))
+import chip_paths  # noqa: E402  (already imported by fair_paths, which restored sys.path; so add its folders here explicitly)
+for _d in (chip_paths.SUITE_ROOT, chip_paths.DINO_DIR):          # SARDet/ and Experiments/mobileNetv2_DINO/: data, engine, model, plots, utils below
+    sys.path.insert(0, str(_d))
 from fair_chip_data import ChipDataset, class_counts, content_hash, load_chip_rows, records  # noqa: E402  (named fair_* so SARDet_chips/chip_data.py, also on sys.path, is not shadowed)
 from data import build_transform  # noqa: E402
 from engine import predict, train_one_epoch  # noqa: E402

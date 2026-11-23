@@ -48,7 +48,10 @@ if [ -n "$SLURM_JOB_ID" ] && [ -z "$NO_CHAIN" ]; then
 fi
 mkdir -p crc/logs
 stage_fair
-
+if [ -n "$UNFINISHED" ] && [ ! -f "$UNFINISHED/checkpoint.pth" ]; then
+    echo "$UNFINISHED has no checkpoint (killed before its first epoch ended); setting it aside and starting fresh"
+    mv "$UNFINISHED" "${UNFINISHED}_nockpt"; UNFINISHED=""
+fi
 if [ -n "$UNFINISHED" ]; then
     echo "resuming $UNFINISHED"
     python $DIR/train_ssl.py --resume "$UNFINISHED"

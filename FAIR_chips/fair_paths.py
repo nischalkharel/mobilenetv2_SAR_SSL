@@ -6,8 +6,8 @@
                       (set in crc/env.sh; a job may point it at node-local disk after staging).
     FAIR_CHIPS_ROOT   folder for chips_u8.npy, chips.csv, chips_meta.json, previews/ (made by make_chips.py).
                       PC default: next to FAIR_CSAR_ROOT; CRC: /ix/ageorge/nik96/data/FAIR_chips.
-Everything else is relative to this file. The ImageNet start weights and the fine-tune code come from the
-detection suite / the ATRNet experiment through SARDet_chips/chip_paths.py (one place that knows them).
+Everything else is relative to this file. The ImageNet start weights and the chip rule come from
+SARDet_chips/chip_paths.py (one place that knows them); this module does not change sys.path.
 """
 import os
 import sys
@@ -16,11 +16,20 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parent
 SARDET_CHIPS_DIR = REPO_ROOT / "SARDet_chips"
-for p in (str(SARDET_CHIPS_DIR),):
-    if p not in sys.path:
-        sys.path.insert(0, p)
-import chip_paths as _cp  # noqa: E402  (also puts SARDet/ and Experiments/mobileNetv2_DINO/ on sys.path)
 
+
+def _chip_paths():
+    """SARDet_chips/chip_paths.py for its values only. Importing it pushes SARDet/ and Experiments/mobileNetv2_DINO/ to the
+    front of sys.path; this module is also imported inside the SSL process (through RegionSSL/rssl/pools.py), so sys.path
+    is restored afterwards. Scripts that need those folders (finetune_chips.py, make_chips.py) add them themselves."""
+    saved = list(sys.path)
+    sys.path.insert(0, str(SARDET_CHIPS_DIR))
+    import chip_paths  # noqa: E402
+    sys.path[:] = saved
+    return chip_paths
+
+
+_cp = _chip_paths()
 MOBILENETV2_IMAGENET_WEIGHTS = _cp.MOBILENETV2_IMAGENET_WEIGHTS
 
 FAIR_CSAR_ROOT = Path(os.environ.get("FAIR_CSAR_ROOT", REPO_ROOT.parent / "FAIR_CSAR_sample"))

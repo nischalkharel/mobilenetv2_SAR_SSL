@@ -204,6 +204,8 @@ class FAIRTilesPool:
     def _open(self, row):
         fp, _ = self._fp()
         with Image.open(fp.png_path(row["official_split"], row["slice"])) as im:
+            if im.size != (fp.SLICE_SIZE, fp.SLICE_SIZE):
+                raise ValueError(f"{row['slice']}: PNG is {im.size}, expected {fp.SLICE_SIZE} square (tile and downsample geometry assume it)")
             return im.convert("L")
 
     def load(self, row):
@@ -255,7 +257,7 @@ class FAIRDownPool(FAIRTilesPool):
     def gt_boxes(self, row):
         _, fa = self._fp()
         out = [[o["x0"], o["y0"], o["x1"], o["y1"]] for o in fa.objects(row["official_split"], row["slice"])]
-        return np.array(out, dtype=np.float32).reshape(-1, 4) / self.FACTOR
+        return np.clip(np.array(out, dtype=np.float32).reshape(-1, 4) / self.FACTOR, 0, self.input_size)
 
     def regions_file(self, smoke=False):
         return REGIONS_DIR / ("regions_fair_down_smoke.npz" if smoke else "regions_fair_down.npz")
