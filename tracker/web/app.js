@@ -143,8 +143,10 @@ function showPop(m, x, y) {
   const w = 420; popEl.style.left = Math.max(8, Math.min(x + 10, innerWidth - w - 12)) + "px"; popEl.style.top = (y + 12 + scrollY) + "px";
 }
 document.addEventListener("click", e => { const el = e.target.closest(".mlabel"); if (!el) return; const m = METHODS[el.dataset.mid]; if (m) { e.stopPropagation(); showPop(m, e.clientX, e.clientY); } });
+// group header = the experiment line of the group (SSL / FINETUNE / TEST from the page's context), then the pool description
+function groupTitle(p, pools = POOL) { return `SSL-${SSL_NAME[p] || p} / FINETUNE-${CTX.finetune} / TEST-${CTX.test}   (${pools[p] || p})`; }
 function groupsByPool(methods, pools = POOL) {
-  return Object.keys(pools).map(p => ({key: p, title: pools[p], rows: methods.filter(m => m.ssl === p)})).filter(g => g.rows.length);
+  return Object.keys(pools).map(p => ({key: p, title: groupTitle(p, pools), rows: methods.filter(m => m.ssl === p)})).filter(g => g.rows.length);
 }
 function nDone(m) { return Object.values(m.cells).filter(c => c.status === "completed" || c.status === "from runs.csv").length; }
 function drawer(host, m, field, fmt, unitName) {
