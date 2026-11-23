@@ -49,6 +49,7 @@
 <script>
 (async () => {
   await shell("chips.html");
+  setContext({task: "classification, 6 classes, mean per-class accuracy on chips cut from the official SARDet-100K test boxes", finetune: "SARDet-100K chips", test: "SARDet-100K chips"});
   const CH = await load("chips"), byId = Object.fromEntries(CH.methods.map(m => [m.id, m])), base = CH.methods.find(m => m.ssl === "none");
   $("task").textContent = CH.task + ". " + CH.chip_rule + ".";
   const POOLC = {none: "ImageNet start, no SSL", sardet: "SSL on SARDet-100K scenes (in-domain for this test)"};

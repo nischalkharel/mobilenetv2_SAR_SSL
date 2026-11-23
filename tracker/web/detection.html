@@ -55,6 +55,7 @@
 <script>
 (async () => {
   await shell("detection.html");
+  setContext({task: "detection, 6 classes, mAP@[.5:.95] on the official SARDet-100K test set", finetune: "SARDet-100K", test: "SARDet-100K"});
   const D = await load("detection"), byId = Object.fromEntries(D.methods.map(m => [m.id, m])), base = D.methods.find(m => m.ssl === "none");
   $("task").textContent = (D.task || "") + (D.compare_folder ? ` (tables from ${D.compare_folder})` : "");
   if (!D.methods.length) { $("fig1").innerHTML = `<p class="empty">${esc(D.note || "no detection results")}</p>`; return; }

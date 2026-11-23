@@ -4,6 +4,10 @@
 const FAM = {base: "var(--base)", dino: "var(--dino)", lejepa: "var(--lejepa)", spark: "var(--spark)", cond: "var(--cond)", region: "var(--region)", scale: "var(--scale)"};
 const POOL = {none: "ImageNet start, no SSL", atr: "SSL on ATRNet-STAR chips (in-domain)", sardet: "SSL on SARDet-100K scenes (cross-dataset)"};
 const POOL_DET = {none: "ImageNet start, no SSL", sardet: "SSL on SARDet-100K scenes (in-domain for detection)"};
+const POOL_FAIR = {none: "ImageNet start, no SSL", sardet: "SSL on SARDet-100K scenes (cross-dataset)", fair_tiles: "SSL on FAIR-CSAR, native 1 m tiles", fair_down: "SSL on FAIR-CSAR, downsampled slices"};
+// plain dataset name of each SSL pool, for the SSL-dataset / FINETUNE-dataset / TEST-dataset / technique line
+const SSL_NAME = {none: "none", atr: "ATRNet-STAR", sardet: "SARDet-100K", fair_tiles: "FAIR-CSAR (native 1 m tiles)", fair_down: "FAIR-CSAR (downsampled slices)"};
+const FAMILY_NAME = {base: "no SSL, ImageNet start", dino: "DINO", lejepa: "LeJEPA", spark: "SparK", cond: "CondDINO", region: "RegionDINO", scale: "ViewScale (fixed-size windows)"};
 const BUDGETS = ["1pct", "3pct", "10pct"];
 const bud = b => b.replace("pct", " %");
 const esc = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
@@ -21,7 +25,7 @@ async function load(name) {
 
 // ---- shell: nav + meta line ----
 async function shell(active) {
-  const pages = [["index.html", "Overview"], ["conclusions.html", "Conclusions"], ["classification.html", "Classification"], ["detection.html", "Detection"], ["maps.html", "Response maps"], ["chips.html", "Chips"], ["runs.html", "Runs"], ["ideas.html", "Ideas"], ["glossary.html", "Glossary"]];
+  const pages = [["index.html", "Overview"], ["conclusions.html", "Conclusions"], ["classification.html", "Classification"], ["detection.html", "Detection"], ["maps.html", "Response maps"], ["chips.html", "Chips"], ["fair.html", "FAIR-CSAR"], ["runs.html", "Runs"], ["ideas.html", "Ideas"], ["glossary.html", "Glossary"]];
   const nav = $("nav");
   nav.innerHTML = pages.map(([h, t]) => `<a href="${h}" class="${h === active ? "active" : ""}">${t}</a>`).join("");
   try {
@@ -113,14 +117,39 @@ function spark(v, w = 96, h = 22, color = "var(--accent)") {
 
 // ---- method display helpers ----
 const famDot = f => `<span class="dot" style="background:${FAM[f]}"></span>`;
-function label(m) { return `${famDot(m.family)}${esc(m.label)}${m.control ? ' <span class="pill">control</span>' : ""}`; }
+// Every page says what it fine-tunes and tests on; each method knows its SSL pool. Together they give the one line
+// Nischal asked for: SSL-<dataset> / FINETUNE-<dataset> / TEST-<dataset> / <technique>. Clicking any method label opens it.
+let CTX = {task: "", finetune: "", test: ""};
+const METHODS = {};
+function setContext(ctx) { CTX = ctx; }
+function fullName(m) { const c = m._ctx || CTX; return `SSL-${SSL_NAME[m.ssl] || m.ssl} / FINETUNE-${c.finetune} / TEST-${c.test} / ${m.label}${m.control ? " (control)" : ""}`; }
+// the context in force when the label was drawn travels with the method (the overview draws several experiments on one page)
+function label(m) { METHODS[m.id] = {...m, _ctx: CTX}; return `<span class="mlabel" data-mid="${esc(m.id)}" title="click: what this experiment is">${famDot(m.family)}${esc(m.label)}${m.control ? ' <span class="pill">control</span>' : ""}</span>`; }
+let popEl;
+function showPop(m, x, y) {
+  if (!popEl) { popEl = document.createElement("div"); popEl.className = "popcard"; document.body.appendChild(popEl);
+    document.addEventListener("click", e => { if (popEl && !popEl.contains(e.target) && !e.target.closest(".mlabel")) popEl.hidden = true; });
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && popEl) popEl.hidden = true; }); }
+  const c = m._ctx || CTX;
+  popEl.innerHTML = `<div class="full">${esc(fullName(m))}</div>
+    <div class="row"><span class="k">task</span>${esc(c.task)}</div>
+    <div class="row"><span class="k">SSL on</span>${m.ssl === "none" ? "nothing: ImageNet weights, then fine-tuning only" : esc(SSL_NAME[m.ssl] || m.ssl) + ", no labels read"}</div>
+    <div class="row"><span class="k">fine-tuned on</span>${esc(c.finetune)} labeled set, 1 / 3 / 10 % of the labels, three splits</div>
+    <div class="row"><span class="k">tested on</span>${esc(c.test)}</div>
+    <div class="row"><span class="k">technique</span>${esc((FAMILY_NAME[m.family] || m.family) === m.label ? m.label : `${FAMILY_NAME[m.family] || m.family}: ${m.label}`)}${m.control ? " (a control: same views, random places)" : ""}</div>
+    ${m.note ? `<div class="row note">${esc(m.note)}</div>` : ""}
+    <div class="row sub">click anywhere else to close</div>`;
+  popEl.hidden = false;
+  const w = 420; popEl.style.left = Math.max(8, Math.min(x + 10, innerWidth - w - 12)) + "px"; popEl.style.top = (y + 12 + scrollY) + "px";
+}
+document.addEventListener("click", e => { const el = e.target.closest(".mlabel"); if (!el) return; const m = METHODS[el.dataset.mid]; if (m) { e.stopPropagation(); showPop(m, e.clientX, e.clientY); } });
 function groupsByPool(methods, pools = POOL) {
   return Object.keys(pools).map(p => ({key: p, title: pools[p], rows: methods.filter(m => m.ssl === p)})).filter(g => g.rows.length);
 }
 function nDone(m) { return Object.values(m.cells).filter(c => c.status === "completed" || c.status === "from runs.csv").length; }
 function drawer(host, m, field, fmt, unitName) {
   const cells = BUDGETS.flatMap(b => [1, 2, 3].map(s => [b, s, m.cells[`${b}/${s}`]]));
-  host.innerHTML = `<div class="eyebrow">${esc(m.label)} &middot; ${esc(POOL[m.ssl] || "")}</div><p class="sub" style="margin:4px 0 10px">${esc(m.note || "")}</p>
+  host.innerHTML = `<div class="eyebrow">${esc(fullName(m))}</div><p class="sub" style="margin:4px 0 10px">${esc(m.note || "")}</p>
     <div class="grid">${cells.map(([b, s, c]) => c ? `<div class="cell"><b>${bud(b)} labels, split ${s}</b> &middot; <span class="mono">${fmt(c[field])}</span> ${unitName}<br>
       <span class="k">run</span> <code>${esc(c.run)}</code><br><span class="k">best epoch</span> ${c.best_epoch ?? "?"} of ${c.epochs_run} &middot; <span class="k">time</span> ${fx(c.train_minutes, 0)} min &middot; <span class="k">commit</span> <code>${esc(c.commit)}</code><br>
       ${c.backbone ? `<span class="k">backbone</span> <code>${esc(c.backbone)}</code><br>` : ""}${c.ssl_run ? `<span class="k">SSL run</span> <code>${esc(String(c.ssl_run).split("/").pop())}</code><br>` : ""}

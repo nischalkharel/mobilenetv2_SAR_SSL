@@ -49,7 +49,8 @@
 <script>
 (async () => {
   await shell("index.html");
-  const C = await load("classification"), D = await load("detection"), CH = await load("chips"), meta = await load("meta");
+  setContext({task: "see the page of each experiment", finetune: "(see page)", test: "(see page)"});
+  const C = await load("classification"), D = await load("detection"), CH = await load("chips"), FA = await load("fair_chips"), meta = await load("meta");
   let ideas = {ideas: []}; try { ideas = await (await fetch("/api/ideas")).json(); } catch (e) {}
 
   // paired difference of m against base over the splits both have, for one budget and field
@@ -61,8 +62,12 @@
 
   // ---- experiment map ----
   $("map").innerHTML = meta.settings.map(st => {
-    const det = st.table === "detection", T = det ? D : st.table === "chips" ? CH : C, field = det ? "map" : "acc", scale = det ? 100 : 1;
-    const base = T.methods.find(m => m.ssl === "none"), rows = T.methods.filter(m => m.ssl === st.ssl);
+    const det = st.table === "detection", T = det ? D : st.table === "chips" ? CH : st.table === "fair" ? FA : C, field = det ? "map" : "acc", scale = det ? 100 : 1;
+    setContext(det ? {task: "detection, 6 classes, mAP@[.5:.95] on the official SARDet-100K test set", finetune: "SARDet-100K", test: "SARDet-100K"}
+      : st.table === "chips" ? {task: "classification, 6 classes, mean per-class accuracy on SARDet-100K test chips", finetune: "SARDet-100K chips", test: "SARDet-100K chips"}
+      : st.table === "fair" ? {task: "classification, 22 classes, mean per-class accuracy on FAIR-CSAR test chips", finetune: "FAIR-CSAR", test: "FAIR-CSAR"}
+      : {task: "classification, 40 vehicle classes, accuracy on the official ATRNet-STAR test set", finetune: "ATRNet-STAR", test: "ATRNet-STAR"});
+    const base = T.methods.find(m => m.ssl === "none"), rows = T.methods.filter(m => st.ssl === "fair" ? m.ssl !== "none" : m.ssl === st.ssl);
     const line = m => {
       const means = BUDGETS.map(b => mean(present(vals(m, b, field))) * scale);
       const d = base && m !== base ? diff(m, base, "1pct", field, scale) : [];
@@ -71,7 +76,7 @@
     return `<div class="card"><h3>${esc(st.title)}</h3><div class="task">${esc(st.task)}${det ? ", shown &times;100" : ""}</div>
       <table><thead><tr><th>method</th><th>done</th><th class="num">1 %</th><th class="num">3 %</th><th class="num">10 %</th><th class="num">vs no SSL, 1 %</th></tr></thead>
       <tbody>${base ? line(base) : ""}${rows.map(line).join("")}${rows.length ? "" : `<tr><td colspan="6" class="empty">nothing run yet</td></tr>`}</tbody></table>
-      <p style="margin:8px 0 0"><a href="${det ? "detection.html" : st.table === "chips" ? "chips.html" : "classification.html"}">open the ${det ? "detection" : st.table === "chips" ? "chips" : "classification"} page &rarr;</a></p></div>`;
+      <p style="margin:8px 0 0"><a href="${det ? "detection.html" : st.table === "chips" ? "chips.html" : st.table === "fair" ? "fair.html" : "classification.html"}">open the ${det ? "detection" : st.table === "chips" ? "chips" : st.table === "fair" ? "FAIR-CSAR" : "classification"} page &rarr;</a></p></div>`;
   }).join("");
 
   // ---- headline cards ----

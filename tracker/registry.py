@@ -108,10 +108,30 @@ CHIPS = {
     "regiondino_o_teacher_random": dict(id="c_rotr", label="teacher-size random windows", family="region", ssl="sardet", ref="c_rot", control=True, note="Random windows with the teacher regions' sizes, then chips."),
 }
 
+# ---- FAIR-CSAR chip classification (FAIR_chips study: 22 classes; SSL on FAIR-CSAR itself or on SARDet-100K) ----
+FAIR_CLASSES = ["Airbus_A220", "Airbus_A320", "Airbus_A330", "Airfreighter", "Boeing737", "Boeing747", "Boeing767", "Boeing777", "Fokker-50",
+                "Gulfstream", "Helicopter", "Other_Aircraft", "Bulk_Carrier", "Container_Ship", "General_Cargo_Ship", "Motion_Defocusing_Ship",
+                "Oil_Tanker", "Other_Ship", "Warship", "Bridge", "Tank", "Tower_Crane"]
+FAIR_CHIPS = {
+    "imagenet": dict(id="f_base", label="ImageNet start, no SSL", family="base", ssl="none", ref=None,
+                     note="ImageNet weights fine-tuned directly on the labeled FAIR-CSAR chips."),
+    "fair_dino_tiles": dict(id="f_dino_t", label="DINO", family="dino", ssl="fair_tiles", ref="f_base", note="Plain DINO on the FAIR-CSAR native 1 m tiles, then the FAIR chips."),
+    "fair_ro_tiles": dict(id="f_ro_t", label="RegionDINO object-only", family="region", ssl="fair_tiles", ref="f_dino_t", note="Object-only views on brightness-rule regions of the FAIR-CSAR tiles."),
+    "fair_ror_tiles": dict(id="f_ror_t", label="object-only, random windows", family="region", ssl="fair_tiles", ref="f_dino_t", control=True, note="Its random-window control (same window sizes, random places)."),
+    "fair_dino_down": dict(id="f_dino_d", label="DINO", family="dino", ssl="fair_down", ref="f_base", note="Plain DINO on the FAIR-CSAR slices downsampled to 512 px (2 m per pixel)."),
+    "fair_ro_down": dict(id="f_ro_d", label="RegionDINO object-only", family="region", ssl="fair_down", ref="f_dino_d", note="Object-only views on the downsampled slices."),
+    "fair_ror_down": dict(id="f_ror_d", label="object-only, random windows", family="region", ssl="fair_down", ref="f_dino_d", control=True, note="Its random-window control."),
+    "sardet_dino": dict(id="f_sd_dino", label="DINO", family="dino", ssl="sardet", ref="f_base", note="The SARDet-100K DINO backbone (no new SSL), fine-tuned on FAIR-CSAR chips: cross-dataset transfer."),
+    "sardet_regiondino_o": dict(id="f_sd_ro", label="RegionDINO object-only", family="region", ssl="sardet", ref="f_sd_dino", note="The SARDet-100K object-only backbone, fine-tuned on FAIR-CSAR chips."),
+    "sardet_regiondino_o_random": dict(id="f_sd_ror", label="object-only, random windows", family="region", ssl="sardet", ref="f_sd_dino", control=True, note="The SARDet-100K random-window control, fine-tuned on FAIR-CSAR chips."),
+}
+
 POOLS = {
     "none": "no SSL",
     "atr": "ATRNet-STAR chips (128 px, target-centred, SOC-40 unlabeled pool)",
     "sardet": "SARDet-100K scenes (94,034 full scenes, shorter side 512)",
+    "fair_tiles": "FAIR-CSAR SL trainval slices as 19,036 unique native 1 m tiles of 512 px (selection and test slices excluded)",
+    "fair_down": "FAIR-CSAR SL trainval slices downsampled 1024 -> 512 px (10,769 images)",
 }
 
 # ---- the experiment map on the overview page: one card per (SSL pool -> labeled data / task) --------------------
@@ -124,6 +144,8 @@ SETTINGS = [
          table="detection", ssl="sardet", task="mAP@[.5:.95] on the official SARDet-100K test set"),
     dict(id="sardet_chips", title="SSL on SARDet-100K scenes, classify SARDet-100K chips", short="in-domain chip classification",
          table="chips", ssl="sardet", task="mean per-class accuracy on chips cut from the official test boxes (clean set, 6 classes)"),
+    dict(id="fair_chips", title="SSL on FAIR-CSAR (or on SARDet-100K), classify FAIR-CSAR chips", short="second dataset, 22 classes",
+         table="fair", ssl="fair", task="mean per-class accuracy on FAIR-CSAR test chips (clean set, 22 classes)"),
 ]
 
 # families in display order, with the plain name of each
