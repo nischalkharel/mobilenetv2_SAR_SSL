@@ -2,7 +2,17 @@
 
 Status 2026-11-22 (night): built, reviewed by two agents (fixes applied), PC smoke passed on the sample PNGs (chips cut,
 regions proposed for both pools, SSL smoke for dino / ro / ror on tiles and ro on down, resume, fine-tune from ImageNet and
-from a smoke backbone). Nothing run on CRC yet; launch order in section 5. Protocol decision in
+from a smoke backbone). CRC 2026-11-22/23: chips + regions built; 9 tiles-arm SSL runs done (1.1 to 1.5 GPU-h each, 29,700 steps,
+object-only fallback 1.8 %); 36 fine-tunes of imagenet + the three SARDet-pool backbones done (first results below);
+the 9 tiles-arm fine-tunes running. Down arm not launched.
+
+First results (mean per-class accuracy on test_clean, 1 / 3 / 10 %, mean of 3 splits): no SSL 24.9 / 29.2 / 39.6
+(overall 43.3 / 49.5 / 59.2): the test is hard, as wanted. SARDet-pool backbones transferred to FAIR: plain DINO
+22.7 / 27.7 / 36.8 (hurts, -2.2 / -1.5 / -2.8 vs no SSL, all splits), object-only RegionDINO 26.6 / 31.9 / 40.9
+(+3.9 / +4.2 / +4.1 vs that DINO, every split positive; +1.7 / +2.7 / +1.3 vs no SSL), its random control 25.8 /
+29.2 / 40.7 (+3.1 / +1.5 / +3.9 vs DINO). So the cross-dataset pattern of ATRNet repeats: plain DINO on SARDet
+scenes transfers worse than ImageNet, the object-only recipe repairs it and lands a little above ImageNet; the
+placement itself adds about 1 point over random windows here (within noise except at 3 %). Protocol decision in
 `datasets/CANDIDATES.md` (2026-11-22), inventory in `datasets/outputs/fair_csar_inventory.md`.
 
 ## 1. Why this dataset and what it asks
