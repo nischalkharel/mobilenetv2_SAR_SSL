@@ -33,23 +33,33 @@ import fair_annotations as fa  # noqa: E402
 sys.path.insert(0, str(fp.SARDET_CHIPS_DIR))
 from make_chips import sha256_file, write_previews  # noqa: E402  (SARDet_chips; cut_image is re-implemented below for PNG paths)
 
-COLUMNS = ["idx", "official_split", "slice", "scene", "obj_id", "class_name", "label", "difficult", "cx", "cy", "box_long", "box_short",
+COLUMNS = ["idx", "official_split", "slice", "scene", "obj_id", "gid", "n_copies", "class_name", "label", "difficult", "cx", "cy", "box_long", "box_short",
            "box_x0", "box_y0", "box_x1", "box_y1", "window_side", "clipped", "n_others_inside", "other_class_inside"]
 
 
-def plan_slice(split, name, floor, margin):
+def owners():
+    """{(owner_slice, owner_obj_id): (gid, n_copies)} from data/objects.csv: the one annotation per physical object that becomes a chip."""
+    with open(fp.OBJECTS_CSV, newline="", encoding="utf-8") as f:
+        return {(r["owner_slice"], int(r["owner_obj_id"])): (int(r["gid"]), int(r["n_copies"])) for r in csv.DictReader(f)}
+
+
+def plan_slice(split, name, floor, margin, own):
+    """Chip rows for the objects this slice owns; the crowding flags still count every annotation of the slice."""
     obs = fa.objects(split, name)
     if not obs:
         return []
     cx = np.array([o["cx"] for o in obs]); cy = np.array([o["cy"] for o in obs]); cls = np.array([o["label"] for o in obs])
     rows = []
     for k, o in enumerate(obs):
+        if (name, o["obj_id"]) not in own:
+            continue
         side = max(floor, margin * o["long"])
         half = side / 2
         inside = (np.abs(cx - cx[k]) < half) & (np.abs(cy - cy[k]) < half)
         inside[k] = False
         clipped = cx[k] - half < 0 or cy[k] - half < 0 or cx[k] + half > fp.SLICE_SIZE or cy[k] + half > fp.SLICE_SIZE
-        rows.append({"official_split": split, "slice": name, "scene": fa.scene_of(name), "obj_id": o["obj_id"], "class_name": o["class_name"],
+        gid, n_copies = own[(name, o["obj_id"])]
+        rows.append({"official_split": split, "slice": name, "scene": fa.scene_of(name), "obj_id": o["obj_id"], "gid": gid, "n_copies": n_copies, "class_name": o["class_name"],
                      "label": o["label"], "difficult": o["difficult"], "cx": round(o["cx"], 1), "cy": round(o["cy"], 1),
                      "box_long": round(o["long"], 1), "box_short": round(o["short"], 1),
                      "box_x0": round(o["x0"], 1), "box_y0": round(o["y0"], 1), "box_x1": round(o["x1"], 1), "box_y1": round(o["y1"], 1),
@@ -105,13 +115,14 @@ def main():
     root = fp.CHIPS_ROOT.with_name(fp.CHIPS_ROOT.name + "_sample") if a.available else fp.CHIPS_ROOT
 
     t0 = time.time()
+    own = owners()
     jobs, rows, skipped = [], [], 0
     for split in fp.SPLITS:
         for name in fa.slice_names(split):
             if a.available and not fp.png_path(split, name).exists():
                 skipped += 1
                 continue
-            r = plan_slice(split, name, a.floor, a.margin)
+            r = plan_slice(split, name, a.floor, a.margin, own)
             if not r:
                 continue
             for x in r:

@@ -55,6 +55,10 @@ Both SL archives are on CRC, verified (md5), extracted without the complex .mat 
 The annotation and metadata folders plus 20 test PNGs are on the PC as `..\2026_2027\FAIR_CSAR_sample\` (not in git).
 Full tables: `datasets/outputs/fair_csar_inventory.md`.
 
+- CORRECTION 2026-11-22 (evening): the slices overlap 50 % in both directions, so the object counts below are
+  ANNOTATION counts; the physical objects are 25,703 (20,940 trainval, 4,763 test), about 3.3 x fewer. The
+  FAIR_chips study de-duplicates them (FAIR_chips/DESIGN.md section 2). Per-class and size statistics are still
+  right in proportion.
 - Slices are 1024 x 1024 px, 8-bit grey PNG (uint8, mean about 30 to 55, long bright tail), 1 m nominal, HH mostly.
   The SLC name fields are range and azimuth offsets, not a 2048 grid as guessed earlier.
 - trainval: 105 scenes, 11,959 slices, 69,298 objects. test: 26 scenes, 2,706 slices, 15,987 objects. Every slice

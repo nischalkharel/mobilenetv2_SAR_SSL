@@ -27,30 +27,45 @@ Questions, in the order the rows answer them:
 
 Source: `FAIR_CSAR_ROOT/{trainval,test}/{PNGImages,Annotations,METAXmls,KeyPoints}` (the SL archives extracted
 without the complex .mat files; 1024 x 1024 uint8 PNG at 1 m, one DOTA-style text file per slice). Every slice
-holds at least one object (median 3, p95 21). trainval: 105 scenes, 11,959 slices, 69,298 objects; test: 26 scenes,
-2,706 slices, 15,987 objects; all 22 classes in both.
+holds at least one object. trainval: 105 scenes, 11,959 slices, 69,298 annotations; test: 26 scenes, 2,706 slices,
+15,987 annotations; all 22 classes in both.
+
+**The slices overlap 50 % in both directions** (range offsets step 512 px, azimuth offsets step 1,897 SLC rows =
+512 PNG px; a few slices sit off the grid). So one physical object is annotated in up to four slices (seen first in
+the chip previews: the same ship four times). `make_manifests.py` maps every annotation into its scene's frame
+(METAXmls patch offsets + slice position), merges annotations of the same scene and class within 4 px into one
+object, and picks the OWNER copy (farthest from its slice border). Result: 85,285 annotations are 25,703 physical
+objects (20,940 trainval, 4,763 test; 16,737 have 4 copies, 7,244 two, 1,237 one). Everything labeled counts
+objects: one chip per object, cut from the owner slice (`data/objects.csv`).
 
 Fixed subsets (`make_manifests.py`, committed under `data/`, SHA-256 in `hashes.json`):
 
 | set | what | size |
 |---|---|---|
-| select | 10 % of each trainval scene's slices, seed 0; per-epoch model selection only | 1,190 slices, 6,728 chips |
-| ssl_pool | trainval minus select; the unlabeled SSL pool, the same for every split | 10,769 slices, 62,570 chips |
-| labeled 1 / 3 / 10 % (split 1, 2, 3) | slices drawn inside ssl_pool, seed = split - 1, nested; unit = slice (all chips of a chosen slice are labeled); classes under 5 chips topped up with the next slices containing them | about 115 / 320 / 1,060 slices, 660 to 770 / 1,880 / 6,260 chips |
-| test | every test slice (the dataset's own split) | 2,706 slices, 15,987 chips |
+| select | 10 % of each trainval scene's slices, seed 0; per-epoch model selection only | 1,190 slices, 1,950 owned objects |
+| ssl_pool | trainval minus select; the unlabeled SSL pool, the same for every split | 10,769 slices, 18,990 owned objects |
+| ssl_tiles | the pool cut 2 x 2 into 512-px tiles, one tile per scene position (origins within 128 px = duplicate) | 19,036 unique tiles of 43,076 |
+| labeled 1 / 3 / 10 % (split 1, 2, 3) | slices drawn inside ssl_pool, seed = split - 1, nested; unit = slice (every object a chosen slice owns is labeled); classes under 5 objects topped up with the next slices owning them | 121 to 136 / 286 to 320 / 1,057 to 1,105 slices; 270 to 313 / 570 to 580 / 1,911 to 1,916 chips |
+| test | every object owned by a test slice (the dataset's own split) | 2,706 slices, 4,763 chips |
 | test_clean | test chips whose window holds no other class's box centre | subset of test |
 
-Leakage notes. The SSL pool never contains a selection slice or a test slice (the fine-tune checks this and stops).
-The dataset's split separates acquisitions, not places: 14 scenes are the same harbour (E139.7 N35.5) on different
-dates, 12 in trainval and 2 in test, so a model can learn the place. That is the benchmark's own split; the paper
-states it. The 1 % draw of split 2 overshoots its target by 150 chips because a many-object slice sat at the
-boundary; the slice unit is kept and the counts are in `data/split2/counts.json`.
+The 1 % budget is small: 190 objects by the fraction, 270 to 313 after the per-class floor of 5, so the smallest
+classes have exactly 5 training chips there (a few-shot regime; 3 % gives about 15, 10 % about 50 for the rarest
+class). Keep 1 / 3 / 10 % for consistency with the other chip tests and read the 1 % row as such.
+
+Leakage notes. The SSL pool never contains a selection slice or a test slice (the fine-tune checks this and stops),
+and an object has one chip, so no chip is in two sets. Because the slices overlap, the pixels of a selection
+object also appear, unlabeled, in neighbouring pool slices: SSL may have seen them, which is not label leakage but
+makes the selection set less independent of SSL than SARDet's official val was; the test split's scenes are
+separate acquisitions, so test pixels never reach SSL. The dataset's split separates acquisitions, not places: 14
+scenes are the same harbour (E139.7 N35.5) on different dates, 12 in trainval and 2 in test, so a model can learn
+the place. That is the benchmark's own split; the paper states it.
 
 ## 3. Chips
 
 The SARDet_chips rule unchanged: square window centred on the oriented box's centre, side = max(64, 1.5 x longer
 box side) in native pixels, edge-padded at the slice border, resized to 128 x 128, 8-bit grey. One chip per
-annotated object, about 85,000 chips in one array (`make_chips.py`, 1.4 GB). Flags per chip: another object's
+physical object (the owner annotation, `data/objects.csv`), 25,703 chips in one array (`make_chips.py`, 0.4 GB). Flags per chip: another object's
 centre inside the window, another class inside, clipped at the border, the dataset's difficult flag. Bridges have a
 long tail (95th percentile 850 px): their windows are up to 1,275 px, mostly padding; the flag table in
 `summary.md` shows how many.
@@ -65,11 +80,12 @@ SSL (RegionSSL engine, `train_ssl.py`, one entry for three method configs x two 
 | fair_ro_{tiles,down} | regiondino_object (object-only RegionDINO: 3 regions x (2 global 96 + 4 local 64), no whole-image view) | brightness-rule regions (`make_regions.py --pool ...`) | same |
 | fair_ror_{tiles,down} | the same with region_source random | random windows, sizes matched to the regions | same |
 
-Pools (RegionSSL/rssl/pools.py): `fair_tiles` = each ssl_pool slice cut 2 x 2 into 512-px tiles at native 1 m
-(43,076 images per epoch); `fair_down` = the slice resized 1024 -> 512 (10,769 images per epoch, 2 m per pixel).
-Everything shared (100 epochs, batch 64, seed = split - 1, view recipe) comes from SARDet/shared/ssl_common.json as
-for every other SSL run, so the arms differ in images seen per epoch (4 x) as well as in resolution; the cost record
-of each run states both. The three splits are three SSL seeds on the same pool, paired with the three labeled draws
+Pools (RegionSSL/rssl/pools.py): `fair_tiles` = the unique 512-px tiles of the ssl_pool slices at native 1 m
+(`data/ssl_tiles.csv`, 19,036 images per epoch; the 50 % slice overlap would otherwise make three of four tiles
+exact repeats); `fair_down` = every ssl_pool slice resized 1024 -> 512 (10,769 images per epoch, 2 m per pixel;
+overlapping slices kept, since no two are the same crop). Everything shared (100 epochs, batch 64, seed = split - 1,
+view recipe) comes from SARDet/shared/ssl_common.json as for every other SSL run, so at equal epochs the tiles arm
+sees 1.8 x the images and the same ground area per epoch; the cost record of each run states both. The three splits are three SSL seeds on the same pool, paired with the three labeled draws
 (the suite's rule). Regions are proposed once per pool (CPU job) with the same brightness rule as SARDet.
 
 Fine-tune (`finetune_chips.py`): the SARDet_chips / ATRNet recipe unchanged (128-px chips resized to 224, AdamW
@@ -80,7 +96,7 @@ full test set are stored; accuracy per major category (aircraft / ship / bridge 
 are written per run. 10 methods x 3 budgets x 3 splits = 90 fine-tunes, in 30 jobs of 3 budgets.
 
 Expected effect sizes: the split-to-split spread on SARDet chips was 2 to 4 points of mean per-class accuracy at
-1 %; with 22 classes and 5 to 150 chips per class at 1 % it will be larger here. Three splits are the minimum;
+1 %; with 22 classes and 5 to about 60 chips per class at 1 % it will be larger here. Three splits are the minimum;
 differences under about 3 points at 1 % are noise.
 
 ## 5. Order of work on CRC and what decides the next step
@@ -100,7 +116,7 @@ differences under about 3 points at 1 % are noise.
 FAIR_chips/
   fair_paths.py        env FAIR_CSAR_ROOT / FAIR_CHIPS_ROOT, classes (22, fixed order), chip rule, manifest paths
   fair_annotations.py  DOTA text parser (oriented box -> centre, long/short side, extent), scene id from the slice name
-  make_manifests.py    data/ (select, ssl_pool, labeled sets x 3 splits, counts, hashes)
+  make_manifests.py    data/ (objects = de-duplicated annotations, select, ssl_pool, ssl_tiles, labeled sets x 3 splits, counts, hashes)
   smoke_list.py        data/pc_smoke_pngs.txt: the PNGs a PC smoke check needs (fetched from CRC with tar -T)
   make_chips.py        chips array + csv + previews (FAIR_CHIPS_ROOT)
   chip_data.py         sets (train / select / test / test_clean) and the ChipDataset (from SARDet_chips)

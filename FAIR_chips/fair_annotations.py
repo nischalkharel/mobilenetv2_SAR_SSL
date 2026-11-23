@@ -38,6 +38,23 @@ def objects(split: str, slice_name: str) -> list:
     return out
 
 
+def frame(split: str, slice_name: str) -> dict:
+    """Where the slice sits in its scene (METAXmls patch block): r0 = range start, a0 = azimuth start, and the SLC
+    units per PNG pixel on each axis (range 1.0; azimuth about 3.7, the SLC is oversampled in azimuth). Used to map
+    annotations of overlapping slices onto one scene frame: slices overlap 50 % in both directions."""
+    import xml.etree.ElementTree as ET
+    r = ET.parse(fp.FAIR_CSAR_ROOT / split / "METAXmls" / f"{slice_name}.xml").getroot()
+    a0, a1 = float(r.findtext("processInfo/patch/azimuthStart")), float(r.findtext("processInfo/patch/azimuthEnd"))
+    r0, r1 = float(r.findtext("processInfo/patch/rangeStart")), float(r.findtext("processInfo/patch/rangeEnd"))
+    w, h = int(r.findtext("size/width")), int(r.findtext("size/height"))
+    return {"r0": r0, "a0": a0, "range_per_px": (r1 - r0) / w, "az_per_px": (a1 - a0) / h, "width": w, "height": h}
+
+
+def scene_xy(fr: dict, x: float, y: float):
+    """Slice pixel (x, y) -> scene coordinates in PNG-pixel units (range px, azimuth px)."""
+    return fr["r0"] / fr["range_per_px"] + x, fr["a0"] / fr["az_per_px"] + y
+
+
 def slice_names(split: str) -> list:
     """Every slice of a split, sorted (from the annotation folder, so no image is needed)."""
     return sorted(p.stem for p in (fp.FAIR_CSAR_ROOT / split / "Annotations").glob("*.txt"))

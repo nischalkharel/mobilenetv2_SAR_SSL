@@ -184,16 +184,22 @@ class FAIRTilesPool:
         return (k % 2) * FAIRTilesPool.TILE, (k // 2) * FAIRTilesPool.TILE
 
     def rows(self):
-        return [{"file_name": f"{s}#t{k}", "slice": s, "tile": k, "official_split": "trainval"} for s in self._slices() for k in range(self.TILES)]
+        """The unique tiles listed in FAIR_chips/data/ssl_tiles.csv (slices overlap 50 %, so most of the 4 tiles of a slice
+        repeat a neighbour's tile; make_manifests.py keeps one per scene position)."""
+        fp, _ = self._fp()
+        with open(fp.SSL_TILES_CSV, newline="", encoding="utf-8") as f:
+            return [{"file_name": f"{r['slice']}#t{r['tile']}", "slice": r["slice"], "tile": int(r["tile"]), "official_split": "trainval"}
+                    for r in csv.DictReader(f)]
 
     def csv_path(self):
-        return self._fp()[0].SSL_POOL_CSV
+        return self._fp()[0].SSL_TILES_CSV
 
     def manifest(self, rows):
         fp, _ = self._fp()
-        return {"pool": self.name, "ssl_pool_csv": str(fp.SSL_POOL_CSV), "csv_sha256": sha256_of_file(fp.SSL_POOL_CSV),
-                "tiles_per_slice": self.TILES, "tile_px": self.TILE, "columns_available_to_the_method": ["slice", "tile"],
-                "note": "trainval slices only, minus the selection slices (FAIR_chips/data/select.csv); the test split is never read by SSL; no labels read"}
+        return {"pool": self.name, "ssl_pool_csv": str(fp.SSL_TILES_CSV), "csv_sha256": sha256_of_file(fp.SSL_TILES_CSV),
+                "slices_csv": str(fp.SSL_POOL_CSV), "slices_csv_sha256": sha256_of_file(fp.SSL_POOL_CSV),
+                "tile_px": self.TILE, "columns_available_to_the_method": ["slice", "tile"],
+                "note": "unique 512-px tiles of the trainval slices minus the selection slices (FAIR_chips/data/select.csv); the test split is never read by SSL; no labels read"}
 
     def _open(self, row):
         fp, _ = self._fp()
@@ -234,10 +240,14 @@ class FAIRDownPool(FAIRTilesPool):
     def rows(self):
         return [{"file_name": s, "slice": s, "official_split": "trainval"} for s in self._slices()]
 
+    def csv_path(self):
+        return self._fp()[0].SSL_POOL_CSV
+
     def manifest(self, rows):
-        m = super().manifest(rows)
-        m.update(tiles_per_slice=1, tile_px=None, downsample=self.FACTOR, columns_available_to_the_method=["slice"])
-        return m
+        fp, _ = self._fp()
+        return {"pool": self.name, "ssl_pool_csv": str(fp.SSL_POOL_CSV), "csv_sha256": sha256_of_file(fp.SSL_POOL_CSV),
+                "downsample": self.FACTOR, "columns_available_to_the_method": ["slice"],
+                "note": "every trainval slice minus the selection slices, resized 1024 -> 512 (slices overlap 50 %, kept as they are); the test split is never read by SSL; no labels read"}
 
     def load(self, row):
         return self._open(row).resize((self.input_size, self.input_size), Image.BILINEAR)
