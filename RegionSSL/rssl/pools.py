@@ -2,6 +2,8 @@
 
     pool = pools.get("sardet")   # SARDet-100K scenes (the suite's pool; what every XA row used)
     pool = pools.get("atrnet")   # ATRNet-STAR SOC-40 train chips (the split's SSL pool; what A1 used)
+    pool = pools.get("fair_tiles")  # FAIR-CSAR SL trainval slices cut 2 x 2 into native 512-px tiles (FAIR_chips study, main arm)
+    pool = pools.get("fair_down")   # the same slices downsampled 1024 -> 512 (FAIR_chips study, resolution arm)
 
 A pool gives: rows() (one dict per image with at least "file_name"), load(row) -> the gray PIL image at the working
 size the views are cut from (input_size), load_for_proposal(row) -> the gray image the region rule runs on
@@ -151,7 +153,105 @@ class ATRNetPool:
         return REGIONS_DIR / ("regions_atrnet_smoke.npz" if smoke else "regions_atrnet.npz")
 
 
-POOLS = {"sardet": SARDetPool, "atrnet": ATRNetPool}
+class FAIRTilesPool:
+    """FAIR-CSAR-V1.0 SL: the study's SSL pool slices (FAIR_chips/data/ssl_pool.csv: trainval minus the selection slices)
+    cut 2 x 2 into 512-px tiles at the native 1 m resolution. One row per tile; file_name = <slice>#t<k> (k = 0..3,
+    row-major) is the key in the region file. Nothing here reads a label: the annotation files are opened only by
+    gt_boxes (diagnostic)."""
+    name = "fair_tiles"
+    dataset = "FAIR-CSAR-V1.0 SL trainval slices (minus selection slices), 2 x 2 native 512-px tiles"
+    input_size = 512
+    propose_size = 512
+    region_scale = 1.0
+    TILE = 512
+    TILES = 4
+
+    def _fp(self):
+        d = REPO / "FAIR_chips"
+        if str(d) not in sys.path:
+            sys.path.append(str(d))                      # appended: nothing of the suite is shadowed
+        import fair_paths as fp  # noqa: E402
+        import fair_annotations as fa  # noqa: E402
+        return fp, fa
+
+    def _slices(self):
+        fp, _ = self._fp()
+        with open(fp.SSL_POOL_CSV, newline="", encoding="utf-8") as f:
+            return [r["slice"] for r in csv.DictReader(f)]
+
+    @staticmethod
+    def tile_origin(k):
+        return (k % 2) * FAIRTilesPool.TILE, (k // 2) * FAIRTilesPool.TILE
+
+    def rows(self):
+        return [{"file_name": f"{s}#t{k}", "slice": s, "tile": k, "official_split": "trainval"} for s in self._slices() for k in range(self.TILES)]
+
+    def csv_path(self):
+        return self._fp()[0].SSL_POOL_CSV
+
+    def manifest(self, rows):
+        fp, _ = self._fp()
+        return {"pool": self.name, "ssl_pool_csv": str(fp.SSL_POOL_CSV), "csv_sha256": sha256_of_file(fp.SSL_POOL_CSV),
+                "tiles_per_slice": self.TILES, "tile_px": self.TILE, "columns_available_to_the_method": ["slice", "tile"],
+                "note": "trainval slices only, minus the selection slices (FAIR_chips/data/select.csv); the test split is never read by SSL; no labels read"}
+
+    def _open(self, row):
+        fp, _ = self._fp()
+        with Image.open(fp.png_path(row["official_split"], row["slice"])) as im:
+            return im.convert("L")
+
+    def load(self, row):
+        x, y = self.tile_origin(row["tile"])
+        return self._open(row).crop((x, y, x + self.TILE, y + self.TILE))
+
+    def load_for_proposal(self, row):
+        return self.load(row)
+
+    def gt_boxes(self, row):
+        """Axis-aligned extents of the oriented boxes that fall in this tile, in tile pixels; diagnostic only."""
+        _, fa = self._fp()
+        x, y = self.tile_origin(row["tile"])
+        out = []
+        for o in fa.objects(row["official_split"], row["slice"]):
+            x0, y0, x1, y1 = max(o["x0"] - x, 0), max(o["y0"] - y, 0), min(o["x1"] - x, self.TILE), min(o["y1"] - y, self.TILE)
+            if x1 - x0 >= 2 and y1 - y0 >= 2:
+                out.append([x0, y0, x1, y1])
+        return np.array(out, dtype=np.float32).reshape(-1, 4)
+
+    def view_coverage(self, rows):
+        return None
+
+    def regions_file(self, smoke=False):
+        return REGIONS_DIR / ("regions_fair_tiles_smoke.npz" if smoke else "regions_fair_tiles.npz")
+
+
+class FAIRDownPool(FAIRTilesPool):
+    """The same slices downsampled 1024 -> 512 (2 m per pixel): one row per slice, file_name = <slice>."""
+    name = "fair_down"
+    dataset = "FAIR-CSAR-V1.0 SL trainval slices (minus selection slices), downsampled to 512 px"
+    FACTOR = 2
+
+    def rows(self):
+        return [{"file_name": s, "slice": s, "official_split": "trainval"} for s in self._slices()]
+
+    def manifest(self, rows):
+        m = super().manifest(rows)
+        m.update(tiles_per_slice=1, tile_px=None, downsample=self.FACTOR, columns_available_to_the_method=["slice"])
+        return m
+
+    def load(self, row):
+        return self._open(row).resize((self.input_size, self.input_size), Image.BILINEAR)
+
+    def gt_boxes(self, row):
+        _, fa = self._fp()
+        out = [[o["x0"], o["y0"], o["x1"], o["y1"]] for o in fa.objects(row["official_split"], row["slice"])]
+        return np.array(out, dtype=np.float32).reshape(-1, 4) / self.FACTOR
+
+    def regions_file(self, smoke=False):
+        return REGIONS_DIR / ("regions_fair_down_smoke.npz" if smoke else "regions_fair_down.npz")
+
+
+POOLS = {"sardet": SARDetPool, "atrnet": ATRNetPool, "fair_tiles": FAIRTilesPool, "fair_down": FAIRDownPool}
 
 
 def get(name: str):
