@@ -4,7 +4,7 @@ Status 2026-11-22 (night): built, reviewed by two agents (fixes applied), PC smo
 regions proposed for both pools, SSL smoke for dino / ro / ror on tiles and ro on down, resume, fine-tune from ImageNet and
 from a smoke backbone). CRC 2026-11-22/23: chips + regions built; 9 tiles-arm SSL runs done (1.1 to 1.5 GPU-h each, 29,700 steps,
 object-only fallback 1.8 %); 36 fine-tunes of imagenet + the three SARDet-pool backbones done (first results below);
-the 9 tiles-arm fine-tunes running. Down arm not launched.
+the 9 tiles-arm fine-tunes done 2026-11-24 (63 cells total). Down arm not launched.
 
 First results (mean per-class accuracy on test_clean, 1 / 3 / 10 %, mean of 3 splits): no SSL 24.9 / 29.2 / 39.6
 (overall 43.3 / 49.5 / 59.2): the test is hard, as wanted. SARDet-pool backbones transferred to FAIR: plain DINO
@@ -14,6 +14,21 @@ First results (mean per-class accuracy on test_clean, 1 / 3 / 10 %, mean of 3 sp
 scenes transfers worse than ImageNet, the object-only recipe repairs it and lands a little above ImageNet; the
 placement itself adds about 1 point over random windows here (within noise except at 3 %). Protocol decision in
 `datasets/CANDIDATES.md` (2026-11-22), inventory in `datasets/outputs/fair_csar_inventory.md`.
+
+Results 2026-11-24, SSL on FAIR-CSAR's own tiles (SSL-FAIR-CSAR tiles / FINETUNE-FAIR-CSAR / TEST-FAIR-CSAR; mean
+per-class accuracy on test_clean, 1 / 3 / 10 %, mean of 3 splits): DINO 26.2 / 30.5 / 43.3 (+1.3 / +1.4 / +3.7 vs no
+SSL; at 10 % every split positive, +2.4 / +2.8 / +5.9; overall accuracy +2.9 / +3.1 / +3.6); RegionDINO object-only
+27.9 / 33.4 / 42.4 (+1.7 / +2.9 / -0.9 vs that DINO); its random-window control 27.5 / 33.8 / 42.2 (+1.2 / +3.3 / -1.1
+vs DINO). Object-only minus its control: +0.4 / -0.4 / +0.2: the placement adds nothing when SSL runs on FAIR itself.
+Readings: (a) SSL on the dataset's own scenes helps, and the gain grows with the label budget (+3.7 at 10 %), the
+first positive same-dataset SSL result on a hard chip test; (b) same-dataset beats cross-dataset SSL by a lot for
+plain DINO (43.3 vs 36.8 at 10 %, 6.5 points), but RegionDINO object-only on SARDet closes most of that gap (40.9),
+so the object-only recipe is what makes a cross-dataset SSL pool usable; (c) with SSL on FAIR, the small-window
+recipe (object-only and control alike) beats standard DINO crops at 1 and 3 % and loses about 1 point at 10 %, same
+crop-size story as SARDet detection; (d) the FAIR SSL runs are under-converged (29,700 steps, DINO loss 4.6 vs 0.74
+on SARDet), so the FAIR-pool numbers are a floor. Aircraft types stay at 22 to 24 % for every method at 1 %.
+Next: one matched-steps DINO run (about 500 epochs) on the tiles to see whether the +3.7 grows; the down arm is
+worth running only for plain DINO (resolution question), since the region rows do not separate here.
 
 ## 1. Why this dataset and what it asks
 

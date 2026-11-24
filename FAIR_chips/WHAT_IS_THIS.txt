@@ -8,13 +8,15 @@ it on a few labeled object chips cut from the same dataset, asking: does SSL hel
 regions (RegionDINO) help like it did on ATRNet; does the native 1 m beat a 2 m downsample; and do the SARDet-pool
 backbones transfer here. Design, subsets and leakage notes: DESIGN.md.
 
-Status (2026-11-22)
+Status (2026-11-24)
 -------------------
 Built on the PC, nothing run on CRC. Manifests drawn and committed (data/). Found while building: the slices
 overlap 50 % both ways, so each object is annotated up to four times; the study counts physical objects (25,703, not
 85,285 annotations) and cuts one chip per object (DESIGN.md section 2). PC smoke passed (chips, regions, SSL for both pools, fine-tune);
-two reviewer passes applied. CRC: SSL tiles arm done, no-SSL and SARDet-backbone fine-tunes done (first results in DESIGN.md status), tiles
-fine-tunes running, down arm not launched.
+two reviewer passes applied. CRC: SSL on the native tiles done, all 63 classification fine-tunes done (no SSL, SSL on SARDet-100K, SSL on FAIR-CSAR
+tiles; results in DESIGN.md status). Short version: SSL on FAIR-CSAR's own tiles helps (+3.7 at 10 % labels for
+DINO), SSL on SARDet-100K hurts unless it is RegionDINO object-only, and placing the views on bright regions adds
+nothing over random windows when SSL runs on FAIR itself. Down-sampled SSL pool not launched.
 
 How it runs (CRC, from the repository root)
 --------------------------------------------
@@ -30,7 +32,7 @@ fair_paths.py         paths from env vars (FAIR_CSAR_ROOT, FAIR_CHIPS_ROOT), the
 fair_annotations.py   reads the DOTA text annotations
 make_manifests.py     draws data/ (select, ssl_pool, labeled sets, counts, hashes); never redrawn without --overwrite
 make_chips.py         cuts the chips into one array file (FAIR_CHIPS_ROOT)
-chip_data.py          the sets and the dataset class
+fair_chip_data.py     the sets and the dataset class
 finetune_chips.py     one fine-tune run; config_finetune.json its settings
 train_ssl.py          SSL entry (RegionSSL engine); config_ssl_<dino|ro|ror>_<tiles|down>.json
 compare.py            outputs/compare/chips.md
