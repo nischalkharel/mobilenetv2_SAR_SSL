@@ -78,7 +78,8 @@ CHIP_SIZE, WINDOW_FLOOR, WINDOW_MARGIN = _cp.CHIP_SIZE, _cp.WINDOW_FLOOR, _cp.WI
 
 # ---- fine-tune method names (here, not in finetune_chips.py, so compare.py never imports a module that
 # SARDet_chips/finetune_chips.py would shadow on sys.path) ----
-FAIR_METHODS = [f"fair_{m}_{arm}" for arm in ("tiles", "down") for m in ("dino", "ro", "ror")]
+FAIR_METHODS = ([f"fair_{m}_{arm}" for arm in ("tiles", "down") for m in ("dino", "ro", "ror")]
+                + [f"fair_{m}_tiles500" for m in ("dino", "ro", "ror", "rot", "rotr")])   # 500-epoch runs; rot = teacher regions, rotr = their random control
 SARDET_METHODS = {"sardet_dino": "dino", "sardet_regiondino_o": "regiondino_o", "sardet_regiondino_o_random": "regiondino_o_random"}
 METHODS = ["imagenet"] + FAIR_METHODS + list(SARDET_METHODS)
 

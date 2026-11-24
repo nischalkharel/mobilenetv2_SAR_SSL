@@ -1,0 +1,40 @@
+{
+  "run_name": "fair_dino_tiles500_ssl_mobilenetv2",
+  "method": "regiondino_scene",
+  "_note": "Plain DINO (this engine's scene recipe: whole-image views, global 224 / local 96, zoom 0.75-1.33) on the FAIR-CSAR pool 'fair_tiles': native 2 x 2 512-px tiles of the trainval slices (1 m per pixel). The paired reference for the two object-only rows of the same arm. dino / optim sections equal RegionSSL/RegionDINO_object/config_ssl.json. 500-epoch version (matched steps with the SARDet-100K runs); everything else equal to config_ssl_dino_tiles.json.",
+  "pool": "fair_tiles",
+  "overrides": {
+    "epochs": 500,
+    "_note": "500 epochs x 297 steps = 148,500 optimizer steps, the SARDet-100K pool's count (147k); the 100-epoch runs stopped at 29,700"
+  },
+  "dino_views": {
+    "local_crops_number": 8,
+    "blur_p": [
+      1.0,
+      0.1,
+      0.5
+    ]
+  },
+  "dino": {
+    "out_dim": 4096,
+    "use_bn_in_head": false,
+    "norm_last_layer": true,
+    "momentum_teacher": 0.9995,
+    "warmup_teacher_temp": 0.04,
+    "teacher_temp": 0.04,
+    "warmup_teacher_temp_epochs": 0,
+    "student_temp": 0.1,
+    "center_momentum": 0.9
+  },
+  "optim": {
+    "optimizer": "adamw",
+    "lr": 0.0005,
+    "min_lr": 1e-06,
+    "warmup_epochs": 10,
+    "weight_decay": 0.04,
+    "weight_decay_end": 0.04,
+    "clip_grad": 3.0,
+    "freeze_last_layer": 1,
+    "use_fp16": true
+  }
+}

@@ -17,6 +17,9 @@ two reviewer passes applied. CRC: SSL on the native tiles done, all 63 classific
 tiles; results in DESIGN.md status). Short version: SSL on FAIR-CSAR's own tiles helps (+3.7 at 10 % labels for
 DINO), SSL on SARDet-100K hurts unless it is RegionDINO object-only, and placing the views on bright regions adds
 nothing over random windows when SSL runs on FAIR itself. Down-sampled SSL pool not launched.
+Stage 2 (built and smoke-tested 2026-11-24, not yet run): the same three methods at 500 epochs (matched to the
+SARDet-100K step count), plus RegionDINO with the frozen SARMAE teacher's attention as the region proposer
+(fair_rot_tiles500) and its teacher-size random control (fair_rotr_tiles500).
 
 How it runs (CRC, from the repository root)
 --------------------------------------------
@@ -24,6 +27,8 @@ sbatch --job-name=make_fair_chips FAIR_chips/crc/make_chips.sbatch              
 sbatch --job-name=regions_fair_tiles FAIR_chips/crc/regions.sbatch fair_tiles  (once, CPU; and fair_down)
 sbatch --job-name=fro_t_s1 FAIR_chips/crc/ssl.sbatch config_ssl_ro_tiles.json 1 (one SSL chain per config and split)
 sbatch --job-name=fch_ro_t_s1 FAIR_chips/crc/finetune.sbatch fair_ro_tiles 1    (3 budgets of one split)
+sbatch --job-name=fair_teacher_regions FAIR_chips/crc/teacher_regions.sbatch  (once, GPU: SARMAE regions for the tiles)
+sbatch --job-name=fro5_s1 FAIR_chips/crc/ssl.sbatch config_ssl_ro_tiles500.json 1 (500-epoch chain; rot / rotr need the teacher job first)
 python FAIR_chips/compare.py                                                    (the table)
 
 Where things are

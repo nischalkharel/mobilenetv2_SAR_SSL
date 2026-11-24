@@ -28,11 +28,18 @@ LABELS = {"imagenet": f"SSL-none / FINETUNE-{_F} / TEST-{_F} / ImageNet start",
           "fair_dino_down": f"SSL-{_F} downsampled / FINETUNE-{_F} / TEST-{_F} / DINO",
           "fair_ro_down": f"SSL-{_F} downsampled / FINETUNE-{_F} / TEST-{_F} / RegionDINO object-only",
           "fair_ror_down": f"SSL-{_F} downsampled / FINETUNE-{_F} / TEST-{_F} / random windows (control)",
+          "fair_dino_tiles500": f"SSL-{_F} tiles, 500 epochs / FINETUNE-{_F} / TEST-{_F} / DINO",
+          "fair_ro_tiles500": f"SSL-{_F} tiles, 500 epochs / FINETUNE-{_F} / TEST-{_F} / RegionDINO object-only",
+          "fair_ror_tiles500": f"SSL-{_F} tiles, 500 epochs / FINETUNE-{_F} / TEST-{_F} / random windows (control)",
+          "fair_rot_tiles500": f"SSL-{_F} tiles, 500 epochs / FINETUNE-{_F} / TEST-{_F} / RegionDINO object-only, teacher (SARMAE) regions",
+          "fair_rotr_tiles500": f"SSL-{_F} tiles, 500 epochs / FINETUNE-{_F} / TEST-{_F} / teacher-size random windows (control)",
           "sardet_dino": f"SSL-SARDet-100K / FINETUNE-{_F} / TEST-{_F} / DINO",
           "sardet_regiondino_o": f"SSL-SARDet-100K / FINETUNE-{_F} / TEST-{_F} / RegionDINO object-only",
           "sardet_regiondino_o_random": f"SSL-SARDet-100K / FINETUNE-{_F} / TEST-{_F} / random windows (control)"}
 REF = {"fair_dino_tiles": "imagenet", "fair_ro_tiles": "fair_dino_tiles", "fair_ror_tiles": "fair_dino_tiles",
        "fair_dino_down": "imagenet", "fair_ro_down": "fair_dino_down", "fair_ror_down": "fair_dino_down",
+       "fair_dino_tiles500": "imagenet", "fair_ro_tiles500": "fair_dino_tiles500", "fair_ror_tiles500": "fair_dino_tiles500",
+       "fair_rot_tiles500": "fair_ro_tiles500", "fair_rotr_tiles500": "fair_rot_tiles500",
        "sardet_dino": "imagenet", "sardet_regiondino_o": "sardet_dino", "sardet_regiondino_o_random": "sardet_dino"}
 BUDGETS = list(fp.BUDGETS)
 RUN_RE = re.compile(r"^(?P<stamp>\d{8}-\d{6})_F1_(?P<method>.+)_mobilenetv2_(?P<budget>\d+pct)_split(?P<split>[123])_seed0$")

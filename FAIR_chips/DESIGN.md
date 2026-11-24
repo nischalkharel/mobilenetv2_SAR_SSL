@@ -107,6 +107,9 @@ SSL (RegionSSL engine, `train_ssl.py`, one entry for three method configs x two 
 | fair_dino_{tiles,down} | regiondino_scene (plain DINO, this engine's scene recipe: global 224 / local 96, zoom 0.75 to 1.33) | whole image | fair_tiles / fair_down |
 | fair_ro_{tiles,down} | regiondino_object (object-only RegionDINO: 3 regions x (2 global 96 + 4 local 64), no whole-image view) | brightness-rule regions (`make_regions.py --pool ...`) | same |
 | fair_ror_{tiles,down} | the same with region_source random | random windows, sizes matched to the regions | same |
+| fair_{dino,ro,ror}_tiles500 | the three above with `"overrides": {"epochs": 500}` (148,500 steps = the SARDet-100K runs' count) | as above | fair_tiles |
+| fair_rot_tiles500 | regiondino_object, 500 epochs, region file from frozen SARMAE's attention (`TeacherRegions/teacher_saliency.py --pool fair_tiles`, folder named by the config's `regions_dir`) | teacher regions | fair_tiles |
+| fair_rotr_tiles500 | the same with region_source random | random windows, sizes matched to the teacher regions | fair_tiles |
 
 Pools (RegionSSL/rssl/pools.py): `fair_tiles` = the unique 512-px tiles of the ssl_pool slices at native 1 m
 (`data/ssl_tiles.csv`, 19,036 images per epoch; the 50 % slice overlap would otherwise make three of four tiles
@@ -120,7 +123,12 @@ the 10-epoch warm-up is shorter in steps. So "tiles beats down" could be step co
 the 4 x redundancy. The arms are therefore read as "the practical recipe at each resolution"; the cost record of
 every run lists images_seen and optimizer_steps. If the tiles result is worth the question, ONE matched-steps row is
 added for plain DINO: a fixed subset of 10,769 of the tiles (seed 0, the same subset for every split), which gives the
-down arm's images per epoch and steps at 1 m; it costs about 57 % of a tiles run and is not built until then. The three splits are three SSL seeds on the same pool, paired with the three labeled draws
+down arm's images per epoch and steps at 1 m; it costs about 57 % of a tiles run and is not built until then.
+Decision 2026-11-24 (Nischal): the 100-epoch tiles runs were far less converged than the SARDet-100K runs (29,700 vs
+147k steps; DINO loss 4.6 vs 0.74), so all three tiles methods are rerun at 500 epochs (the `_tiles500` configs; the
+engine records the deviation under `_overrides` in the run's config.json), plus the teacher-region method and its
+teacher-size control at the same 500 epochs. Cost: DINO about 7.5 GPU-h per split, object-only about 6; 15 SSL runs
+in all, about 95 GPU-h with the proposer job. The 100-epoch runs stay in the table as the short-schedule reference. The three splits are three SSL seeds on the same pool, paired with the three labeled draws
 (the suite's rule). Regions are proposed once per pool (CPU job) with the same brightness rule as SARDet.
 
 Fine-tune (`finetune_chips.py`): the SARDet_chips / ATRNet recipe unchanged (128-px chips resized to 224, AdamW
@@ -144,6 +152,10 @@ differences under about 3 points at 1 % are noise.
    full if the tiles rows show any gain to compare resolution against; if everything is null, run only
    fair_dino_down to answer the resolution question for plain DINO.
 4. Results go to the tracker (registry CHIPS-style rows, a chips page for FAIR) and to `datasets/CANDIDATES.md`.
+5. 500-epoch stage (2026-11-24): `crc/teacher_regions.sbatch` (GPU, once, about 1 h) and the 9 chains
+   `crc/ssl.sbatch config_ssl_{dino,ro,ror}_tiles500.json {1,2,3}` at once; the 6 chains
+   `config_ssl_{rot,rotr}_tiles500.json {1,2,3}` after the proposer job; then the 15 fine-tune jobs
+   `crc/finetune.sbatch fair_{dino,ro,ror,rot,rotr}_tiles500 {1,2,3}` and `compare.py`.
 
 ## 6. Where things are
 

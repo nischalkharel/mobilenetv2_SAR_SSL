@@ -200,7 +200,7 @@ def preview(pool, rows, stores, out_png, cols=4):
         for (name, store), c in zip(stores.items(), colors):
             for x1, y1, x2, y2 in store.get(r["file_name"]):
                 d.rectangle([int(x1), int(y1), int(x2), int(y2)], outline=c, width=1)
-        d.text((4, 4), f"{r['source']} {r['file_name']}", fill="white")
+        d.text((4, 4), f"{r.get('source', pool.name)} {r['file_name']}", fill="white")   # FAIR rows carry no 'source'; the pool name stands in
         tiles.append(im.resize((384, int(384 * im.size[1] / im.size[0]))))
     h = max(t.size[1] for t in tiles); rows_n = int(np.ceil(len(tiles) / cols))
     sheet = Image.new("RGB", (cols * 388, rows_n * (h + 4) + 24), "black")
@@ -233,7 +233,7 @@ def main():
     elif hasattr(pool, "all_rows"):
         rows = pool.all_rows()
     out_dir = a.out_dir or (HERE / "outputs" / (f"regions_{a.signal}" + (f"_z{a.zoom}" if a.zoom != 2 else "") + (f"_q{a.top_q:g}" if a.top_q != 2 else "")))
-    stem = "regions" + ("_smoke" if a.smoke else f"_limit{a.limit}" if a.limit else "")
+    stem = pool.regions_file(a.smoke).stem + (f"_limit{a.limit}" if a.limit else "")   # regions[_smoke] for sardet, regions_fair_tiles[_smoke] for the FAIR pool
     model, tinfo = load_teacher(a.ckpt, a.device)
     print(f"teacher: ViT-B/16 from {tinfo['file']} (epoch {tinfo['epoch']}, {tinfo['tensors']} tensors, sha256 {tinfo['sha256'][:12]}) on {a.device}\n"
           f"{len(rows)} {pool.name} images -> {out_dir / (stem + '.npz')}  (signal {a.signal}; top {a.top_q} %, min area {a.min_area}, max {a.max_regions} regions)", flush=True)
@@ -255,7 +255,7 @@ def main():
         print(f"  wrote {d / (stem + '.npz')}: {summaries[s]['regions_total']} regions, per image mean {summaries[s]['regions_per_image']['mean']:.1f}, extent quantiles {summaries[s]['extent_px_quantiles']}")
     if a.diagnose or a.preview:
         stores = {}
-        felz = REPO / "RegionSSL" / "regions" / ("regions_smoke.npz" if a.smoke else "regions.npz")   # the brightness-rule file itself, whatever REGIONSSL_REGIONS_DIR says
+        felz = REPO / "RegionSSL" / "regions" / pool.regions_file(a.smoke).name   # the brightness-rule file of this pool, whatever REGIONSSL_REGIONS_DIR says
         if felz.exists():
             stores["brightness rule"] = R.RegionStore(felz, scale=pool.region_scale)
         for s in per:

@@ -85,8 +85,21 @@ def merged_config(method_cfg: dict, smoke: bool, smoke_overrides: dict) -> dict:
     cfg = {"run_name": method_cfg["run_name"], "method": method_cfg.get("method"),
            "common": {k: v for k, v in common.items() if k != "views"}, "views": dict(common["views"])}
     shared_keys = set(cfg["common"]) | set(cfg["views"])
+    # "overrides": the one documented way for a config to change a shared key (e.g. epochs for a matched-steps run).
+    # It is applied to the shared section and recorded under "_overrides", so the run's config.json shows the deviation.
+    overrides = {k: v for k, v in method_cfg.get("overrides", {}).items() if not k.startswith("_")}
+    for k, v in overrides.items():
+        if k in cfg["common"]:
+            cfg["common"][k] = v
+        elif k in cfg["views"]:
+            cfg["views"][k] = v
+        else:
+            raise KeyError(f"overrides may only redefine shared keys {sorted(shared_keys)}, got {k!r}")
+    if overrides:
+        cfg["_overrides"] = overrides
+        print(f"shared SSL keys overridden by this config: {overrides}", flush=True)
     for section, values in method_cfg.items():
-        if section in ("run_name", "method") or section.startswith("_"):
+        if section in ("run_name", "method", "overrides") or section.startswith("_"):
             continue
         clash = shared_keys & (set(values) if isinstance(values, dict) else {section})
         if clash:

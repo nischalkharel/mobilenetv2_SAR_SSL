@@ -27,6 +27,8 @@ FOLDERS = {"dino": ("SARDet/DINO_SARDet", "dino_ssl_mobilenetv2"), "lejepa": ("S
            # FAIR_chips study: the same engine on the FAIR-CSAR pools (tiles = native 2 x 2 tiles, down = downsampled slices);
            # fair_dino = plain DINO of that engine (paired reference), fair_ro = object-only, fair_ror = its random control
            **{f"fair_{m}_{arm}": ("FAIR_chips", f"fair_{m}_{arm}_ssl_mobilenetv2") for arm in ("tiles", "down") for m in ("dino", "ro", "ror")},
+           # the 500-epoch tiles runs (matched steps); fair_rot = teacher (SARMAE) regions, fair_rotr = teacher-size random control
+           **{f"fair_{m}_tiles500": ("FAIR_chips", f"fair_{m}_tiles500_ssl_mobilenetv2") for m in ("dino", "ro", "ror", "rot", "rotr")},
            # arm I: the same engine on the ATRNet-STAR SSL pool (in-domain); atr_dino = plain DINO of that engine, the paired reference
            "atr_dino": ("RegionSSL/DINO_reference", "dino_suite_atr_ssl_mobilenetv2"),
            "atr_regiondino_so": ("RegionSSL/RegionDINO_scene_object", "regiondino_so_atr_ssl_mobilenetv2"),
