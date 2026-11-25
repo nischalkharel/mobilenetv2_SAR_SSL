@@ -57,6 +57,16 @@ CLASSIFICATION = {
                                                         note="Object-only recipe with the windows placed on regions proposed by the frozen SARMAE teacher's attention instead of the brightness rule. Paired against the brightness-rule row."),
     "XA RegionDINO object-only, teacher-size random windows (control)": dict(id="xa_rotr", label="teacher-size random windows", family="region", ssl="sardet", ref="xa_rot", control=True,
                                                                              note="Random windows with the teacher regions' sizes (2 to 3 x larger than the brightness-rule regions): separates placement from size."),
+    "XF DINO on FAIR-CSAR": dict(id="xf_dino", label="DINO", family="dino", ssl="fair_tiles", ref="a0",
+                                 note="Plain DINO on the FAIR-CSAR 1 m tiles for 500 epochs (the FAIR_chips backbone), then fine-tuned on ATRNet chips: cross-dataset from a second scene archive."),
+    "XF RegionDINO object-only on FAIR-CSAR": dict(id="xf_ro", label="RegionDINO object-only", family="region", ssl="fair_tiles", ref="xf_dino",
+                                                   note="Object-only views on brightness-rule regions of the FAIR-CSAR tiles (500 epochs), then ATRNet chips."),
+    "XF RegionDINO object-only on FAIR-CSAR, random windows (control)": dict(id="xf_ror", label="object-only, random windows", family="region", ssl="fair_tiles", ref="xf_dino", control=True,
+                                                                             note="Its random-window control (same window sizes, random places), then ATRNet chips."),
+    "XF RegionDINO object-only on FAIR-CSAR, teacher regions": dict(id="xf_rot", label="object-only, teacher regions", family="region", ssl="fair_tiles", ref="xf_ro",
+                                                                    note="Windows on regions proposed by the frozen SARMAE teacher on the FAIR-CSAR tiles (500 epochs), then ATRNet chips."),
+    "XF RegionDINO object-only on FAIR-CSAR, teacher-size random windows (control)": dict(id="xf_rotr", label="teacher-size random windows", family="region", ssl="fair_tiles", ref="xf_rot", control=True,
+                                                                                          note="Random windows with the teacher regions' sizes, then ATRNet chips."),
     "XI DINO (suite recipe) on ATRNet": dict(id="xi_dino", label="DINO, RegionSSL engine", family="dino", ssl="atr", ref="a1",
                                              note="Plain DINO run by the RegionDINO engine on the ATRNet chips: the paired reference for the XI RegionDINO rows, and a check against A1."),
     "XI RegionDINO scene+object on ATRNet": dict(id="xi_rso", label="RegionDINO scene+object", family="region", ssl="atr", ref="xi_dino",
@@ -106,6 +116,11 @@ CHIPS = {
     "regiondino_o_random": dict(id="c_ror", label="object-only, random windows", family="region", ssl="sardet", ref="c_dino", control=True, note="Its random-window control."),
     "regiondino_o_teacher": dict(id="c_rot", label="object-only, teacher regions", family="region", ssl="sardet", ref="c_ro", note="Windows on SARMAE-proposed regions (TeacherRegions backbone), then chips; paired against the brightness-rule row."),
     "regiondino_o_teacher_random": dict(id="c_rotr", label="teacher-size random windows", family="region", ssl="sardet", ref="c_rot", control=True, note="Random windows with the teacher regions' sizes, then chips."),
+    "fair_dino_tiles500": dict(id="c_f_dino", label="DINO", family="dino", ssl="fair_tiles", ref="c_base", note="Plain DINO on the FAIR-CSAR 1 m tiles (500 epochs, the FAIR_chips backbone), then SARDet chips: cross-dataset."),
+    "fair_ro_tiles500": dict(id="c_f_ro", label="RegionDINO object-only", family="region", ssl="fair_tiles", ref="c_f_dino", note="Object-only views on brightness-rule regions of the FAIR-CSAR tiles, then SARDet chips."),
+    "fair_ror_tiles500": dict(id="c_f_ror", label="object-only, random windows", family="region", ssl="fair_tiles", ref="c_f_dino", control=True, note="Its random-window control, then SARDet chips."),
+    "fair_rot_tiles500": dict(id="c_f_rot", label="object-only, teacher regions", family="region", ssl="fair_tiles", ref="c_f_ro", note="Windows on SARMAE-proposed regions of the FAIR-CSAR tiles, then SARDet chips."),
+    "fair_rotr_tiles500": dict(id="c_f_rotr", label="teacher-size random windows", family="region", ssl="fair_tiles", ref="c_f_rot", control=True, note="Random windows with the teacher regions' sizes, then SARDet chips."),
 }
 
 # ---- FAIR-CSAR chip classification (FAIR_chips study: 22 classes; SSL on FAIR-CSAR itself or on SARDet-100K) ----
@@ -151,6 +166,10 @@ SETTINGS = [
          table="chips", ssl="sardet", task="mean per-class accuracy on chips cut from the official test boxes (clean set, 6 classes)"),
     dict(id="fair_chips", title="SSL on FAIR-CSAR (or on SARDet-100K), classify FAIR-CSAR chips", short="second dataset, 22 classes",
          table="fair", ssl="fair", task="mean per-class accuracy on FAIR-CSAR test chips (clean set, 22 classes)"),
+    dict(id="fair_to_atr", title="SSL on FAIR-CSAR tiles, classify ATRNet-STAR chips", short="cross-dataset from a second scene archive",
+         table="classification", ssl="fair_tiles", task="40-class accuracy on the official ATRNet-STAR test set"),
+    dict(id="fair_to_sardet_chips", title="SSL on FAIR-CSAR tiles, classify SARDet-100K chips", short="cross-dataset chip classification",
+         table="chips", ssl="fair_tiles", task="mean per-class accuracy on chips cut from the official SARDet-100K test boxes (clean set, 6 classes)"),
 ]
 
 # families in display order, with the plain name of each

@@ -55,6 +55,12 @@ def row_key(folder: Path):
               # TeacherRegions: RegionDINO object-only with SARMAE-proposed regions, and its size-matched random control
               "XA_regiondino_o_teacher_sardetssl_mobilenetv2": "XA RegionDINO object-only, teacher regions",
               "XA_regiondino_o_teacher_random_sardetssl_mobilenetv2": "XA RegionDINO object-only, teacher-size random windows (control)",
+              # arm F: the FAIR_chips 500-epoch backbones (SSL on FAIR-CSAR 1 m tiles), tested on ATRNet chips
+              "XF_dino_tiles500_fairssl_mobilenetv2": "XF DINO on FAIR-CSAR",
+              "XF_ro_tiles500_fairssl_mobilenetv2": "XF RegionDINO object-only on FAIR-CSAR",
+              "XF_ror_tiles500_fairssl_mobilenetv2": "XF RegionDINO object-only on FAIR-CSAR, random windows (control)",
+              "XF_rot_tiles500_fairssl_mobilenetv2": "XF RegionDINO object-only on FAIR-CSAR, teacher regions",
+              "XF_rotr_tiles500_fairssl_mobilenetv2": "XF RegionDINO object-only on FAIR-CSAR, teacher-size random windows (control)",
               "XC_dino_mixed_mobilenetv2": "XC DINO on mixed pool", "XC_lejepa_mixed_mobilenetv2": "XC LeJEPA on mixed pool",
               "XC_spark_mixed_mobilenetv2": "XC SparK on mixed pool"}.get(name)
     if method is None:

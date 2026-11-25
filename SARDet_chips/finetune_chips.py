@@ -39,7 +39,8 @@ sys.path.insert(0, str(cp.REPO_ROOT / "SARDet_to_ATR"))
 import find_backbone  # noqa: E402
 
 METHODS = ["imagenet", "dino", "lejepa", "spark", "regiondino_so", "regiondino_so_random", "regiondino_o", "regiondino_o_random",
-           "regiondino_o_teacher", "regiondino_o_teacher_random"]   # TeacherRegions backbones (added 2026-11-22)
+           "regiondino_o_teacher", "regiondino_o_teacher_random",   # TeacherRegions backbones (added 2026-11-22)
+           "fair_dino_tiles500", "fair_ro_tiles500", "fair_ror_tiles500", "fair_rot_tiles500", "fair_rotr_tiles500"]   # FAIR_chips 500-epoch backbones: SSL on FAIR-CSAR tiles, tested on SARDet chips (cross-dataset; added 2026-11-25)
 SMOKE_PER_CLASS, SMOKE_EPOCHS = 12, 2
 
 

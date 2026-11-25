@@ -5,7 +5,8 @@
 #   sbatch --job-name=ch_imagenet_s1 SARDet_chips/crc/finetune.sbatch imagenet 1
 #   sbatch --job-name=ch_dino_s2 SARDet_chips/crc/finetune.sbatch dino 2
 #   methods: imagenet dino lejepa spark regiondino_so regiondino_so_random regiondino_o regiondino_o_random
-#            regiondino_o_teacher regiondino_o_teacher_random (TeacherRegions backbones); splits 1 2 3
+#            regiondino_o_teacher regiondino_o_teacher_random (TeacherRegions backbones)
+#            fair_{dino,ro,ror,rot,rotr}_tiles500 (FAIR_chips 500-epoch backbones, cross-dataset); splits 1 2 3
 # The SSL backbone is the scene SSL run of the same split (SARDet_to_ATR/find_backbone.py); its SHA-256 goes into
 # run_info.json. Budgets run largest first so the long one starts early; a budget whose run folder already has
 # eval_test/metrics.json is skipped (safe to resubmit).
@@ -19,7 +20,7 @@
 #SBATCH --output=crc/logs/%x_%j.out
 
 set -eo pipefail
-METHOD=${1:?imagenet | dino | lejepa | spark | regiondino_so[_random] | regiondino_o[_random] | regiondino_o_teacher[_random]}
+METHOD=${1:?imagenet | dino | lejepa | spark | regiondino_so[_random] | regiondino_o[_random] | regiondino_o_teacher[_random] | fair_<dino|ro|ror|rot|rotr>_tiles500}
 SPLIT=${2:?split 1, 2 or 3}
 source SARDet_chips/crc/env.sh
 mkdir -p crc/logs

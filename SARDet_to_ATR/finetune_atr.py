@@ -5,7 +5,8 @@
 This is a thin wrapper: the training itself is Experiments/mobileNetv2_DINO/train_supervised.py (the A1/A2/A3
 fine-tune code, byte-identical across those folders) with SARDet_to_ATR/config_finetune.json, which equals the
 A1 config except for the run name. Nothing in Experiments/ is modified. Run folders land in
-SARDet_to_ATR/outputs/finetune/<stamp>_XA_<method>_sardetssl_mobilenetv2[_<budget>][_split<s>]_seed0/ and are
+SARDet_to_ATR/outputs/finetune/<stamp>_XA_<method>_sardetssl_mobilenetv2[_<budget>][_split<s>]_seed0/ (XI_..._atrssl_
+for the atr_* methods, XF_..._fairssl_ for the fair_* methods = the FAIR_chips 500-epoch backbones) and are
 scored with Experiments/mobileNetv2_DINO/evaluate.py --run <folder> --split validation|test.
 The split (which ATRNet labeled draw) comes from the environment variable SAR_SPLIT, as for every ATRNet run.
 """
@@ -26,7 +27,9 @@ METHODS = ("dino", "lejepa", "spark", "regiondino_so", "regiondino_so_random", "
            # ViewScale sweep: fixed-size random windows (run names XA_viewscale_e<k>_sardetssl_...)
            "viewscale_e32", "viewscale_e64", "viewscale_e128", "viewscale_e256", "viewscale_e512",
            # TeacherRegions: SARMAE-proposed regions and the teacher-size random control
-           "regiondino_o_teacher", "regiondino_o_teacher_random")
+           "regiondino_o_teacher", "regiondino_o_teacher_random",
+           # arm F: the FAIR_chips 500-epoch backbones (SSL on FAIR-CSAR 1 m tiles), run names XF_<m>_fairssl_...
+           "fair_dino_tiles500", "fair_ro_tiles500", "fair_ror_tiles500", "fair_rot_tiles500", "fair_rotr_tiles500")
 
 
 def main():
@@ -46,6 +49,10 @@ def main():
         cfg["run_name"] = cfg["run_name"].replace("XA_atr_", "XI_").replace("_sardetssl_", "_atrssl_")
         cfg["cross_dataset"] = {"ssl_dataset": "ATRNet-STAR SOC-40 train (the split's SSL pool)", "downstream_dataset": "ATRNet-STAR SOC-40",
                                 "arm": "I (in-domain: RegionSSL engine on the ATRNet pool)", "ssl_method": args.method}
+    elif args.method.startswith("fair_"):    # arm F: SSL on the FAIR-CSAR tiles (FAIR_chips study), run names XF_<method>_fairssl_...
+        cfg["run_name"] = cfg["run_name"].replace("XA_fair_", "XF_").replace("_sardetssl_", "_fairssl_")
+        cfg["cross_dataset"] = {"ssl_dataset": "FAIR-CSAR-V1.0 SL trainval tiles (FAIR_chips pool fair_tiles, 500 epochs)", "downstream_dataset": "ATRNet-STAR SOC-40",
+                                "arm": "F (SSL on FAIR-CSAR scenes, a second scene archive)", "ssl_method": args.method}
     else:
         cfg["cross_dataset"] = {"ssl_dataset": "SARDet-100K", "downstream_dataset": "ATRNet-STAR SOC-40", "arm": "A (SARDet SSL as run)",
                                 "ssl_method": args.method}

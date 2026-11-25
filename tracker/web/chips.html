@@ -52,7 +52,7 @@
   setContext({task: "classification, 6 classes, mean per-class accuracy on chips cut from the official SARDet-100K test boxes", finetune: "SARDet-100K chips", test: "SARDet-100K chips"});
   const CH = await load("chips"), byId = Object.fromEntries(CH.methods.map(m => [m.id, m])), base = CH.methods.find(m => m.ssl === "none");
   $("task").textContent = CH.task + ". " + CH.chip_rule + ".";
-  const POOLC = {none: "ImageNet start, no SSL", sardet: "SSL on SARDet-100K scenes (in-domain for this test)"};
+  const POOLC = {none: "ImageNet start, no SSL", sardet: "SSL on SARDet-100K scenes (in-domain for this test)", fair_tiles: "SSL on FAIR-CSAR 1 m tiles, 500 epochs (cross-dataset)"};
   if (!CH.methods.length) { $("fig1").innerHTML = `<p class="empty">no chip runs yet</p>`; return; }
 
   const groups = groupsByPool(CH.methods, POOLC).map(g => ({title: g.title, rows: g.rows.map(m => ({label: m.label, family: m.family, control: m.control, v: Object.fromEntries(BUDGETS.map(b => [b, vals(m, b, "acc")]))}))}));

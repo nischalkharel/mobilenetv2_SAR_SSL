@@ -2,7 +2,7 @@
 // Every chart is plain SVG built from strings; no library.
 
 const FAM = {base: "var(--base)", dino: "var(--dino)", lejepa: "var(--lejepa)", spark: "var(--spark)", cond: "var(--cond)", region: "var(--region)", scale: "var(--scale)"};
-const POOL = {none: "ImageNet start, no SSL", atr: "SSL on ATRNet-STAR chips (in-domain)", sardet: "SSL on SARDet-100K scenes (cross-dataset)"};
+const POOL = {none: "ImageNet start, no SSL", atr: "SSL on ATRNet-STAR chips (in-domain)", sardet: "SSL on SARDet-100K scenes (cross-dataset)", fair_tiles: "SSL on FAIR-CSAR 1 m tiles, 500 epochs (cross-dataset, second scene archive)"};
 const POOL_DET = {none: "ImageNet start, no SSL", sardet: "SSL on SARDet-100K scenes (in-domain for detection)"};
 const POOL_FAIR = {none: "ImageNet start, no SSL", sardet: "SSL on SARDet-100K scenes (cross-dataset)", fair_tiles: "SSL on FAIR-CSAR, native 1 m tiles", fair_down: "SSL on FAIR-CSAR, downsampled slices"};
 // plain dataset name of each SSL pool, for the SSL-dataset / FINETUNE-dataset / TEST-dataset / technique line
