@@ -4,7 +4,8 @@ Status 2026-11-22 (night): built, reviewed by two agents (fixes applied), PC smo
 regions proposed for both pools, SSL smoke for dino / ro / ror on tiles and ro on down, resume, fine-tune from ImageNet and
 from a smoke backbone). CRC 2026-11-22/23: chips + regions built; 9 tiles-arm SSL runs done (1.1 to 1.5 GPU-h each, 29,700 steps,
 object-only fallback 1.8 %); 36 fine-tunes of imagenet + the three SARDet-pool backbones done (first results below);
-the 9 tiles-arm fine-tunes done 2026-11-24 (63 cells total). Down arm not launched.
+the 9 tiles-arm fine-tunes done 2026-11-24; 500-epoch stage (15 SSL runs + teacher proposer + 45 fine-tunes) done
+2026-11-25: 108 cells total. Down arm not launched.
 
 First results (mean per-class accuracy on test_clean, 1 / 3 / 10 %, mean of 3 splits): no SSL 24.9 / 29.2 / 39.6
 (overall 43.3 / 49.5 / 59.2): the test is hard, as wanted. SARDet-pool backbones transferred to FAIR: plain DINO
@@ -29,6 +30,24 @@ crop-size story as SARDet detection; (d) the FAIR SSL runs are under-converged (
 on SARDet), so the FAIR-pool numbers are a floor. Aircraft types stay at 22 to 24 % for every method at 1 %.
 Next: one matched-steps DINO run (about 500 epochs) on the tiles to see whether the +3.7 grows; the down arm is
 worth running only for plain DINO (resolution question), since the region rows do not separate here.
+
+Results 2026-11-25, the 500-epoch stage (148,500 steps; mean per-class accuracy on test_clean, 1 / 3 / 10 %, mean
+of 3 splits; no SSL 24.9 / 29.2 / 39.6): DINO 27.3 / 32.9 / 43.6 (+2.4 / +3.8 / +4.0 vs no SSL; 3 and 10 % positive
+on every split; overall accuracy +4.6 / +5.6 / +3.7); RegionDINO object-only 28.6 / 34.0 / 43.7 (+1.3 / +1.1 / +0.1
+vs that DINO); its random-window control 28.8 / 32.9 / 41.5 (+1.5 / 0.0 / -2.1 vs DINO; object-only minus control
+-0.2 / +1.1 / +2.2); teacher (SARMAE) regions 28.5 / 33.8 / 43.7 (-0.1 / -0.2 / 0.0 vs the brightness rule; best
+overall accuracy of every row, 49.4 / 56.4 / 64.5, by about 1 point); teacher-size random control 25.0 / 31.4 / 40.8
+(-3.5 / -2.4 / -2.9 vs the teacher row, 8 of 9 pairs negative). Convergence: DINO loss 4.6 -> 2.6 (teacher entropy
+2.8 -> 0.74), object-only 2.55 -> 1.67 (0.96 -> 0.36). Teacher proposer on the 19,036 tiles: 20 regions per tile,
+extent median 18 px (95 % under 48), and on 300 annotated tiles it reaches 41.5 % of the objects against 33.8 % for
+the brightness rule (30 regions per tile, median 8 px).
+Readings: (a) with matched steps, SSL on the dataset's own tiles is worth +2 to +4 points at every budget, not only
+at 10 %; (b) placement now shows a little: both region rows beat their size-matched random controls at 10 % (+2.2
+brightness rule, +2.9 teacher) and the teacher row beats its control at every budget, but object-only vs its control
+is inside split noise at 1 and 3 %; (c) the teacher finds more objects than the brightness rule on 1 m imagery (41 vs
+34 %) and still does not classify better: the fourth test where a better proposer buys nothing in mean per-class
+accuracy (c11); (d) same-dataset still beats cross-dataset SSL by 6.8 points for plain DINO at 10 % (43.6 vs 36.8).
+The 500-epoch rows are the FAIR headline from here; the 100-epoch rows stay as the short-schedule reference.
 
 ## 1. Why this dataset and what it asks
 

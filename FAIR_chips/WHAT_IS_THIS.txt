@@ -8,7 +8,7 @@ it on a few labeled object chips cut from the same dataset, asking: does SSL hel
 regions (RegionDINO) help like it did on ATRNet; does the native 1 m beat a 2 m downsample; and do the SARDet-pool
 backbones transfer here. Design, subsets and leakage notes: DESIGN.md.
 
-Status (2026-11-24)
+Status (2026-11-25)
 -------------------
 Built on the PC, nothing run on CRC. Manifests drawn and committed (data/). Found while building: the slices
 overlap 50 % both ways, so each object is annotated up to four times; the study counts physical objects (25,703, not
@@ -17,9 +17,10 @@ two reviewer passes applied. CRC: SSL on the native tiles done, all 63 classific
 tiles; results in DESIGN.md status). Short version: SSL on FAIR-CSAR's own tiles helps (+3.7 at 10 % labels for
 DINO), SSL on SARDet-100K hurts unless it is RegionDINO object-only, and placing the views on bright regions adds
 nothing over random windows when SSL runs on FAIR itself. Down-sampled SSL pool not launched.
-Stage 2 (built and smoke-tested 2026-11-24, not yet run): the same three methods at 500 epochs (matched to the
-SARDet-100K step count), plus RegionDINO with the frozen SARMAE teacher's attention as the region proposer
-(fair_rot_tiles500) and its teacher-size random control (fair_rotr_tiles500).
+Stage 2 done 2026-11-25 (500 epochs, matched to the SARDet-100K step count): plain DINO on FAIR's own tiles is
+worth +2.4 / +3.8 / +4.0 at 1 / 3 / 10 % labels; RegionDINO object-only and the teacher-region version land within a
+point of it (28.6 and 28.5 vs 27.3 at 1 %); each region row beats its own size-matched random control at 10 % by 2
+to 3 points; the SARMAE teacher finds more objects than the brightness rule (41 vs 34 %) but classifies the same.
 
 How it runs (CRC, from the repository root)
 --------------------------------------------
