@@ -1,0 +1,48 @@
+{
+  "run_name": "F1_fair_dino_tiles500_mobilenetv2",
+  "_note": "Chip classification on FAIR-CSAR SL, 22 classes (DESIGN.md section 4). METHOD, the backbone, the budget and the split are filled in by finetune_chips.py. data and train values are the SARDet_chips values (themselves the A0/A1 ATRNet values) so the recipe is the same across the three chip tests; only the chips and the head size differ.",
+  "init": {
+    "type": "backbone_checkpoint",
+    "backbone_checkpoint": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/FAIR_chips/outputs/ssl/20261124-123044_fair_dino_tiles500_ssl_mobilenetv2_split1_seed0/backbone_epoch500.pth"
+  },
+  "data": {
+    "chip_size": 128,
+    "input_size": 224,
+    "normalize_mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "normalize_std": [
+      0.229,
+      0.224,
+      0.225
+    ],
+    "augment_hflip_p": 0.5,
+    "augment_translate_pad": 8,
+    "num_workers": 0,
+    "train_csv": "split1/labeled_3pct.csv (chips)",
+    "val_csv": "select.csv (chips)"
+  },
+  "train": {
+    "seed": 0,
+    "epochs": 30,
+    "batch_size": 64,
+    "optimizer": "adamw",
+    "lr": 0.0005,
+    "weight_decay": 0.01,
+    "scheduler": "cosine",
+    "device": "cuda",
+    "log_every_batches": 50,
+    "selection": "epoch with the highest mean per-class accuracy on the selection chips (earliest on ties)"
+  },
+  "method": "fair_dino_tiles500",
+  "budget": "3pct",
+  "split": 1,
+  "chip_rule": {
+    "chip_size": 128,
+    "window_floor": 64,
+    "window_margin": 1.5
+  },
+  "smoke": false
+}
