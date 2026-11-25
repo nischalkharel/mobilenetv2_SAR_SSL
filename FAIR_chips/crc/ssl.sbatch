@@ -6,7 +6,8 @@
 #   sbatch --job-name=fror_t_s1  FAIR_chips/crc/ssl.sbatch config_ssl_ror_tiles.json 1
 #   (and the *_down.json configs for the resolution arm; config_ssl_<dino|ro|ror|rot|rotr>_tiles500.json for the 500-epoch
 #   runs, about 6 to 8 h each; rot / rotr need TeacherRegions/outputs/regions_cls_fair_tiles/regions_fair_tiles.npz from
-#   FAIR_chips/crc/teacher_regions.sbatch first)
+#   FAIR_chips/crc/teacher_regions.sbatch first; rog / rogr need GradientRegions/outputs/regions_fair_tiles/regions_fair_tiles.npz
+#   from GradientRegions/crc/regions_fair.sbatch first)
 # The engine checkpoints every epoch; at its start this job submits a copy of itself (afterany) that resumes an
 # unfinished run or exits at once when the run is complete, so the chain ends by itself. The object-only configs
 # need RegionSSL/regions/regions_<pool>.npz (FAIR_chips/crc/regions.sbatch) and stop if it is missing or partial.

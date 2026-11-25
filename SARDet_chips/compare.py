@@ -23,11 +23,15 @@ LABELS = {"imagenet": "ImageNet start (no SSL)", "dino": "DINO on scenes", "leje
           "regiondino_o_teacher": "RegionDINO object-only, teacher regions", "regiondino_o_teacher_random": "RegionDINO object-only, teacher-size random windows (control)",
           "fair_dino_tiles500": "SSL on FAIR-CSAR tiles: DINO", "fair_ro_tiles500": "SSL on FAIR-CSAR tiles: RegionDINO object-only",
           "fair_ror_tiles500": "SSL on FAIR-CSAR tiles: random windows (control)", "fair_rot_tiles500": "SSL on FAIR-CSAR tiles: teacher regions",
-          "fair_rotr_tiles500": "SSL on FAIR-CSAR tiles: teacher-size random windows (control)"}
+          "fair_rotr_tiles500": "SSL on FAIR-CSAR tiles: teacher-size random windows (control)",
+          "regiondino_o_gradient": "RegionDINO object-only, gradient regions", "regiondino_o_gradient_random": "RegionDINO object-only, gradient-size random windows (control)",
+          "fair_rog_tiles500": "SSL on FAIR-CSAR tiles: gradient regions", "fair_rogr_tiles500": "SSL on FAIR-CSAR tiles: gradient-size random windows (control)"}
 REF = {"dino": "imagenet", "lejepa": "imagenet", "spark": "imagenet", "regiondino_so": "dino", "regiondino_so_random": "dino",
        "regiondino_o": "dino", "regiondino_o_random": "dino", "regiondino_o_teacher": "regiondino_o", "regiondino_o_teacher_random": "regiondino_o_teacher",
        "fair_dino_tiles500": "imagenet", "fair_ro_tiles500": "fair_dino_tiles500", "fair_ror_tiles500": "fair_dino_tiles500",
-       "fair_rot_tiles500": "fair_ro_tiles500", "fair_rotr_tiles500": "fair_rot_tiles500"}
+       "fair_rot_tiles500": "fair_ro_tiles500", "fair_rotr_tiles500": "fair_rot_tiles500",
+       "regiondino_o_gradient": "regiondino_o", "regiondino_o_gradient_random": "regiondino_o_gradient",
+       "fair_rog_tiles500": "fair_ro_tiles500", "fair_rogr_tiles500": "fair_rog_tiles500"}
 BUDGETS = ["1pct", "3pct", "10pct"]
 NAME_RE = re.compile(r"^\d{8}-\d{6}_S1_(?P<method>.+?)_mobilenetv2_(?P<budget>\d+pct)_split(?P<split>[123])_seed0$")
 

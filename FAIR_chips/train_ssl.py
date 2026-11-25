@@ -5,7 +5,9 @@
     python FAIR_chips/train_ssl.py --resume <run folder>
 
 Configs: config_ssl_<dino|ro|ror>_<tiles|down>.json (100 epochs) and config_ssl_<dino|ro|ror|rot|rotr>_tiles500.json
-(500 epochs = 148,500 steps, matched to the SARDet-100K runs; "overrides": {"epochs": 500}). rot = object-only views on
+(500 epochs = 148,500 steps, matched to the SARDet-100K runs; "overrides": {"epochs": 500}). rog = object-only views on
+regions from DINOSAR's ratio-gradient content map (GradientRegions/make_regions.py --pool fair_tiles), rogr = its
+size-matched random control. rot = object-only views on
 regions proposed by the frozen SARMAE teacher (TeacherRegions/teacher_saliency.py --pool fair_tiles, file in
 TeacherRegions/outputs/regions_cls_fair_tiles, named by the config's "regions_dir"), rotr = its teacher-size random control. The "method" key picks the class: regiondino_scene (plain
 DINO, scene views only; the engine's reference recipe, as RegionSSL/DINO_reference) or regiondino_object (object-only

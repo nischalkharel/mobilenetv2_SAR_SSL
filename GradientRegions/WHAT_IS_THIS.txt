@@ -1,0 +1,49 @@
+GradientRegions: a third region proposer for RegionDINO, DINOSAR's ratio-gradient content map. Student stays MobileNetV2.
+
+Why this folder exists (2026-11-25)
+----------------------------------
+The novelty check (reports/SAR SSL novelty check.md) found DINOSAR (Tang et al., Int. J. Digital Earth, accepted
+2026-11-04): DINO on 7 million SAR tiles whose crops are chosen from a "content map" instead of at random. A reviewer
+will ask whether our brightness-rule regions do anything their content map does not. So the same content map is run
+as a proposer in our pipeline, next to the brightness rule and the SARMAE teacher: same RegionDINO object-only
+recipe, same map-to-regions rule, only the map differs. A size-matched random-window control goes with it, as for
+the other two proposers.
+
+What the map is (content_map.py, ported from DINOSAR/dinosar/content_aware_crop.py, no labels)
+------------------------------------------------------------------------------------------
+Per tile: stretch to [0, 1]; downsample by 4; for window sizes 3 and 7 take the box mean, then the log-ratio of the
+means shifted by half a window left/right and up/down (a ratio-of-averages edge detector in the log domain), times
+the box mean (so dark speckle does not fire); L2 over the two scales; min-max to [0, 1]; upsample back. Regions =
+top 2 % of the map -> connected components -> boxes, at most 20 per image (TeacherRegions rule).
+What is NOT used from DINOSAR: its anchor picker and crop sampler (random crop sizes); our recipe needs object-sized
+boxes, so the map goes through the same rule as the teacher map.
+
+Measured on 300 SARDet-100K scenes (annotations read only to measure): objects reached 59.6 % (brightness rule
+61.7 %, SARMAE teacher 57 %), region centres on an object 23.9 % (rule 7.0 %, teacher 12 %), 8.2 regions per scene
+(rule 27.5), extent median 21 px (rule 10, teacher 16). The most precise finder of the three.
+
+Status (2026-11-25)
+-------------------
+Built and smoke-tested on the PC (proposer on both pools, SSL for the gradient row and its control on the SARDet
+pool and on the FAIR-CSAR tiles). Nothing run on CRC yet. Rows it adds: SARDet pool -> ATRNet transfer (XA ...
+gradient regions / gradient-size random windows), SARDet chips, optional detection; FAIR tiles 500 epochs ->
+FAIR chips (fair_rog_tiles500 / fair_rogr_tiles500) and the XF transfer.
+
+How it runs (CRC)
+-----------------
+cd SARDet && sbatch --job-name=regions_grad ../GradientRegions/crc/regions_sardet.sbatch   (CPU, once)
+sbatch --job-name=regions_grad_fair GradientRegions/crc/regions_fair.sbatch                 (CPU, once, repo root)
+cd SARDet && sbatch --job-name=rog_s1 crc/ssl.sbatch ../GradientRegions 1 config_ssl.json  (and config_ssl_random.json; splits 1 2 3)
+sbatch --job-name=frog5_s1 FAIR_chips/crc/ssl.sbatch config_ssl_rog_tiles500.json 1        (and rogr; splits 1 2 3)
+then the usual fine-tune jobs with methods regiondino_o_gradient[_random] and fair_rog[r]_tiles500.
+
+Where things are
+----------------
+content_map.py       the map (numpy); PARAMETERS records the recipe in every region summary
+make_regions.py      pool -> region file (+ --diagnose box check, --preview sheet); outputs/regions_<pool>/
+train_ssl.py         SSL entry for the SARDet pool (sets REGIONSSL_REGIONS_DIR to outputs/regions_sardet)
+config_ssl.json      gradient regions; config_ssl_random.json its size-matched control; config_finetune.json stub
+crc/                 the two CPU proposer jobs
+outputs/             region summaries / box agreement / previews (committed), region .npz files (not), SSL runs
+Also touched (additive): FAIR_chips/config_ssl_rog[r]_tiles500.json, method names in SARDet_to_ATR, SARDet_chips,
+FAIR_chips, SARDet/compare, tracker registry + collect + glossary.

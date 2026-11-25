@@ -28,8 +28,10 @@ METHODS = ("dino", "lejepa", "spark", "regiondino_so", "regiondino_so_random", "
            "viewscale_e32", "viewscale_e64", "viewscale_e128", "viewscale_e256", "viewscale_e512",
            # TeacherRegions: SARMAE-proposed regions and the teacher-size random control
            "regiondino_o_teacher", "regiondino_o_teacher_random",
+           # GradientRegions: DINOSAR-style ratio-gradient content regions and the gradient-size random control
+           "regiondino_o_gradient", "regiondino_o_gradient_random",
            # arm F: the FAIR_chips 500-epoch backbones (SSL on FAIR-CSAR 1 m tiles), run names XF_<m>_fairssl_...
-           "fair_dino_tiles500", "fair_ro_tiles500", "fair_ror_tiles500", "fair_rot_tiles500", "fair_rotr_tiles500")
+           "fair_dino_tiles500", "fair_ro_tiles500", "fair_ror_tiles500", "fair_rot_tiles500", "fair_rotr_tiles500", "fair_rog_tiles500", "fair_rogr_tiles500")
 
 
 def main():

@@ -17,7 +17,7 @@
 #SBATCH --output=crc/logs/%x_%j.out
 
 set -eo pipefail
-METHOD=${1:?dino | lejepa | spark | regiondino_o[_random] | regiondino_so[_random] | atr_dino | atr_regiondino_* | fair_<dino|ro|ror|rot|rotr>_tiles500}
+METHOD=${1:?dino | lejepa | spark | regiondino_o[_random] | regiondino_so[_random] | atr_dino | atr_regiondino_* | regiondino_o_gradient[_random] | fair_<dino|ro|ror|rot|rotr|rog|rogr>_tiles500}
 export SAR_SPLIT=${2:?split 1, 2 or 3}
 source crc/env.sh
 mkdir -p crc/logs

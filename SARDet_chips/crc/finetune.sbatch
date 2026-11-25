@@ -20,7 +20,7 @@
 #SBATCH --output=crc/logs/%x_%j.out
 
 set -eo pipefail
-METHOD=${1:?imagenet | dino | lejepa | spark | regiondino_so[_random] | regiondino_o[_random] | regiondino_o_teacher[_random] | fair_<dino|ro|ror|rot|rotr>_tiles500}
+METHOD=${1:?imagenet | dino | lejepa | spark | regiondino_so[_random] | regiondino_o[_random] | regiondino_o_teacher[_random] | regiondino_o_gradient[_random] | fair_<dino|ro|ror|rot|rotr|rog|rogr>_tiles500}
 SPLIT=${2:?split 1, 2 or 3}
 source SARDet_chips/crc/env.sh
 mkdir -p crc/logs

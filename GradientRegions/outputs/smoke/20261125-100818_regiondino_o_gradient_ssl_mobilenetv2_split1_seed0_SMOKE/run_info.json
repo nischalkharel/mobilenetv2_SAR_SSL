@@ -1,0 +1,171 @@
+{
+  "kind": "ssl",
+  "status": "completed",
+  "started": "2026-11-25T10:08:18",
+  "run_dir": "C:\\Users\\nisch\\Documents\\SHREC\\2026_2027\\mobilenetv2_SAR_SSL\\GradientRegions\\outputs\\smoke\\20261125-100818_regiondino_o_gradient_ssl_mobilenetv2_split1_seed0_SMOKE",
+  "config": {
+    "run_name": "regiondino_o_gradient_ssl_mobilenetv2",
+    "method": "regiondino_object",
+    "common": {
+      "epochs": 2,
+      "batch_size": 8,
+      "seed_rule": "split - 1",
+      "num_workers": 0,
+      "export_rule": "final epoch, no selection",
+      "seed": 0
+    },
+    "views": {
+      "resize_rule": "detector_512",
+      "global_size": 224,
+      "local_size": 96,
+      "zoom_range": [
+        0.75,
+        1.33
+      ],
+      "hflip_p": 0.5,
+      "brightness": 0.4,
+      "contrast": 0.4,
+      "color_jitter_p": 0.8,
+      "blur_sigma": [
+        0.1,
+        2.0
+      ],
+      "solarization_p": 0.0
+    },
+    "object_views": {
+      "objects_per_image": 3,
+      "obj_global_size": 96,
+      "obj_local_size": 64,
+      "obj_local_number": 4,
+      "obj_global_zoom": [
+        1.4,
+        2.2
+      ],
+      "obj_local_zoom": [
+        0.5,
+        1.0
+      ],
+      "min_object_px": 12,
+      "max_magnification": 2.0,
+      "region_source": "felz",
+      "region_sampling": "sqrt_area",
+      "obj_blur_p": [
+        1.0,
+        0.1,
+        0.5
+      ],
+      "_note": "region_source felz here means 'read the region file'; the file itself comes from the gradient content map"
+    },
+    "dino": {
+      "out_dim": 4096,
+      "use_bn_in_head": false,
+      "norm_last_layer": true,
+      "momentum_teacher": 0.9995,
+      "warmup_teacher_temp": 0.04,
+      "teacher_temp": 0.04,
+      "warmup_teacher_temp_epochs": 0,
+      "student_temp": 0.1,
+      "center_momentum": 0.9
+    },
+    "optim": {
+      "optimizer": "adamw",
+      "lr": 0.0005,
+      "min_lr": 1e-06,
+      "warmup_epochs": 1,
+      "weight_decay": 0.04,
+      "weight_decay_end": 0.04,
+      "clip_grad": 3.0,
+      "freeze_last_layer": 1,
+      "use_fp16": true
+    },
+    "smoke": true
+  },
+  "git": {
+    "commit": "1962cfaea292cbd50b0b205595d583754b255a72",
+    "branch": "SmokeTest_Mobilenet_with_DINO",
+    "uncommitted_changes": true
+  },
+  "environment": {
+    "python": "3.13.4",
+    "torch": "2.10.0+cu130",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "hostname": "NischalPC",
+    "cpu_count": 32,
+    "slurm_job_id": null,
+    "cuda_available": true,
+    "torchvision": "0.25.0+cu130",
+    "gpu": "NVIDIA GeForce RTX 4070 SUPER",
+    "gpu_memory_gb": 12.0
+  },
+  "dataset_root": "C:\\Users\\nisch\\Documents\\SHREC\\2026_2027\\SARDet-work\\Dataset_SARDet\\SARDet_100K",
+  "split": 1,
+  "command": "GradientRegions/train_ssl.py --smoke",
+  "method": "regiondino_object",
+  "initialization": {
+    "kind": "imagenet",
+    "file": "C:\\Users\\nisch\\Documents\\SHREC\\2026_2027\\mobilenetv2_SAR_SSL\\MobileNetV2\\checkpoints\\pretrained\\mobilenet_v2_imagenet1k_v2.pth",
+    "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35"
+  },
+  "checkpoint_rule": "final epoch, fixed in advance; the SSL loss never selects a checkpoint",
+  "export_rule": "teacher backbone, final epoch",
+  "views_per_image": 18,
+  "view_plan": {
+    "pool": "sardet",
+    "input_size": 512,
+    "scene": [],
+    "object": [
+      [
+        "obj_global",
+        3,
+        1.0
+      ],
+      [
+        "obj_global",
+        3,
+        0.1
+      ],
+      [
+        "obj_local",
+        12,
+        0.5
+      ]
+    ],
+    "objects_per_image": 3,
+    "obj_global_size": 96,
+    "obj_local_size": 64
+  },
+  "cost": {
+    "epochs_done": 2,
+    "optimizer_steps": 12,
+    "images_seen": 96,
+    "view_forwards": 1728,
+    "train_minutes": 0.39,
+    "gpu_hours": 0.007,
+    "peak_gpu_memory_gb": 0.91
+  },
+  "view_box_coverage": {
+    "global": {
+      "views_with_a_box": 0.3177083333333333,
+      "n_views": 192
+    },
+    "local": {
+      "views_with_a_box": 0.06770833333333333,
+      "n_views": 192
+    }
+  },
+  "schedule_fingerprint": "d7e7f2b9aec7e72869838f092a5150c08524750d0cd4fa3f4a2320de72093b56",
+  "steps_per_epoch": 6,
+  "total_steps": 12,
+  "num_trainable_parameters": 10616832,
+  "measured_seconds_per_step": 0.128,
+  "estimated_hours_for_all_epochs": 0.0,
+  "exported_backbone": {
+    "file": "backbone_epoch2.pth",
+    "state_sha256": "e7bf4860367695c5737ad5c5a3423d16f930271c82da1c55cd17fefbc35736c1",
+    "file_sha256": "62d82c61e471c81e7b2b25236e9c33ca37242eda9edf4c902c1c5c8f7728aee7",
+    "num_tensors": 312
+  },
+  "finished": "2026-11-25T10:08:43",
+  "wall_minutes": 0.42,
+  "peak_gpu_memory_gb": 0.91
+}

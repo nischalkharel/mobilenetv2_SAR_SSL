@@ -1,0 +1,51 @@
+{
+  "run_name": "regiondino_o_gradient_ssl_mobilenetv2",
+  "method": "regiondino_object",
+  "_note": "RegionDINO object-only with the region file proposed from DINOSAR's ratio-gradient content map (GradientRegions/make_regions.py) instead of the brightness rule. Identical to RegionSSL/RegionDINO_object/config_ssl.json otherwise; the region file is selected by REGIONSSL_REGIONS_DIR=GradientRegions/outputs/regions_sardet (set by train_ssl.py here).",
+  "object_views": {
+    "objects_per_image": 3,
+    "obj_global_size": 96,
+    "obj_local_size": 64,
+    "obj_local_number": 4,
+    "obj_global_zoom": [
+      1.4,
+      2.2
+    ],
+    "obj_local_zoom": [
+      0.5,
+      1.0
+    ],
+    "min_object_px": 12,
+    "max_magnification": 2.0,
+    "region_source": "felz",
+    "region_sampling": "sqrt_area",
+    "obj_blur_p": [
+      1.0,
+      0.1,
+      0.5
+    ],
+    "_note": "region_source felz here means 'read the region file'; the file itself comes from the gradient content map"
+  },
+  "dino": {
+    "out_dim": 4096,
+    "use_bn_in_head": false,
+    "norm_last_layer": true,
+    "momentum_teacher": 0.9995,
+    "warmup_teacher_temp": 0.04,
+    "teacher_temp": 0.04,
+    "warmup_teacher_temp_epochs": 0,
+    "student_temp": 0.1,
+    "center_momentum": 0.9
+  },
+  "optim": {
+    "optimizer": "adamw",
+    "lr": 0.0005,
+    "min_lr": 1e-06,
+    "warmup_epochs": 10,
+    "weight_decay": 0.04,
+    "weight_decay_end": 0.04,
+    "clip_grad": 3.0,
+    "freeze_last_layer": 1,
+    "use_fp16": true
+  }
+}
