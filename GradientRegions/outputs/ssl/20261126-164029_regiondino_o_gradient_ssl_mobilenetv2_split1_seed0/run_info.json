@@ -1,0 +1,162 @@
+{
+  "kind": "ssl",
+  "status": "running",
+  "started": "2026-11-26T16:40:29",
+  "run_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/GradientRegions/outputs/ssl/20261126-164029_regiondino_o_gradient_ssl_mobilenetv2_split1_seed0",
+  "config": {
+    "run_name": "regiondino_o_gradient_ssl_mobilenetv2",
+    "method": "regiondino_object",
+    "common": {
+      "epochs": 100,
+      "batch_size": 64,
+      "seed_rule": "split - 1",
+      "num_workers": 8,
+      "export_rule": "final epoch, no selection",
+      "seed": 0
+    },
+    "views": {
+      "resize_rule": "detector_512",
+      "global_size": 224,
+      "local_size": 96,
+      "zoom_range": [
+        0.75,
+        1.33
+      ],
+      "hflip_p": 0.5,
+      "brightness": 0.4,
+      "contrast": 0.4,
+      "color_jitter_p": 0.8,
+      "blur_sigma": [
+        0.1,
+        2.0
+      ],
+      "solarization_p": 0.0
+    },
+    "object_views": {
+      "objects_per_image": 3,
+      "obj_global_size": 96,
+      "obj_local_size": 64,
+      "obj_local_number": 4,
+      "obj_global_zoom": [
+        1.4,
+        2.2
+      ],
+      "obj_local_zoom": [
+        0.5,
+        1.0
+      ],
+      "min_object_px": 12,
+      "max_magnification": 2.0,
+      "region_source": "felz",
+      "region_sampling": "sqrt_area",
+      "obj_blur_p": [
+        1.0,
+        0.1,
+        0.5
+      ],
+      "_note": "region_source felz here means 'read the region file'; the file itself comes from the gradient content map"
+    },
+    "dino": {
+      "out_dim": 4096,
+      "use_bn_in_head": false,
+      "norm_last_layer": true,
+      "momentum_teacher": 0.9995,
+      "warmup_teacher_temp": 0.04,
+      "teacher_temp": 0.04,
+      "warmup_teacher_temp_epochs": 0,
+      "student_temp": 0.1,
+      "center_momentum": 0.9
+    },
+    "optim": {
+      "optimizer": "adamw",
+      "lr": 0.0005,
+      "min_lr": 1e-06,
+      "warmup_epochs": 10,
+      "weight_decay": 0.04,
+      "weight_decay_end": 0.04,
+      "clip_grad": 3.0,
+      "freeze_last_layer": 1,
+      "use_fp16": true
+    },
+    "smoke": false
+  },
+  "git": {
+    "commit": "3c89c90248ee190ac854c16786d036000ade640d",
+    "branch": "SmokeTest_Mobilenet_with_DINO",
+    "uncommitted_changes": true
+  },
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.10.0+cu128",
+    "platform": "Linux-5.14.0-503.22.1.el9_5.x86_64-x86_64-with-glibc2.34",
+    "hostname": "gpu-n46.crc.pitt.edu",
+    "cpu_count": 64,
+    "slurm_job_id": "4802334",
+    "cuda_available": true,
+    "torchvision": "0.25.0+cu128",
+    "gpu": "NVIDIA A100-PCIE-40GB",
+    "gpu_memory_gb": 39.5
+  },
+  "dataset_root": "/scratch/slurm-4802334/SARDet_100K",
+  "split": 1,
+  "command": "../GradientRegions/train_ssl.py --config ../GradientRegions/config_ssl.json",
+  "method": "regiondino_object",
+  "initialization": {
+    "kind": "imagenet",
+    "file": "/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth",
+    "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35"
+  },
+  "checkpoint_rule": "final epoch, fixed in advance; the SSL loss never selects a checkpoint",
+  "export_rule": "teacher backbone, final epoch",
+  "views_per_image": 18,
+  "view_plan": {
+    "pool": "sardet",
+    "input_size": 512,
+    "scene": [],
+    "object": [
+      [
+        "obj_global",
+        3,
+        1.0
+      ],
+      [
+        "obj_global",
+        3,
+        0.1
+      ],
+      [
+        "obj_local",
+        12,
+        0.5
+      ]
+    ],
+    "objects_per_image": 3,
+    "obj_global_size": 96,
+    "obj_local_size": 64
+  },
+  "cost": {
+    "epochs_done": 31,
+    "optimizer_steps": 45539,
+    "images_seen": 2914496,
+    "view_forwards": 52460928,
+    "train_minutes": 98.09,
+    "gpu_hours": 1.635,
+    "peak_gpu_memory_gb": 6.28
+  },
+  "view_box_coverage": {
+    "global": {
+      "views_with_a_box": 0.2941666666666667,
+      "n_views": 1200
+    },
+    "local": {
+      "views_with_a_box": 0.07333333333333333,
+      "n_views": 1200
+    }
+  },
+  "schedule_fingerprint": "9046d3e8b529624063eea12df46c740c479b9c8274a7f764cd3440598b623045",
+  "steps_per_epoch": 1469,
+  "total_steps": 146900,
+  "num_trainable_parameters": 10616832,
+  "measured_seconds_per_step": 0.1292,
+  "estimated_hours_for_all_epochs": 5.27
+}
