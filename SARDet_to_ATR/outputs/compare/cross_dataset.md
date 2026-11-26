@@ -28,6 +28,11 @@
 | XI RegionDINO scene+object on ATRNet | 33.6 / 33.2 / 34.6 | 33.8 (0.7) | 55.2 / 56.2 / 56.0 | 55.8 (0.5) | 77.3 / 77.5 / 76.5 | 77.1 (0.5) |
 | XI RegionDINO object-only on ATRNet, random windows (control) | 30.3 / 29.2 / 30.9 | 30.1 (0.9) | 53.4 / 53.7 / 51.9 | 53.0 (1.0) | 75.9 / 76.3 / 76.2 | 76.1 (0.2) |
 | XI RegionDINO object-only on ATRNet | 30.5 / 32.9 / 32.6 | 32.0 (1.3) | 54.1 / 55.0 / 54.3 | 54.5 (0.5) | 75.5 / 75.9 / 75.8 | 75.7 (0.2) |
+| XF DINO on FAIR-CSAR | 22.5 / 22.6 / 22.6 | 22.6 (0.1) | 48.0 / 47.6 / 46.8 | 47.5 (0.6) | 74.2 / 74.7 / 73.6 | 74.2 (0.5) |
+| XF RegionDINO object-only on FAIR-CSAR, teacher regions | 26.3 / 26.7 / 26.1 | 26.4 (0.3) | 50.7 / 49.2 / 49.0 | 49.6 (0.9) | 74.3 / 74.4 / 74.4 | 74.4 (0.1) |
+| XF RegionDINO object-only on FAIR-CSAR, random windows (control) | 23.8 / 24.0 / 24.1 | 23.9 (0.2) | 48.1 / 49.8 / 48.6 | 48.8 (0.9) | 73.8 / 74.1 / 74.0 | 74.0 (0.1) |
+| XF RegionDINO object-only on FAIR-CSAR | 26.7 / 26.1 / 27.6 | 26.8 (0.8) | 49.8 / 50.5 / 49.5 | 49.9 (0.5) | 74.7 / 74.9 / 74.3 | 74.7 (0.3) |
+| XF RegionDINO object-only on FAIR-CSAR, teacher-size random windows (control) | 22.8 / 22.8 / 23.4 | 23.0 (0.3) | 47.1 / 48.8 / 47.2 | 47.7 (1.0) | 73.7 / 73.9 / 73.6 | 73.7 (0.1) |
 
 ## Paired differences per split (test accuracy points): SARDet-SSL minus its reference, and minus A0
 

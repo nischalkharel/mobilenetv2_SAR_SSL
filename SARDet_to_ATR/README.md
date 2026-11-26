@@ -14,6 +14,7 @@ images the SSL stage saw change.
 | A0 to A3, P4 | ATRNet chips (existing rows, nothing re-run) | done |
 | **A** | SARDet-100K scenes, the 9 backbones already trained for the detection study (DINO / LeJEPA / SparK, 3 seeds), fine-tuned on ATRNet | this folder, ready to run |
 | C | one mixed pool: ATRNet chips + SARDet scenes, new SSL runs | next, after A |
+| **F** | FAIR-CSAR tiles (500 epochs), the 15 backbones from FAIR_chips (DINO, RegionDINO object-only, random control, teacher regions, teacher-size control; 3 splits), fine-tuned on ATRNet (XF rows) | done 2026-11-26 (c13): plain DINO +1.8 / +4.1 / +2.4 over no SSL, object-only 26.8 / 49.9 / 74.7, placement +2.8 / +1.2 / +0.7 (9 of 9), teacher = rule |
 | B (object-scale-matched crops) | skipped by decision 2026-11-17 | not planned |
 
 Reading rule: if A beats A1/A2/A3 at the low budgets, bigger and more varied SSL data helps the compact model;

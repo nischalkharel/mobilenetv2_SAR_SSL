@@ -5,7 +5,8 @@ regions proposed for both pools, SSL smoke for dino / ro / ror on tiles and ro o
 from a smoke backbone). CRC 2026-11-22/23: chips + regions built; 9 tiles-arm SSL runs done (1.1 to 1.5 GPU-h each, 29,700 steps,
 object-only fallback 1.8 %); 36 fine-tunes of imagenet + the three SARDet-pool backbones done (first results below);
 the 9 tiles-arm fine-tunes done 2026-11-24; 500-epoch stage (15 SSL runs + teacher proposer + 45 fine-tunes) done
-2026-11-25: 108 cells total. Down arm not launched.
+2026-11-25: 108 cells total. Stage 3 (the 15 stage-2 backbones fine-tuned on ATRNet chips, XF rows in
+SARDet_to_ATR, and on SARDet chips) done 2026-11-26: see the results block below and tracker conclusion c13. Down arm not launched.
 
 First results (mean per-class accuracy on test_clean, 1 / 3 / 10 %, mean of 3 splits): no SSL 24.9 / 29.2 / 39.6
 (overall 43.3 / 49.5 / 59.2): the test is hard, as wanted. SARDet-pool backbones transferred to FAIR: plain DINO
@@ -48,6 +49,16 @@ is inside split noise at 1 and 3 %; (c) the teacher finds more objects than the 
 34 %) and still does not classify better: the fourth test where a better proposer buys nothing in mean per-class
 accuracy (c11); (d) same-dataset still beats cross-dataset SSL by 6.8 points for plain DINO at 10 % (43.6 vs 36.8).
 The 500-epoch rows are the FAIR headline from here; the 100-epoch rows stay as the short-schedule reference.
+
+Results 2026-11-26, the FAIR backbones on other datasets' chips (SSL-FAIR-CSAR tiles 500 epochs / FINETUNE-ATRNet /
+TEST-ATRNet, official test accuracy, 1 / 3 / 10 %, mean of 3 splits): no SSL 20.7 / 43.4 / 71.7; DINO 22.6 / 47.5 /
+74.2 (+1.8 / +4.1 / +2.4, nine of nine pairs positive, where plain DINO from the SARDet-100K pool gave -3.0 / -1.6 /
++0.5); RegionDINO object-only 26.8 / 49.9 / 74.7 (+4.2 / +2.5 / +0.5 over DINO; +2.8 / +1.2 / +0.7 over its random
+control; nine of nine each); random control 23.9 / 48.8 / 74.0; teacher regions 26.4 / 49.6 / 74.4 (rule -0.4 / -0.3 /
+-0.3, fifth tie; +3.4 / +1.9 / +0.7 over the teacher-size control 23.0 / 47.7 / 73.7). Reading: the negative scene
+transfer of c03 is a property of the SARDet pool, not of scene SSL; object-only views are the best cross-dataset
+backbone from both pools. On SARDet chips (SSL-FAIR / FINETUNE-SARDet chips / TEST-SARDet chips) all five rows sit
+within split noise of no SSL (81.0 to 82.5 / 90.6 to 92.8 / 96.7 to 97.2 vs 81.0 / 91.4 / 96.5), as every backbone does.
 
 ## 1. Why this dataset and what it asks
 

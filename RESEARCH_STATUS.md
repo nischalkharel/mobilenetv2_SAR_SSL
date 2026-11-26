@@ -1,7 +1,7 @@
-# Research status, 2026-11-25: what we have, what it shows, what is missing
+# Research status, 2026-11-26: what we have, what it shows, what is missing
 
 One document, updated in place when something changes. The numbers come from the tracker (`tracker/`, conclusions
-c01 to c12 in `tracker/web/conclusions.js`); every experiment is named SSL-dataset / FINETUNE-dataset /
+c01 to c13 in `tracker/web/conclusions.js`); every experiment is named SSL-dataset / FINETUNE-dataset /
 TEST-dataset / technique. Accuracies are mean per-class accuracy on the test set unless said otherwise, averaged
 over three splits (each split = its own labeled draw and its own SSL seed), at 1 / 3 / 10 % of the labels.
 
@@ -73,6 +73,11 @@ glossary, run records with code commit, data hashes and cost per run.
 | SARDet scenes / FAIR / FAIR / DINO | 22.7 | 27.7 | 36.8 | cross-dataset scene SSL hurts again (-2 to -3) | c12 |
 | SARDet scenes / FAIR / FAIR / RegionDINO object-only | 26.6 | 31.9 | 40.9 | repairs it: +3.9 / +4.2 / +4.1 over DINO, every split | c12 |
 | SARDet scenes / FAIR / FAIR / random windows (control) | 25.8 | 29.2 | 40.7 | here the control gets most of it (placement +0.8 / +2.7 / +0.2 per-class, +3 to +5 overall) | c12 |
+| FAIR tiles / ATRNet / ATRNet / DINO, 500 epochs | 22.6 | 47.5 | 74.2 | from THIS scene pool plain DINO transfers BETTER than no SSL (+1.8 / +4.1 / +2.4, 9 of 9 pairs): negative transfer is SARDet-specific | c13 |
+| FAIR tiles / ATRNet / ATRNet / RegionDINO object-only, 500 epochs | 26.8 | 49.9 | 74.7 | +4.2 / +2.5 / +0.5 over DINO (9 of 9); equal to the SARDet-pool object-only row | c13 |
+| FAIR tiles / ATRNet / ATRNet / random windows (control), 500 epochs | 23.9 | 48.8 | 74.0 | placement +2.8 / +1.2 / +0.7 (9 of 9); smaller than from SARDet (+6.3 / +3.6 / +1.0) but the same sign everywhere | c13 |
+| FAIR tiles / ATRNet / ATRNet / teacher (SARMAE) regions, 500 epochs | 26.4 | 49.6 | 74.4 | = brightness rule (fifth tie); its size-matched control 23.0 / 47.7 / 73.7 | c13 |
+| FAIR tiles / SARDet chips / SARDet chips / all five backbones | 81.0 to 82.5 | 90.6 to 92.8 | 96.7 to 97.2 | saturated, null, like every other backbone | c13, c09 |
 
 Response maps (c07): on full scenes the ImageNet weights are the most object-focused backbone (peak in a box 36 %),
 plain DINO spreads over the scene (8 to 11 %), object-only brings it back (29 to 33 %); on chips the object-only
@@ -82,25 +87,33 @@ backbone peaks in the vehicle box 56 to 62 % of the time against 17 to 19 % for 
 
 1. **Strong.** SSL on in-domain chips gives a compact model a large gain when labels are scarce (21 -> 35 % at 1 %
    labels on ATRNet). One dataset, three methods, three splits.
-2. **Strong, two dataset pairs.** Plain SSL on big scene archives transfers to object chips worse than no SSL
-   (ATRNet: -3 for DINO, -8 for LeJEPA; FAIR: -2 to -3 for DINO). The response maps explain why: scene SSL learns
-   the background.
-3. **Strong on ATRNet, medium on FAIR.** Cutting DINO's views around label-free bright regions (RegionDINO
-   object-only) turns that loss into the best cross-dataset result (+9.4 at 1 % on ATRNet, +4 at every budget on
-   FAIR, positive on every split of both). What the controls say about WHY differs: on ATRNet the random-window
-   control gets a third of the gain, so placement carries two thirds; on FAIR the control gets most of it in mean
-   per-class accuracy (placement +1 to +3) and object-only beats the control in overall accuracy on all nine pairs.
-   Honest statement: the small object-sized views are the robust part; placement adds on top, clearly on ATRNet,
-   modestly on FAIR.
+2. **Revised 2026-11-26: it depends on the pool.** Plain SSL on the SARDet-100K scene archive transfers to object
+   chips worse than no SSL (ATRNet: -3 for DINO, -8 for LeJEPA; FAIR chips: -2 to -3 for DINO), but plain DINO on
+   the FAIR-CSAR tiles transfers to ATRNet chips BETTER than no SSL (+1.8 / +4.1 / +2.4, every split). So the sign
+   of plain scene SSL is set by what the pool contains (SARDet: nine detection sets mixed, mostly ships on open
+   water; FAIR-CSAR: 1 m Gaofen-3 imagery of airports, ports, cities), not by "scenes versus chips". The response
+   maps (SARDet pool only) still show plain DINO spreading over the background. Caveat: FAIR backbones had 500
+   epochs on 19k tiles, SARDet backbones 100 epochs on 94k scenes; steps matched, repetitions per image not.
+3. **Strong, three pool-to-test pairs.** Cutting DINO's views around label-free bright regions (RegionDINO
+   object-only) gives the best cross-dataset result from both scene pools: SARDet -> ATRNet +9.4 / +7.1 / +1.4 over
+   DINO, FAIR -> ATRNet +4.2 / +2.5 / +0.5, SARDet -> FAIR chips +3.9 / +4.2 / +4.1; positive on every split of all
+   three (27 of 27 pairs). Where the test is ATRNet chips, object-only also beats its size-matched random-window
+   control on 18 of 18 pairs (placement +6.3 / +3.6 / +1.0 from SARDet, +2.8 / +1.2 / +0.7 from FAIR); on the FAIR
+   chip test the control gets most of the gain in mean per-class accuracy. Honest statement: the small
+   object-sized views are the robust part everywhere; placement adds a clear, consistent amount on top when the
+   test is ATRNet, and the amount is larger from the pool where plain DINO fails (SARDet). The method removes the
+   pool dependence in claim 2: object-only is above no SSL from both pools, plain DINO only from one.
 4. **Medium.** Same-dataset scene SSL helps a hard chip test once trained long enough (+2.4 / +3.8 / +4.0 on FAIR
    at 500 epochs; the 100-epoch runs showed only the 10 % gain). There, placement is worth about 2 points at 10 %
    and nothing below.
 5. **Medium.** Crop size and placement are two separate effects: small views help detection and transfer alike
    (control = object-only on detection; ViewScale curve rises to 256 px); placement matters only when the test is
    object chips cut from a different dataset.
-6. **Medium, four tests.** A 1.3 GB SAR foundation model as the region proposer does not beat the brightness rule
-   (ATRNet transfer, SARDet detection, SARDet chips, FAIR chips), even where it finds more objects (FAIR: 41 vs 34 %),
-   while both proposers beat their own random controls. The method stays cheap and teacher-free.
+6. **Strong, five tests.** A 1.3 GB SAR foundation model as the region proposer does not beat the brightness rule
+   (ATRNet transfer from both pools, SARDet detection, SARDet chips, FAIR chips), even where it finds more objects
+   (FAIR: 41 vs 34 %), while both proposers beat their own random controls (FAIR -> ATRNet: teacher +3.4 / +1.9 /
+   +0.7 over its control, 9 of 9). The method stays cheap and teacher-free. The DINOSAR gradient map is the third
+   proposer (GradientRegions, running).
 7. **Bounds.** Object views do not help when the SSL images are already chips (c06). SARDet's own chips are too easy
    to separate methods (c09). CondDINO is a real but metadata-dependent effect (c02), a side section at most.
 
@@ -116,7 +129,7 @@ dataset, negative results explained, and reproducibility. All of that exists:
 | Baseline study | A0 vs DINO / LeJEPA / SparK in-domain, CondDINO | done (c01, c02) |
 | The transfer problem | scene SSL vs chips, response maps | done (c03, c07) |
 | RegionDINO | method, both modes, controls, ViewScale, TeacherRegions | done (c04, c05, c08, c10, c11) |
-| Second dataset | FAIR-CSAR same-dataset and cross-dataset | done (c12) |
+| Second dataset | FAIR-CSAR same-dataset and cross-dataset; FAIR backbones on ATRNet and SARDet chips | done (c12, c13) |
 | Detection | SARDet detection suite | done for the main rows; ViewScale and teacher rows split 1 only |
 | Cost | SSL cost per method is recorded (GPU-hours, peak memory, steps); detector MACs / CPU latency script exists | no per-method CPU inference table, no comparison against a larger reference model |
 | Discussion and limits | c06, c09, the FAIR control nuance, equal-epoch caveats | material exists in DESIGN files and conclusions; not written as prose |
@@ -145,11 +158,12 @@ What a reviewer will ask for that we cannot answer today, ranked by how cheap th
 
 | gap | why it matters | cost | status |
 |---|---|---|---|
-| Transfer of the FAIR-trained backbones to ATRNet chips (SSL-FAIR / FINETUNE-ATRNet / TEST-ATRNet) and to SARDet chips | a second SCENE ARCHIVE for claim 3 (today both cross-dataset results start from SARDet scenes); the 15 FAIR backbones already exist | fine-tunes only, about 5 GPU-h | not run; cheapest high-value item |
+| Transfer of the FAIR-trained backbones to ATRNet chips (SSL-FAIR / FINETUNE-ATRNet / TEST-ATRNet) and to SARDet chips | a second SCENE ARCHIVE for claim 3 | fine-tunes only, about 5 GPU-h | DONE 2026-11-26 (c13): claim 3 holds from both pools; claim 2 revised (pool-dependent) |
+| Why the two pools differ for plain DINO | claim 2 is now "it depends on the pool"; a reviewer will ask what about the pool | hours on the PC: per-pool random-window hit rate on bright regions, share of near-empty (water) scenes in SARDet, object density per image | not run; the region files and annotations exist |
 | Second compact architecture on the key setting (no SSL, DINO, RegionDINO object-only; SSL on SARDet, test on ATRNet) | "is it MobileNetV2-specific?"; sponsor request | about 30 GPU-h SSL + fine-tunes | not started; candidates MobileNetV3, EfficientNet-B0 |
 | A larger reference (ResNet-50 with the same recipe, or SARMAE fine-tuned on the same labeled sets) | "how close does the compact model get" | 1 to 2 SSL runs x 3 splits, or fine-tunes only for SARMAE | not started |
 | CPU cost table (parameters, MACs, latency per chip) for MobileNetV2 vs the reference | the deployment argument of the whole project | hours on the PC | script exists for the detector only |
-| Placement evidence on FAIR is weaker than on ATRNet | claim 3's "why" | either accept the honest statement, or add the reverse direction (SSL on ATRNet chips, test on SARDet / FAIR chips) | not run |
+| Placement evidence on the FAIR chip test is weaker than on ATRNet | claim 3's "why" | the FAIR -> ATRNet rows now show placement +2.8 / +1.2 / +0.7 on 9 of 9 pairs, so the weak case is the FAIR chip TEST, not the FAIR pool; the reverse direction (SSL on ATRNet chips, test on SARDet / FAIR chips) would settle it | partly answered |
 | Detection on split 2 and 3 for ViewScale and teacher rows | three splits everywhere | about 20 GPU-h | split 1 only |
 | Related-work positioning against object-centric SSL in optical imagery and SAR SSL papers | novelty claim | reading and writing | not done |
 | One final re-run of the paper's rows under one frozen protocol, with the fine-tune seed also varied | reviewers ask for seeds; fine-tune seed is fixed today | depends on the final table | planned (tracker to-do) |
@@ -157,8 +171,8 @@ What a reviewer will ask for that we cannot answer today, ranked by how cheap th
 
 ## 6. Recommended order from here
 
-1. Fine-tune the existing FAIR-trained backbones on ATRNet chips and on SARDet chips (cheap, closes the "second
-   scene archive" hole for claim 3 and tests whether the FAIR placement result repeats cross-dataset).
+1. Done 2026-11-26 (c13). Follow-up on the PC: measure what separates the two pools (random-window hit rate on
+   bright regions, near-empty scene share, objects per image), so claim 2 has a stated cause.
 2. Write the related-work section now, in parallel with any runs; it decides how the method is named and framed.
 3. Second compact architecture on the key setting (three methods, three splits).
 4. CPU cost table and one larger reference model.
