@@ -92,8 +92,13 @@ backbone peaks in the vehicle box 56 to 62 % of the time against 17 to 19 % for 
    the FAIR-CSAR tiles transfers to ATRNet chips BETTER than no SSL (+1.8 / +4.1 / +2.4, every split). So the sign
    of plain scene SSL is set by what the pool contains (SARDet: nine detection sets mixed, mostly ships on open
    water; FAIR-CSAR: 1 m Gaofen-3 imagery of airports, ports, cities), not by "scenes versus chips". The response
-   maps (SARDet pool only) still show plain DINO spreading over the background. Caveat: FAIR backbones had 500
-   epochs on 19k tiles, SARDet backbones 100 epochs on 94k scenes; steps matched, repetitions per image not.
+   maps (SARDet pool only) still show plain DINO spreading over the background. Measured 2026-11-26
+   (`RegionSSL/pool_hit_rate.py`, DINO's own windows against the method's label-free bright regions): on SARDet a
+   global view is background-only 27 % of the time and a local view 42 %, with the ship-at-sea sources (39 % of the
+   pool) at 45 to 81 %; on the FAIR tiles (48 smoke tiles so far) 7 % and 15 %. Annotated objects go the other way
+   (32 % of SARDet global views hold an object, 11 % of FAIR's), so what plain DINO needs in a view is structure,
+   not objects. Caveat: FAIR backbones had 500 epochs on 19k tiles, SARDet backbones 100 epochs on 94k scenes;
+   steps matched, repetitions per image not.
 3. **Strong, three pool-to-test pairs.** Cutting DINO's views around label-free bright regions (RegionDINO
    object-only) gives the best cross-dataset result from both scene pools: SARDet -> ATRNet +9.4 / +7.1 / +1.4 over
    DINO, FAIR -> ATRNet +4.2 / +2.5 / +0.5, SARDet -> FAIR chips +3.9 / +4.2 / +4.1; positive on every split of all
@@ -159,7 +164,7 @@ What a reviewer will ask for that we cannot answer today, ranked by how cheap th
 | gap | why it matters | cost | status |
 |---|---|---|---|
 | Transfer of the FAIR-trained backbones to ATRNet chips (SSL-FAIR / FINETUNE-ATRNet / TEST-ATRNet) and to SARDet chips | a second SCENE ARCHIVE for claim 3 | fine-tunes only, about 5 GPU-h | DONE 2026-11-26 (c13): claim 3 holds from both pools; claim 2 revised (pool-dependent) |
-| Why the two pools differ for plain DINO | claim 2 is now "it depends on the pool"; a reviewer will ask what about the pool | hours on the PC: per-pool random-window hit rate on bright regions, share of near-empty (water) scenes in SARDet, object density per image | not run; the region files and annotations exist |
+| Why the two pools differ for plain DINO | claim 2 is now "it depends on the pool"; a reviewer will ask what about the pool | measured 2026-11-26 (`RegionSSL/outputs/pool_hit_rate_sardet.json`): 27 % / 42 % of SARDet global / local views are background-only, driven by the sea sources; FAIR 7 % / 15 % (smoke; full file on CRC). The causal test is cheap: plain DINO on SARDet land sources only vs sea sources only, tested on ATRNet (2 pools x 3 splits, about 20 GPU-h) | diagnostic done; causal test not built |
 | Second compact architecture on the key setting (no SSL, DINO, RegionDINO object-only; SSL on SARDet, test on ATRNet) | "is it MobileNetV2-specific?"; sponsor request | about 30 GPU-h SSL + fine-tunes | not started; candidates MobileNetV3, EfficientNet-B0 |
 | A larger reference (ResNet-50 with the same recipe, or SARMAE fine-tuned on the same labeled sets) | "how close does the compact model get" | 1 to 2 SSL runs x 3 splits, or fine-tunes only for SARMAE | not started |
 | CPU cost table (parameters, MACs, latency per chip) for MobileNetV2 vs the reference | the deployment argument of the whole project | hours on the PC | script exists for the detector only |
@@ -171,8 +176,8 @@ What a reviewer will ask for that we cannot answer today, ranked by how cheap th
 
 ## 6. Recommended order from here
 
-1. Done 2026-11-26 (c13). Follow-up on the PC: measure what separates the two pools (random-window hit rate on
-   bright regions, near-empty scene share, objects per image), so claim 2 has a stated cause.
+1. Done 2026-11-26 (c13), and the pool diagnostic with it (background-only views 27 / 42 % on SARDet vs 7 / 15 %
+   on FAIR). Next for claim 2: plain DINO on SARDet land sources only vs sea sources only, tested on ATRNet.
 2. Write the related-work section now, in parallel with any runs; it decides how the method is named and framed.
 3. Second compact architecture on the key setting (three methods, three splits).
 4. CPU cost table and one larger reference model.

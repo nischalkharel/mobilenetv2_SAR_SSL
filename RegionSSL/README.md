@@ -16,6 +16,7 @@ detection suite (`SARDet/`) and the ATRNet experiment folders are imported read-
 | `RegionDINO_object/` | method 2: DINO on object views **only** (the network never sees a whole-image crop) |
 | `*/config_ssl_random.json` | the control for each method: same everything, object views cut around random windows of matched size |
 | `crc/make_regions.sbatch` | the one CPU job that makes the region file on CRC |
+| `pool_hit_rate.py` | pool diagnostic (2026-11-26, c13): samples plain DINO's own global / local windows over a pool and measures how often they land on bright content (usable regions of the region file; `--gt N` adds the annotated-object check on a sample, labels read only to measure); per source for SARDet-100K; outputs `outputs/pool_hit_rate_<pool>.json` (committed) |
 | `rssl/pools.py` | the two unlabeled pools the engine can train on: `sardet` (SARDet-100K scenes, shorter side 512) and `atrnet` (ATRNet-STAR train chips, views from the chip at 224, regions proposed at the native 128) |
 | `*/config_ssl_atr.json`, `*/config_ssl_atr_random.json` | arm I: the same two methods and controls on the ATRNet pool (in-domain), run names `*_atr_*` |
 | `DINO_reference/` | plain DINO of this engine (scene views only) on the ATRNet pool: the paired reference for the `*_atr` rows; its gap to A1 measures the crop-recipe difference |
