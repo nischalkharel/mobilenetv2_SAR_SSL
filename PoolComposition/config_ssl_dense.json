@@ -1,0 +1,40 @@
+{
+  "run_name": "dino_dense_ssl_mobilenetv2",
+  "method": "regiondino_scene",
+  "_note": "PoolComposition: plain DINO (the suite recipe: whole-scene views, global 224 / local 96, zoom 0.75-1.33; dino and optim values = DINO_SARDet/config_ssl.json) on the SARDet-100K pool subset 'dense': the half of the pool above the median bright-area fraction (label-free, from the brightness-rule region file). Scene list PoolComposition/data/pool_dense.csv. Paired reference: XA DINO on SARDet (whole pool, 100 epochs = 146,900 steps).",
+  "pool": "sardet_dense",
+  "overrides": {
+    "epochs": 200,
+    "_note": "matched steps: this subset x these epochs = the full pool's 146,900 steps; optim.warmup_epochs likewise matches the full pool's 14,690 warmup steps (data/counts.json; both checked by train_ssl.py)"
+  },
+  "dino_views": {
+    "local_crops_number": 8,
+    "blur_p": [
+      1.0,
+      0.1,
+      0.5
+    ]
+  },
+  "dino": {
+    "out_dim": 4096,
+    "use_bn_in_head": false,
+    "norm_last_layer": true,
+    "momentum_teacher": 0.9995,
+    "warmup_teacher_temp": 0.04,
+    "teacher_temp": 0.04,
+    "warmup_teacher_temp_epochs": 0,
+    "student_temp": 0.1,
+    "center_momentum": 0.9
+  },
+  "optim": {
+    "optimizer": "adamw",
+    "lr": 0.0005,
+    "min_lr": 1e-06,
+    "warmup_epochs": 20,
+    "weight_decay": 0.04,
+    "weight_decay_end": 0.04,
+    "clip_grad": 3.0,
+    "freeze_last_layer": 1,
+    "use_fp16": true
+  }
+}

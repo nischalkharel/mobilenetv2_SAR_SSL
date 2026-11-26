@@ -30,6 +30,8 @@ METHODS = ("dino", "lejepa", "spark", "regiondino_so", "regiondino_so_random", "
            "regiondino_o_teacher", "regiondino_o_teacher_random",
            # GradientRegions: DINOSAR-style ratio-gradient content regions and the gradient-size random control
            "regiondino_o_gradient", "regiondino_o_gradient_random",
+           # PoolComposition: plain DINO on SARDet subsets (run names XA_dino_<subset>_sardetssl_...), paired against XA DINO on the whole pool
+           "dino_land", "dino_sea", "dino_dense", "dino_sparse", "dino_random",
            # arm F: the FAIR_chips 500-epoch backbones (SSL on FAIR-CSAR 1 m tiles), run names XF_<m>_fairssl_...
            "fair_dino_tiles500", "fair_ro_tiles500", "fair_ror_tiles500", "fair_rot_tiles500", "fair_rotr_tiles500", "fair_rog_tiles500", "fair_rogr_tiles500")
 
@@ -55,6 +57,10 @@ def main():
         cfg["run_name"] = cfg["run_name"].replace("XA_fair_", "XF_").replace("_sardetssl_", "_fairssl_")
         cfg["cross_dataset"] = {"ssl_dataset": "FAIR-CSAR-V1.0 SL trainval tiles (FAIR_chips pool fair_tiles, 500 epochs)", "downstream_dataset": "ATRNet-STAR SOC-40",
                                 "arm": "F (SSL on FAIR-CSAR scenes, a second scene archive)", "ssl_method": args.method}
+    elif args.method.startswith("dino_"):    # PoolComposition: plain DINO on a fixed subset of the SARDet pool (run names XA_dino_<subset>_sardetssl_...)
+        subset = args.method.removeprefix("dino_")
+        cfg["cross_dataset"] = {"ssl_dataset": f"SARDet-100K, {subset} subset only (PoolComposition/data/pool_{subset}.csv, matched steps)",
+                                "downstream_dataset": "ATRNet-STAR SOC-40", "arm": "A (SARDet SSL, pool subset)", "ssl_method": args.method}
     else:
         cfg["cross_dataset"] = {"ssl_dataset": "SARDet-100K", "downstream_dataset": "ATRNet-STAR SOC-40", "arm": "A (SARDet SSL as run)",
                                 "ssl_method": args.method}

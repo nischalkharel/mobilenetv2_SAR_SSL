@@ -58,6 +58,12 @@ def row_key(folder: Path):
               # GradientRegions: DINOSAR's ratio-gradient content map as the proposer, and its size-matched random control
               "XA_regiondino_o_gradient_sardetssl_mobilenetv2": "XA RegionDINO object-only, gradient regions",
               "XA_regiondino_o_gradient_random_sardetssl_mobilenetv2": "XA RegionDINO object-only, gradient-size random windows (control)",
+              # PoolComposition: plain DINO on fixed subsets of the SARDet pool, matched steps
+              "XA_dino_land_sardetssl_mobilenetv2": "XA DINO on SARDet land sources only",
+              "XA_dino_sea_sardetssl_mobilenetv2": "XA DINO on SARDet sea sources only",
+              "XA_dino_dense_sardetssl_mobilenetv2": "XA DINO on SARDet dense scenes only",
+              "XA_dino_sparse_sardetssl_mobilenetv2": "XA DINO on SARDet sparse scenes only",
+              "XA_dino_random_sardetssl_mobilenetv2": "XA DINO on a random half of SARDet (size control)",
               # arm F: the FAIR_chips 500-epoch backbones (SSL on FAIR-CSAR 1 m tiles), tested on ATRNet chips
               "XF_dino_tiles500_fairssl_mobilenetv2": "XF DINO on FAIR-CSAR",
               "XF_ro_tiles500_fairssl_mobilenetv2": "XF RegionDINO object-only on FAIR-CSAR",
@@ -118,7 +124,7 @@ def main():
                     rows_csv.append({"method": m, "budget": b, "split": s, "test_accuracy": round(v, 2)})
         lines.append(line)
     lines += ["", "## Paired differences per split (test accuracy points): SARDet-SSL minus its reference, and minus A0", "",
-              "Reference = the same method's ATRNet-SSL row (A1/A2/A3) for DINO/LeJEPA/SparK; = XA DINO on SARDet for the XA RegionDINO rows; "
+              "Reference = the same method's ATRNet-SSL row (A1/A2/A3) for DINO/LeJEPA/SparK; = XA DINO on SARDet for the XA RegionDINO rows and the SARDet-subset DINO rows; "
               "= A1 for XI DINO (suite recipe) and = XI DINO for the XI RegionDINO rows (same engine, same pool, only the object views differ).", "",
               "| method | budget | vs reference (s1 / s2 / s3) | mean | vs A0 (s1 / s2 / s3) | mean |", "|---|---|---|---|---|---|"]
     pairs = {"XA DINO on SARDet": "A1 DINO on ATRNet", "XA LeJEPA on SARDet": "A2 LeJEPA on ATRNet", "XA SparK on SARDet": "A3 SparK on ATRNet",
@@ -126,6 +132,8 @@ def main():
              "XA RegionDINO object-only on SARDet": "XA DINO on SARDet", "XA RegionDINO object-only, random windows (control)": "XA DINO on SARDet",
              "XA RegionDINO object-only, teacher regions": "XA DINO on SARDet",
              "XA RegionDINO object-only, teacher-size random windows (control)": "XA DINO on SARDet",
+             **{f"XA DINO on SARDet {s} only": "XA DINO on SARDet" for s in ("land sources", "sea sources", "dense scenes", "sparse scenes")},
+             "XA DINO on a random half of SARDet (size control)": "XA DINO on SARDet",
              **{f"XA ViewScale e{e} (fixed {e}-px windows)": "XA DINO on SARDet" for e in (32, 64, 128, 256, 512)},
              "XI DINO (suite recipe) on ATRNet": "A1 DINO on ATRNet",
              "XI RegionDINO scene+object on ATRNet": "XI DINO (suite recipe) on ATRNet",

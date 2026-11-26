@@ -263,7 +263,67 @@ class FAIRDownPool(FAIRTilesPool):
         return REGIONS_DIR / ("regions_fair_down_smoke.npz" if smoke else "regions_fair_down.npz")
 
 
-POOLS = {"sardet": SARDetPool, "atrnet": ATRNetPool, "fair_tiles": FAIRTilesPool, "fair_down": FAIRDownPool}
+class SARDetSubsetPool(SARDetPool):
+    """A fixed subset of the SARDet-100K pool (PoolComposition study, 2026-11-26): the scenes listed in
+    PoolComposition/data/pool_<subset>.csv, written once by PoolComposition/make_pool_lists.py from the pool manifest's
+    source column (land / sea) or from the label-free bright-area fraction of the brightness-rule region file
+    (dense / sparse), or at random (random: the equal-size control). Same images, frame, region file and recipe as
+    `sardet`; only the list of scenes differs.
+    Nothing here reads a label."""
+    subset = ""
+
+    @property
+    def name(self):
+        return f"sardet_{self.subset}"
+
+    @property
+    def dataset(self):
+        return f"SARDet-100K SSL pool, {self.subset} subset (PoolComposition/data/pool_{self.subset}.csv)"
+
+    def list_csv(self):
+        return REPO / "PoolComposition" / "data" / f"pool_{self.subset}.csv"
+
+    def rows(self):
+        with open(self.list_csv(), newline="", encoding="utf-8") as f:
+            names = {r["file_name"] for r in csv.DictReader(f)}
+        rows = [r for r in super().rows() if r["file_name"] in names]
+        if len(rows) != len(names):
+            raise ValueError(f"{self.list_csv().name}: {len(names)} listed scenes, {len(rows)} found in the pool manifest")
+        return rows
+
+    def csv_path(self):
+        return self.list_csv()
+
+    def manifest(self, rows):
+        base = super().manifest(rows)
+        return {**base, "pool": self.name, "subset": self.subset, "subset_list_csv": str(self.list_csv()),
+                "subset_list_sha256": sha256_of_file(self.list_csv()), "subset_images": len(rows),
+                "subset_rule": "PoolComposition/data/counts.json (source names for land / sea; bright-area median split for dense / sparse)"}
+
+
+class SARDetLandPool(SARDetSubsetPool):
+    subset = "land"
+
+
+class SARDetSeaPool(SARDetSubsetPool):
+    subset = "sea"
+
+
+class SARDetDensePool(SARDetSubsetPool):
+    subset = "dense"
+
+
+class SARDetSparsePool(SARDetSubsetPool):
+    subset = "sparse"
+
+
+class SARDetRandomPool(SARDetSubsetPool):
+    subset = "random"
+
+
+POOLS = {"sardet": SARDetPool, "atrnet": ATRNetPool, "fair_tiles": FAIRTilesPool, "fair_down": FAIRDownPool,
+         "sardet_land": SARDetLandPool, "sardet_sea": SARDetSeaPool, "sardet_dense": SARDetDensePool, "sardet_sparse": SARDetSparsePool,
+         "sardet_random": SARDetRandomPool}
 
 
 def get(name: str):

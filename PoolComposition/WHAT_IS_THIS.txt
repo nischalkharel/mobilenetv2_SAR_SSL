@@ -1,0 +1,50 @@
+PoolComposition: does what the scene pool CONTAINS set the sign of plain scene SSL? Plain DINO on fixed subsets of
+the SARDet-100K pool, matched steps, tested on ATRNet-STAR chips. Student stays MobileNetV2.
+
+Why this folder exists (2026-11-26, tracker c13)
+-----------------------------------------------
+Plain DINO on all 94,034 SARDet-100K scenes transfers to ATRNet chips WORSE than no SSL (-3.0 at 1 % labels); plain
+DINO on 19,036 FAIR-CSAR tiles transfers BETTER (+1.8 / +4.1 / +2.4). RegionSSL/pool_hit_rate.py showed the difference
+in what DINO's own random views see: on SARDet 27 % of global views and 42 % of local views hold no bright content,
+nearly all on the ship-at-sea sources; on FAIR almost every view holds structure. This study tests that explanation
+inside ONE pool: if DINO on the land / dense part transfers positively and DINO on the sea / sparse part negatively,
+the pool's content is the cause and the paper has its figure for "pool composition decides plain scene SSL".
+
+The five subsets (make_pool_lists.py, data/, committed; no labels read)
+----------------------------------------------------------------------
+dense    47,017 scenes  above the pool's median bright-area fraction (label-free)  bright area median 49 %
+sparse   47,017 scenes  below it                                                    bright area median 3 %
+random   47,017 scenes  a random half (seed 0): the size control                   about the pool's 15 %
+land     57,036 scenes  OGSOD, MSAR, SAR-AIRcraft, SIVED, SADD (source name)       bright area median 34 %
+sea      36,998 scenes  Shipdataset, HRSID, SSDD, AIR_SARShip (source name)        bright area median 3 %
+bright-area fraction = share of the 512-px frame covered by the brightness-rule regions RegionDINO uses (extent >= 12).
+Primary test: dense vs sparse vs random (same image count, only the content differs; random shows what fewer images
+with more passes does on its own). Land / sea is the interpretable pair but changes image count, sensor and
+resolution too. Matched steps AND matched warmup steps: every subset trains for the full pool's 146,900 steps with a
+14,690-step warmup (halves 200 epochs / warmup 20; land 165 / 16; sea 254 / 25; data/counts.json; train_ssl.py refuses
+a config that disagrees). The pool is the audited SSL pool (official train scenes only; val and test never read).
+
+Method
+------
+RegionDINO in mode "scene" (RegionSSL engine): no object views, no region file, the same views, head, loss and
+optimizer as DINO_SARDet (RegionSSL/DINO_reference documents the equivalence; the configs agree key for key). So the
+paired reference is the existing row "XA DINO on SARDet" (whole pool, 100 epochs). Pools sardet_land / sea / dense /
+sparse live in RegionSSL/rssl/pools.py (SARDetSubsetPool, additive).
+
+How it runs (CRC)
+-----------------
+cd /ihome/ageorge/nik96/mobilenetv2_SAR_SSL/SARDet
+for m in dense sparse random; do for s in 1 2 3; do sbatch --job-name=d${m}_s$s crc/ssl.sbatch ../PoolComposition $s config_ssl_$m.json; done; done
+for m in land sea; do for s in 1 2 3; do sbatch --job-name=d${m}_s$s crc/ssl.sbatch ../PoolComposition $s config_ssl_$m.json; done; done
+then, from the repository root: sbatch --job-name=xa_ddense_s1 SARDet_to_ATR/crc.sbatch dino_dense 1   (methods dino_dense dino_sparse dino_random dino_land dino_sea; splits 1 2 3)
+About 7 GPU-h per SSL run (the whole-pool DINO runs took 7.0 to 7.2 h for the same 146,900 steps): 5 subsets x 3 splits = about 105 GPU-h; 15 fine-tune jobs.
+
+Where things are
+----------------
+make_pool_lists.py   pool manifest + region file -> data/scene_bright_area.csv, data/pool_<subset>.csv, data/counts.json
+train_ssl.py         SSL entry (scene-only RegionDINO = suite DINO); checks overrides.epochs against counts.json
+config_ssl_<subset>.json   run names dino_<subset>_ssl_mobilenetv2; "pool": sardet_<subset>; overrides.epochs + optim.warmup_epochs matched
+outputs/ssl/         run folders (records committed, weights not)
+Rows it adds: SARDet_to_ATR XA_dino_<subset>_sardetssl_mobilenetv2 ("XA DINO on SARDet <land sources|sea sources|dense scenes|sparse scenes> only",
+"XA DINO on a random half of SARDet (size control)"), paired against XA DINO on SARDet in compare.py; tracker rows xa_dino_land / sea / dense / sparse / random; glossary line.
+Also touched (additive): RegionSSL/rssl/pools.py, SARDet_to_ATR/{find_backbone,finetune_atr,compare}.py + crc.sbatch help, tracker/registry.py, glossary.js.

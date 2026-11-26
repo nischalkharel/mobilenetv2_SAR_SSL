@@ -164,7 +164,7 @@ What a reviewer will ask for that we cannot answer today, ranked by how cheap th
 | gap | why it matters | cost | status |
 |---|---|---|---|
 | Transfer of the FAIR-trained backbones to ATRNet chips (SSL-FAIR / FINETUNE-ATRNet / TEST-ATRNet) and to SARDet chips | a second SCENE ARCHIVE for claim 3 | fine-tunes only, about 5 GPU-h | DONE 2026-11-26 (c13): claim 3 holds from both pools; claim 2 revised (pool-dependent) |
-| Why the two pools differ for plain DINO | claim 2 is now "it depends on the pool"; a reviewer will ask what about the pool | measured 2026-11-26 (`RegionSSL/outputs/pool_hit_rate_sardet.json`): 27 % / 42 % of SARDet global / local views are background-only, driven by the sea sources; FAIR 7 % / 15 % (smoke; full file on CRC). The causal test is cheap: plain DINO on SARDet land sources only vs sea sources only, tested on ATRNet (2 pools x 3 splits, about 20 GPU-h) | diagnostic done; causal test not built |
+| Why the two pools differ for plain DINO | claim 2 is now "it depends on the pool"; a reviewer will ask what about the pool | measured 2026-11-26 (`RegionSSL/outputs/pool_hit_rate_sardet.json`): 27 % / 42 % of SARDet global / local views are background-only, driven by the sea sources; FAIR 7 % / 15 % (smoke; full file on CRC). The causal test is cheap: plain DINO on SARDet land sources only vs sea sources only, tested on ATRNet (2 pools x 3 splits, about 20 GPU-h) | diagnostic done; causal test BUILT 2026-11-26 (`PoolComposition/`: plain DINO on dense / sparse / random-half / land / sea subsets of the SARDet pool, matched steps and warmup, reviewed), awaiting CRC launch |
 | Second compact architecture on the key setting (no SSL, DINO, RegionDINO object-only; SSL on SARDet, test on ATRNet) | "is it MobileNetV2-specific?"; sponsor request | about 30 GPU-h SSL + fine-tunes | not started; candidates MobileNetV3, EfficientNet-B0 |
 | A larger reference (ResNet-50 with the same recipe, or SARMAE fine-tuned on the same labeled sets) | "how close does the compact model get" | 1 to 2 SSL runs x 3 splits, or fine-tunes only for SARMAE | not started |
 | CPU cost table (parameters, MACs, latency per chip) for MobileNetV2 vs the reference | the deployment argument of the whole project | hours on the PC | script exists for the detector only |
@@ -177,7 +177,8 @@ What a reviewer will ask for that we cannot answer today, ranked by how cheap th
 ## 6. Recommended order from here
 
 1. Done 2026-11-26 (c13), and the pool diagnostic with it (background-only views 27 / 42 % on SARDet vs 7 / 15 %
-   on FAIR). Next for claim 2: plain DINO on SARDet land sources only vs sea sources only, tested on ATRNet.
+   on FAIR). Next for claim 2: the PoolComposition runs (plain DINO on SARDet dense / sparse / random-half / land / sea
+   subsets, matched steps and warmup, tested on ATRNet; built and reviewed, about 105 GPU-h).
 2. Write the related-work section now, in parallel with any runs; it decides how the method is named and framed.
 3. Second compact architecture on the key setting (three methods, three splits).
 4. CPU cost table and one larger reference model.

@@ -27,6 +27,8 @@ FOLDERS = {"dino": ("SARDet/DINO_SARDet", "dino_ssl_mobilenetv2"), "lejepa": ("S
            # GradientRegions: regions from DINOSAR's ratio-gradient content map, and the size-matched random control
            "regiondino_o_gradient": ("GradientRegions", "regiondino_o_gradient_ssl_mobilenetv2"),
            "regiondino_o_gradient_random": ("GradientRegions", "regiondino_o_gradient_random_ssl_mobilenetv2"),
+           # PoolComposition: plain DINO (suite recipe) on fixed subsets of the SARDet pool, matched steps (land / sea by source; dense / sparse by bright area)
+           **{f"dino_{s}": ("PoolComposition", f"dino_{s}_ssl_mobilenetv2") for s in ("land", "sea", "dense", "sparse", "random")},
            # FAIR_chips study: the same engine on the FAIR-CSAR pools (tiles = native 2 x 2 tiles, down = downsampled slices);
            # fair_dino = plain DINO of that engine (paired reference), fair_ro = object-only, fair_ror = its random control
            **{f"fair_{m}_{arm}": ("FAIR_chips", f"fair_{m}_{arm}_ssl_mobilenetv2") for arm in ("tiles", "down") for m in ("dino", "ro", "ror")},
