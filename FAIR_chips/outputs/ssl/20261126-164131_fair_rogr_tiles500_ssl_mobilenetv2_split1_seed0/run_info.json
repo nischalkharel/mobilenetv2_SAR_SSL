@@ -1,0 +1,167 @@
+{
+  "kind": "ssl",
+  "status": "completed",
+  "started": "2026-11-26T16:41:31",
+  "run_dir": "/ihome/ageorge/nik96/mobilenetv2_SAR_SSL/FAIR_chips/outputs/ssl/20261126-164131_fair_rogr_tiles500_ssl_mobilenetv2_split1_seed0",
+  "config": {
+    "run_name": "fair_rogr_tiles500_ssl_mobilenetv2",
+    "method": "regiondino_object",
+    "common": {
+      "epochs": 500,
+      "batch_size": 64,
+      "seed_rule": "split - 1",
+      "num_workers": 8,
+      "export_rule": "final epoch, no selection",
+      "seed": 0
+    },
+    "views": {
+      "resize_rule": "detector_512",
+      "global_size": 224,
+      "local_size": 96,
+      "zoom_range": [
+        0.75,
+        1.33
+      ],
+      "hflip_p": 0.5,
+      "brightness": 0.4,
+      "contrast": 0.4,
+      "color_jitter_p": 0.8,
+      "blur_sigma": [
+        0.1,
+        2.0
+      ],
+      "solarization_p": 0.0
+    },
+    "_overrides": {
+      "epochs": 500
+    },
+    "pool": "fair_tiles",
+    "regions_dir": "GradientRegions/outputs/regions_fair_tiles",
+    "object_views": {
+      "objects_per_image": 3,
+      "obj_global_size": 96,
+      "obj_local_size": 64,
+      "obj_local_number": 4,
+      "obj_global_zoom": [
+        1.4,
+        2.2
+      ],
+      "obj_local_zoom": [
+        0.5,
+        1.0
+      ],
+      "min_object_px": 12,
+      "max_magnification": 2.0,
+      "region_source": "random",
+      "region_sampling": "sqrt_area",
+      "obj_blur_p": [
+        1.0,
+        0.1,
+        0.5
+      ],
+      "_note": "windows are sized from each region's own extent (no fixed pixel size); max_magnification stops tiny blobs being blown up; region_source random = the control with matched-size random windows"
+    },
+    "dino": {
+      "out_dim": 4096,
+      "use_bn_in_head": false,
+      "norm_last_layer": true,
+      "momentum_teacher": 0.9995,
+      "warmup_teacher_temp": 0.04,
+      "teacher_temp": 0.04,
+      "warmup_teacher_temp_epochs": 0,
+      "student_temp": 0.1,
+      "center_momentum": 0.9
+    },
+    "optim": {
+      "optimizer": "adamw",
+      "lr": 0.0005,
+      "min_lr": 1e-06,
+      "warmup_epochs": 10,
+      "weight_decay": 0.04,
+      "weight_decay_end": 0.04,
+      "clip_grad": 3.0,
+      "freeze_last_layer": 1,
+      "use_fp16": true
+    },
+    "smoke": false
+  },
+  "git": {
+    "commit": "3c89c90248ee190ac854c16786d036000ade640d",
+    "branch": "SmokeTest_Mobilenet_with_DINO",
+    "uncommitted_changes": true
+  },
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.10.0+cu128",
+    "platform": "Linux-5.14.0-503.22.1.el9_5.x86_64-x86_64-with-glibc2.34",
+    "hostname": "gpu-n49.crc.pitt.edu",
+    "cpu_count": 64,
+    "slurm_job_id": "4802343",
+    "cuda_available": true,
+    "torchvision": "0.25.0+cu128",
+    "gpu": "NVIDIA A100-PCIE-40GB",
+    "gpu_memory_gb": 39.5
+  },
+  "dataset_root": "/ix/ageorge/nik96/data/SARDet_100K",
+  "split": 1,
+  "command": "FAIR_chips/train_ssl.py --config FAIR_chips/config_ssl_rogr_tiles500.json",
+  "method": "regiondino_object",
+  "initialization": {
+    "kind": "imagenet",
+    "file": "/ix/ageorge/nik96/data/mobilenet_v2_imagenet1k_v2.pth",
+    "sha256": "1f19491f7357621f8e418089d3f596c54b18cbd1f567da83b98135a4a707fc35"
+  },
+  "checkpoint_rule": "final epoch, fixed in advance; the SSL loss never selects a checkpoint",
+  "export_rule": "teacher backbone, final epoch",
+  "views_per_image": 18,
+  "view_plan": {
+    "pool": "fair_tiles",
+    "input_size": 512,
+    "scene": [],
+    "object": [
+      [
+        "obj_global",
+        3,
+        1.0
+      ],
+      [
+        "obj_global",
+        3,
+        0.1
+      ],
+      [
+        "obj_local",
+        12,
+        0.5
+      ]
+    ],
+    "objects_per_image": 3,
+    "obj_global_size": 96,
+    "obj_local_size": 64
+  },
+  "cost": {
+    "epochs_done": 500,
+    "optimizer_steps": 148500,
+    "images_seen": 9504000,
+    "view_forwards": 171072000,
+    "train_minutes": 336.05,
+    "gpu_hours": 5.601,
+    "peak_gpu_memory_gb": 6.28
+  },
+  "view_box_coverage": null,
+  "schedule_fingerprint": "da251c4045beb095488cdd08bb0167832e9eb2d91c22f3a2f5fb1923e19752cb",
+  "steps_per_epoch": 297,
+  "total_steps": 148500,
+  "num_trainable_parameters": 10616832,
+  "measured_seconds_per_step": 0.1326,
+  "estimated_hours_for_all_epochs": 5.47,
+  "exported_backbone": {
+    "file": "backbone_epoch500.pth",
+    "state_sha256": "151269d593b9cb418fa77800752e04c4b749700172a9513f717a07136ec547da",
+    "file_sha256": "b7df290b80cdacead4a9878530645bb8384060b7b6c9b4f111fc51b66c4aa1f0",
+    "num_tensors": 312
+  },
+  "finished": "2026-11-26T22:25:34",
+  "wall_minutes": 344.06,
+  "peak_gpu_memory_gb": 6.28
+}
